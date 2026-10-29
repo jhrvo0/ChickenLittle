@@ -48,12 +48,16 @@ class BreadboardProfile:
     fz_y_a: float
     fz_pitch: float
     fz_size: tuple
+    boards: int = 1                 # quantas placas iguais encaixadas pela ponta
+    cols_per_board: int = 0
+    board_gap_pitch: float = 0.0    # passos extras entre a ultima coluna de uma placa e a 1a da seguinte
 
 
 def _load_breadboards() -> dict:
     raw = json.load(open(DATA_DIR / "breadboards.json", encoding="utf-8"))["profiles"]
     return {k: BreadboardProfile(k, v["title"], v["n_cols"], tuple(v["rail_cols"]), v["rails_in_this_project"], v["fz_module_id"],
-                                 v["fz_path"], v["fz_scale"], v["fz_x0"], v["fz_y_a"], v["fz_pitch"], tuple(v["fz_size"]))
+                                 v["fz_path"], v["fz_scale"], v["fz_x0"], v["fz_y_a"], v["fz_pitch"], tuple(v["fz_size"]),
+                                 v.get("boards", 1), v.get("cols_per_board", v["n_cols"]), v.get("board_gap_pitch", 0.0))
             for k, v in raw.items()}
 
 
@@ -86,7 +90,29 @@ def n_cols() -> int:
 def rail_cols() -> tuple:
     return active().rail_cols
 
-HOLE_RE = re.compile(r"^(\d{1,2})([A-JW-Z])$")
+
+def board_of(col: int) -> tuple[int, int]:
+    """(numero da placa 1.., coluna impressa nessa placa)."""
+    cpb = active().cols_per_board
+    return (col - 1) // cpb + 1, (col - 1) % cpb + 1
+
+
+def make_hole(col: int, row: str) -> str:
+    """Nome do furo como o iniciante le na placa: '21J' (placa 1) ou 'P2:5E' (placa 2)."""
+    b, c = board_of(col)
+    return f"{c}{row}" if b == 1 else f"P{b}:{c}{row}"
+
+
+def col_x(col: float) -> float:
+    """Coluna (pode ser fracionaria, ex.: pontos de passagem de fios) -> x em passos, com o vao entre placas."""
+    prof = active()
+    if prof.boards <= 1:
+        return float(col)
+    k = int(max(0.0, (col - 1) // prof.cols_per_board)) if col >= prof.cols_per_board + 1 else 0
+    k = min(k, prof.boards - 1)
+    return float(col) + k * prof.board_gap_pitch
+
+HOLE_RE = re.compile(r"^(?:P(\d):)?(\d{1,2})([A-JW-Z])$")
 WIRE_END_RE = re.compile(r"^W\d+\.[ab]$")
 
 
@@ -110,8 +136,13 @@ class Issue:
 def parse_hole(hole: str) -> tuple[int, str]:
     m = HOLE_RE.match(hole)
     if not m:
-        raise NetlistError(f"Furo invalido: {hole!r} (esperado ex.: 17A, 30J, 5Z)")
-    col, row = int(m.group(1)), m.group(2)
+        raise NetlistError(f"Furo invalido: {hole!r} (esperado ex.: 17A, 30J, 5Z, P2:5E)")
+    prof = active()
+    board = int(m.group(1) or 1)
+    local, row = int(m.group(2)), m.group(3)
+    if not 1 <= board <= prof.boards or not 1 <= local <= prof.cols_per_board:
+        raise NetlistError(f"Placa inexistente ou coluna fora da placa: {hole!r}")
+    col = (board - 1) * prof.cols_per_board + local
     if not 1 <= col <= n_cols():
         raise NetlistError(f"Coluna fora da protoboard ({n_cols()} colunas): {hole!r}")
     if row in RAIL_ROWS and col not in rail_cols():
@@ -134,14 +165,15 @@ def hole_group(hole: str, rail_split: int | None = None) -> tuple:
 def hole_xy(hole: str) -> tuple[float, float]:
     """Posicao do furo em passos (x = coluna, y = fileira; y cresce para CIMA)."""
     col, row = parse_hole(hole)
-    return float(col), float(ROW_Y[row])
+    return col_x(col), float(ROW_Y[row])
 
 
 def fz_hole_xy(hole: str) -> tuple[float, float]:
     """Posicao do furo nas coordenadas do SVG do Fritzing (unidades do SVG, y para baixo)."""
     col, row = parse_hole(hole)
     b = active()
-    x = b.fz_x0 + (col - 1) * b.fz_pitch
+    board, local = board_of(col)
+    x = (board - 1) * b.fz_size[0] + b.fz_x0 + (local - 1) * b.fz_pitch     # placas encostadas lado a lado
     y = b.fz_y_a - ROW_Y[row] * b.fz_pitch
     return round(x, 3), round(y, 3)
 
@@ -162,7 +194,7 @@ def load_modules() -> dict:
     return load_json(DATA_DIR / "modules.json")
 
 
-STAGE_ORDER = ["A", "B", "C"]   # D (LCD) e E ficam adiados: ver netlist.deferred_stages
+STAGE_ORDER = ["A", "B", "C", "D", "E"]
 
 
 def stage_index(stage: str) -> int:
@@ -288,7 +320,7 @@ class Layout:
         if not 1 <= col <= n_cols():
             raise NetlistError("ESP32 fora da protoboard")
         assert n >= pin.index
-        return f"{col}{row}"
+        return make_hole(col, row)
 
     def pin_hole(self, ref: str, pin: str) -> str:
         """Furo ocupado pelo pino 'pin' do componente 'ref' (ou erro)."""

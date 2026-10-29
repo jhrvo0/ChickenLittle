@@ -14,7 +14,7 @@ from . import model
 from .model import Layout
 
 ESP_ID = "esp"
-PART_IDS = {"M1": "ultra", "P1": "pot", "R1": "r1", "R2": "r2", "R3": "r3"}
+PART_IDS = {"M1": "ultra", "P1": "pot", "R1": "r1", "R2": "r2", "R3": "r3", "R4": "r4", "R5": "r5", "M3": "lcd"}
 GND_MAP = {"J2.14": "GND.1", "J3.1": "GND.2", "J3.7": "GND.3"}   # ASSUMIDO (tudo e GND; irrelevante eletricamente)
 
 
@@ -40,10 +40,12 @@ def wokwi_terminal(lay: Layout, ref_pin: str) -> str | None:
         return f"{PART_IDS[ref]}:{'1' if pin == 'A' else '2'}"
     if t == "potentiometer":
         return f"{PART_IDS[ref]}:{ {'END_A': 'VCC', 'WIPER': 'SIG', 'END_B': 'GND'}[pin] }"
-    return None                                  # TCRT5000: sem modelo (LCD: estagio D adiado)
+    if t == "lcd2004a":
+        return f"{PART_IDS[ref]}:{pin}"
+    return None                                  # TCRT5000: sem modelo Wokwi
 
 
-NET_COLOR = {"5V": "red", "3V3": "orange", "GND": "black", "TRIG": "gold", "ECHO_5V": "red", "ECHO_NODE": "green",
+NET_COLOR = {"LCD_RS": "blue", "LCD_E": "green", "LCD_D4": "white", "LCD_D5": "brown", "LCD_D6": "orange", "LCD_D7": "purple", "5V": "red", "3V3": "orange", "GND": "black", "TRIG": "gold", "ECHO_5V": "red", "ECHO_NODE": "green",
              "POT_WIPER": "purple"}
 
 
@@ -59,6 +61,9 @@ def build_diagram(lay: Layout, stage: str = "C", distance_cm: int = 25) -> dict:
         "R2": ("wokwi-resistor", ohms("R2"), 30, 260),
         "R3": ("wokwi-resistor", ohms("R3"), 100, 260),
         "P1": ("wokwi-potentiometer", {}, 150, 260),
+        "R4": ("wokwi-resistor", ohms("R4"), 170, 420),
+        "R5": ("wokwi-resistor", ohms("R5"), 230, 420),
+        "M3": ("wokwi-lcd2004", {"pins": "full"}, -60, 420),
     }
     for ref, (ptype, attrs, top, left) in spec.items():
         if ref in present:
@@ -119,7 +124,7 @@ README = """# Simulacao Wokwi do MotionPet (gerada)
 
 Arquivos gerados por `python -m hardware.build` a partir de `hardware/netlist/motionpet.netlist.json`:
 
-- `diagram.json` — ESP32-DevKitC V4 (`board-esp32-devkit-c-v4`, 38 pinos), HC-SR04, R1/R2/R3 e potenciometro (estagios A-C). O LCD (estagio D) esta adiado.
+- `diagram.json` — ESP32-DevKitC V4 (`board-esp32-devkit-c-v4`, 38 pinos), HC-SR04, R1-R5, potenciometro e LCD 2004A em modo paralelo de 4 bits (estagios A-D).
 - `wokwi.toml` — aponta para o firmware compilado pelo PlatformIO (`pio run -d firmware`).
 - `scenarios/hcsr04.test.yaml` — cenario de teste (sensor_frame, distancias 25 cm e 300 cm).
 

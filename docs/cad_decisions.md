@@ -1,6 +1,6 @@
 # Decisoes tecnicas — representacao eletronica (CAD) do MotionPet
 
-Data: 2026-10-29 · Escopo: Estagio B (prioridade) + A e C; D/E adiados · Status: `PENDING_PHYSICAL_VALIDATION` (Ciclo 5 permanece aberto; nenhum Ciclo 6 iniciado).
+Data: 2026-10-29 · Escopo: Estagio B (prioridade) + A, C, D (LCD na P2) e E · Status: `PENDING_PHYSICAL_VALIDATION` (Ciclo 5 permanece aberto; nenhum Ciclo 6 iniciado).
 
 ## 1. Decisoes
 | ID | Decisao | Motivo |
@@ -8,10 +8,10 @@ Data: 2026-10-29 · Escopo: Estagio B (prioridade) + A e C; D/E adiados · Statu
 | D1 | A netlist JSON (`hardware/netlist/motionpet.netlist.json`) e a unica fonte; tudo e gerado dela | "circuito antes da imagem"; nenhuma conexao sem pino real e justificativa |
 | D2 | Pinagem do firmware **inalterada** (GPIO5, 34, 35, 39, 36, 19, 18, 21, 22, 23, 27); testes comparam `firmware/main/pinout_config.h`, `terminal.bench.pinout.ALL_ASSIGNED_GPIOS` e a netlist | preservar o trabalho do Antigravity |
 | D3 | Perfil de placa assumido: **ESP32 DevKit 38 pinos, 0,9 pol entre fileiras** (confirmar em C01) | e o unico leiaute comum que deixa 1 furo acessivel de cada lado numa protoboard unica |
-| D4 | **Meia-protoboard de 30 colunas (A–J × 1–30)**, geometria/barramentos do `Half_breadboard_v2` do Fritzing; o modelo e parametrizado por perfil (`data/breadboards.json`: `bb400` ativo, `bb830` mantido) | informado pelo usuario; geometria real e conferida por teste |
+| D4 | **Meia-protoboard de 30 colunas (A–J × 1–30)** para os estagios A–C (P1); a P2 so recebe o LCD (D10), geometria/barramentos do `Half_breadboard_v2` do Fritzing; o modelo e parametrizado por perfil (`data/breadboards.json`: `bb400` ativo, `bb830` mantido) | informado pelo usuario; geometria real e conferida por teste |
 | D5 | ESP32 nas fileiras **B** (lado J2) e **I** (lado J3), pino 1 na **coluna 1** (a USB-C sai um pouco da borda), USB a esquerda → so as fileiras **A** e **J** ficam acessiveis; sobram as colunas **21–30** | fisica do encaixe; 19 das 30 colunas |
 | D6 | Estagio B: HC-SR04 em `21J–24J`; R1 `23H–27H` (1 kΩ); R2 `27F–30F` (1 kΩ); R3 `30G–24G` (300 Ω); no do divisor = coluna 27, junção R2/R3 = coluna 30 (grupo F–J); fios W1 `19A→21H`, W2 `7J→24I`, W3 `10J→22I`, W4 `27I→5A` | W4 (no → GPIO34) e o unico fio do sinal e so entra depois do ensaio estatico (ponto de parada) |
-| D10 | **Estagios D (LCD) e E adiados.** O LCD de 16 pinos nao cabe junto com a ESP32 em 30 colunas. Opcoes: 2ª meia-protoboard (LCD encaixa direto) ou ~12 jumpers femea–macho. Layout antigo (830 pontos) arquivado em `hardware/netlist/archive/` | aguardando a decisao do usuario; pinagem do LCD e firmware nao mudam |
+| D10 | **Estagio D (LCD) na 2ª meia-protoboard (P2)**, encaixada na ponta da coluna 30 da P1. Perfil `bb400x2` (60 colunas internas; furos da P2 escritos `P2:12E`). LCD com o conector na fileira A da P2 (VSS em `P2:12A` … K em `P2:27A`), display para fora da placa. RW, VSS e K no GND por jumpers curtos (W12–W14); R4 = 1 kΩ (contraste, V0→GND, ajustavel: C07); R5 = 300 Ω (backlight); 3 fios de alimentacao (W11 GND, W15/W16 5 V) e 6 de sinal (W17–W22). Estagios A–C nao mudaram | o usuario juntou duas meias-protoboards e pediu montagem simples |
 | D11 | **Divisor 1 kΩ / (1 kΩ + 300 Ω)**: unica combinacao **em serie** com ≤ 3 resistores de 1 kΩ e 300 Ω que respeita o teto de 3,30 V e VIH no pior caso (teste `test_chosen_divider_is_the_cheapest_safe_combination_of_1k_and_300`). Havia uma variante em paralelo (R1 = 1 kΩ‖300 Ω, R2 = 300 Ω) com a mesma tensao, mas ela puxaria ≈ 9,4 mA do pino ECHO do HC-SR04 (contra ≈ 2,2 mA): descartada. Leitura das faixas a partir da dourada: 1 kΩ = dourado-vermelho-preto-marrom; 300 Ω = dourado-marrom-preto-laranja. Precisa de 2 resistores de 1 kΩ e 1 de 300 Ω | resistores informados pelo usuario |
 | D7 | `.fzz` gerado por codigo proprio (nao pelo MCP) | o MCP escolhido liga conector a conector e nao modela pecas encaixadas nos furos |
 | D8 | MCP escolhido: fedoragobrowse/fritzing-mcp (MIT) — **configurado, nao verificado** (ver `hardware/mcp/README.md`) | roda sem o app Fritzing; codigo revisado; execucao negada no ambiente de geracao |
@@ -32,7 +32,7 @@ Data: 2026-10-29 · Escopo: Estagio B (prioridade) + A e C; D/E adiados · Statu
 - **`wokwi-cli`**: download e execucao negados pelo sistema de permissoes; `lint` e o cenario de teste **nao foram executados**.
 - **MCP de Fritzing**: instalacao/execucao negadas; **nenhuma chamada MCP foi testada**.
 - **`.fzz` nao aberto no Fritzing** (nao ha Fritzing na maquina de geracao). Verificado: ZIP/XML validos, conexoes reciprocas, redes reextraidas do XML = netlist (A–C), conectores sobre os furos (≤ 0,6 px), `moduleId` reais do Fritzing. A peca da ESP32 e **generica** (nao e o modelo da sua placa).
-- Estagio C e **provisorio** (ordem de pinos do TCRT5000 nao confirmada; 6 fios, 4 deles longos). Estagios D/E: adiados (D10).
+- Estagio C e **provisorio** (ordem de pinos do TCRT5000 nao confirmada; 6 fios, 4 deles longos). Estagio D: contraste (R4) e backlight (R5) a ajustar na bancada; fios de sinal do LCD com 15–20 cm.
 - Trilhos de alimentacao da protoboard: **nao usados** (a meia-placa pode ou nao te-los; nao foi informado). Se existirem, as coordenadas de furo dos trilhos no modelo nao sao as do desenho real — por isso nao os uso.
 
 ## 4. Pendencias de confirmacao fisica

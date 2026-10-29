@@ -11,9 +11,9 @@ A **unica fonte de verdade** e `hardware/netlist/motionpet.netlist.json` (compon
 observacoes de seguranca, confirmacoes pendentes). Nada e desenhado a mao: `python -m hardware.build` gera tudo a partir dele.
 
 ## Como ver o Estagio B (prioridade)
-1. Abra **`hardware/out/guia_montagem.html`** no navegador: e uma **apresentacao de slides** (um passo por slide, 24 no total).
+1. Abra **`hardware/out/guia_montagem.html`** no navegador: e uma **apresentacao de slides** (um passo por slide, 35 no total).
    A protoboard vai sendo montada na tela, o item novo pisca em rosa, o zoom segue a regiao e o painel "ADICIONE AGORA" mostra cor do fio,
-   furos de cada ponta e faixas dos resistores. Teclado: **← →** navegam, **A** mostra a protoboard inteira, **F** tela cheia. O Estagio B (★) esta nos slides 6–16; o LCD (Estagio D) esta adiado.
+   furos de cada ponta e faixas dos resistores. Teclado: **← →** navegam, **A** mostra a protoboard inteira, **F** tela cheia. O Estagio B (★) esta nos slides 6–16; o LCD (Estagio D) fica na 2ª meia-protoboard (P2).
 2. Imagens: `hardware/out/protoboard_estagioB.svg|png`, ensaio do divisor `protoboard_estagioB_passo5_ensaio_divisor.svg|png`,
    esquematico independente `esquematico_estagioB.svg|png`.
 3. Tabelas: `hardware/out/fios_estagioB.csv`, `furos_estagioB.csv`, `estagioB.md` (redes, componentes/furos, fio a fio, mapa de furos).

@@ -44,17 +44,22 @@ def _comp(raw: dict, ref: str) -> dict:
 # Protoboard: conectividade e geometria
 # ----------------------------------------------------------------------------
 def test_breadboard_strips_follow_real_connectivity():
-    _layout()                                           # ativa o perfil da netlist (bb400)
+    _layout()                                           # ativa o perfil da netlist (bb400x2: duas meias-protoboards)
     g = model.hole_group
-    assert model.n_cols() == 30
+    assert model.n_cols() == 60 and model.active().cols_per_board == 30
     assert g("17A") == g("17E") == g("17C")           # A-E ligadas na mesma coluna
     assert g("17F") == g("17J")                        # F-J ligadas na mesma coluna
     assert g("17E") != g("17F")                        # canal central isola os dois lados
     assert g("17A") != g("18A")                        # colunas diferentes sao isoladas
     with pytest.raises(model.NetlistError):
-        model.parse_hole("31A")                        # a meia-protoboard so tem 30 colunas
+        model.parse_hole("31A")                        # cada meia-protoboard so tem 30 colunas (a 2a e escrita P2:...)
     with pytest.raises(model.NetlistError):
         model.parse_hole("0A")
+    with pytest.raises(model.NetlistError):
+        model.parse_hole("P3:1A")                      # so ha duas placas
+    assert model.parse_hole("P2:5E") == (35, "E")
+    assert g("P2:5A") == g("P2:5E") and g("P2:5A") != g("5A") and g("P2:5F") != g("5F")   # placas sao independentes
+    assert model.make_hole(35, "E") == "P2:5E" and model.make_hole(30, "J") == "30J"
 
 
 def test_breadboard_geometry_matches_fritzing_half_breadboard_v2():
@@ -65,7 +70,10 @@ def test_breadboard_geometry_matches_fritzing_half_breadboard_v2():
     assert model.fz_hole_xy("1J") == (13.65, 45.0)
     assert model.fz_hole_xy("10F")[1] - model.fz_hole_xy("10E")[1] == -27.0     # canal: E -> F = 3 passos de 9
     assert model.ROW_Y["F"] - model.ROW_Y["E"] == 3
-    assert len(model.rail_cols()) == 25
+    # a 2a placa (P2) e a mesma peca deslocada da largura da placa (292,41 unidades): encostadas pela ponta
+    assert model.fz_hole_xy("P2:1A") == (292.41 + 13.65, 144.0)
+    assert model.fz_hole_xy("P2:30J") == (292.41 + 274.65, 45.0)
+    assert len(model.breadboard_profiles()["bb400"].rail_cols) == 25
 
 
 # ----------------------------------------------------------------------------
@@ -382,7 +390,7 @@ def test_wokwi_diagram_nets_equal_logical_nets_except_unmodeled_tcrt5000():
 
 def test_wokwi_gpio_numbers_match_firmware_header():
     lay = _layout()
-    d = export_wokwi.build_diagram(lay, "C")
+    d = export_wokwi.build_diagram(lay, "D")
     esp_pins = {t for c in d["connections"] for t in c[:2] if t.startswith("esp:")}
     for name, spec in lay.raw["firmware_pin_map"].items():
         if spec["net"] is None or spec.get("deferred"):
@@ -526,7 +534,7 @@ def test_slides_html_structure_and_focus_boxes():
     m = re.search(r"window\.SLIDES=(\[.*?\]);window\.FULLBOX=(\[.*?\]);", page, re.S)
     slides, full = json.loads(m.group(1)), json.loads(m.group(2))
     n_steps = sum(len(v) for v in lay.raw["build_steps"].values())
-    assert len(slides) == 2 + n_steps + 1 + 2                  # intro + materiais + passos + slide do LCD + 2 de ajuda
+    assert len(slides) == 2 + n_steps + 2                      # intro + materiais + passos + 2 de ajuda
     steps = [s for s in slides if s["kind"] == "step"]
     assert len(steps) == n_steps
     for s in steps:
@@ -545,3 +553,32 @@ def test_slides_html_structure_and_focus_boxes():
     assert [i for i, s in enumerate(b) if s.get("hold")] == [4]
     assert "W4" in b[9]["adds"] and "T1" in b[4]["temp"]
     assert all(s["adds"] == [] for s in b[:2])
+
+
+# ----------------------------------------------------------------------------
+# Estagio D: LCD 2004A na 2a meia-protoboard (P2)
+# ----------------------------------------------------------------------------
+def test_lcd_on_second_board_has_rw_grounded_and_signals_on_firmware_gpios():
+    lay = _layout()
+    pin_net = lay.pin_net_map("D")
+    gnd = pin_net["M3.VSS"]
+    assert {"M3.RW", "M3.K", "R4.B", "U1.GND@J3.7"} <= gnd           # RW no GND: o LCD nunca devolve 5 V
+    assert pin_net["M3.VDD"] >= {"U1.5V", "R5.A"}
+    assert pin_net["M3.V0"] == frozenset({"M3.V0", "R4.A"})
+    assert pin_net["M3.A"] == frozenset({"M3.A", "R5.B"})
+    for gpio, pin in ((19, "RS"), (18, "E"), (21, "D4"), (22, "D5"), (23, "D6"), (27, "D7")):
+        assert pin_net[f"M3.{pin}"] == frozenset({f"M3.{pin}", f"U1.IO{gpio}"}), pin
+    for d in ("D0", "D1", "D2", "D3"):                                 # modo 4 bits: D0-D3 sem fio
+        assert pin_net.get(f"M3.{d}", frozenset({f"M3.{d}"})) == frozenset({f"M3.{d}"})
+    assert all(h.startswith("P2:") for h in lay.components["M3"]["pins"].values())
+
+
+def test_mutation_lcd_rw_not_grounded_is_rejected():
+    lay = _mutated(lambda r: r.update({"wires": [w for w in r["wires"] if w["id"] != "W12"]}))
+    codes = _codes(lay, "D")
+    assert "NET_OPEN" in codes or "NET_PARTIAL" in codes or "NET_UNDECLARED" in codes
+
+
+def test_mutation_lcd_vdd_on_gpio_is_rejected():
+    lay = _mutated(lambda r: _wire(r, "W15").update({"from": "8J"}))   # 5 V do LCD ligado ao GPIO19
+    assert model.errors(model.validate(lay, "D"))
