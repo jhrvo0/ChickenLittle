@@ -1,0 +1,71 @@
+{
+ "validation": {
+  "A": {
+   "errors": 0,
+   "warnings": 0
+  },
+  "B": {
+   "errors": 0,
+   "warnings": 1
+  },
+  "C": {
+   "errors": 0,
+   "warnings": 1
+  },
+  "D": {
+   "errors": 0,
+   "warnings": 1
+  },
+  "E": {
+   "errors": 0,
+   "warnings": 1
+  }
+ },
+ "files": {
+  "wokwi/README.md": "87db45be2bdc1452573f854dce43ee95785616301c84d17f6e095a3576e53a94",
+  "wokwi/diagram.json": "32533a0e3dde97fd1900098508594c12711200221e30d0dd252389d29a3d2734",
+  "wokwi/scenarios/hcsr04.test.yaml": "8bd6427f6f504e5e7a695f1a7a6482672c8151e9f71ec6b5169a618a01e85537",
+  "wokwi/wokwi.toml": "7844baea97d5eace5b63ec267c91ab76b0de6fcaf01c58a6ade34f01d67ee07a",
+  "MotionPet_estagioA.fzz": "d759a09da1b97b1142a202fda93bd961f650f7ff11de4768c1d9e2f46e3ca363",
+  "MotionPet_estagioB.fzz": "81497c42defa059aac4a7dd6d0b5eab01a3c4986017b0fbb61c2fa28bd43d15f",
+  "MotionPet_estagioC.fzz": "eb2d5518a557606633bda3072591a593ed8623826d4f21136d551d757972d8eb",
+  "MotionPet_estagioD.fzz": "deda9a7e78e707794a29d8d9a1f3a8dbcd4e37ca24ec7c4f0bbdb8828e380f0b",
+  "MotionPet_estagioE.fzz": "d20238bfa8206b5febac6b4a5eb05e51b7ca42f2868cc7a947f79c547a291591",
+  "esquematico_estagioA.svg": "7772407bed68f97ce91e906bcb06689c6ba32945080def36d5e8225e8bbea11c",
+  "esquematico_estagioB.svg": "4f295e3767787280a3979c8a3b2df6183fdeaf346e932aa696ed220a8fe2e372",
+  "esquematico_estagioC.svg": "76c93417935c6a7a75956ed7bf3c210fa9a711fc94f2327a803f0d2dbc426154",
+  "esquematico_estagioD.svg": "a7e7fa0cc801fb8f91800b1ae3f4e4ceffe4ef0f327beda6dada1b809637f2d9",
+  "esquematico_estagioE.svg": "ee0af34b0985e54f9b8542c8c1128333696b777d9273c57d821a2c0619ea449f",
+  "estagioA.md": "d4b60ffaa2e4cc08416283395f5308b00f892829b165d629ba78661e25a4b1ac",
+  "estagioB.md": "bfacb36a9e2c4af1ae3e3dbbe293b0698e0d57b8864c8301478e869b895c0298",
+  "estagioC.md": "dc1fa14c30903e00d3d57449bd793eb59e99d680a9e5cd9666e49cafead9079a",
+  "estagioD.md": "0893124431581146e1c96ae8fe7f7dba8a281ddcaf670aabf648ed8071ae7e35",
+  "estagioE.md": "b25d4ac1b4fd2c54b6fd304b2bd1bdb3a506a84478c7d3dbac7fa2816b27d09d",
+  "fios_estagioA.csv": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "fios_estagioB.csv": "a5a22861f6c53a2c030458e9abffba19d9ab851074f12a22b8d2961f677d6778",
+  "fios_estagioC.csv": "045f4e8ced2793add218fa37fb50c40a1574e10f01105d3e7662c3188b06c310",
+  "fios_estagioD.csv": "c8372fc4e21e5fdedbb4490bdf98aa5e08f5e8f13b5e1cb75952196fc338e4be",
+  "fios_estagioE.csv": "c8372fc4e21e5fdedbb4490bdf98aa5e08f5e8f13b5e1cb75952196fc338e4be",
+  "furos_estagioA.csv": "ae9eacfc0dfd8dadc88de3e2eca0168716066d19f1cd5630fc8c79ac2681a965",
+  "furos_estagioB.csv": "307f42fc5cc2db23c8dc9722e3984071c40aa210b5a59338c55c41da7fc1505e",
+  "furos_estagioC.csv": "58f96661e36c7e8dbd223b6f3beb66b95d9e81aec56845638d263c358b737af6",
+  "furos_estagioD.csv": "ecc9e3e62d49aa14378a090dae5991d0c0ae70bf44f98ae4b38ca1aaafe17fa0",
+  "furos_estagioE.csv": "ecc9e3e62d49aa14378a090dae5991d0c0ae70bf44f98ae4b38ca1aaafe17fa0",
+  "guia_montagem.html": "321646ada721676de28a10029212c8587d37d0e7c74d150f837eff52ad3d808c",
+  "netlist_resumo.md": "5de4705f1e02f28474210cbd7de7de9d47044e43243136dd3d030c79020de974",
+  "parts/MotionPet_esp32_38pin.fzp": "6643b53da9d57257cffd0dd651efc1c0f67f0a0b9441a82e67eaaa552aec859c",
+  "parts/MotionPet_esp32_38pin.fzpz": "c83ca0ccd16964bc04d0a8f4ac164cc6c25f0a4d3c630021bee593de6a86ce3e",
+  "parts/MotionPet_lcd2004a.fzp": "cb3a5dcad31fb3ed106136106e33addec64ed61c34290891f73686d251b9d041",
+  "parts/MotionPet_lcd2004a.fzpz": "ca02d67f147aa2e1f8234c6b60910cc7e139622cd84b5b87053bd54697cac809",
+  "parts/MotionPet_pot.fzp": "67d01e74eb64be91e36f88b1da0e455e083032b09577a77f64e89c866aed34fc",
+  "parts/MotionPet_pot.fzpz": "ce2e70ee5c734d68741d6408824113a3590245713697e93bff05de7261f914ae",
+  "parts/MotionPet_tcrt5000.fzp": "f6ab7cf53c24224d21fc4f1589110928ea81f9fd5957a916042799cda72c06c1",
+  "parts/MotionPet_tcrt5000.fzpz": "055d5cc8e94f25fc26e1f6e4f8845996aeb405f0d2c4e192800dd69bed75690a",
+  "protoboard_estagioA.svg": "dc64866b90ccd9f09d4a9a179ff9bcc5a5dc34f48769081e7d15172e47807361",
+  "protoboard_estagioB.svg": "a4ad7aa7343010c9275c2dcbccb0cb7947980a4fd5de02bb49970c68f07326da",
+  "protoboard_estagioB_passo5_ensaio_divisor.svg": "669a2d7c3d43e36393d88f737dbbdc5fade827614dd4464ba301160d34c1198d",
+  "protoboard_estagioC.svg": "01b0cc78e5278b158a1b149c23ae5970996395ec5e3a946701164bbdba53ee8b",
+  "protoboard_estagioD.svg": "89f15db4b784322ee54a6a8ed1b7b95f92491da5f1bc1027232ada23970d6d78",
+  "protoboard_estagioE.svg": "5823405ed3330fb546aaebced2d56aba36f4a5b14f5130ad10d4f5bc23d09a9d"
+ }
+}

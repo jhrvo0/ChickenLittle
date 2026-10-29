@@ -35,3 +35,6 @@ sdkconfig.old
 # OS / IDE
 .DS_Store
 Thumbs.db
+
+# Ferramentas de terceiros clonadas pelo setup do MCP (hardware/tools/setup_fritzing_mcp.py)
+tools/

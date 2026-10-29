@@ -1,0 +1,19 @@
+name: 'MotionPet - ESP32 + HC-SR04 emitindo sensor_frame (JSON Lines v1)'
+version: 1
+author: 'MotionPet'
+# ESTE CENARIO NAO FOI EXECUTADO no ambiente de build (wokwi-cli indisponivel). Executar com:
+#   WOKWI_CLI_TOKEN=<seu token> wokwi-cli hardware/wokwi --scenario hardware/wokwi/scenarios/hcsr04.test.yaml
+steps:
+  - wait-serial: 'sensor_frame'
+  - set-control:
+      part-id: ultra
+      name: distance
+      value: 25
+  - delay: 800ms
+  - wait-serial: '"valid_ultrasonic":true'
+  - set-control:
+      part-id: ultra
+      name: distance
+      value: 300
+  - delay: 800ms
+  - wait-serial: '"valid_ultrasonic":true'

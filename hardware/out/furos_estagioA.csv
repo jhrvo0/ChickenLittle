@@ -1,0 +1,5 @@
+furo,coluna,fileira,ocupante,rede
+4I,4,I,U1 ESP32 DevKit: pino GND [J3.1],GND
+10I,10,I,U1 ESP32 DevKit: pino GND [J3.7],GND
+17B,17,B,U1 ESP32 DevKit: pino GND [J2.14],GND
+22B,22,B,U1 ESP32 DevKit: pino 5V [J2.19],5V

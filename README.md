@@ -203,3 +203,13 @@ Opções úteis de linha de comando:
 - [`docs/ml_pipeline_spec.md`](docs/ml_pipeline_spec.md) — Especificação do pipeline de Machine Learning e TinyML para séries temporais 1D (Ciclo 2).
 - [`docs/real_data_collection_guide.md`](docs/real_data_collection_guide.md) — Procedimento passo a passo para coleta multi-participante do dataset físico real na bancada e limitações experimentais.
 - [`docs/cycle5_bench_checklist.md`](docs/cycle5_bench_checklist.md) — **Checklist físico rápido e objetivo (Ciclo 5)**: tabela canônica única (`GPIO34`), regras elétricas (`<= 3,30 V`) e comandos das Etapas A–D até o teste E2E do Pet Launch.
+
+## Eletrônica e CAD (Ciclo 5 — pós-handoff)
+
+A montagem em protoboard agora tem uma **fonte única de verdade** (`hardware/netlist/motionpet.netlist.json`) e artefatos gerados dela:
+guia HTML navegável, SVG/PNG da protoboard e do esquemático, `.fzz` do Fritzing, projeto Wokwi, tabelas fio a fio e mapa de furos.
+
+- Comece por **`hardware/out/guia_montagem.html`** (aba **B ★** = HC-SR04 + divisor de ECHO) e leia `hardware/README.md`.
+- Decisões, descobertas e limites: `docs/cad_decisions.md`. MCPs avaliados e estado real: `hardware/mcp/README.md`.
+- Regenerar: `python -m hardware.build [--png]` · Testar: `python -m pytest tests/test_hardware_cad.py`.
+- **Status inalterado: `PENDING_PHYSICAL_VALIDATION`** — nenhuma validação física foi feita; confirmações pendentes C01–C09 na netlist.

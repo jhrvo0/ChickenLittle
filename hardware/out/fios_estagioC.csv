@@ -1,0 +1,11 @@
+id,estagio_de_introducao,cor,de_furo,ate_furo,rede,tensao_esperada,funcao,justificativa,seguranca,validacao
+W1,B,vermelho,22A,30H,5V,"4,75-5,25 V",5V -> VCC do HC-SR04,Alimenta o HC-SR04 com 5 V (pino 5V da ESP32).,Somente HC-SR04 e LCD usam 5 V. NUNCA levar este fio ao TCRT5000 ou ao potenciometro.,PENDING_PHYSICAL_VALIDATION
+W2,B,preto,10J,33I,GND,0 V,GND -> GND do HC-SR04,Terra comum entre ESP32 e HC-SR04 (inclui o ramo inferior R2 do divisor).,Sem terra comum o ECHO flutua e pode injetar 5 V no GPIO.,PENDING_PHYSICAL_VALIDATION
+W3,B,amarelo,13J,31I,TRIG,"0 / 3,3 V",GPIO5 -> TRIG,"Pulso de disparo: saida 3,3 V do GPIO5 (o TTL do HC-SR04 aceita >= 2,0 V).",GPIO5 e pino de strapping; usa-lo como saida e aceitavel.,PENDING_PHYSICAL_VALIDATION
+W4,B,verde,36F,8A,ECHO_NODE,"0 / 3,00 V (3,15 V max. nominal)",No do divisor -> GPIO34,"Leva o ECHO ja reduzido (3,00 V nominal) ao GPIO34, pino somente-entrada.","NAO instalar antes de medir o no <= 3,30 V (ponto de parada da etapa B).",PENDING_PHYSICAL_VALIDATION
+W5,C,laranja,4A,27B,3V3,"3,25-3,35 V",3V3 -> VCC do TCRT5000,"Alimenta o modulo IR em 3,3 V.",NUNCA ligar o TCRT5000 em 5 V.,PENDING_PHYSICAL_VALIDATION
+W6,C,laranja,27C,33C,3V3,"3,25-3,35 V",3V3 -> extremo do potenciometro,"Alimenta o potenciometro em 3,3 V (derivado da coluna 27).",NUNCA ligar o potenciometro em 5 V.,PENDING_PHYSICAL_VALIDATION
+W7,C,preto,17A,28B,GND,0 V,GND -> GND do TCRT5000,Terra do modulo IR.,,PENDING_PHYSICAL_VALIDATION
+W8,C,preto,28C,35C,GND,0 V,GND -> extremo do potenciometro,Terra do potenciometro (derivado da coluna 28).,,PENDING_PHYSICAL_VALIDATION
+W9,C,azul,29B,9A,IR_DO,"0 / 3,3 V",DO -> GPIO35,"Saida digital do TCRT5000 (0/3,3 V) ao GPIO35, somente-entrada.",,PENDING_PHYSICAL_VALIDATION
+W10,C,roxo,34B,6A,POT_WIPER,"0-3,3 V",Cursor -> GPIO36 (VP),"Cursor do potenciometro (0-3,3 V) ao ADC1_CH0.",,PENDING_PHYSICAL_VALIDATION

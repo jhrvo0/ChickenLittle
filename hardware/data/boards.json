@@ -1,0 +1,110 @@
+{
+  "_comment": "Perfis de placa ESP32. A serigrafia da placa fisica real SEMPRE prevalece. Pinagem 38 pinos: ESP32-DevKitC V4 / NodeMCU-32S (J2 = esquerda, J3 = direita com a USB para cima). Pinagem 30 pinos: DOIT ESP32 DevKit V1.",
+  "profiles": {
+    "esp32_devkit_38pin": {
+      "title": "ESP32 DevKit 38 pinos (estilo DevKitC V4 / NodeMCU-32S), ESP-WROOM-32",
+      "status": "ASSUMED_PENDING_PHYSICAL_CONFIRMATION",
+      "pins_per_side": 19,
+      "pin_pitch_in": 0.1,
+      "row_spacing_in": 0.9,
+      "row_spacing_note": "Clones de 38 pinos costumam ter 22,86 mm (0,9 pol) entre as fileiras; o DevKitC V4 oficial tem 25,4 mm (1,0 pol). MEDIR na placa real.",
+      "pcb_mm": [52.0, 26.0],
+      "breadboard_fit": "one_free_hole_each_side",
+      "sides": {
+        "J2": [
+          ["3V3", null, "power_3v3", "Saida 3,3 V do regulador"],
+          ["EN", null, "reset", "Reset (CHIP_PU)"],
+          ["VP", 36, "input_only", "GPIO36 / ADC1_CH0"],
+          ["VN", 39, "input_only", "GPIO39 / ADC1_CH3"],
+          ["IO34", 34, "input_only", "GPIO34 / ADC1_CH6"],
+          ["IO35", 35, "input_only", "GPIO35 / ADC1_CH7"],
+          ["IO32", 32, "gpio", "GPIO32 / ADC1_CH4"],
+          ["IO33", 33, "gpio", "GPIO33 / ADC1_CH5"],
+          ["IO25", 25, "gpio", "GPIO25 / DAC1"],
+          ["IO26", 26, "gpio", "GPIO26 / DAC2"],
+          ["IO27", 27, "gpio", "GPIO27"],
+          ["IO14", 14, "gpio", "GPIO14"],
+          ["IO12", 12, "strapping_forbidden", "GPIO12 / MTDI: NAO conectar (VDD_SDIO)"],
+          ["GND", null, "ground", "Terra"],
+          ["IO13", 13, "gpio", "GPIO13"],
+          ["SD2", 9, "flash_forbidden", "GPIO9: SPI Flash, NAO conectar"],
+          ["SD3", 10, "flash_forbidden", "GPIO10: SPI Flash, NAO conectar"],
+          ["CMD", 11, "flash_forbidden", "GPIO11: SPI Flash, NAO conectar"],
+          ["5V", null, "power_5v", "Entrada/saida 5 V (VBUS/VIN)"]
+        ],
+        "J3": [
+          ["GND", null, "ground", "Terra"],
+          ["IO23", 23, "gpio", "GPIO23"],
+          ["IO22", 22, "gpio", "GPIO22"],
+          ["TX0", 1, "uart_reserved", "GPIO1 / UART0 TX: reservado ao USB-Serial"],
+          ["RX0", 3, "uart_reserved", "GPIO3 / UART0 RX: reservado ao USB-Serial"],
+          ["IO21", 21, "gpio", "GPIO21"],
+          ["GND", null, "ground", "Terra"],
+          ["IO19", 19, "gpio", "GPIO19"],
+          ["IO18", 18, "gpio", "GPIO18"],
+          ["IO5", 5, "strapping_caution", "GPIO5: strapping (pull-up no boot), uso como saida e aceitavel"],
+          ["IO17", 17, "gpio", "GPIO17"],
+          ["IO16", 16, "gpio", "GPIO16"],
+          ["IO4", 4, "gpio", "GPIO4"],
+          ["IO0", 0, "strapping_avoid", "GPIO0: strapping (boot)"],
+          ["IO2", 2, "strapping_avoid", "GPIO2: strapping (LED/boot)"],
+          ["IO15", 15, "strapping_avoid", "GPIO15: strapping (MTDO)"],
+          ["SD1", 8, "flash_forbidden", "GPIO8: SPI Flash, NAO conectar"],
+          ["SD0", 7, "flash_forbidden", "GPIO7: SPI Flash, NAO conectar"],
+          ["CLK", 6, "flash_forbidden", "GPIO6: SPI Flash, NAO conectar"]
+        ]
+      },
+      "usb": "usb_c",
+      "wokwi_part": "wokwi-esp32-devkit-v1",
+      "wokwi_note": "Wokwi nao possui o DevKit de 38 pinos oficial no catalogo conhecido; o mapeamento usa o DevKit V1 (30 pinos) que contem os mesmos GPIOs usados."
+    },
+    "esp32_devkit_30pin": {
+      "title": "ESP32 DevKit V1 DOIT 30 pinos, ESP-WROOM-32",
+      "status": "ALTERNATIVE_NOT_LAID_OUT",
+      "pins_per_side": 15,
+      "pin_pitch_in": 0.1,
+      "row_spacing_in": 1.0,
+      "row_spacing_note": "~25,4 mm: em UMA protoboard padrao so um lado fica com furos livres acessiveis.",
+      "pcb_mm": [51.5, 28.3],
+      "breadboard_fit": "one_side_only",
+      "sides": {
+        "J2": [
+          ["EN", null, "reset", "Reset"],
+          ["VP", 36, "input_only", "GPIO36"],
+          ["VN", 39, "input_only", "GPIO39"],
+          ["D34", 34, "input_only", "GPIO34"],
+          ["D35", 35, "input_only", "GPIO35"],
+          ["D32", 32, "gpio", "GPIO32"],
+          ["D33", 33, "gpio", "GPIO33"],
+          ["D25", 25, "gpio", "GPIO25"],
+          ["D26", 26, "gpio", "GPIO26"],
+          ["D27", 27, "gpio", "GPIO27"],
+          ["D14", 14, "gpio", "GPIO14"],
+          ["D12", 12, "strapping_forbidden", "GPIO12: NAO conectar"],
+          ["D13", 13, "gpio", "GPIO13"],
+          ["GND", null, "ground", "Terra"],
+          ["VIN", null, "power_5v", "5 V"]
+        ],
+        "J3": [
+          ["D23", 23, "gpio", "GPIO23"],
+          ["D22", 22, "gpio", "GPIO22"],
+          ["TX0", 1, "uart_reserved", "GPIO1"],
+          ["RX0", 3, "uart_reserved", "GPIO3"],
+          ["D21", 21, "gpio", "GPIO21"],
+          ["D19", 19, "gpio", "GPIO19"],
+          ["D18", 18, "gpio", "GPIO18"],
+          ["D5", 5, "strapping_caution", "GPIO5"],
+          ["TX2", 17, "gpio", "GPIO17"],
+          ["RX2", 16, "gpio", "GPIO16"],
+          ["D4", 4, "gpio", "GPIO4"],
+          ["D2", 2, "strapping_avoid", "GPIO2"],
+          ["D15", 15, "strapping_avoid", "GPIO15"],
+          ["GND", null, "ground", "Terra"],
+          ["3V3", null, "power_3v3", "3,3 V"]
+        ]
+      },
+      "usb": "usb_c",
+      "wokwi_part": "wokwi-esp32-devkit-v1"
+    }
+  }
+}

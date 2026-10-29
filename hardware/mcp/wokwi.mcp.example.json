@@ -1,0 +1,11 @@
+{
+  "_comment": "EXEMPLO (nao ativo). Servidor MCP experimental do Wokwi CLI. Exige wokwi-cli instalado e um token do painel Wokwi CI. NUNCA grave o token em arquivo versionado: defina a variavel de ambiente WOKWI_CLI_TOKEN no seu sistema.",
+  "mcpServers": {
+    "wokwi": {
+      "type": "stdio",
+      "command": "wokwi-cli",
+      "args": ["mcp"],
+      "env": { "WOKWI_CLI_TOKEN": "${WOKWI_CLI_TOKEN}" }
+    }
+  }
+}
