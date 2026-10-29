@@ -1,0 +1,23 @@
+id,estagio_de_introducao,cor,de_furo,ate_furo,rede,tensao_esperada,funcao,justificativa,seguranca,validacao
+W1,B,vermelho,19A,21H,5V,"4,75-5,25 V",5V -> VCC do HC-SR04,Alimenta o HC-SR04 com 5 V (pino 5V da ESP32).,Somente HC-SR04 e LCD usam 5 V. NUNCA levar este fio ao TCRT5000 ou ao potenciometro.,PENDING_PHYSICAL_VALIDATION
+W2,B,preto,7J,24I,GND,0 V,GND -> GND do HC-SR04,"Terra comum entre ESP32 e HC-SR04 (inclui o ramo inferior do divisor, R3).",Sem terra comum o ECHO flutua e pode injetar 5 V no GPIO.,PENDING_PHYSICAL_VALIDATION
+W3,B,amarelo,10J,22I,TRIG,"0 / 3,3 V",GPIO5 -> TRIG,"Pulso de disparo: saida 3,3 V do GPIO5 (o TTL do HC-SR04 aceita >= 2,0 V).",GPIO5 e pino de strapping; usa-lo como saida e aceitavel.,PENDING_PHYSICAL_VALIDATION
+W4,B,verde,27I,5A,ECHO_NODE,"0 / 2,83 V (2,97 V max. nominal; pior caso 3,10 V)",No do divisor -> GPIO34,"Leva o ECHO ja reduzido (2,83 V nominal) ao GPIO34, pino somente-entrada.","NAO instalar antes de medir o no <= 3,30 V (ponto de parada da etapa B).",PENDING_PHYSICAL_VALIDATION
+W5,C,laranja,1A,21D,3V3,"3,25-3,35 V",3V3 -> VCC do TCRT5000,"Alimenta o modulo IR em 3,3 V.",NUNCA ligar o TCRT5000 em 5 V.,PENDING_PHYSICAL_VALIDATION
+W6,C,laranja,21E,28E,3V3,"3,25-3,35 V",3V3 -> extremo do potenciometro,"Alimenta o potenciometro em 3,3 V (derivado da coluna 21).",NUNCA ligar o potenciometro em 5 V.,PENDING_PHYSICAL_VALIDATION
+W7,C,preto,22C,24F,GND,0 V,GND do TCRT5000 -> GND do sensor,Leva o terra do modulo IR ate a coluna 24 (GND comum do lado de cima).,,PENDING_PHYSICAL_VALIDATION
+W8,C,preto,30D,24H,GND,0 V,GND do potenciometro -> GND do sensor,Leva o terra do potenciometro ate a coluna 24 (GND comum).,,PENDING_PHYSICAL_VALIDATION
+W9,C,azul,23B,6A,IR_DO,"0 / 3,3 V",DO -> GPIO35,"Saida digital do TCRT5000 (0/3,3 V) ao GPIO35, somente-entrada.",,PENDING_PHYSICAL_VALIDATION
+W10,C,roxo,29B,3A,POT_WIPER,"0-3,3 V",Cursor -> GPIO36 (VP),"Cursor do potenciometro (0-3,3 V) ao ADC1_CH0.",,PENDING_PHYSICAL_VALIDATION
+W11,D,preto,30E,P2:12E,GND,0 V,GND -> VSS do LCD,"Leva o terra da P1 (coluna 30, mesma tira do GND do potenciometro) ao pino 1 do LCD.",,PENDING_PHYSICAL_VALIDATION
+W12,D,preto,P2:12C,P2:16C,GND,0 V,VSS -> RW (pino 5),RW permanentemente em GND: o LCD so recebe dados (nunca devolve 5 V aos GPIOs).,OBRIGATORIO: RW = 0 Ω para GND antes de ligar.,PENDING_PHYSICAL_VALIDATION
+W13,D,preto,P2:16D,P2:27D,GND,0 V,RW -> K (pino 16),Catodo do backlight no GND.,,PENDING_PHYSICAL_VALIDATION
+W14,D,preto,P2:12D,P2:10D,GND,0 V,VSS -> coluna 10 (ponta de R4),"Leva o GND a coluna 10 da P2, onde fica a ponta de baixo do R4 (contraste).",,PENDING_PHYSICAL_VALIDATION
+W15,D,vermelho,21F,P2:13E,5V,"4,75-5,25 V",5V -> VDD (pino 2),Alimenta o LCD em 5 V (coluna 21 da P1 = 5 V).,,PENDING_PHYSICAL_VALIDATION
+W16,D,vermelho,21I,P2:29E,5V,"4,75-5,25 V",5V -> R5 (backlight),"Leva 5 V a coluna 29 da P2, ponta de cima do R5.",,PENDING_PHYSICAL_VALIDATION
+W17,D,azul,8J,P2:15E,LCD_RS,"0 / 3,3 V",GPIO19 -> RS (pino 4),Selecao de registrador.,,PENDING_PHYSICAL_VALIDATION
+W18,D,verde,9J,P2:17E,LCD_E,"0 / 3,3 V",GPIO18 -> E (pino 6),Enable.,,PENDING_PHYSICAL_VALIDATION
+W19,D,branco,6J,P2:22E,LCD_D4,"0 / 3,3 V",GPIO21 -> D4 (pino 11),Dado D4.,,PENDING_PHYSICAL_VALIDATION
+W20,D,marrom,3J,P2:23E,LCD_D5,"0 / 3,3 V",GPIO22 -> D5 (pino 12),Dado D5.,,PENDING_PHYSICAL_VALIDATION
+W21,D,laranja,2J,P2:24E,LCD_D6,"0 / 3,3 V",GPIO23 -> D6 (pino 13),Dado D6.,,PENDING_PHYSICAL_VALIDATION
+W22,D,roxo,11A,P2:25E,LCD_D7,"0 / 3,3 V",GPIO27 -> D7 (pino 14),Dado D7 (o GPIO27 fica na fileira de BAIXO da ESP32).,,PENDING_PHYSICAL_VALIDATION

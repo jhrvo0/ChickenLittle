@@ -206,7 +206,8 @@
           "v": 0.0
         }
       },
-      "wokwi_part": "wokwi-lcd2004"
+      "wokwi_part": "wokwi-lcd2004",
+      "pin1_from_left_mm": 9.8
     },
     "resistor": {
       "title": "Resistor axial 1/4 W",

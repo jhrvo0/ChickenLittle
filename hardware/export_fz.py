@@ -106,14 +106,24 @@ def build_fz(lay: Layout, stage: str) -> tuple[bytes, dict[str, bytes], dict]:
     gen = generic_parts(lay)
     mi = 3000
     insts: list[_Inst] = []
-    bb = _Inst("BB1", bb_module_id(), mi, "breadboardbreadboard", 0.0, 0.0, {}, {}, {})
-    insts.append(bb)
-    mi += 1
-    by_ref: dict[str, _Inst] = {"BB1": bb}
+    prof = model.active()
+    bbs: list[_Inst] = []
+    for b in range(prof.boards):                     # placas encostadas pela ponta, lado a lado
+        bbs.append(_Inst(f"BB{b + 1}", bb_module_id(), mi, "breadboardbreadboard", round(b * prof.fz_size[0] * bb_scale(), 3), 0.0, {}, {}, {}))
+        insts.append(bbs[-1])
+        mi += 1
+    bb = bbs[0]
+    by_ref: dict[str, _Inst] = {i.ref: i for i in bbs}
+
+    def bb_conn(hole: str) -> tuple[_Inst, str]:
+        col, row = parse_hole(hole)
+        board, local = model.board_of(col)
+        return bbs[board - 1], f"pin{local}{row}"
 
     def connect_hole(inst: _Inst, conn: str, hole: str, layer: str) -> None:
-        inst.connects.setdefault(conn, []).append((bb.model_index, f"pin{hole}", "breadboardbreadboard"))
-        bb.connects.setdefault(f"pin{hole}", []).append((inst.model_index, conn, layer))
+        bi, pin = bb_conn(hole)
+        inst.connects.setdefault(conn, []).append((bi.model_index, pin, "breadboardbreadboard"))
+        bi.connects.setdefault(pin, []).append((inst.model_index, conn, layer))
 
     extra_files: dict[str, bytes] = {}
     for comp in lay.comps(stage):
@@ -176,8 +186,9 @@ def build_fz(lay: Layout, stage: str) -> tuple[bytes, dict[str, bytes], dict]:
                       {"__color": WIRE_HEX.get(w["color"], "#999999")}, {})
         mi += 1
         for conn, hole in (("connector0", w["from"]), ("connector1", w["to"])):
-            winst.connects.setdefault(conn, []).append((bb.model_index, f"pin{hole}", "breadboardbreadboard"))
-            bb.connects.setdefault(f"pin{hole}", []).append((winst.model_index, conn, "breadboardWire"))
+            bi, pin = bb_conn(hole)
+            winst.connects.setdefault(conn, []).append((bi.model_index, pin, "breadboardbreadboard"))
+            bi.connects.setdefault(pin, []).append((winst.model_index, conn, "breadboardWire"))
         wires.append(winst)
 
     # ---------- XML ----------
@@ -215,9 +226,9 @@ def build_fz(lay: Layout, stage: str) -> tuple[bytes, dict[str, bytes], dict]:
         ET.SubElement(e, "title").text = inst.ref
         vs = ET.SubElement(e, "views")
         bbv = ET.SubElement(vs, "breadboardView", {"layer": inst.layer})
-        ET.SubElement(bbv, "geometry", {"z": "1.5" if inst is bb else "2.5", "x": f"{inst.x:.3f}", "y": f"{inst.y:.3f}"})
+        ET.SubElement(bbv, "geometry", {"z": "1.5" if inst in bbs else "2.5", "x": f"{inst.x:.3f}", "y": f"{inst.y:.3f}"})
         emit_connectors(bbv, inst, inst.layer)
-        if inst is not bb:
+        if inst not in bbs:
             for vn, layer, dx in (("schematicView", "schematic", 700), ("pcbView", "copper0", 1400)):
                 v = ET.SubElement(vs, vn, {"layer": layer})
                 ET.SubElement(v, "geometry", {"z": "2.5", "x": f"{dx + (inst.model_index - 3000) * 14}", "y": "100"})
@@ -282,7 +293,9 @@ def nets_from_fzz(path_or_bytes, lay: Layout, stage: str) -> list[frozenset[str]
         inst = idx_to_inst[midx]
         mid = inst.get("moduleIdRef")
         if mid == bb_module_id():
-            return ("hole", cid[3:])
+            board = int((title[midx] or "BB1")[2:] or 1)
+            hm = model.HOLE_RE.match(cid[3:])
+            return ("hole", model.make_hole((board - 1) * model.active().cols_per_board + int(hm.group(2)), hm.group(3)))
         return ("pin", title[midx], cid)
 
     holes = set()
