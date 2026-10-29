@@ -165,6 +165,83 @@ class PetEngine:
         self._refresh_derived_fields(evolved=evolved)
         return self.state
 
+    def can_start_launch(self) -> tuple[bool, str]:
+        """Verifica se o pet está apto a iniciar uma partida de Pet Launch."""
+        s = self.state
+        if s.is_sleeping:
+            return False, "PET DORMINDO"
+        if s.mood == PetMood.SICK:
+            return False, "PET DOENTE"
+        if s.energy < self.config.launch_min_energy:
+            return False, "ENERGIA BAIXA"
+        return True, "PRONTO"
+
+    def apply_launch_match(
+        self,
+        distance_m: float,
+        score: int,
+        coins_earned: int,
+        xp_earned: int,
+        bounces: int = 0,
+    ) -> tuple[PetState, bool]:
+        """Integra o resultado de uma partida do Pet Launch na fonte única do `PetState`."""
+        s = self.state
+        cfg = self.config
+        ok, reason = self.can_start_launch()
+        if not ok:
+            s.last_action = reason[:20]
+            return s, False
+
+        dist = round(max(0.0, float(distance_m)), 2)
+        pts = max(0, int(score))
+        coins = max(0, int(coins_earned))
+        xp = max(0, int(xp_earned))
+        _ = bounces
+
+        is_new_record = dist > s.best_launch_distance_m or pts > s.best_launch_score
+        s.best_launch_distance_m = max(s.best_launch_distance_m, dist)
+        s.best_launch_score = max(s.best_launch_score, pts)
+        s.total_launches += 1
+        s.coins += coins
+
+        # Custo moderado de energia e estímulo positivo ao humor/vínculo
+        s.energy -= cfg.launch_energy_cost
+        s.hunger += cfg.launch_hunger_delta
+        s.happiness += (
+            cfg.launch_record_happiness_bonus if is_new_record else cfg.launch_happiness_bonus
+        )
+        s.care_counters["play"] = s.care_counters.get("play", 0) + 1
+
+        evolved = self._grant_xp(xp)
+        self._trigger_animation(PetAnimation.PLAYING)
+        prefix = "REC!" if is_new_record else "LAUNCH"
+        s.last_action = f"{prefix} {dist:.1f}m"[:20]
+
+        s.clamp_all()
+        self._refresh_derived_fields(evolved=evolved)
+        return self.state, is_new_record
+
+    def unlock_launch_upgrade(self, upgrade_id: str, cost: int) -> tuple[bool, str]:
+        """Desbloqueia melhoria permanente do Pet Launch usando moedas acumuladas."""
+        s = self.state
+        uid = str(upgrade_id).strip().upper()
+        price = max(0, int(cost))
+        if not uid:
+            return False, "UPGRADE INVALIDO"
+        if uid in s.unlocked_upgrades:
+            return False, "JA DESBLOQUEADO"
+        if s.coins < price:
+            return False, "MOEDAS INSUFICIENTES"
+
+        s.coins -= price
+        s.unlocked_upgrades.append(uid)
+        s.happiness += 6.0
+        self._trigger_animation(PetAnimation.PLAYING)
+        s.last_action = f"UPG:{uid[:15]}"[:20]
+        s.clamp_all()
+        self._refresh_derived_fields(evolved=False)
+        return True, f"DESBLOQUEADO: {uid}"
+
     def _grant_xp(self, amount: int) -> bool:
         if amount <= 0:
             return False

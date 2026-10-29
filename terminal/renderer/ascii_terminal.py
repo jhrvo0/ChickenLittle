@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from terminal.communication.protocol import (
     AppModeId,
@@ -11,6 +12,9 @@ from terminal.communication.protocol import (
     SensorFramePayload,
 )
 from terminal.pet.state import EvolutionStage, PetAnimation, PetMood, PetState
+
+if TYPE_CHECKING:
+    from terminal.games.pet_launch import PetLaunchGame
 
 
 @dataclass(frozen=True)
@@ -35,9 +39,10 @@ def _progress_bar(value: float, width: int = 12) -> str:
 
 
 class TerminalAsciiRenderer:
-    """Renderiza o painel completo do MotionPet em ASCII puro."""
+    """Renderiza o painel completo do MotionPet em ASCII puro (padrão 86c e compacto 60c)."""
 
     PANEL_WIDTH = 86
+    COMPACT_WIDTH = 60
 
     def render(
         self,
@@ -45,8 +50,25 @@ class TerminalAsciiRenderer:
         lcd_frame: LcdFramePayload,
         frame_idx: int = 0,
         telemetry: HudTelemetry | None = None,
+        compact: bool = False,
+        launch_game: PetLaunchGame | None = None,
     ) -> str:
         tel = telemetry or HudTelemetry()
+        if tel.mode == AppModeId.PET_LAUNCH and launch_game is not None:
+            from terminal.games.launch_renderer import PetLaunchAsciiRenderer
+
+            return PetLaunchAsciiRenderer().render(
+                game=launch_game,
+                state=state,
+                lcd_frame=lcd_frame,
+                frame_idx=frame_idx,
+                telemetry=tel,
+                compact=compact,
+            )
+
+        if compact:
+            return self._render_compact_pet(state, lcd_frame, frame_idx, tel)
+
         w = self.PANEL_WIDTH
         border = "+" + ("=" * (w - 2)) + "+"
         sep = "+" + ("-" * (w - 2)) + "+"
@@ -99,13 +121,43 @@ class TerminalAsciiRenderer:
         out.append(border)
         return "\n".join(out)
 
+    def _render_compact_pet(
+        self,
+        state: PetState,
+        lcd_frame: LcdFramePayload,
+        frame_idx: int,
+        tel: HudTelemetry,
+    ) -> str:
+        w = self.COMPACT_WIDTH
+        inner = w - 4
+        border = "+" + ("=" * (w - 2)) + "+"
+        sep = "+" + ("-" * (w - 2)) + "+"
+        out: list[str] = [
+            border,
+            "|" + f" MOTIONPET [COMPACTO] | {tel.mode.value:<11} | Nv.{state.level:02d} ${state.coins:03d} "[: w - 2].ljust(w - 2) + "|",
+            sep,
+        ]
+        if tel.mode != AppModeId.MOTION_PET and tel.mode_banner:
+            for bline in tel.mode_banner.splitlines()[:2]:
+                out.append("| " + bline[:inner].ljust(inner) + " |")
+            out.append(sep)
+
+        for sline in self._select_sprite(state, frame_idx % 2)[1:7]:
+            out.append("| " + sline.strip().center(inner)[:inner].ljust(inner) + " |")
+        out.append("| " + f"HG:{state.hunger:3.0f}% HP:{state.happiness:3.0f}% EN:{state.energy:3.0f}% HL:{state.health:3.0f}% REC:{state.best_launch_distance_m:4.1f}m"[:inner].ljust(inner) + " |")
+        out.append("| " + f"LCD:[{lcd_frame.lines[0]}] [{lcd_frame.lines[1]}]"[:inner].ljust(inner) + " |")
+        out.append(sep)
+        out.append("| " + "[F]Comer [P]Brincar [R]Dormir [M]Modo [S]Save [Q]Sair"[:inner].ljust(inner) + " |")
+        out.append(border)
+        return "\n".join(out)
+
     def _build_right_panel(self, state: PetState, lcd_frame: LcdFramePayload) -> list[str]:
         xp_in_lvl = state.xp % 50
         lines = [
             f"PET: {state.name:<10} NV:{state.level:02d} (XP:{xp_in_lvl:02d}/50)",
             f"ESTAGIO: {state.stage.value:<13} HUMOR: {state.mood.value:<8}",
             f"PERFIL:  {state.personality.value:<13} ANIM:  {state.animation.value:<8}",
-            "",
+            f"MOEDAS:  {state.coins:<5d}      REC.VOO: {state.best_launch_distance_m:5.1f}m",
             f"Fome (0=ok): {_progress_bar(state.hunger, 12)}",
             f"Felicidade : {_progress_bar(state.happiness, 12)}",
             f"Energia    : {_progress_bar(state.energy, 12)}",

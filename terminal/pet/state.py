@@ -56,6 +56,13 @@ def _default_care_counters() -> dict[str, int]:
     }
 
 
+LAUNCH_UPGRADE_IDS: tuple[str, ...] = (
+    "SLINGSHOT_PRO",
+    "AERO_CAPE",
+    "SPRING_BOOTS",
+)
+
+
 @dataclass
 class PetState:
     """Snapshot serializável e completo do estado do MotionPet."""
@@ -76,6 +83,11 @@ class PetState:
     age_ticks: int = 0
     last_action: str = "READY"
     care_counters: dict[str, int] = field(default_factory=_default_care_counters)
+    coins: int = 0
+    best_launch_distance_m: float = 0.0
+    best_launch_score: int = 0
+    total_launches: int = 0
+    unlocked_upgrades: list[str] = field(default_factory=list)
 
     def clamp_all(self) -> None:
         self.hunger = round(clamp_stat(self.hunger), 2)
@@ -86,6 +98,16 @@ class PetState:
         self.level = max(1, int(self.level))
         self.age_ticks = max(0, int(self.age_ticks))
         self.animation_ttl_ticks = max(0, int(self.animation_ttl_ticks))
+        self.coins = max(0, int(self.coins))
+        self.best_launch_distance_m = round(max(0.0, float(self.best_launch_distance_m)), 2)
+        self.best_launch_score = max(0, int(self.best_launch_score))
+        self.total_launches = max(0, int(self.total_launches))
+        deduped: list[str] = []
+        for item in self.unlocked_upgrades:
+            uid = str(item).strip().upper()
+            if uid and uid not in deduped:
+                deduped.append(uid)
+        self.unlocked_upgrades = deduped
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -105,6 +127,11 @@ class PetState:
             "age_ticks": self.age_ticks,
             "last_action": self.last_action,
             "care_counters": dict(self.care_counters),
+            "coins": self.coins,
+            "best_launch_distance_m": round(self.best_launch_distance_m, 2),
+            "best_launch_score": self.best_launch_score,
+            "total_launches": self.total_launches,
+            "unlocked_upgrades": list(self.unlocked_upgrades),
         }
 
     @classmethod
@@ -115,6 +142,9 @@ class PetState:
             for k in counters:
                 if k in raw_counters:
                     counters[k] = max(0, int(raw_counters[k]))
+
+        raw_upgrades = data.get("unlocked_upgrades", [])
+        upgrades = [str(u) for u in raw_upgrades] if isinstance(raw_upgrades, list) else []
 
         state = cls(
             name=str(data.get("name", "Pip"))[:12] or "Pip",
@@ -133,6 +163,11 @@ class PetState:
             age_ticks=int(data.get("age_ticks", 0)),
             last_action=str(data.get("last_action", "READY"))[:20],
             care_counters=counters,
+            coins=int(data.get("coins", 0)),
+            best_launch_distance_m=float(data.get("best_launch_distance_m", 0.0)),
+            best_launch_score=int(data.get("best_launch_score", 0)),
+            total_launches=int(data.get("total_launches", 0)),
+            unlocked_upgrades=upgrades,
         )
         state.clamp_all()
         return state

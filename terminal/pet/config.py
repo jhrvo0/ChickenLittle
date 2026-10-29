@@ -65,6 +65,13 @@ class PetConfig:
 
     rest_xp: int = 5
 
+    # Minijogo Pet Launch (custo moderado e recompensas de bem-estar)
+    launch_energy_cost: float = 8.0
+    launch_min_energy: float = 10.0
+    launch_hunger_delta: float = 4.0
+    launch_happiness_bonus: float = 14.0
+    launch_record_happiness_bonus: float = 22.0
+
     # Evolução e níveis
     xp_per_level: int = 50
     chick_min_level: int = 2

@@ -9,6 +9,7 @@ from ml.classifiers import BaseGestureClassifier, SimulatedGestureClassifier
 from simulator.sensors import SensorSimulator, SensorSource
 from terminal.communication.protocol import (
     AckPayload,
+    AppModeId,
     CommandType,
     ErrorPayload,
     GestureEventPayload,
@@ -54,6 +55,7 @@ class SimulatedEsp32Node:
         self.pet_tick_every_n_samples = max(1, pet_tick_every_n_samples)
 
         self._step_counter = 0
+        self.active_mode: AppModeId = AppModeId.MOTION_PET
         self.last_sensor: SensorFramePayload | None = None
         self.last_lcd: LcdFramePayload = self.lcd_renderer.render(self.engine.state, 0)
         self.save_status: str = "PRONTO"
@@ -94,12 +96,16 @@ class SimulatedEsp32Node:
             self.endpoint.write_line(
                 self.codec.encode(MessageType.GESTURE_EVENT, detected.to_dict(), ts_ms=ts_ms)
             )
-            applied = self.engine.apply_gesture(detected)
-            if applied is not None:
-                state_dirty = True
+            if self.active_mode == AppModeId.MOTION_PET:
+                applied = self.engine.apply_gesture(detected)
+                if applied is not None:
+                    state_dirty = True
 
-        # 4. Tick biológico periódico do pet
-        if self._step_counter % self.pet_tick_every_n_samples == 0:
+        # 4. Tick biológico periódico do pet (pausado durante partida ativa de Pet Launch)
+        if (
+            self.active_mode != AppModeId.PET_LAUNCH
+            and self._step_counter % self.pet_tick_every_n_samples == 0
+        ):
             self.engine.tick(1)
             state_dirty = True
 
@@ -133,8 +139,9 @@ class SimulatedEsp32Node:
                     self.endpoint.write_line(
                         self.codec.encode(MessageType.GESTURE_EVENT, gest.to_dict(), ts_ms=ts_ms)
                     )
-                    if self.engine.apply_gesture(gest) is not None:
-                        dirty = True
+                    if self.active_mode == AppModeId.MOTION_PET:
+                        if self.engine.apply_gesture(gest) is not None:
+                            dirty = True
                     ack = AckPayload(ack_seq=env.seq, status="ok")
                     self.endpoint.write_line(
                         self.codec.encode(MessageType.ACK, ack.to_dict(), ts_ms=ts_ms)
@@ -164,8 +171,30 @@ class SimulatedEsp32Node:
 
         if cmd == CommandType.SWITCH_MODE:
             target = str(cmd_payload.payload.get("mode", "MOTION_PET"))
-            self.engine.state.last_action = f"M:{target[:10]}"
+            try:
+                self.active_mode = AppModeId(target)
+            except ValueError:
+                self.active_mode = AppModeId.MOTION_PET
+            self.engine.state.last_action = f"M:{self.active_mode.value[:10]}"
             return True
+
+        if cmd == CommandType.PLAY and cmd_payload.payload.get("minigame") == "PET_LAUNCH":
+            action = str(cmd_payload.payload.get("action", ""))
+            if action == "MATCH_RESULT":
+                self.engine.apply_launch_match(
+                    distance_m=float(cmd_payload.payload.get("distance_m", 0.0)),
+                    score=int(cmd_payload.payload.get("score", 0)),
+                    coins_earned=int(cmd_payload.payload.get("coins_earned", 0)),
+                    xp_earned=int(cmd_payload.payload.get("xp_earned", 0)),
+                    bounces=int(cmd_payload.payload.get("bounces", 0)),
+                )
+                return True
+            if action == "UNLOCK_UPGRADE":
+                self.engine.unlock_launch_upgrade(
+                    upgrade_id=str(cmd_payload.payload.get("upgrade_id", "")),
+                    cost=int(cmd_payload.payload.get("cost", 0)),
+                )
+                return True
 
         self.engine.apply_command(cmd)
         return True

@@ -4,16 +4,17 @@ Sistema embarcado interativo que combina **ESP32**, **TinyML** (reconhecimento d
 
 ---
 
-## Status do Projeto — Ciclos 1, 2 e 3
+## Status do Projeto — Ciclos 1, 2, 3 e 4
 
 | Subsistema | Status Atual | Observação |
 | :--- | :--- | :--- |
-| **Motor de Estado do Pet (`terminal/pet/` & `firmware/pet/`)** | **Implementado e Testado (Python + C++)** | Paridade 1:1 verificada entre `PetEngine` (Python) e `pet_state.cpp` (C++) + persistência NVS com CRC32 e proteção antidesgaste. |
+| **Motor de Estado do Pet (`terminal/pet/` & `firmware/pet/`)** | **Implementado e Testado (Python + C++)** | Paridade 1:1 verificada entre `PetEngine` (Python) e `pet_state.cpp` (C++), integrado a moedas, recordes, loja de melhorias e persistência NVS/JSON. |
 | **Protocolo Serial JSON Lines v1 (`terminal/communication/` & `firmware/communication/`)** | **Implementado e Testado (Python + C++)** | Envelopes versionados (`v=1`) zero-heap no ESP32 (`sensor_frame`, `gesture_event`, `pet_state`, `lcd_frame`, `ack`, `error`). |
-| **Simulador ESP32 + Sensores (`simulator/`)** | **Implementado e Testado** | Simulação determinística 1D do HC-SR04, TCRT5000, potenciômetro, replay `.jsonl`/`.csv` e classificador intercambiável. |
-| **Espelho LCD 20×4 & Terminal ASCII (`terminal/renderer/` & `firmware/display/`)** | **Implementado e Testado (Python + C++)** | Driver paralelo HD44780 de 4 bits (`RW` em `GND`) com CGRAM customizada, shadow buffer diferencial sem flicker e paridade 1:1 com Python. |
-| **Infraestrutura de Machine Learning (`ml/` & `firmware/gestures/`)** | **Implementada e Testada (`AWAITING_REAL_DATA`)** | Coleta real/simulada, filtro causal, 11 features, estabilizador de eventos e inferência TinyML C++ estática (`mlp_compact`, substituível). |
-| **Modos Auxiliares (`Pet Launch`, `Air Music`, `Air Slides`)** | **Interfaces Modulares + Física Base** | Contratos de eventos prontos; loop dedicado do jogo no Ciclo 4 e integrações finais no Ciclo 6. |
+| **Simulador ESP32 + Sensores (`simulator/`)** | **Implementado e Testado** | Simulação determinística 1D do HC-SR04, TCRT5000, potenciômetro, replay `.jsonl`/`.csv`, isolamento de modos e classificador intercambiável. |
+| **Espelho LCD 20×4 & Terminal ASCII (`terminal/renderer/` & `firmware/display/`)** | **Implementado e Testado (Python + C++)** | Renderização diferencial anti-flicker, modo compacto (60 cols) e 6 estados LCD 20×4 dedicados ao Pet Launch. |
+| **Infraestrutura de Machine Learning (`ml/` & `firmware/gestures/`)** | **Implementada e Testada (`AWAITING_REAL_DATA`)** | Coleta real/simulada, filtro causal, 11 features, estabilizador e inferência TinyML C++ estática (`mlp_compact` 11→16→8→4, 364 parâmetros treináveis). |
+| **Minijogo `Pet Launch` (`terminal/games/`)** | **Jogável Ponta a Ponta (Ciclo 4)** | Loop arcade completo de 10 etapas, física 2D de timestep fixo (`0.02s`), câmera horizontal, estrelas, loja de 3 melhorias e entradas unificadas (Teclado/Sim/TinyML). |
+| **Modos Auxiliares (`Air Music`, `Air Slides`)** | **Interfaces Modulares Prontas** | Contratos de eventos preservados para integração final no Ciclo 6. |
 | **Firmware C++/FreeRTOS (`firmware/`)** | **Implementado e Compilado (`esp32dev`)** | 5 tasks FreeRTOS em `APP_CPU_NUM` (`RAM: 7.2%`, `Flash: 23.2%`). Pinout `PROPOSED_PENDING_BENCH_INSPECTION`; ler `docs/bench_assembly_guide.md`. |
 
 ---
@@ -70,18 +71,25 @@ O runtime principal do Ciclo 1 utiliza apenas a biblioteca padrão do Python (`>
 
 ## Como Executar
 
-### 1. Demonstração Executável Automatizada (Sem Hardware)
-Executa um roteiro determinístico ponta a ponta: inicialização do nó ESP32 simulado, tráfego JSON Lines v1, gesto ultrassônico `APPROACH`, interações de cuidado, evolução de `EGG` para `CHICK`, salvamento, reset e recarregamento do progresso:
+### 1. Demonstrações Executáveis Automatizadas (Sem Hardware)
 
 ```powershell
+# Demonstração do Ciclo 1 (Tamagotchi + gestos + evolução + persistência)
 .\.venv\Scripts\python.exe -m terminal --demo
+
+# Demonstração do Ciclo 4 (Partida completa do Pet Launch em 10 etapas + loja + log de eventos)
+.\.venv\Scripts\python.exe -m terminal --launch-demo
 ```
 
-### 2. Modo Interativo em Tempo Real no Terminal
-Abre o painel ASCII animado com controle instantâneo pelo teclado e espelho do LCD 20×4:
+### 2. Modo Interativo em Tempo Real no Terminal (MotionPet & Pet Launch)
+Abre o painel ASCII animado com renderização diferencial anti-flicker e espelho do LCD 20×4:
 
 ```powershell
-.\.venv\Scripts\python.exe -m terminal
+# Iniciar direto no minijogo Pet Launch (ou omitir --mode para abrir no Tamagotchi)
+.\.venv\Scripts\python.exe -m terminal --mode pet-launch
+
+# Forçar layout compacto de 60 colunas para janelas pequenas
+.\.venv\Scripts\python.exe -m terminal --mode pet-launch --compact
 ```
 
 Opções úteis de linha de comando:
@@ -133,6 +141,11 @@ Opções úteis de linha de comando:
 | `T` | Avançar manualmente um tick biológico |
 | `S` / `L` / `N` | Salvar progresso / Recarregar progresso / Resetar pet |
 | `M` | Alternar entre `MOTION_PET`, `PET_LAUNCH`, `AIR_MUSIC` e `AIR_SLIDES` |
+| `ENTER` ou `E` / Gesto `APPROACH` (`1`) | **Pet Launch:** Selecionar pet / Confirmar etapa / Disparar lançamento |
+| `SPACE` ou `H` / Gesto `HOLD` (`3`) | **Pet Launch:** Carregar barra de força (zona Sweet-Spot: `80%..95%`) |
+| `B` ou `ESC` / Gesto `RETREAT` (`2`) | **Pet Launch:** Cancelar carga ou voltar ao menu anterior |
+| `W` / `Z` (ou `+` / `-` POT) | **Pet Launch:** Ajustar ângulo de lançamento (`20°..70°`) |
+| `U` ou `7` / `8` / `9` | **Pet Launch:** Desbloquear melhorias na loja (`Estilingue Pro`, `Capa Aero`, `Botas de Mola`) |
 | `Q` | Encerrar aplicação com segurança |
 
 ---

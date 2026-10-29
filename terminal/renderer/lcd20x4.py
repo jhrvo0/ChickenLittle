@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from terminal.communication.protocol import LcdFramePayload, SensorFramePayload
 from terminal.pet.state import EvolutionStage, PetAnimation, PetMood, PetState
+
+if TYPE_CHECKING:
+    from terminal.games.pet_launch import LaunchResult
+    from terminal.games.physics import LaunchPhysicsState
 
 _STAGE_SHORT: dict[EvolutionStage, str] = {
     EvolutionStage.EGG: "EGG",
@@ -78,6 +84,96 @@ class Lcd20x4Renderer:
         else:
             dist_txt = "D:---cm "
         raw_l3 = f"{dist_txt}{state.last_action[:12]:<12}"
+
+        lines = (
+            _sanitize_ascii(raw_l0, 20),
+            _sanitize_ascii(raw_l1, 20),
+            _sanitize_ascii(raw_l2, 20),
+            _sanitize_ascii(raw_l3, 20),
+        )
+        return LcdFramePayload(lines=lines)
+
+    def render_launch(
+        self,
+        state: PetState,
+        phase: str,
+        angle_deg: float = 45.0,
+        charge_norm: float = 0.0,
+        phys: LaunchPhysicsState | None = None,
+        last_result: LaunchResult | None = None,
+        best_distance_m: float = 0.0,
+        sweet_spot: bool = False,
+        frame_idx: int = 0,
+    ) -> LcdFramePayload:
+        """Renderiza os 6 estados dedicados do Pet Launch estritamente em 20x4 ASCII."""
+        parity = frame_idx % 2
+        face = self._select_face(state, parity)
+        stage_txt = _STAGE_SHORT.get(state.stage, "PET")
+        en = min(max(int(round(state.energy)), 0), 100)
+        rec = max(best_distance_m, state.best_launch_distance_m)
+        ph = str(phase).upper()
+
+        if ph in ("MENU", "SELECT_PET", "PREP"):
+            # Estado 1: Preparação (Menu / Seleção / Rampa)
+            hdr = "MENU" if ph == "MENU" else ("PET OK" if ph == "SELECT_PET" else "PREPARE")
+            raw_l0 = f"PET LAUNCH: {hdr:<8}"
+            raw_l1 = f"{state.name[:7]:<7} {stage_txt:3} EN:{en:3d}%"
+            raw_l2 = f"ANG:{angle_deg:4.1f}d REC:{min(999.0, rec):4.0f}m"
+            act_hint = "[APP]JOGAR [U]LOJA  " if ph == "MENU" else "[HOLD]CARR [APP]OK  "
+            raw_l3 = act_hint
+
+        elif ph == "CHARGING":
+            # Estado 2: Carregamento de força
+            clamped = max(0.0, min(1.0, float(charge_norm)))
+            filled = int(round(clamped * 8))
+            bar8 = ("#" * filled) + ("-" * (8 - filled))
+            pct = int(round(clamped * 100.0))
+            tag = "*" if sweet_spot else " "
+            raw_l0 = "PET LAUNCH: CARGA   "
+            raw_l1 = f"PWR:[{bar8}]{tag}{pct:3d}%"
+            raw_l2 = f"ANG:{angle_deg:4.1f}d  {face:6}"
+            raw_l3 = "APP:LANCA  RET:CANC "
+
+        elif ph == "LAUNCHING":
+            # Estado 3: Lançamento / Disparo na rampa
+            v0 = phys.initial_speed_mps if phys is not None else 0.0
+            raw_l0 = "PET LAUNCH: DISPARO!"
+            raw_l1 = ">> LANCAMENTO! >>   "
+            raw_l2 = f"V0:{min(99.9, v0):4.1f}m/s A:{angle_deg:4.1f}d"
+            raw_l3 = f"{state.name[:7]:<7} DECOLANDO!  "
+
+        elif ph == "FLIGHT":
+            # Estado 4: Voo balístico / Quiques / Rolagem
+            x_m = min(999.9, phys.x_m) if phys is not None else 0.0
+            y_m = min(999.9, phys.y_m) if phys is not None else 0.0
+            spd = min(99.9, phys.speed_mps) if phys is not None else 0.0
+            bnc = min(9, phys.bounces) if phys is not None else 0
+            st_cnt = min(9, len(phys.collected_stars)) if phys is not None else 0
+            mphase = phys.motion_phase.value[:8] if phys is not None else "AIRBORNE"
+            raw_l0 = "PET LAUNCH: EM VOO  "
+            raw_l1 = f"DIST:{x_m:5.1f}m B:{bnc:1d} *{st_cnt:1d}"
+            raw_l2 = f"ALT :{y_m:5.1f}m V:{spd:4.1f}"
+            raw_l3 = f"FASE:{mphase:<8} {face:6}"
+
+        elif ph == "RESULT":
+            # Estado 5: Resultado da partida e recompensas
+            dist = min(999.9, last_result.distance_m) if last_result is not None else 0.0
+            pts = min(99999, last_result.score) if last_result is not None else 0
+            coins = min(99, last_result.coins_reward) if last_result is not None else 0
+            xp = min(99, last_result.xp_reward) if last_result is not None else 0
+            is_rec = bool(last_result.is_new_record) if last_result is not None else False
+            raw_l0 = "RESULTADO *RECORDE!*" if is_rec else "PET LAUNCH: PLACAR  "
+            raw_l1 = f"D:{dist:5.1f}m PTS:{pts:5d}"
+            raw_l2 = f"MOEDAS:+{coins:2d}  XP:+{xp:2d}"
+            raw_l3 = f"{face:6} [APP] MENU   "
+
+        else:
+            # Estado 6: Retorno ao pet (RETURN_TO_PET)
+            coins_tot = min(9999, state.coins)
+            raw_l0 = "RETORNO AO MOTIONPET"
+            raw_l1 = f"{state.name[:7]:<7} MOEDAS:{coins_tot:4d}"
+            raw_l2 = f"REC:{min(999.9, rec):5.1f}m EN:{en:3d}%"
+            raw_l3 = f"{face:6} ATE A PROXIMA"
 
         lines = (
             _sanitize_ascii(raw_l0, 20),

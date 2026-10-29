@@ -1,4 +1,4 @@
-"""Aplicação principal de terminal do MotionPet (interativa em tempo real e modo demonstração)."""
+"""Aplicação principal de terminal do MotionPet (interativa em tempo real e modos demonstração)."""
 
 from __future__ import annotations
 
@@ -30,7 +30,12 @@ from terminal.communication.transport import (
     SerialEndpoint,
     create_virtual_serial_pair,
 )
-from terminal.games.pet_launch import PetLaunchMode
+from terminal.games.launch_renderer import (
+    DifferentialTerminalWriter,
+    detect_terminal_dimensions,
+    should_use_compact_layout,
+)
+from terminal.games.pet_launch import LaunchPhase, PetLaunchMode
 from terminal.modes.air_music import AirMusicMode
 from terminal.modes.air_slides import AirSlidesMode
 from terminal.modes.base import BaseAppMode
@@ -53,9 +58,11 @@ class TerminalHostClient:
         self,
         endpoint: SerialEndpoint,
         transport_label: str = "VIRTUAL_SERIAL_JSONL_V1",
+        compact_mode: bool = False,
     ) -> None:
         self.endpoint = endpoint
         self.transport_label = transport_label
+        self.compact_mode = compact_mode
         self.codec = ProtocolCodec()
         self.terminal_renderer = TerminalAsciiRenderer()
         self._fallback_lcd = Lcd20x4Renderer()
@@ -71,13 +78,19 @@ class TerminalHostClient:
         self.tx_packets = 0
         self.rx_packets = 0
         self.frame_idx = 0
+        self._return_to_pet_lcd_ttl = 0
 
         self.active_mode: AppModeId = AppModeId.MOTION_PET
+        self._launch_mode = PetLaunchMode(animated_flight=True)
         self.aux_modes: dict[AppModeId, BaseAppMode] = {
-            AppModeId.PET_LAUNCH: PetLaunchMode(),
+            AppModeId.PET_LAUNCH: self._launch_mode,
             AppModeId.AIR_MUSIC: AirMusicMode(),
             AppModeId.AIR_SLIDES: AirSlidesMode(),
         }
+
+    @property
+    def pet_launch_mode(self) -> PetLaunchMode:
+        return self._launch_mode
 
     def send_command(self, command: CommandType, payload: dict[str, object] | None = None) -> None:
         msg = PetCommandPayload(command=command, payload=dict(payload or {}))
@@ -101,11 +114,56 @@ class TerminalHostClient:
         self.endpoint.write_line(line)
         self.tx_packets += 1
 
-    def cycle_mode(self) -> AppModeId:
-        curr_idx = _MODE_ROTATION.index(self.active_mode)
-        self.active_mode = _MODE_ROTATION[(curr_idx + 1) % len(_MODE_ROTATION)]
+    def set_mode(self, target_mode: AppModeId) -> AppModeId:
+        prev_mode = self.active_mode
+        if prev_mode == AppModeId.PET_LAUNCH and target_mode != AppModeId.PET_LAUNCH:
+            self._launch_mode.on_exit_mode(self.pet_state)
+            self.lcd_frame = self._fallback_lcd.render_launch(
+                state=self.pet_state,
+                phase=LaunchPhase.RETURN_TO_PET.value,
+                best_distance_m=self._launch_mode.best_distance_m,
+                frame_idx=self.frame_idx,
+            )
+            self._return_to_pet_lcd_ttl = 2
+
+        self.active_mode = target_mode
+        if target_mode == AppModeId.PET_LAUNCH and prev_mode != AppModeId.PET_LAUNCH:
+            self._launch_mode.on_enter_mode(self.pet_state)
+            self._sync_launch_lcd()
+
         self.send_command(CommandType.SWITCH_MODE, {"mode": self.active_mode.value})
         return self.active_mode
+
+    def cycle_mode(self) -> AppModeId:
+        curr_idx = _MODE_ROTATION.index(self.active_mode)
+        next_mode = _MODE_ROTATION[(curr_idx + 1) % len(_MODE_ROTATION)]
+        return self.set_mode(next_mode)
+
+    def _sync_launch_lcd(self) -> None:
+        g = self._launch_mode.game
+        self.lcd_frame = self._fallback_lcd.render_launch(
+            state=self.pet_state,
+            phase=g.phase.value,
+            angle_deg=g.angle_deg,
+            charge_norm=g.charge_norm,
+            phys=g.physics.state,
+            last_result=g.last_result,
+            best_distance_m=g.best_distance_m,
+            sweet_spot=g.is_in_sweet_spot(),
+            frame_idx=self.frame_idx,
+        )
+
+    def _flush_launch_commands(self) -> None:
+        for cmd_payload in self._launch_mode.pop_pending_pet_commands():
+            self.send_command(CommandType.PLAY, cmd_payload)
+
+    def update_game(self, dt_s: float) -> None:
+        """Avança a simulação temporal do minijogo ativo (desacoplada do FPS do terminal)."""
+        if self.active_mode == AppModeId.PET_LAUNCH:
+            self._launch_mode.bind_pet_state(self.pet_state)
+            self._launch_mode.update(dt_s)
+            self._flush_launch_commands()
+            self._sync_launch_lcd()
 
     def poll_serial(self) -> int:
         """Consome todas as mensagens pendentes vindas do dispositivo serial."""
@@ -121,15 +179,30 @@ class TerminalHostClient:
 
             if env.type == MessageType.PET_STATE:
                 self.pet_state = PetState.from_dict(env.data)
+                self._launch_mode.bind_pet_state(self.pet_state)
+                if self.active_mode == AppModeId.PET_LAUNCH:
+                    self._sync_launch_lcd()
             elif env.type == MessageType.LCD_FRAME:
-                self.lcd_frame = LcdFramePayload.from_dict(env.data)
+                if self.active_mode != AppModeId.PET_LAUNCH and self._return_to_pet_lcd_ttl <= 0:
+                    self.lcd_frame = LcdFramePayload.from_dict(env.data)
             elif env.type == MessageType.SENSOR_FRAME:
                 self.last_sensor = SensorFramePayload.from_dict(env.data)
                 if self.active_mode in self.aux_modes:
                     self.aux_modes[self.active_mode].on_sensor_frame(self.last_sensor)
+                    if self.active_mode == AppModeId.PET_LAUNCH:
+                        self._sync_launch_lcd()
             elif env.type == MessageType.GESTURE_EVENT:
                 self.last_gesture = GestureEventPayload.from_dict(env.data)
-                if self.active_mode in self.aux_modes:
+                if self.active_mode == AppModeId.PET_LAUNCH:
+                    self._launch_mode.bind_pet_state(self.pet_state)
+                    self._launch_mode.on_gesture_event(
+                        self.last_gesture,
+                        seq_id=env.seq,
+                        ts_ms=env.ts_ms,
+                    )
+                    self._flush_launch_commands()
+                    self._sync_launch_lcd()
+                elif self.active_mode in self.aux_modes:
                     mode_obj = self.aux_modes[self.active_mode]
                     if isinstance(mode_obj, AirSlidesMode):
                         mode_obj.on_gesture_event(self.last_gesture, ts_ms=env.ts_ms)
@@ -146,60 +219,100 @@ class TerminalHostClient:
         sensor_sim: SensorSimulator | None = None,
     ) -> bool:
         """Processa uma tecla de controle. Retorna `False` quando o usuário solicita sair."""
+        if not key:
+            return True
+
         k = key.lower()
         if k == "q":
             return False
         if k == "f":
             self.send_command(CommandType.FEED)
-        elif k == "p":
+            return True
+        if k == "p":
             self.send_command(CommandType.PLAY)
-        elif k == "r":
+            return True
+        if k == "r":
             self.send_command(CommandType.REST)
-        elif k == "c":
+            return True
+        if k == "c":
             self.send_command(CommandType.HEAL)
-        elif k == "i":
+            return True
+        if k == "i":
             self.send_command(CommandType.INTERACT)
-        elif k == "t":
+            return True
+        if k == "t":
             self.send_command(CommandType.TICK)
-        elif k == "s":
+            return True
+        if k == "s":
             self.send_command(CommandType.SAVE)
-        elif k == "l":
+            return True
+        if k == "l":
             self.send_command(CommandType.LOAD)
-        elif k == "n":
+            return True
+        if k == "n":
             self.send_command(CommandType.RESET)
-        elif k == "m":
+            return True
+        if k == "m":
             self.cycle_mode()
-        elif k == "1":
+            return True
+        if k == "1":
             if sensor_sim is not None:
                 sensor_sim.queue_gesture_profile(GestureType.APPROACH)
             else:
                 self.send_simulated_gesture(GestureType.APPROACH)
-        elif k == "2":
+            return True
+        if k == "2":
             if sensor_sim is not None:
                 sensor_sim.queue_gesture_profile(GestureType.RETREAT)
             else:
                 self.send_simulated_gesture(GestureType.RETREAT)
-        elif k == "3":
+            return True
+        if k == "3":
             if sensor_sim is not None:
                 sensor_sim.queue_gesture_profile(GestureType.HOLD)
             else:
                 self.send_simulated_gesture(GestureType.HOLD)
-        elif k == "4":
+            return True
+        if k == "4":
             if sensor_sim is not None:
                 sensor_sim.queue_gesture_profile(GestureType.NEUTRAL)
             else:
                 self.send_simulated_gesture(GestureType.NEUTRAL)
-        elif k == "+" and sensor_sim is not None:
+            return True
+        if k == "+" and sensor_sim is not None:
             sensor_sim.adjust_potentiometer(0.1)
-        elif k == "-" and sensor_sim is not None:
+            return True
+        if k == "-" and sensor_sim is not None:
             sensor_sim.adjust_potentiometer(-0.1)
+            return True
+
+        # Atalhos dedicados do Pet Launch (ENTER, SPACE, ESC, e/h/v/b/w/z/u/7/8/9)
+        if self.active_mode == AppModeId.PET_LAUNCH:
+            self._launch_mode.bind_pet_state(self.pet_state)
+            self._launch_mode.on_key_input(key)
+            self._flush_launch_commands()
+            self._sync_launch_lcd()
+
         return True
 
-    def render_frame(self) -> str:
+    def render_frame(
+        self,
+        term_cols: int | None = None,
+        term_rows: int | None = None,
+    ) -> str:
         self.frame_idx += 1
         banner = ""
         if self.active_mode in self.aux_modes:
             banner = self.aux_modes[self.active_mode].status_banner()
+
+        if self.active_mode == AppModeId.PET_LAUNCH:
+            self._sync_launch_lcd()
+
+        use_compact = should_use_compact_layout(
+            term_cols=term_cols,
+            term_rows=term_rows,
+            force_compact=self.compact_mode,
+        )
 
         telemetry = HudTelemetry(
             mode=self.active_mode,
@@ -212,12 +325,21 @@ class TerminalHostClient:
             mode_banner=banner,
             classifier_summary=self.classifier_summary,
         )
-        return self.terminal_renderer.render(
+        rendered = self.terminal_renderer.render(
             state=self.pet_state,
             lcd_frame=self.lcd_frame,
             frame_idx=self.frame_idx,
             telemetry=telemetry,
+            compact=use_compact,
+            launch_game=(
+                self._launch_mode.game if self.active_mode == AppModeId.PET_LAUNCH else None
+            ),
         )
+
+        if self._return_to_pet_lcd_ttl > 0:
+            self._return_to_pet_lcd_ttl -= 1
+
+        return rendered
 
 
 def run_demo(
@@ -227,7 +349,7 @@ def run_demo(
     classifier_kind: str = "sim",
     model_path: str | Path | None = "data/models/best_model.joblib",
 ) -> int:
-    """Executa uma demonstração determinística ponta a ponta sem hardware físico."""
+    """Executa a demonstração determinística ponta a ponta do Ciclo 1 sem hardware físico."""
     stream = out or sys.stdout
     host_ep, device_ep, wire_log = create_virtual_serial_pair()
     sensor_sim = SensorSimulator(seed=7, dropout_prob=0.0)
@@ -295,6 +417,112 @@ def run_demo(
     return 0
 
 
+def run_pet_launch_demo(
+    save_path: str | Path = "data/saves/demo_pet_launch.save.json",
+    pet_name: str = "Pip",
+    out: TextIO | None = None,
+    classifier_kind: str = "sim",
+    model_path: str | Path | None = "data/models/best_model.joblib",
+    compact: bool = False,
+) -> int:
+    """Executa demonstração automatizada completa do Pet Launch (Ciclo 4) registrando eventos."""
+    stream = out or sys.stdout
+    host_ep, device_ep, wire_log = create_virtual_serial_pair()
+    sensor_sim = SensorSimulator(seed=21, dropout_prob=0.0)
+    sensor_sim.set_potentiometer(0.46)  # ~43 graus calibrados
+    clf: BaseGestureClassifier = create_gesture_classifier(
+        kind=classifier_kind,
+        model_path=model_path,
+    )
+
+    sim_node = SimulatedEsp32Node(
+        endpoint=device_ep,
+        sensor_source=sensor_sim,
+        initial_state=PetState(name=pet_name, coins=10),
+        save_path=save_path,
+        pet_tick_every_n_samples=8,
+        classifier=clf,
+    )
+    client = TerminalHostClient(host_ep, compact_mode=compact)
+
+    sim_node.boot(auto_load=False)
+    client.poll_serial()
+    client.classifier_summary = clf.get_diagnostics().format_hud_line()
+
+    def pump_bus() -> None:
+        sim_node.step()
+        client.poll_serial()
+
+    stream.write("=== MOTIONPET CICLO 4 -- DEMONSTRACAO AUTOMATIZADA PET LAUNCH ===\n\n")
+
+    # Etapa 1: Entrar no modo Pet Launch
+    client.set_mode(AppModeId.PET_LAUNCH)
+    pump_bus()
+
+    # Etapa 2 & 3: Selecionar pet e ir para rampa via gesto prioritário APPROACH
+    client.send_simulated_gesture(GestureType.APPROACH)
+    pump_bus()
+    client.send_simulated_gesture(GestureType.APPROACH)
+    pump_bus()
+
+    # Etapa 4: Carregar força 4x com gesto HOLD até 88% (Sweet-Spot!)
+    for _ in range(4):
+        client.send_simulated_gesture(GestureType.HOLD)
+        pump_bus()
+
+    stream.write(">>> [QUADRO 1] Barra de Forca carregada via Gesto HOLD (Sweet-Spot 88%):\n")
+    stream.write(client.render_frame() + "\n\n")
+
+    # Etapa 5: Disparar o lançamento com gesto prioritário APPROACH (sem depender de IMPULSE)
+    client.send_simulated_gesture(GestureType.APPROACH)
+    pump_bus()
+
+    # Etapas 6 & 7: Acompanhar trajetória balística animada (timestep fixo 0.02s)
+    mid_flight_frame: str | None = None
+    sim_steps = 0
+    while client.pet_launch_mode.phase in (LaunchPhase.LAUNCHING, LaunchPhase.FLIGHT):
+        client.update_game(0.08)
+        sim_steps += 1
+        if mid_flight_frame is None and client.pet_launch_mode.physics_state.y_m >= 5.0:
+            mid_flight_frame = client.render_frame()
+        if sim_steps > 500:
+            break
+
+    # Sincroniza recompensas (Etapas 8 & 9) no PetEngine autoritativo via JSON Lines v1
+    pump_bus()
+
+    if mid_flight_frame is not None:
+        stream.write(">>> [QUADRO 2] Pet em pleno voo balistico com camera horizontal:\n")
+        stream.write(mid_flight_frame + "\n\n")
+
+    stream.write(">>> [QUADRO 3] Placar Final, Recompensas e Novo Recorde integrados ao PetState:\n")
+    stream.write(client.render_frame() + "\n\n")
+
+    # Etapa 10: Retornar ao Menu, desbloquear melhoria na loja e persistir estado
+    client.send_simulated_gesture(GestureType.APPROACH)
+    pump_bus()
+    client.handle_keypress("u")  # Compra Estilingue Pro (15 moedas)
+    pump_bus()
+    client.send_command(CommandType.SAVE)
+    pump_bus()
+    client.save_status = sim_node.save_status
+
+    game = client.pet_launch_mode.game
+    res = game.last_result
+    stream.write(">>> [LOG DE EVENTOS DA PARTIDA (10 ETAPAS)]:\n")
+    for idx, ev in enumerate(game.event_log, start=1):
+        stream.write(f"  {idx:02d}. {ev}\n")
+
+    if res is not None:
+        stream.write(
+            f"\nResumo da Partida: Dist={res.distance_m:.2f}m | AltMax={res.max_height_m:.2f}m | "
+            f"Quiques={res.bounces} | Estrelas={res.stars_collected} | Score={res.score} | "
+            f"Moedas Pet={client.pet_state.coins} | Upgrades={client.pet_state.unlocked_upgrades} | "
+            f"Frames Serial={len(wire_log)}.\n"
+        )
+    return 0
+
+
 def _read_nonblocking_windows_key() -> str | None:
     try:
         import msvcrt
@@ -319,11 +547,13 @@ def run_interactive(
     baudrate: int = 115200,
     replay_path: str | Path | None = None,
     max_frames: int | None = None,
-    refresh_sec: float = 0.25,
+    refresh_sec: float = 0.20,
     classifier_kind: str = "sim",
     model_path: str | Path | None = "data/models/best_model.joblib",
+    initial_mode: AppModeId = AppModeId.MOTION_PET,
+    compact: bool = False,
 ) -> int:
-    """Inicia a interface ASCII animada em tempo real no terminal do notebook."""
+    """Inicia a interface ASCII animada em tempo real (com renderização diferencial anti-flicker)."""
     sim_node: SimulatedEsp32Node | None = None
     sensor_sim: SensorSimulator | None = None
     active_clf: BaseGestureClassifier = create_gesture_classifier(
@@ -354,61 +584,96 @@ def run_interactive(
         )
         sim_node.boot(auto_load=True)
 
-    client = TerminalHostClient(endpoint=host_ep, transport_label=transport_label)
+    client = TerminalHostClient(
+        endpoint=host_ep,
+        transport_label=transport_label,
+        compact_mode=compact,
+    )
     client.poll_serial()
+    if initial_mode != AppModeId.MOTION_PET:
+        client.set_mode(initial_mode)
+        if sim_node is not None:
+            sim_node.step()
+            client.poll_serial()
+
     client.classifier_summary = active_clf.get_diagnostics().format_hud_line()
     if sim_node is not None:
         client.save_status = sim_node.save_status
 
     is_tty = sys.stdin.isatty() and sys.stdout.isatty()
     if is_tty and os.name == "nt":
-        # Habilita sequências ANSI no console do Windows
+        # Habilita sequências ANSI VT100 no console do Windows
         os.system("")
 
+    diff_writer = DifferentialTerminalWriter(sys.stdout, is_tty=is_tty)
     frames = 0
+    last_loop_ts = time.monotonic()
+    sensor_accum_s = 0.0
+    sensor_period_s = 0.08
+
     try:
         if is_tty:
-            sys.stdout.write("\x1b[2J\x1b[?25l")
+            sys.stdout.write("\x1b[2J\x1b[H\x1b[?25l")
             sys.stdout.flush()
 
         while True:
-            if sim_node is not None:
+            now = time.monotonic()
+            dt_s = max(0.0, min(0.25, now - last_loop_ts))
+            last_loop_ts = now
+            sensor_accum_s += dt_s
+
+            # Avança nó simulado em cadência realista de sensores (ou no 1º frame)
+            if sim_node is not None and (frames == 0 or sensor_accum_s >= sensor_period_s):
+                sensor_accum_s = 0.0
                 sim_node.step()
+
             client.poll_serial()
+            client.update_game(dt_s if frames > 0 else 0.02)
+            client.poll_serial()
+
             client.classifier_summary = active_clf.get_diagnostics().format_hud_line()
             if sim_node is not None:
                 client.save_status = sim_node.save_status
 
-            rendered = client.render_frame()
-            if is_tty:
-                sys.stdout.write("\x1b[H" + rendered + "\n")
-                sys.stdout.flush()
-            else:
-                sys.stdout.write(rendered + "\n")
-                sys.stdout.flush()
+            t_cols, t_rows = detect_terminal_dimensions() if is_tty else (86, 34)
+            rendered = client.render_frame(term_cols=t_cols, term_rows=t_rows)
+            diff_writer.write_frame(rendered)
 
             frames += 1
             if max_frames is not None and frames >= max_frames:
                 break
 
+            # Taxa de atualização mais fluida durante o voo balístico, sem alterar fixed_dt=0.02s
+            in_fast_flight = (
+                client.active_mode == AppModeId.PET_LAUNCH
+                and client.pet_launch_mode.phase in (LaunchPhase.LAUNCHING, LaunchPhase.FLIGHT)
+            )
+            frame_wait = 0.06 if in_fast_flight else refresh_sec
+
             if is_tty and os.name == "nt":
-                deadline = time.monotonic() + refresh_sec
+                deadline = time.monotonic() + frame_wait
                 keep_running = True
                 while time.monotonic() < deadline:
                     key = _read_nonblocking_windows_key()
                     if key is not None:
                         keep_running = client.handle_keypress(key, sensor_sim=sensor_sim)
+                        if sim_node is not None:
+                            sim_node.step()
+                            client.poll_serial()
                         break
-                    time.sleep(0.02)
+                    time.sleep(0.015)
                 if not keep_running:
                     break
             elif is_tty:
-                # Fallback POSIX simples por linha
-                cmd_str = input("\nComando [f/p/r/c/i/1-4/s/l/m/n/q]: ").strip()
-                if cmd_str and not client.handle_keypress(cmd_str[0], sensor_sim=sensor_sim):
+                cmd_str = input("\nComando [enter/space/b/u/f/p/r/1-4/m/s/q]: ")
+                if cmd_str == "":
+                    key_to_send = "\r"
+                else:
+                    key_to_send = cmd_str[0]
+                if not client.handle_keypress(key_to_send, sensor_sim=sensor_sim):
                     break
             else:
-                time.sleep(min(refresh_sec, 0.05))
+                time.sleep(min(frame_wait, 0.05))
     except KeyboardInterrupt:
         pass
     finally:
@@ -423,12 +688,28 @@ def run_interactive(
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="motionpet",
-        description="MotionPet — Terminal ASCII, Simulador ESP32/Sensores e Espelho LCD 20x4",
+        description="MotionPet — Terminal ASCII, Pet Launch, Simulador ESP32/TinyML e LCD 20x4",
     )
     parser.add_argument(
         "--demo",
         action="store_true",
-        help="Executa demonstracao automatizada ponta a ponta sem hardware e encerra.",
+        help="Executa demonstracao automatizada do Ciclo 1 (Tamagotchi + Serial) e encerra.",
+    )
+    parser.add_argument(
+        "--launch-demo",
+        action="store_true",
+        help="Executa demonstracao automatizada completa do Pet Launch (Ciclo 4) e encerra.",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=("motion-pet", "pet-launch"),
+        default="motion-pet",
+        help="Modo inicial ao abrir a interface interativa (padrao: motion-pet).",
+    )
+    parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="Forca layout compacto de 60 colunas para terminais estreitos.",
     )
     parser.add_argument(
         "--name",
@@ -485,6 +766,17 @@ def main(argv: list[str] | None = None) -> int:
             classifier_kind=args.classifier,
             model_path=args.model_path,
         )
+    if args.launch_demo:
+        return run_pet_launch_demo(
+            save_path=args.save_path,
+            pet_name=args.name,
+            classifier_kind=args.classifier,
+            model_path=args.model_path,
+            compact=args.compact,
+        )
+    start_mode = (
+        AppModeId.PET_LAUNCH if args.mode == "pet-launch" else AppModeId.MOTION_PET
+    )
     return run_interactive(
         save_path=args.save_path,
         pet_name=args.name,
@@ -494,6 +786,8 @@ def main(argv: list[str] | None = None) -> int:
         max_frames=args.frames,
         classifier_kind=args.classifier,
         model_path=args.model_path,
+        initial_mode=start_mode,
+        compact=args.compact,
     )
 
 
