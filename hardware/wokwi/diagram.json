@@ -25,7 +25,7 @@
       "top": -40,
       "left": 260,
       "attrs": {
-        "value": "2200"
+        "value": "1000"
       }
     },
     {
@@ -34,7 +34,16 @@
       "top": 30,
       "left": 260,
       "attrs": {
-        "value": "3300"
+        "value": "1000"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": 100,
+      "left": 260,
+      "attrs": {
+        "value": "300"
       }
     },
     {
@@ -66,7 +75,7 @@
     ],
     [
       "esp:GND.1",
-      "r2:2",
+      "r3:2",
       "black",
       []
     ],
@@ -113,6 +122,12 @@
       []
     ],
     [
+      "r2:2",
+      "r3:1",
+      "blue",
+      []
+    ],
+    [
       "esp:VP",
       "pot:SIG",
       "purple",
@@ -120,5 +135,5 @@
     ]
   ],
   "dependencies": {},
-  "_comment": "GERADO por python -m hardware.build. TCRT5000 nao possui modelo Wokwi e foi omitido. O divisor 2,2k/3,3k existe no diagrama mas o Wokwi NAO o valida analogicamente."
+  "_comment": "GERADO por python -m hardware.build. TCRT5000 nao possui modelo Wokwi e foi omitido. O divisor 1k / (1k+300) existe no diagrama mas o Wokwi NAO o valida analogicamente."
 }

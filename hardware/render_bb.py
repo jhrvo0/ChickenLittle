@@ -299,9 +299,15 @@ def draw_resistor(f: Frame, lay: Layout, comp: dict, parts: list[str], new: bool
     for hx, hy in ((xa, ya), (xb, yb)):
         parts.append(f'<circle cx="{hx:.1f}" cy="{hy:.1f}" r="3.4" fill="#cfd3d8" stroke="#555" stroke-width="0.8"/>')
     label = f'{ref} {model.fmt_ohms(comp["ohms"])}'
-    ly0 = my - 22 if comp.get("label_pos") == "above" else my + 8
-    parts.append(f'<g class="reslabel"><rect x="{mx - 30:.1f}" y="{ly0:.1f}" width="60" height="13" rx="3" fill="#fffbe6" stroke="#8a7440" stroke-width="0.8"/>'
-                 + _text(mx, ly0 + 9.6, label, 8.4, "#3a2f10", weight="bold") + "</g>")
+    pos = comp.get("label_pos")
+    if pos == "right":                       # a direita da perna mais a direita (fora do corpo, longe de outros resistores)
+        ex, ey = (xa, ya) if xa >= xb else (xb, yb)
+        lx0, ly0 = ex + 9.0, ey - 6.5
+    else:
+        lx0, ly0 = mx - 30, (my - 22 if pos == "above" else my + 8)
+    TAKEN_TAGS.append((lx0, ly0, lx0 + 60, ly0 + 13))
+    parts.append(f'<g class="reslabel"><rect x="{lx0:.1f}" y="{ly0:.1f}" width="60" height="13" rx="3" fill="#fffbe6" stroke="#8a7440" stroke-width="0.8"/>'
+                 + _text(lx0 + 30, ly0 + 9.6, label, 8.4, "#3a2f10", weight="bold") + "</g>")
     parts.append("</g>")
 
 
@@ -404,7 +410,7 @@ def _bounds_pitch(lay: Layout, scene: Scene) -> tuple[float, float, float, float
     for mk in scene.markers:
         col = parse_hole(mk["hole"])[0]
         xs.append(col + (50 + 6.6 * len(mk["text"])) / K)
-        ys.append(model.ROW_Y[parse_hole(mk["hole"])[1]] - 4.5)
+        ys.append(model.ROW_Y[parse_hole(mk["hole"])[1]] + (70 / K if mk.get("dir") == "up" else -4.5))
     for w in lay.wires_at(scene.stage):
         if w["id"] in scene.exclude_wires or (scene.include_refs is not None and w["id"] not in scene.include_refs):
             continue
@@ -504,10 +510,25 @@ def render_scene(lay: Layout, scene: Scene) -> tuple[str, dict]:
         nx2, ny2 = f.hole(f"{node_col}J")
         body.append(f'<rect x="{nx - 12:.1f}" y="{ny2 - 12:.1f}" width="24" height="{ny - ny2 + 24:.1f}" rx="6" fill="#3ecf6b" fill-opacity="0.16" stroke="#1f9d46" stroke-width="1.2" stroke-dasharray="4 3"/>')
         cy_ch = f.px(0, 5.5)[1]
+        top = [c for c in comps if c.get("role") == "divider_top"]
+        bot = [c for c in comps if str(c.get("role", "")).startswith("divider_bottom")]
+        vnode = model.divider_vout(5.0, sum(c["ohms"] for c in top), sum(c["ohms"] for c in bot)) if top and bot else 3.0
         body.append(_text(zx, cy_ch - 2, "ECHO", 8.6, "#b02020", weight="bold"))
         body.append(_text(zx, cy_ch + 8, "5 V", 8.6, "#b02020", weight="bold"))
         body.append(_text(nx, cy_ch - 2, "NÓ", 8.6, "#157a35", weight="bold"))
-        body.append(_text(nx, cy_ch + 8, "≤3,3 V", 8.6, "#157a35", weight="bold"))
+        body.append(_text(nx, cy_ch + 8, f"≈{vnode:.1f} V".replace(".", ","), 8.6, "#157a35", weight="bold"))
+        # junção entre resistores do ramo de baixo (coluna compartilhada por pernas de dois resistores)
+        legs_cols = {}
+        for c in bot:
+            for h_ in c["legs"]:
+                legs_cols.setdefault(parse_hole(h_)[0], []).append(c["ref"])
+        for mc, refs in sorted(legs_cols.items()):
+            if len(refs) == 2:
+                mx0, my0 = f.hole(f"{mc}F")
+                mx1, my1 = f.hole(f"{mc}J")
+                body.append(f'<rect x="{mx0 - 12:.1f}" y="{my1 - 12:.1f}" width="24" height="{my0 - my1 + 24:.1f}" rx="6" fill="#e8c34a" fill-opacity="0.18" stroke="#b08a10" stroke-width="1.2" stroke-dasharray="4 3"/>')
+                body.append(_text(mx0, cy_ch - 2, "MEIO", 8.6, "#7a5a00", weight="bold"))
+                body.append(_text(mx0, cy_ch + 8, f"{'/'.join(refs)}", 8.0, "#7a5a00", weight="bold"))
         body.append("</g>")
         _ = ze
     for comp in comps:
@@ -529,10 +550,12 @@ def render_scene(lay: Layout, scene: Scene) -> tuple[str, dict]:
     for mk in scene.markers:
         mx_, my_ = f.hole(mk["hole"])
         tw_ = 6.6 * len(mk["text"]) + 14
+        up = mk.get("dir") == "up"                      # chamada para cima (livra os resistores quando o furo esta na fileira J)
+        dy_line, dy_box, dy_txt = (-11, -64, -50) if up else (11, 44, 58)
         body.append(f'<g class="marker"{gx(mk.get("id", ""))}><circle cx="{mx_:.1f}" cy="{my_:.1f}" r="11" fill="none" stroke="#e0007a" stroke-width="3"/>'
-                    f'<line x1="{mx_:.1f}" y1="{my_ + 11:.1f}" x2="{mx_ + 24:.1f}" y2="{my_ + 44:.1f}" stroke="#e0007a" stroke-width="2"/>'
-                    f'<rect x="{mx_ + 24:.1f}" y="{my_ + 44:.1f}" width="{tw_:.1f}" height="20" rx="5" fill="#fff0f8" stroke="#e0007a" stroke-width="1.6"/>'
-                    + _text(mx_ + 24 + tw_ / 2, my_ + 58, mk["text"], 10.5, "#8a004c", weight="bold") + "</g>")
+                    f'<line x1="{mx_:.1f}" y1="{my_ + dy_line:.1f}" x2="{mx_ + 24:.1f}" y2="{my_ + (-44 if up else 44):.1f}" stroke="#e0007a" stroke-width="2"/>'
+                    f'<rect x="{mx_ + 24:.1f}" y="{my_ + dy_box:.1f}" width="{tw_:.1f}" height="20" rx="5" fill="#fff0f8" stroke="#e0007a" stroke-width="1.6"/>'
+                    + _text(mx_ + 24 + tw_ / 2, my_ + dy_txt, mk["text"], 10.5, "#8a004c", weight="bold") + "</g>")
     out.extend(body)
     out.append("</g>")
     # rodape
@@ -574,7 +597,7 @@ def item_bbox(lay: Layout, meta: dict, ident: str, scene: Scene) -> tuple[float,
     elif any(m.get("id") == ident for m in scene.markers):
         m = next(m for m in scene.markers if m.get("id") == ident)
         x, y = f.hole(m["hole"])
-        pts = [(x - 12, y - 12), (x + 40 + 6.6 * len(m["text"]), y + 70)]
+        pts = [(x - 12, y - 70), (x + 40 + 6.6 * len(m["text"]), y + 12)] if m.get("dir") == "up" else [(x - 12, y - 12), (x + 40 + 6.6 * len(m["text"]), y + 70)]
         pad = 0
     elif ident in lay.components:
         comp = lay.components[ident]

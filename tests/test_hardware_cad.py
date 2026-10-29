@@ -84,31 +84,70 @@ def test_derived_nets_match_declared_nets_stage_b():
     assert echo == frozenset({"M1.ECHO", "R1.A"})                      # ECHO ve SO o R1
     node = pin_net["R1.B"]
     assert node == frozenset({"R1.B", "R2.A", "U1.IO34"})              # ECHO -> R1 -> NO -> GPIO34
-    assert "R2.B" in pin_net["M1.GND"] and "U1.GND@J3.7" in pin_net["M1.GND"]  # NO -> R2 -> GND
+    assert pin_net["R2.B"] == frozenset({"R2.B", "R3.A"})                  # NO -> R2 -> junção -> R3
+    assert "R3.B" in pin_net["M1.GND"] and "U1.GND@J3.7" in pin_net["M1.GND"]  # R3 -> GND
     assert pin_net["M1.VCC"] == frozenset({"M1.VCC", "U1.5V"})
     assert pin_net["M1.TRIG"] == frozenset({"M1.TRIG", "U1.IO5"})
 
 
-def test_divider_math_matches_cycle5_values_and_flags_tolerance_stack():
+def test_divider_math_with_the_users_resistors_1k_and_1k_plus_300():
+    """Resistores do usuario: 1 kΩ (dourado-vermelho-preto-marrom) e 300 Ω (dourado-marrom-preto-laranja)."""
     lay = _layout()
-    r1, r2 = lay.components["R1"], lay.components["R2"]
-    assert (r1["ohms"], r2["ohms"]) == (2200, 3300)
-    assert model.divider_vout(5.0, 2200, 3300) == pytest.approx(3.00)
-    assert model.divider_vout(5.25, 2200, 3300) == pytest.approx(3.15)
-    lo, hi = model.divider_extremes(4.75, 5.25, 2200, 3300, 0.05)
-    assert hi == pytest.approx(3.275, abs=0.001) and hi <= 3.30   # pior caso com resistores de 5%
-    assert lo > 0.75 * 3.3                                           # acima de VIH min (2,475 V)
+    r1, r2, r3 = (lay.components[k] for k in ("R1", "R2", "R3"))
+    assert (r1["ohms"], r2["ohms"], r3["ohms"]) == (1000, 1000, 300)
+    bottom = r2["ohms"] + r3["ohms"]                                   # R2 e R3 em serie
+    assert model.divider_vout(5.0, r1["ohms"], bottom) == pytest.approx(2.826, abs=0.001)
+    assert model.divider_vout(5.25, r1["ohms"], bottom) == pytest.approx(2.967, abs=0.001)
+    lo, hi = model.divider_extremes(4.75, 5.25, r1["ohms"], bottom, 0.05)
+    assert hi == pytest.approx(3.096, abs=0.001) and hi <= 3.30 - 0.15  # >= 150 mV de folga ao teto de 3,30 V
+    assert lo > 0.75 * 3.3 + 0.05                                      # acima de VIH min (2,475 V) com folga
     # o par proibido 1k/2k estoura o teto
     assert model.divider_vout(5.25, 1000, 2000) > 3.30
     # coerencia com o validador ja existente do Ciclo 5
     from terminal.bench import pinout as p
-    a = p.evaluate_echo_divider(2200, 3300)
-    assert a.safe is True and a.vout_nominal_v == pytest.approx(3.00)
+    a = p.evaluate_echo_divider(r1["ohms"], bottom)
+    assert a.safe is True and a.has_recommended_margin is True and a.vout_nominal_v == pytest.approx(2.826, abs=0.001)
+    # tensao no nó entre R2 e R3 (so resistores) e corrente solicitada ao ECHO
+    assert 5.0 * r3["ohms"] / (r1["ohms"] + bottom) == pytest.approx(0.652, abs=0.001)
+    assert 5.0 / (r1["ohms"] + bottom) < 0.0025                        # < 2,5 mA
+
+
+def test_users_resistors_cannot_be_used_directly_as_r1_r2():
+    """1 kΩ em cima/300 Ω embaixo da 1,15 V (leitura falha); 300 Ω em cima/1 kΩ embaixo da 3,85 V (queima o GPIO)."""
+    def only_two(top, bottom):
+        def mut(r):
+            _comp(r, "R1").update({"ohms": top})
+            _comp(r, "R2").update({"ohms": bottom})
+            _comp(r, "R3").update({"ohms": 0.001})                       # R3 ~ curto (nao existe no cenario)
+        return _codes(_mutated(mut), "B")
+    assert "DIVIDER_TOO_LOW" in only_two(1000, 300)
+    assert "DIVIDER_TOO_HIGH" in only_two(300, 1000)
+
+
+def test_chosen_divider_is_the_cheapest_safe_combination_of_1k_and_300():
+    """Enumera redes EM SERIE de 1 kΩ e 300 Ω (ate 3 resistores no total): so (R1 = 1k | R2 = 1k + 300) passa."""
+    def chain(a, b):
+        return a * 1000 + b * 300
+    safe = []
+    for n1a in range(0, 4):
+        for n1b in range(0, 4):
+            for n2a in range(0, 4):
+                for n2b in range(0, 4):
+                    if n1a + n1b == 0 or n2a + n2b == 0 or n1a + n1b + n2a + n2b > 3:
+                        continue
+                    r1, r2 = chain(n1a, n1b), chain(n2a, n2b)
+                    lo, hi = model.divider_extremes(4.75, 5.25, r1, r2, 0.05)
+                    if hi <= 3.30 and lo >= 0.75 * 3.3:
+                        safe.append(((n1a, n1b), (n2a, n2b)))
+    assert safe == [((1, 0), (1, 1))]                                  # R1 = 1 kΩ ; R2 = 1 kΩ + 300 Ω em serie
 
 
 def test_resistor_color_bands_match_docs():
     assert model.resistor_bands(2200, 0.05) == ["red", "red", "red", "gold"]
     assert model.resistor_bands(3300, 0.05) == ["orange", "orange", "red", "gold"]
+    # resistores do usuario (lidos a partir da faixa dourada: dourado-vermelho-preto-marrom e dourado-marrom-preto-laranja)
+    assert model.resistor_bands(1000, 0.05) == ["brown", "black", "red", "gold"]
+    assert model.resistor_bands(300, 0.05) == ["orange", "black", "brown", "gold"]
     assert model.resistor_bands(150, 0.05) == ["brown", "green", "brown", "gold"]
 
 
@@ -195,7 +234,7 @@ def test_mutation_gpio12_touched_is_rejected():
 def test_mutation_old_1k_2k_divider_is_rejected():
     def mut(r):
         _comp(r, "R1").update({"ohms": 1000})
-        _comp(r, "R2").update({"ohms": 2000})
+        _comp(r, "R2").update({"ohms": 1700})                               # 1700 + 300 (R3) = 2000
     assert "DIVIDER_TOO_HIGH" in _codes(_mutated(mut), "B")
 
 
@@ -206,7 +245,7 @@ def test_mutation_tcrt5000_on_5v_is_rejected():
 
 
 def test_mutation_double_occupied_hole_is_rejected():
-    lay = _mutated(lambda r: _wire(r, "W4").update({"from": "27G"}))   # 27G ja e perna de R2
+    lay = _mutated(lambda r: _wire(r, "W4").update({"from": "27F"}))   # 27F ja e perna de R2
     assert "HOLE_DOUBLE_OCCUPIED" in _codes(lay, "B")
 
 
@@ -223,7 +262,7 @@ def test_mutation_supply_short_is_rejected():
 
 
 def test_mutation_resistor_leg_moved_breaks_divider_node():
-    lay = _mutated(lambda r: _comp(r, "R2").update({"legs": ["28G", "24G"]}))   # no fica aberto
+    lay = _mutated(lambda r: _comp(r, "R3").update({"legs": ["29G", "24G"]}))   # a junção R2/R3 fica aberta
     codes = _codes(lay, "B")
     assert "NET_OPEN" in codes
 
@@ -376,9 +415,9 @@ def test_outputs_are_deterministic_and_wire_table_matches_netlist():
     assert a == b
     rows = reports.wire_rows(lay, "B")
     assert [r["id"] for r in rows] == ["W1", "W2", "W3", "W4"]
-    assert {(r["de_furo"], r["ate_furo"]) for r in rows} == {("19A", "21H"), ("7J", "24I"), ("10J", "22I"), ("27F", "5A")}
+    assert {(r["de_furo"], r["ate_furo"]) for r in rows} == {("19A", "21H"), ("7J", "24I"), ("10J", "22I"), ("27I", "5A")}
     hm = {r["furo"] for r in reports.hole_map_rows(lay, "B")}
-    assert {"27F", "27G", "27H", "5A", "5B", "19A", "19B", "21J", "23J"} <= hm
+    assert {"27F", "27H", "27I", "30F", "30G", "24G", "5A", "5B", "19A", "19B", "21J", "23J"} <= hm
 
 
 def test_stage_b_wires_do_not_reach_forbidden_pins_nor_5v_gpio():

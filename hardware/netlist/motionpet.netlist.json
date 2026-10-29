@@ -78,7 +78,7 @@
    "type": "resistor",
    "stage": "B",
    "label": "R1 divisor (ECHO -> no)",
-   "ohms": 2200,
+   "ohms": 1000,
    "tolerance": 0.05,
    "legs": [
     "23H",
@@ -86,21 +86,37 @@
    ],
    "role": "divider_top",
    "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION",
-   "label_pos": "above"
+   "label_pos": "right"
   },
   {
    "ref": "R2",
    "type": "resistor",
    "stage": "B",
-   "label": "R2 divisor (no -> GND)",
-   "ohms": 3300,
+   "label": "R2 divisor (no -> meio)",
+   "ohms": 1000,
    "tolerance": 0.05,
    "legs": [
-    "27G",
+    "27F",
+    "30F"
+   ],
+   "role": "divider_bottom",
+   "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION",
+   "label_pos": "right"
+  },
+  {
+   "ref": "R3",
+   "type": "resistor",
+   "stage": "B",
+   "label": "R3 divisor (meio -> GND)",
+   "ohms": 300,
+   "tolerance": 0.05,
+   "legs": [
+    "30G",
     "24G"
    ],
    "role": "divider_bottom",
-   "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION"
+   "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION",
+   "label_pos": "right"
   },
   {
    "ref": "M2",
@@ -178,7 +194,7 @@
     ]
    ],
    "label": "GND -> GND do HC-SR04",
-   "purpose": "Terra comum entre ESP32 e HC-SR04 (inclui o ramo inferior R2 do divisor).",
+   "purpose": "Terra comum entre ESP32 e HC-SR04 (inclui o ramo inferior do divisor, R3).",
    "voltage": "0 V",
    "safety": "Sem terra comum o ECHO flutua e pode injetar 5 V no GPIO.",
    "validation": "PENDING_PHYSICAL_VALIDATION"
@@ -214,16 +230,16 @@
    "id": "W4",
    "stage": "B",
    "net": "ECHO_NODE",
-   "from": "27F",
+   "from": "27I",
    "to": "5A",
    "color": "green",
    "via": [
     [
-     26.4,
-     "F"
+     25.9,
+     "I"
     ],
     [
-     26.4,
+     25.9,
      -2.2
     ],
     [
@@ -232,8 +248,8 @@
     ]
    ],
    "label": "No do divisor -> GPIO34",
-   "purpose": "Leva o ECHO ja reduzido (3,00 V nominal) ao GPIO34, pino somente-entrada.",
-   "voltage": "0 / 3,00 V (3,15 V max. nominal)",
+   "purpose": "Leva o ECHO ja reduzido (2,83 V nominal) ao GPIO34, pino somente-entrada.",
+   "voltage": "0 / 2,83 V (2,97 V max. nominal; pior caso 3,10 V)",
    "safety": "NAO instalar antes de medir o no <= 3,30 V (ponto de parada da etapa B).",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
@@ -373,7 +389,7 @@
     "U1.GND@J3.1",
     "U1.GND@J3.7",
     "M1.GND",
-    "R2.B",
+    "R3.B",
     "M2.GND",
     "P1.END_B"
    ],
@@ -433,15 +449,27 @@
    "name": "ECHO_NODE",
    "stage": "B",
    "domain": "SIGNAL_3V3",
-   "v_nominal": 3.0,
-   "v_max": 3.15,
+   "v_nominal": 2.83,
+   "v_max": 2.97,
    "pins": [
     "R1.B",
     "R2.A",
     "U1.IO34"
    ],
-   "note": "No do divisor 2,2 k / 3,3 k: 3,00 V nominal @ 5,00 V.",
-   "v_max_at_gpio": "divider:R1:R2"
+   "note": "No do divisor: R1 = 1 kΩ em cima; R2 (1 kΩ) + R3 (300 Ω) em serie embaixo = 1,3 kΩ. 2,83 V nominal @ 5,00 V (pior caso 3,10 V).",
+   "v_max_at_gpio": "divider:R1:R2+R3"
+  },
+  {
+   "name": "DIV_MID",
+   "stage": "B",
+   "domain": "SIGNAL_3V3",
+   "v_nominal": 0.65,
+   "v_max": 0.69,
+   "pins": [
+    "R2.B",
+    "R3.A"
+   ],
+   "note": "Junção entre R2 e R3 (coluna 30). Só liga os dois resistores; não vai a nenhum pino."
   },
   {
    "name": "IR_DO",
@@ -574,7 +602,7 @@
   {
    "id": "C03",
    "blocks": "B",
-   "text": "Medir R1 (2,2 kΩ ±5%: 2,09-2,31 kΩ) e R2 (3,3 kΩ ±5%: 3,14-3,47 kΩ) FORA do circuito; cores 2,2k = vermelho-vermelho-vermelho; 3,3k = laranja-laranja-vermelho."
+   "text": "Medir R1 e R2 (1 kΩ ±5%: 0,95-1,05 kΩ) e R3 (300 Ω ±5%: 285-315 Ω) FORA do circuito. Lendo a partir da faixa dourada: 1 kΩ = dourado-vermelho-preto-marrom; 300 Ω = dourado-marrom-preto-laranja."
   },
   {
    "id": "C04",
@@ -662,22 +690,24 @@
    },
    {
     "n": 2,
-    "title": "Meça R1 e R2 fora do circuito",
-    "text": "Multímetro em Ω, com os resistores soltos. Fora da faixa? Troque o resistor.",
+    "title": "Identifique e meça R1, R2 e R3",
+    "text": "Multímetro em Ω, com os resistores soltos. R1 e R2: 1 kΩ (lendo a partir da faixa dourada: dourado, vermelho, preto, marrom). R3: 300 Ω (dourado, marrom, preto, laranja). Fora da faixa? Troque o resistor.",
     "adds": [],
     "measure": [
      "R1",
-     "R2"
+     "R2",
+     "R3"
     ],
     "hold": false
    },
    {
     "n": 3,
-    "title": "Instale R1 e R2 (ainda sem o sensor)",
-    "text": "R1 nos furos 23H e 27H. R2 nos furos 27G e 24G. A coluna 27 é o NÓ do divisor.",
+    "title": "Instale R1, R2 e R3 (ainda sem o sensor)",
+    "text": "R1 (1 kΩ) nos furos 23H e 27H. R2 (1 kΩ) nos furos 27F e 30F. R3 (300 Ω) nos furos 30G e 24G. A coluna 27 é o NÓ do divisor; a coluna 30 só junta R2 com R3.",
     "adds": [
      "R1",
-     "R2"
+     "R2",
+     "R3"
     ],
     "hold": false
    },
@@ -694,7 +724,7 @@
    {
     "n": 5,
     "title": "PARE: ensaio do divisor",
-    "text": "Sem o HC-SR04 e sem o fio verde. O jumper temporário (tracejado) leva 5 V à ponta de R1. Conecte a USB e meça entre o furo 27F e o GND: esperado ≈ 3,0 V.",
+    "text": "Sem o HC-SR04 e sem o fio verde. O jumper temporário (tracejado) leva 5 V à ponta de R1. Conecte a USB e meça entre o furo 27J (ponteira vermelha) e o furo 24J (GND, ponteira preta): esperado ≈ 2,8 V (aceitável 2,5 a 3,2 V).",
     "adds": [],
     "temp": [
      "T1"
@@ -703,11 +733,12 @@
     "focus": [
      "R1",
      "R2",
+     "R3",
      "T1",
      "MK5"
     ],
     "hold": true,
-    "warn": "Mais de 3,30 V: desconecte a USB AGORA e refaça o divisor."
+    "warn": "Mais de 3,30 V: desconecte a USB AGORA e refaça o divisor. Menos de 2,5 V: confira R2, R3 e o jumper temporário."
    },
    {
     "n": 6,
@@ -716,11 +747,12 @@
     "adds": [],
     "focus": [
      "R1",
-     "R2"
+     "R2",
+     "R3"
     ],
     "hold": false,
     "commands": [
-     "python -m terminal.bench divider --r1 2200 --r2 3300 --measured-v <valor medido>"
+     "python -m terminal.bench divider --r1 1000 --r2 1300 --measured-v <valor medido>"
     ]
    },
    {
@@ -750,7 +782,8 @@
     "focus": [
      "M1",
      "R1",
-     "R2"
+     "R2",
+     "R3"
     ],
     "hold": false,
     "checks": [
@@ -762,7 +795,7 @@
    {
     "n": 10,
     "title": "Último fio: NÓ → GPIO34",
-    "text": "Fio verde: 27F → 5A. É o único fio que leva o sinal do ECHO ao ESP32, e só entra depois do ensaio.",
+    "text": "Fio verde: 27I → 5A. É o único fio que leva o sinal do ECHO ao ESP32, e só entra depois do ensaio.",
     "adds": [
      "W4"
     ],
@@ -868,8 +901,9 @@
   {
    "id": "MK5",
    "stage": "B",
-   "hole": "27F",
-   "text": "MEDIR AQUI (27F x GND) ~ 3,0 V"
+   "hole": "27J",
+   "text": "MEDIR AQUI (27J x GND) ~ 2,8 V",
+   "dir": "up"
   }
  ],
  "deferred_stages": {

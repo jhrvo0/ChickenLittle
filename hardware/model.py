@@ -566,20 +566,26 @@ def validate(layout: Layout, stage: str) -> list[Issue]:
                 if got and got != {want}:
                     add("ERROR", "WRONG_SUPPLY", f"{comp['ref']}.{pin} deveria estar em {want}, esta em {sorted(got)}")
 
-    # 7) divisor de ECHO
-    r1 = layout.components.get("R1")
-    r2 = layout.components.get("R2")
-    if r1 and r2 and layout.present(r1, stage) and layout.present(r2, stage):
-        lo, hi = divider_extremes(4.75, 5.25, r1["ohms"], r2["ohms"], max(r1["tolerance"], r2["tolerance"]))
-        nom = divider_vout(5.0, r1["ohms"], r2["ohms"])
+    # 7) divisor de ECHO (ramo de cima e ramo de baixo podem ter varios resistores em serie)
+    top = [c for c in layout.components.values() if c.get("role") == "divider_top" and layout.present(c, stage)]
+    bot = [c for c in layout.components.values() if str(c.get("role", "")).startswith("divider_bottom") and layout.present(c, stage)]
+    if top and bot:
+        ra = sum(c["ohms"] for c in top)
+        rb = sum(c["ohms"] for c in bot)
+        tol = max(c["tolerance"] for c in top + bot)
+        lo, hi = divider_extremes(4.75, 5.25, ra, rb, tol)
+        nom = divider_vout(5.0, ra, rb)
         if hi > V_LIMIT_GPIO:
             add("ERROR", "DIVIDER_TOO_HIGH", f"Divisor: Vout_max(pior caso)={hi:.3f} V > {V_LIMIT_GPIO} V")
         if lo < 0.75 * 3.3:
             add("ERROR", "DIVIDER_TOO_LOW", f"Divisor: Vout_min(pior caso)={lo:.3f} V < VIH_min={0.75*3.3:.3f} V")
         if hi > V_LIMIT_GPIO - 0.05:
             add("WARN", "DIVIDER_MARGIN_THIN",
-                f"Divisor com tolerancia {max(r1['tolerance'], r2['tolerance']):.0%}: pior caso {hi:.3f} V "
+                f"Divisor com tolerancia {tol:.0%}: pior caso {hi:.3f} V "
                 f"(margem {1000*(V_LIMIT_GPIO-hi):.0f} mV ao teto de {V_LIMIT_GPIO} V); nominal {nom:.2f} V")
+        if lo < 0.75 * 3.3 + 0.05 and lo >= 0.75 * 3.3:
+            add("WARN", "DIVIDER_LOW_MARGIN_THIN",
+                f"Divisor: pior caso minimo {lo:.3f} V, so {1000*(lo-0.75*3.3):.0f} mV acima de VIH={0.75*3.3:.3f} V")
     return issues
 
 
@@ -588,8 +594,11 @@ def net_vmax_at_gpio(layout: Layout, net: dict, stage: str) -> float | None:
     rule = net.get("v_max_at_gpio")
     if isinstance(rule, str) and rule.startswith("divider:"):
         _, a, b = rule.split(":")
-        ra, rb = layout.components[a], layout.components[b]
-        _lo, hi = divider_extremes(4.75, 5.25, ra["ohms"], rb["ohms"], max(ra["tolerance"], rb["tolerance"]))
+        # cada lado pode ser "R2" ou uma serie "R2+R3"
+        top = [layout.components[x] for x in a.split("+")]
+        bot = [layout.components[x] for x in b.split("+")]
+        _lo, hi = divider_extremes(4.75, 5.25, sum(c["ohms"] for c in top), sum(c["ohms"] for c in bot),
+                                   max(c["tolerance"] for c in top + bot))
         return hi
     if rule is None:
         return net.get("v_max", net.get("v_nominal"))

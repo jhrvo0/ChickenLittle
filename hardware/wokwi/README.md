@@ -2,7 +2,7 @@
 
 Arquivos gerados por `python -m hardware.build` a partir de `hardware/netlist/motionpet.netlist.json`:
 
-- `diagram.json` — ESP32-DevKitC V4 (`board-esp32-devkit-c-v4`, 38 pinos), HC-SR04, R1/R2 e potenciometro (estagios A-C). O LCD (estagio D) esta adiado.
+- `diagram.json` — ESP32-DevKitC V4 (`board-esp32-devkit-c-v4`, 38 pinos), HC-SR04, R1/R2/R3 e potenciometro (estagios A-C). O LCD (estagio D) esta adiado.
 - `wokwi.toml` — aponta para o firmware compilado pelo PlatformIO (`pio run -d firmware`).
 - `scenarios/hcsr04.test.yaml` — cenario de teste (sensor_frame, distancias 25 cm e 300 cm).
 

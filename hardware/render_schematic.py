@@ -47,23 +47,31 @@ def _resistor_v(x, y, h=64, label="", sub="", bands=None):
     return "\n".join(out)
 
 
+def _pt(bands):
+    from .reports import BAND_PT
+    return "-".join(BAND_PT[b] for b in bands)
+
+
 def divider_panel(lay: Layout, ox: float, oy: float) -> tuple[str, float, float]:
-    r1, r2 = lay.components["R1"], lay.components["R2"]
-    a, b = r1["ohms"], r2["ohms"]
+    r1 = lay.components["R1"]
+    lower = [x for x in lay.components.values() if str(x.get("role", "")).startswith("divider_bottom")]
+    a = r1["ohms"]
+    b = sum(x["ohms"] for x in lower)                       # ramo de baixo = resistores em serie
+    tol = max([r1["tolerance"]] + [x["tolerance"] for x in lower])
     vnom = model.divider_vout(5.0, a, b)
     vnom_max = model.divider_vout(5.25, a, b)
-    lo, hi = model.divider_extremes(4.75, 5.25, a, b, max(r1["tolerance"], r2["tolerance"]))
+    lo, hi = model.divider_extremes(4.75, 5.25, a, b, tol)
     c = lay.modules["resistor_color_code"]
     b1 = model.resistor_bands(a, r1["tolerance"], c)
-    b2 = model.resistor_bands(b, r2["tolerance"], c)
-    w, h = 640, 372
+    extra = 78 * (len(lower) - 1)                            # cada resistor extra no ramo de baixo
+    w, h = 640, 372 + extra
     o = [f'<g transform="translate({ox} {oy})">']
     o.append(f'<rect x="0" y="0" width="{w}" height="{h}" rx="10" fill="#fffdf6" stroke="#b9b6aa" stroke-width="1.5"/>')
     o.append(_text(16, 26, "Divisor resistivo do ECHO (a parte que protege o ESP32)", 14, "#17212b", anchor="start", weight="bold"))
     # dominios
-    o.append(f'<rect x="14" y="44" width="250" height="262" rx="8" fill="#fde2e2" fill-opacity="0.65" stroke="#d11a1a" stroke-dasharray="5 4"/>')
+    o.append(f'<rect x="14" y="44" width="250" height="{262 + extra}" rx="8" fill="#fde2e2" fill-opacity="0.65" stroke="#d11a1a" stroke-dasharray="5 4"/>')
     o.append(_text(24, 62, "DOMINIO 5 V (HC-SR04)", 10, "#a01818", anchor="start", weight="bold"))
-    o.append(f'<rect x="270" y="44" width="356" height="262" rx="8" fill="#dff5e6" fill-opacity="0.8" stroke="#1f9d46" stroke-dasharray="5 4"/>')
+    o.append(f'<rect x="270" y="44" width="356" height="{262 + extra}" rx="8" fill="#dff5e6" fill-opacity="0.8" stroke="#1f9d46" stroke-dasharray="5 4"/>')
     o.append(_text(280, 62, "DOMINIO 3,3 V (ESP32)", 10, "#157a35", anchor="start", weight="bold"))
     # ECHO -> R1
     y0 = 130
@@ -71,7 +79,7 @@ def divider_panel(lay: Layout, ox: float, oy: float) -> tuple[str, float, float]
     o.append(_text(73, y0 - 4, "HC-SR04", 11, "#fff", weight="bold"))
     o.append(_text(73, y0 + 12, "pino ECHO", 10, "#dcecff"))
     o.append(f'<path d="M116,{y0} h30" stroke="#222" stroke-width="2"/>')
-    o.append(_resistor_h(146, y0, 64, f"R1 = {model.fmt_ohms(a)}", f"{'-'.join(b1)}", b1))
+    o.append(_resistor_h(146, y0, 64, f"R1 = {model.fmt_ohms(a)}", _pt(b1), b1))
     o.append(f'<path d="M210,{y0} h64 " stroke="#222" stroke-width="2"/>')
     o.append(f'<path d="M274,{y0} h110" stroke="#222" stroke-width="2"/>')
     o.append(f'<circle cx="320" cy="{y0}" r="4.5" fill="#111"/>')
@@ -82,16 +90,28 @@ def divider_panel(lay: Layout, ox: float, oy: float) -> tuple[str, float, float]
     o.append(f'<rect x="440" y="{y0 - 22}" width="168" height="44" rx="5" fill="#1c2733" stroke="#0d141b"/>')
     o.append(_text(524, y0 - 4, "ESP32  GPIO34 (IO34)", 11, "#fff", weight="bold"))
     o.append(_text(524, y0 + 12, "entrada somente-leitura (GPI)", 9.5, "#c9d6e2"))
-    # R2 para GND
+    # ramo de baixo (R2, R3...) em serie ate o GND
     o.append(f'<path d="M320,{y0} v30" stroke="#222" stroke-width="2"/>')
-    o.append(_resistor_v(320, y0 + 30, 64, f"R2 = {model.fmt_ohms(b)}", f"{'-'.join(b2)}", b2))
-    o.append(f'<path d="M320,{y0 + 94} v22" stroke="#222" stroke-width="2"/>')
-    o.append(_gnd_symbol(320, y0 + 116))
-    o.append(_text(348, y0 + 130, "GND comum", 10, "#333", anchor="start"))
+    yy = y0 + 30
+    for i, rr in enumerate(lower):
+        bb = model.resistor_bands(rr["ohms"], rr["tolerance"], c)
+        o.append(_resistor_v(320, yy, 64, f"{rr['ref']} = {model.fmt_ohms(rr['ohms'])}", _pt(bb), bb))
+        yy += 64
+        if i < len(lower) - 1:
+            vmid = 5.0 * sum(x["ohms"] for x in lower[i + 1:]) / (a + b)
+            o.append(f'<path d="M320,{yy} v14" stroke="#222" stroke-width="2"/>')
+            o.append(f'<circle cx="320" cy="{yy + 14}" r="4" fill="#111"/>')
+            o.append(_text(332, yy + 18, f"junção {rr['ref']}/{lower[i + 1]['ref']}: {vmid:.2f} V (só resistores)", 9.5, "#333", anchor="start"))
+            o.append(f'<path d="M320,{yy + 14} v14" stroke="#222" stroke-width="2"/>')
+            yy += 28
+    o.append(f'<path d="M320,{yy} v22" stroke="#222" stroke-width="2"/>')
+    o.append(_gnd_symbol(320, yy + 22))
+    o.append(_text(348, yy + 36, "GND comum", 10, "#333", anchor="start"))
     # contas
-    ty = 330
-    o.append(_text(16, ty, f"Vout = Vecho x R2/(R1+R2) = Vecho x {b / (a + b):.3f}", 11, "#17212b", anchor="start", weight="bold"))
-    o.append(_text(16, ty + 16, f"5,00 V -> {vnom:.2f} V   |   5,25 V -> {vnom_max:.2f} V   |   pior caso com tolerancia {r1['tolerance']:.0%}: "
+    ty = 330 + extra
+    low_name = "+".join(x["ref"] for x in lower)
+    o.append(_text(16, ty, f"Vout = Vecho x ({low_name})/(R1+{low_name}) = Vecho x {b / (a + b):.3f}", 11, "#17212b", anchor="start", weight="bold"))
+    o.append(_text(16, ty + 16, f"5,00 V -> {vnom:.2f} V   |   5,25 V -> {vnom_max:.2f} V   |   pior caso com tolerancia {tol:.0%}: "
                    f"{lo:.2f} V .. {hi:.3f} V (teto seguro 3,30 V; VIH minimo 2,475 V)", 9.8, "#333", anchor="start"))
     o.append("</g>")
     return "\n".join(o), w, h
@@ -125,7 +145,7 @@ def render_schematic(lay: Layout, stage: str, title: str = "") -> str:
     esp_pins = collapsed
     ROW = 30
     mods = [c for c in lay.comps(stage) if c["type"] in ("hc_sr04", "tcrt5000_module", "potentiometer", "lcd2004a")]
-    ress = [c for c in lay.comps(stage) if c["type"] == "resistor" and c["ref"] not in ("R1", "R2")]
+    ress = [c for c in lay.comps(stage) if c["type"] == "resistor" and not str(c.get("role", "")).startswith("divider")]
     height = 90 + max(len(esp_pins) * ROW + 40, 200)
     # coluna da direita: modulos empilhados
     y_cursor = 80
