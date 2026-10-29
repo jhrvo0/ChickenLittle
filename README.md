@@ -4,17 +4,17 @@ Sistema embarcado interativo que combina **ESP32**, **TinyML** (reconhecimento d
 
 ---
 
-## Status do Projeto — Ciclos 1 e 2
+## Status do Projeto — Ciclos 1, 2 e 3
 
 | Subsistema | Status Atual | Observação |
 | :--- | :--- | :--- |
-| **Motor de Estado do Pet (`terminal/pet/`)** | **Implementado e Testado** | Necessidades, humor, evolução (`EGG` → `CHICK` → `CYBER_ROOSTER`), personalidade emergente e persistência atômica JSON. |
-| **Protocolo Serial JSON Lines v1 (`terminal/communication/`)** | **Implementado e Testado** | Envelopes versionados (`v=1`), validação estrita e loopback serial virtual em memória (`VirtualSerialEndpoint`). |
+| **Motor de Estado do Pet (`terminal/pet/` & `firmware/pet/`)** | **Implementado e Testado (Python + C++)** | Paridade 1:1 verificada entre `PetEngine` (Python) e `pet_state.cpp` (C++) + persistência NVS com CRC32 e proteção antidesgaste. |
+| **Protocolo Serial JSON Lines v1 (`terminal/communication/` & `firmware/communication/`)** | **Implementado e Testado (Python + C++)** | Envelopes versionados (`v=1`) zero-heap no ESP32 (`sensor_frame`, `gesture_event`, `pet_state`, `lcd_frame`, `ack`, `error`). |
 | **Simulador ESP32 + Sensores (`simulator/`)** | **Implementado e Testado** | Simulação determinística 1D do HC-SR04, TCRT5000, potenciômetro, replay `.jsonl`/`.csv` e classificador intercambiável. |
-| **Espelho LCD 20×4 & Terminal ASCII (`terminal/renderer/`)** | **Implementado e Testado** | LCD 4×20 ASCII estrito + painel ASCII animado com telemetria em tempo real de classe, confiança, janela, latência e rejeições. |
-| **Infraestrutura de Machine Learning (`ml/`)** | **Implementada e Testada (`AWAITING_REAL_DATA`)** | Coleta, filtragem causal, 11 features, split sem vazamento, Baseline/DT/RF/MLP, estabilização de eventos e exportador C++ com paridade nativa. |
+| **Espelho LCD 20×4 & Terminal ASCII (`terminal/renderer/` & `firmware/display/`)** | **Implementado e Testado (Python + C++)** | Driver paralelo HD44780 de 4 bits (`RW` em `GND`) com CGRAM customizada, shadow buffer diferencial sem flicker e paridade 1:1 com Python. |
+| **Infraestrutura de Machine Learning (`ml/` & `firmware/gestures/`)** | **Implementada e Testada (`AWAITING_REAL_DATA`)** | Coleta real/simulada, filtro causal, 11 features, estabilizador de eventos e inferência TinyML C++ estática (`mlp_compact`, substituível). |
 | **Modos Auxiliares (`Pet Launch`, `Air Music`, `Air Slides`)** | **Interfaces Modulares + Física Base** | Contratos de eventos prontos; loop dedicado do jogo no Ciclo 4 e integrações finais no Ciclo 6. |
-| **Firmware C++/FreeRTOS (`firmware/`)** | **Headers + `tinyml_model.h` exportável (Ciclo 3)** | Pinout proposto **não validado fisicamente**; consultar obrigatoriamente `docs/hardware_safety.md` antes de energizar. |
+| **Firmware C++/FreeRTOS (`firmware/`)** | **Implementado e Compilado (`esp32dev`)** | 5 tasks FreeRTOS em `APP_CPU_NUM` (`RAM: 7.2%`, `Flash: 23.2%`). Pinout `PROPOSED_PENDING_BENCH_INSPECTION`; ler `docs/bench_assembly_guide.md`. |
 
 ---
 
@@ -150,5 +150,6 @@ Opções úteis de linha de comando:
 - [`docs/architecture.md`](docs/architecture.md) — Arquitetura dual-interface, ADRs e separação entre simulação e hardware.
 - [`docs/protocol.md`](docs/protocol.md) — Especificação do protocolo serial JSON Lines v1.
 - [`docs/hardware_safety.md`](docs/hardware_safety.md) — **Leitura obrigatória antes da montagem física**: divisor resistivo para o pino `ECHO` (5 V → 3,3 V) do HC-SR04, aterramento de `RW` e compatibilidade lógica do LCD 2004A V1.1, restrições de GPIOs do ESP32 e checklist de bancada.
+- [`docs/bench_assembly_guide.md`](docs/bench_assembly_guide.md) — **Guia incremental de bancada (Ciclo 3)**: montagem em 4 estágios (priorizando P0 HC-SR04), checklist de multímetro pré-energização e comandos de gravação/coleta real.
 - [`docs/ml_pipeline_spec.md`](docs/ml_pipeline_spec.md) — Especificação do pipeline de Machine Learning e TinyML para séries temporais 1D (Ciclo 2).
 - [`docs/real_data_collection_guide.md`](docs/real_data_collection_guide.md) — Procedimento passo a passo para coleta do dataset físico real na bancada e limitações experimentais.

@@ -9,7 +9,8 @@
 extern "C" {
 #endif
 
-#define PET_NAME_MAX_LEN 24
+#define PET_NAME_MAX_LEN   24
+#define PET_ACTION_MAX_LEN 24
 
 /**
  * @brief Estágios evolutivos do pet.
@@ -75,22 +76,36 @@ typedef enum {
 } PetCommandType;
 
 /**
- * @brief Snapshot completo e autoritativo do estado do pet.
+ * @brief Contadores de cuidado para derivação da personalidade emergente.
+ */
+typedef struct {
+    uint16_t feed;
+    uint16_t play;
+    uint16_t rest;
+    uint16_t interact;
+    uint16_t heal;
+} PetCareCounters;
+
+/**
+ * @brief Snapshot completo e autoritativo do estado do pet (paridade 1:1 com Python `PetState`).
  */
 typedef struct {
     char name[PET_NAME_MAX_LEN];
-    uint8_t hunger;         ///< 0 = totalmente saciado, 100 = faminto crítico
-    uint8_t happiness;      ///< 0 = deprimido, 100 = radiante
-    uint8_t energy;         ///< 0 = exausto, 100 = energia máxima
-    uint8_t health;         ///< 0 = morto, 100 = perfeito estado
-    uint32_t xp;            ///< Pontos de experiência acumulados
-    uint16_t level;         ///< Nível de evolução (1..N)
-    PetStage stage;         ///< Estágio evolutivo
-    PetMood mood;           ///< Estado emocional derivado
-    PetPersonality personality; ///< Personalidade
-    PetAnimation animation; ///< Animação corrente
-    bool is_sleeping;       ///< Verdadeiro se estiver em repouso
-    uint32_t age_ticks;     ///< Contador de ciclos de vida
+    float hunger;                   ///< 0.0 = totalmente saciado, 100.0 = faminto crítico
+    float happiness;                ///< 0.0 = deprimido, 100.0 = radiante
+    float energy;                   ///< 0.0 = exausto, 100.0 = energia máxima
+    float health;                   ///< 0.0 = crítico, 100.0 = perfeito estado
+    uint32_t xp;                    ///< Pontos de experiência acumulados
+    uint16_t level;                 ///< Nível de evolução (1..N)
+    PetStage stage;                 ///< Estágio evolutivo
+    PetMood mood;                   ///< Estado emocional derivado
+    PetPersonality personality;     ///< Personalidade emergente
+    PetAnimation animation;         ///< Animação corrente
+    uint16_t animation_ttl_ticks;   ///< Ticks restantes da animação temporária
+    bool is_sleeping;               ///< Verdadeiro se estiver em repouso
+    uint32_t age_ticks;             ///< Contador de ciclos biológicos vividos
+    char last_action[PET_ACTION_MAX_LEN]; ///< Última ação registrada (ex: "READY", "FED")
+    PetCareCounters care_counters;  ///< Histórico acumulado por tipo de cuidado
 } PetStateSnapshot;
 
 /**
@@ -99,9 +114,19 @@ typedef struct {
 void pet_init(PetStateSnapshot *pet, const char *name, PetPersonality personality);
 
 /**
+ * @brief Reinicia o pet preservando ou trocando o nome (define `last_action = "RESET"`).
+ */
+void pet_reset(PetStateSnapshot *pet, const char *name);
+
+/**
  * @brief Executa um ciclo temporal de simulação biológica (fome aumenta, energia decresce).
  */
 void pet_tick(PetStateSnapshot *pet);
+
+/**
+ * @brief Aplica um comando administrativo ou de cuidado ao pet com tag opcional (ex: `"G:APPROA"`).
+ */
+bool pet_apply_command_tagged(PetStateSnapshot *pet, PetCommandType cmd, const char *source_tag);
 
 /**
  * @brief Aplica um comando administrativo ou de cuidado ao pet.
@@ -109,12 +134,17 @@ void pet_tick(PetStateSnapshot *pet);
 bool pet_apply_command(PetStateSnapshot *pet, PetCommandType cmd);
 
 /**
- * @brief Reage a um evento gestual detectado.
+ * @brief Reage a um evento gestual detectado com verificação de confiança mínima.
+ */
+bool pet_apply_gesture_event(PetStateSnapshot *pet, const GestureEvent *event, float min_confidence);
+
+/**
+ * @brief Reage a um tipo de gesto detectado (confiança implícita 1.0).
  */
 bool pet_apply_gesture(PetStateSnapshot *pet, GestureType gesture);
 
 /**
- * @brief Atualiza o humor derivado com base nos atributos vitais correntes.
+ * @brief Atualiza o humor derivado, estágio, personalidade e animação.
  */
 void pet_update_derived_mood(PetStateSnapshot *pet);
 

@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "sensors/sensor_types.h"
+#include "pet/pet_state.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,6 +35,31 @@ typedef struct {
     char lines[LCD_ROWS][LCD_COLS + 1];  ///< 4 linhas com 20 caracteres cada + terminador nulo
 } LCDFrameBuffer;
 
+/**
+ * @brief Abstração de hardware (HAL) para o barramento paralelo de 4 bits do HD44780.
+ */
+typedef struct {
+    void (*configure_pins)(const LCDPinConfig *cfg);
+    void (*write_pin)(uint8_t pin, uint8_t level);
+    void (*delay_us)(uint32_t us);
+} LCDHalOps;
+
+/**
+ * @brief Contexto do driver HD44780 com shadow buffer 4x20 para atualização diferencial sem flicker.
+ */
+typedef struct {
+    LCDPinConfig pins;
+    LCDHalOps hal;
+    char shadow[LCD_ROWS][LCD_COLS];
+    bool shadow_valid;
+    bool initialized;
+    uint8_t cursor_row;
+    uint8_t cursor_col;
+    uint32_t total_frames_rendered;
+    uint32_t chars_written_last_frame;
+    uint32_t total_bus_bytes_sent;
+} LCDDriverContext;
+
 // Índices de glifos customizados na CGRAM do HD44780 (máximo de 8 glifos: 0 a 7)
 #define LCD_GLYPH_HEART       0   ///< Ícone de coração (saúde/amor)
 #define LCD_GLYPH_FOOD        1   ///< Ícone de grão/comida
@@ -43,53 +70,34 @@ typedef struct {
 #define LCD_GLYPH_BAR_4       6   ///< Barra de progresso 4/4 (cheia)
 #define LCD_GLYPH_ZZZ         7   ///< Ícone de sono
 
+// API com contexto explícito (usada em testes automatizados e tasks)
+bool lcd_ctx_init(LCDDriverContext *ctx, const LCDPinConfig *cfg, const LCDHalOps *custom_hal);
+void lcd_ctx_clear(LCDDriverContext *ctx);
+void lcd_ctx_set_cursor(LCDDriverContext *ctx, uint8_t row, uint8_t col);
+void lcd_ctx_print(LCDDriverContext *ctx, const char *str);
+void lcd_ctx_print_line(LCDDriverContext *ctx, uint8_t row, const char *line);
+void lcd_ctx_render_frame(LCDDriverContext *ctx, const LCDFrameBuffer *frame);
+void lcd_ctx_create_custom_char(LCDDriverContext *ctx, uint8_t location, const uint8_t charmap[8]);
+void lcd_ctx_load_default_glyphs(LCDDriverContext *ctx);
+
 /**
- * @brief Inicializa a comunicação paralela de 4 bits com o controlador HD44780.
- * @param cfg Ponteiro para struct com os GPIOs alocados
- * @return true se a sequência de inicialização de 4 bits foi executada
+ * @brief Formata o quadro 20x4 do Pet com equivalência caractere-por-caractere a `Lcd20x4Renderer` (Python).
  */
+void lcd_format_pet_frame(
+    const PetStateSnapshot *state,
+    uint32_t frame_idx,
+    const SensorRawFrame *sensor,
+    LCDFrameBuffer *out_frame
+);
+
+// API global original (opera sobre instância estática padrão)
 bool lcd_init(const LCDPinConfig *cfg);
-
-/**
- * @brief Limpa o visor e retorna o cursor para a posição (0, 0).
- */
 void lcd_clear(void);
-
-/**
- * @brief Posiciona o cursor nas coordenadas informadas.
- * @param row Linha (0 a 3)
- * @param col Coluna (0 a 19)
- */
 void lcd_set_cursor(uint8_t row, uint8_t col);
-
-/**
- * @brief Escreve uma string na posição atual do cursor.
- */
 void lcd_print(const char *str);
-
-/**
- * @brief Escreve uma linha completa, preenchendo o restante com espaços em branco.
- * @param row Linha de destino (0 a 3)
- * @param line Texto de até 20 caracteres
- */
 void lcd_print_line(uint8_t row, const char *line);
-
-/**
- * @brief Renderiza um buffer completo de 4 linhas no display físico.
- * @param frame Quadro contendo exatamente as 4 linhas
- */
 void lcd_render_frame(const LCDFrameBuffer *frame);
-
-/**
- * @brief Grava um caractere customizado na CGRAM do display.
- * @param location Posição de memória (0 a 7)
- * @param charmap Vetor de 8 bytes com o padrão de pixels 5x8
- */
 void lcd_create_custom_char(uint8_t location, const uint8_t charmap[8]);
-
-/**
- * @brief Carrega os glifos padrão (coração, comida, barras de status) na CGRAM.
- */
 void lcd_load_default_glyphs(void);
 
 #ifdef __cplusplus

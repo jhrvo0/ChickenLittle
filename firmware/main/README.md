@@ -1,101 +1,37 @@
-# Arquitetura de Firmware e Tarefas FreeRTOS — MotionPet
+# Arquitetura de Firmware e Tarefas FreeRTOS — MotionPet (Ciclo 3)
 
-Este documento descreve a topologia multitarefa preemptiva projetada para o firmware do ESP-WROOM-32, estruturada para implementação no **Ciclo 3**, em conformidade com o **ADR-01**.
-
----
-
-## 1. Topologia de Tarefas e Alocação de Núcleos (Dual-Core)
-
-O processador ESP32 conta com dois núcleos Xtensa LX6 de 32 bits operando a 240 MHz. Para garantir temporização rígida nos sensores e evitar que operações de I/O bloqueiem a inferência ou o ciclo biológico do pet, as tarefas são distribuídas entre os dois núcleos:
-
-```
-+-----------------------------------------------------------------------------------+
-|                                   ESP32 Dual Core                                 |
-|                                                                                   |
-|  [ CORE 0 - Protocolo & Display ]             [ CORE 1 - Tempo Real & Domínio ]   |
-|                                                                                   |
-|  +-----------------------------+              +-----------------------------+     |
-|  | TaskDisplayAndSerial        |              | TaskSensorAcquire           |     |
-|  | - Prioridade: 1             |              | - Prioridade: 4 (Alta)      |     |
-|  | - Pilha: 4096 bytes         |              | - Pilha: 3072 bytes         |     |
-|  | - Refresh LCD (5 Hz)        |              | - Amostragem HC-SR04/IR     |     |
-|  | - Tx/Rx JSON Lines v1       |              | - Período: 50 ms (20 Hz)    |     |
-|  +--------------^--------------+              +--------------+--------------+     |
-|                 |                                            |                    |
-|        xQueueSend (Serial Tx)                         q_sensor_frames             |
-|                 |                                            v                    |
-|  +--------------+--------------+              +-----------------------------+     |
-|  | q_pet_commands (Serial Rx)  |              | TaskGestureInfer            |     |
-|  +--------------+--------------+              | - Prioridade: 3             |     |
-|                 |                             | - Pilha: 4096 bytes         |     |
-|                 |                             | - Extração Features/TinyML  |     |
-|                 |                             | - Período: 50 ms            |     |
-|                 |                             +--------------+--------------+     |
-|                 |                                            |                    |
-|                 |                                     q_gesture_events            |
-|                 +---------------------+                      |                    |
-|                                       v                      v                    |
-|                               +------------------------------+                    |
-|                               | TaskPetDomain                                     |
-|                               | - Prioridade: 2                                   |
-|                               | - Pilha: 4096 bytes                               |
-|                               | - Ciclo Biológico (1 Hz)                          |
-|                               | - Máquina de Estados Autoritativa                 |
-|                               | - Mutex: xPetStateMutex                           |
-|                               +---------------------------------------------------+
-+-----------------------------------------------------------------------------------+
-```
+Este documento descreve a arquitetura multitarefa FreeRTOS efetivamente implementada em `firmware/main/main.cpp` para o `ESP-WROOM-32` (`ESP-IDF v4.4.7` / `framework-arduinoespressif32 @ 2.0.17`).
 
 ---
 
-## 2. Detalhamento das Tarefas FreeRTOS
+## 1. Topologia de 5 Tarefas Independentes em `APP_CPU_NUM`
 
-### 2.1 `TaskSensorAcquire` (Núcleo 1)
-- **Responsabilidade**: Aquisição física em tempo real de todos os periféricos de entrada.
-  1. Gera pulso de $10\,\mu\text{s}$ no pino `TRIG` do HC-SR04.
-  2. Mede a duração em microssegundos do pino `ECHO` usando `pulseIn` ou temporizador de interrupção com timeout seguro de $25\,\text{ms}$.
-  3. Realiza leitura digital do sensor TCRT5000 (`GPIO35`).
-  4. Realiza conversão A/D de 12 bits do potenciômetro (`GPIO36` no ADC1).
-  5. Monta a estrutura `SensorRawFrame`.
-- **Período**: $50\,\text{ms}$ ($20\,\text{Hz}$ fixos), respeitando o tempo de decaimento acústico do HC-SR04.
-- **Prioridade**: **4 (Alta)** — deve interromper tarefas de domínio para manter precisão de amostragem.
-- **Comunicação**: Enfileira o quadro na fila `q_sensor_frames` (tamanho: 4 quadros).
+Para evitar contenção de cache multicore sem benefício mensurável e manter sincronização determinística, todas as **5 tarefas de aplicação** operam fixadas em `APP_CPU_NUM` (Core 1), comunicando-se exclusivamente por **filas estáticas FreeRTOS** e por um semáforo mutex de curta duração (`g_state_mutex`), sem alocação dinâmica de heap nos laços de tempo real:
 
-### 2.2 `TaskGestureInfer` (Núcleo 1)
-- **Responsabilidade**: Classificação temporal de gestos.
-  1. Consome quadros da fila `q_sensor_frames`.
-  2. Alimenta buffer circular de janelamento deslizante ($12$ amostras $\approx 600\,\text{ms}$).
-  3. Extrai o vetor de 8 características (`d_mean`, `d_std`, `v_mean`, `v_peak`, etc.).
-  4. Executa inferência via baseline de regras ou modelo TinyML compilado em C++.
-  5. Aplica filtro de histerese para evitar múltiplos disparos do mesmo gesto.
-- **Período**: Acionada pela chegada de cada quadro de sensor ($20\,\text{Hz}$).
-- **Prioridade**: **3 (Média-Alta)**.
-- **Comunicação**: Despacha `GestureEvent` para a fila `q_gesture_events`.
-
-### 2.3 `TaskPetDomain` (Núcleo 1)
-- **Responsabilidade**: Motor de regras de negócio e biologia do pet virtual (Fonte Autoritativa da Verdade).
-  1. Mantém a estrutura global `PetStateSnapshot`.
-  2. A cada $1000\,\text{ms}$ ($1\,\text{Hz}$), invoca `pet_tick(&pet)` (decaimento de fome, energia, humor).
-  3. Processa comandos recebidos da fila `q_pet_commands` (alimentar, brincar, dormir).
-  4. Reage a eventos da fila `q_gesture_events` (ex: `APPROACH` $\rightarrow$ alimentação/carinho).
-  5. Avalia evolução de estágio (`EGG` $\rightarrow$ `CHICK` $\rightarrow$ `CYBER_ROOSTER`).
-  6. Atualiza o buffer de caracteres do LCD com o status corrente.
-- **Período**: $1000\,\text{ms}$ para tick biológico + desbloqueio imediato em filas de eventos.
-- **Prioridade**: **2 (Média)**.
-- **Sincronização**: Protege leitura e escrita do estado pelo semáforo mutex `xPetStateMutex`.
-
-### 2.4 `TaskDisplayAndSerial` (Núcleo 0)
-- **Responsabilidade**: Gerenciamento de periféricos lentos de I/O e comunicação externa.
-  1. **Display LCD 2004A**: Atualiza as 4 linhas de 20 caracteres via barramento de 4 bits em intervalos de $200\,\text{ms}$ ($5\,\text{Hz}$).
-  2. **Serial Rx**: Faz varredura não-bloqueante da porta Serial USB. Ao encontrar terminador `\n`, decodifica comando JSON com `jsonl_parse_pet_command` e envia para `q_pet_commands`.
-  3. **Serial Tx**: Transmite quadros `sensor_frame` ($10\,\text{Hz}$), `pet_state` ($1\,\text{Hz}$) e `gesture_event` (sob demanda) formatados em JSON Lines v1.
-- **Período**: Loop contínuo com pausa cooperativa `vTaskDelay(pdMS_TO_TICKS(10))`.
-- **Prioridade**: **1 (Baixa)** — impede que latências de I/O serial ou escrita lenta do LCD afetem a amostragem de sensores.
+| Tarefa FreeRTOS | Prioridade | Stack (Bytes) | Período / Gatilho | Responsabilidade Principal |
+| :--- | :---: | :---: | :--- | :--- |
+| **`TaskSensorAcquire`** | `4` (Alta) | `3072 B` | `vTaskDelayUntil` (`70 ms` padrão; `50..500 ms`) | Leitura física do HC-SR04 (timeout `25 ms`), TCRT5000 (`DO` + `AO` opcional em ADC1) e potenciômetro (`ADC1_CH0`). Alimenta `g_q_sensor_infer` e, quando ativa, `g_q_sensor_tx`. |
+| **`TaskGestureInfer`** | `3` (Média-Alta) | `4096 B` | Bloqueio em `g_q_sensor_infer` (`portMAX_DELAY`) | Filtro causal (`tinyml_filter_step`), buffer circular (`W=10`), extração das 11 features canônicas, inferência TinyML (`tinyml_infer_proba`) e estabilizador temporal com cooldown. |
+| **`TaskPetDomain`** | `2` (Média) | `4096 B` | `1000 ms` (`1 Hz`) + bloqueio em `g_q_cmd_pet` | Máquina de estados autoritativa do Pet (`pet_tick`, comandos, gestos, evolução) e persistência NVS com CRC32, skip sem mudança e throttle de `30 s`. |
+| **`TaskSerialComm`** | `2` (Média) | `4096 B` | Varredura cooperativa (`5 ms`) | Único proprietário da `UART0` (`115200 baud`). Fluxo 100% puro JSON Lines v1 (`CORE_DEBUG_LEVEL=0`), parser Rx tolerante a falhas e telemetria `DIAG`. |
+| **`TaskLcdDisplay`** | `1` (Baixa) | `3072 B` | `vTaskDelayUntil` (`200 ms` / `5 Hz`) | Formatação 20×4 (`lcd_format_pet_frame`), animações não-bloqueantes de 2 quadros e atualização diferencial (dirty shadow buffer) em modo paralelo de 4 bits. |
 
 ---
 
-## 3. Gestão de Memória e Filas FreeRTOS
+## 2. Filas e Instrumentação em Tempo Real
 
-Para assegurar estabilidade contínua sem fragmentação de memória (*heap fragmentation*):
-1. Todas as filas (`q_sensor_frames`, `q_gesture_events`, `q_pet_commands`) utilizam alocação estática `xQueueCreateStatic` ou são alocadas uma única vez na inicialização no `setup()`.
-2. Buffers de formatação JSON (`char buffer[JSONL_LINE_BUFFER_SIZE]`) são alocados nas pilhas locais das tarefas ou em memória estática global (`.bss`), nunca via `malloc` ou `String` dinâmica do Arduino.
+- **Filas FreeRTOS:**
+  - `g_q_sensor_infer` (`8 × sizeof(SensorRawFrame)`): `TaskSensorAcquire -> TaskGestureInfer`
+  - `g_q_sensor_tx` (`8 × sizeof(SensorRawFrame)`): `TaskSensorAcquire -> TaskSerialComm`
+  - `g_q_gesture_pet` (`6 × sizeof(GestureEvent)`): `TaskGestureInfer / Serial Rx -> TaskPetDomain`
+  - `g_q_gesture_tx` (`6 × sizeof(GestureEvent)`): `TaskGestureInfer -> TaskSerialComm`
+  - `g_q_cmd_pet` (`8 × sizeof(PetCmdQueueItem)`): `TaskSerialComm -> TaskPetDomain`
+  - `g_q_pet_reply_tx` (`8 × sizeof(PetReplyQueueItem)`): `TaskPetDomain -> TaskSerialComm`
+- **Telemetria (`FirmwareRuntimeMetrics` via comando `DIAG`):**
+  - `acq_us` / `max_acq_us` (duração da aquisição física)
+  - `inf_us` / `max_inf_us` (latência de filtragem + features + inferência TinyML)
+  - `q_si`, `q_tx` (ocupação instantânea das filas)
+  - `hwm_s`, `hwm_g`, `hwm_p`, `hwm_c`, `hwm_l` (stack high-water mark em bytes livres de cada task)
+  - `heap`, `min_heap` (memória livre atual e mínima histórica)
+  - `drop_si`, `drop_tx`, `drop_g`, `to_us`, `nvs_w` (contadores de perda de amostras, timeouts ultrassônicos e gravações NVS)
+  - `mdl`, `exp` (identificação explícita do modelo TinyML embarcado e status experimental `AWAITING_REAL_DATA`)

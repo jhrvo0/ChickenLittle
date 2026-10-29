@@ -81,13 +81,19 @@ def _build_common_c_preamble(
     num_classes = len(class_names)
     num_features = len(FEATURE_NAMES)
     class_strs = ", ".join(f'"{c}"' for c in class_names)
+    is_eng_synth = 0 if experimental_status == "EVALUATED_ON_REAL_DATA" else 1
+    synth_banner = (
+        " * WARNING: MODELO DE ENGENHARIA (TREINADO EM DADOS SINTETICOS) — AINDA NAO VALIDADO EXPERIMENTALMENTE.\n"
+        if is_eng_synth
+        else " * MODELO TREINADO E AVALIADO EM DADOS FISICOS REAIS.\n"
+    )
 
     return f"""/*
  * AUTO-GENERATED FILE — DO NOT EDIT MANUALLY
- * MotionPet Cycle 2 TinyML Static Header (`tinyml_model.h`)
+ * MotionPet TinyML Static Header (`tinyml_model.h`)
  * Model: {model_name}
  * Experimental Data Status: {experimental_status}
- * Hardware Status: NOT_VALIDATED_ON_ESP32_HARDWARE (Host C++ Parity Verified Only)
+{synth_banner} * Hardware Status: NOT_VALIDATED_ON_ESP32_HARDWARE (Host C++ Parity Verified Only)
  *
  * Restricoes embarcadas atendidas:
  * - Zero alocacao dinamica (sem malloc/new/std::vector/std::string)
@@ -153,6 +159,10 @@ static inline float tinyml_expf(float x) {{
 #ifdef __cplusplus
 extern "C" {{
 #endif
+
+#define TINYML_MODEL_NAME                     "{model_name}"
+#define TINYML_EXPERIMENTAL_STATUS            "{experimental_status}"
+#define TINYML_IS_ENGINEERING_SYNTHETIC_MODEL {is_eng_synth}
 
 #define TINYML_NUM_FEATURES {num_features}
 #define TINYML_NUM_CLASSES  {num_classes}
