@@ -11,12 +11,17 @@ venv/
 .mypy_cache/
 .ruff_cache/
 
-# Runtime & user saves
+# Runtime & user saves / generated ML artifacts
 *.save.json
+*.parity.json
 data/saves/
 data/raw/*.jsonl
 data/raw/*.csv
+data/raw/*.meta.json
+data/raw/synthetic/
 data/processed/*
+data/models/*
+data/reports/*
 !data/.gitkeep
 !data/README.md
 

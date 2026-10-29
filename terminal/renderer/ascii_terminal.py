@@ -25,6 +25,7 @@ class HudTelemetry:
     save_status: str = "NAO SALVO"
     transport_label: str = "VIRTUAL_SERIAL_JSONL_V1"
     mode_banner: str = ""
+    classifier_summary: str = ""
 
 
 def _progress_bar(value: float, width: int = 12) -> str:
@@ -250,4 +251,8 @@ class TerminalAsciiRenderer:
             f"PKT TX/RX: {tel.tx_packets}/{tel.rx_packets}"
         )
         line3 = f"PERSIST. | Save: {tel.save_status}"
-        return [line1, line2, line3]
+        lines = [line1, line2]
+        if tel.classifier_summary:
+            lines.append(f"CLASSIF. | {tel.classifier_summary}")
+        lines.append(line3)
+        return lines

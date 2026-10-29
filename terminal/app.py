@@ -9,6 +9,7 @@ import time
 from pathlib import Path
 from typing import TextIO
 
+from ml.classifiers import BaseGestureClassifier, create_gesture_classifier
 from simulator.esp32_sim_node import SimulatedEsp32Node
 from simulator.sensors import DatasetReplaySource, SensorSimulator, SensorSource
 from terminal.communication.protocol import (
@@ -64,6 +65,7 @@ class TerminalHostClient:
         self.last_sensor: SensorFramePayload | None = None
         self.last_gesture: GestureEventPayload | None = None
         self.save_status: str = "NAO SALVO"
+        self.classifier_summary: str = ""
         self.last_error: str | None = None
 
         self.tx_packets = 0
@@ -208,6 +210,7 @@ class TerminalHostClient:
             save_status=self.save_status,
             transport_label=self.transport_label,
             mode_banner=banner,
+            classifier_summary=self.classifier_summary,
         )
         return self.terminal_renderer.render(
             state=self.pet_state,
@@ -221,11 +224,17 @@ def run_demo(
     save_path: str | Path = "data/saves/demo_pet.save.json",
     pet_name: str = "Pip",
     out: TextIO | None = None,
+    classifier_kind: str = "sim",
+    model_path: str | Path | None = "data/models/best_model.joblib",
 ) -> int:
-    """Executa uma demonstração determinística ponta a ponta do Ciclo 1 sem hardware físico."""
+    """Executa uma demonstração determinística ponta a ponta sem hardware físico."""
     stream = out or sys.stdout
     host_ep, device_ep, wire_log = create_virtual_serial_pair()
     sensor_sim = SensorSimulator(seed=7, dropout_prob=0.0)
+    clf: BaseGestureClassifier = create_gesture_classifier(
+        kind=classifier_kind,
+        model_path=model_path,
+    )
 
     sim_node = SimulatedEsp32Node(
         endpoint=device_ep,
@@ -233,19 +242,21 @@ def run_demo(
         initial_state=PetState(name=pet_name),
         save_path=save_path,
         pet_tick_every_n_samples=6,
+        classifier=clf,
     )
     client = TerminalHostClient(host_ep)
 
     sim_node.boot(auto_load=False)
     client.poll_serial()
+    client.classifier_summary = clf.get_diagnostics().format_hud_line()
 
     stream.write("=== MOTIONPET CICLO 1 -- DEMONSTRACAO EXECUTAVEL (SEM HARDWARE FISICO) ===\n\n")
     stream.write(">>> [ETAPA 1] Estado inicial sincronizado via JSON Lines v1 (Ovo Nivel 1):\n")
     stream.write(client.render_frame() + "\n\n")
 
-    # Etapa 2: Trajetória simulada HC-SR04 (APPROACH -> carinho automático via detector de janela)
+    # Etapa 2: Trajetória simulada HC-SR04 (APPROACH -> carinho automático via classificador)
     sensor_sim.queue_gesture_profile(GestureType.APPROACH)
-    for _ in range(10):
+    for _ in range(12):
         sim_node.step()
         client.poll_serial()
 
@@ -270,6 +281,7 @@ def run_demo(
     sim_node.step()
     client.poll_serial()
     client.save_status = sim_node.save_status
+    client.classifier_summary = clf.get_diagnostics().format_hud_line()
 
     stream.write(
         f">>> [ETAPA 2] Apos gesto HC-SR04 APPROACH, interacoes, evolucao (Nv {saved_level}) "
@@ -308,10 +320,16 @@ def run_interactive(
     replay_path: str | Path | None = None,
     max_frames: int | None = None,
     refresh_sec: float = 0.25,
+    classifier_kind: str = "sim",
+    model_path: str | Path | None = "data/models/best_model.joblib",
 ) -> int:
     """Inicia a interface ASCII animada em tempo real no terminal do notebook."""
     sim_node: SimulatedEsp32Node | None = None
     sensor_sim: SensorSimulator | None = None
+    active_clf: BaseGestureClassifier = create_gesture_classifier(
+        kind=classifier_kind,
+        model_path=model_path,
+    )
 
     if serial_port:
         host_ep: SerialEndpoint = PySerialEndpoint(port=serial_port, baudrate=baudrate)
@@ -332,11 +350,13 @@ def run_interactive(
             sensor_source=source,
             initial_state=PetState(name=pet_name),
             save_path=save_path,
+            classifier=active_clf,
         )
         sim_node.boot(auto_load=True)
 
     client = TerminalHostClient(endpoint=host_ep, transport_label=transport_label)
     client.poll_serial()
+    client.classifier_summary = active_clf.get_diagnostics().format_hud_line()
     if sim_node is not None:
         client.save_status = sim_node.save_status
 
@@ -355,6 +375,7 @@ def run_interactive(
             if sim_node is not None:
                 sim_node.step()
             client.poll_serial()
+            client.classifier_summary = active_clf.get_diagnostics().format_hud_line()
             if sim_node is not None:
                 client.save_status = sim_node.save_status
 
@@ -441,13 +462,29 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Limita o numero de quadros renderizados antes de encerrar.",
     )
+    parser.add_argument(
+        "--classifier",
+        choices=("sim", "ml", "embedded"),
+        default="sim",
+        help="Seleciona o classificador intercambiavel de gestos (padrao: sim).",
+    )
+    parser.add_argument(
+        "--model-path",
+        default="data/models/best_model.joblib",
+        help="Caminho do modelo treinado para --classifier ml.",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     if args.demo:
-        return run_demo(save_path=args.save_path, pet_name=args.name)
+        return run_demo(
+            save_path=args.save_path,
+            pet_name=args.name,
+            classifier_kind=args.classifier,
+            model_path=args.model_path,
+        )
     return run_interactive(
         save_path=args.save_path,
         pet_name=args.name,
@@ -455,6 +492,8 @@ def main(argv: list[str] | None = None) -> int:
         baudrate=args.baudrate,
         replay_path=args.replay,
         max_frames=args.frames,
+        classifier_kind=args.classifier,
+        model_path=args.model_path,
     )
 
 

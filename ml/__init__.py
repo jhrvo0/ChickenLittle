@@ -1,8 +1,43 @@
-"""Módulo de Machine Learning e TinyML do MotionPet.
+"""Infraestrutura de Machine Learning e TinyML para reconhecimento de gestos do MotionPet."""
 
-Este pacote contém os submódulos responsáveis pela coleta de dados físicos,
-pré-processamento de séries temporais 1D, treinamento de modelos de classificação,
-avaliação multivariada e exportação estática para C++ no ESP32.
-"""
+from ml.classifiers import (
+    BaseGestureClassifier,
+    ClassifierDiagnostics,
+    EmbeddedGestureClassifier,
+    MLGestureClassifier,
+    SimulatedGestureClassifier,
+    create_gesture_classifier,
+)
+from ml.schemas import (
+    ALL_GESTURE_CLASSES,
+    CORE_GESTURE_CLASSES,
+    EXPERIMENTAL_GESTURE_CLASSES,
+    FEATURE_NAMES,
+    ML_SCHEMA_VERSION,
+    DataOrigin,
+    ExperimentalStatus,
+    PreprocessingConfig,
+    RawSampleRecord,
+    StabilizerConfig,
+    WindowSample,
+)
 
-__version__ = "0.1.0"
+__all__ = [
+    "ALL_GESTURE_CLASSES",
+    "BaseGestureClassifier",
+    "CORE_GESTURE_CLASSES",
+    "ClassifierDiagnostics",
+    "DataOrigin",
+    "EXPERIMENTAL_GESTURE_CLASSES",
+    "EmbeddedGestureClassifier",
+    "ExperimentalStatus",
+    "FEATURE_NAMES",
+    "MLGestureClassifier",
+    "ML_SCHEMA_VERSION",
+    "PreprocessingConfig",
+    "RawSampleRecord",
+    "SimulatedGestureClassifier",
+    "StabilizerConfig",
+    "WindowSample",
+    "create_gesture_classifier",
+]

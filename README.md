@@ -4,18 +4,17 @@ Sistema embarcado interativo que combina **ESP32**, **TinyML** (reconhecimento d
 
 ---
 
-## Status do Projeto — Ciclo 1 (Fundação Funcional)
+## Status do Projeto — Ciclos 1 e 2
 
 | Subsistema | Status Atual | Observação |
 | :--- | :--- | :--- |
 | **Motor de Estado do Pet (`terminal/pet/`)** | **Implementado e Testado** | Necessidades, humor, evolução (`EGG` → `CHICK` → `CYBER_ROOSTER`), personalidade emergente e persistência atômica JSON. |
 | **Protocolo Serial JSON Lines v1 (`terminal/communication/`)** | **Implementado e Testado** | Envelopes versionados (`v=1`), validação estrita e loopback serial virtual em memória (`VirtualSerialEndpoint`). |
-| **Simulador ESP32 + Sensores (`simulator/`)** | **Implementado e Testado** | Simulação determinística 1D do HC-SR04 (~60 ms/amostra, ruído e timeouts), TCRT5000, potenciômetro e replay `.jsonl`/`.csv`. |
-| **Espelho LCD 20×4 (`terminal/renderer/lcd20x4.py`)** | **Implementado e Testado** | Garantia estrita de 4 linhas × 20 colunas em ASCII 7-bits imprimível (compatível HD44780). |
-| **Terminal ASCII (`terminal/renderer/ascii_terminal.py`)** | **Implementado e Testado** | Cena animada, barras de atributos, espelho do LCD 20×4 em tempo real, telemetria e controle por teclado. |
+| **Simulador ESP32 + Sensores (`simulator/`)** | **Implementado e Testado** | Simulação determinística 1D do HC-SR04, TCRT5000, potenciômetro, replay `.jsonl`/`.csv` e classificador intercambiável. |
+| **Espelho LCD 20×4 & Terminal ASCII (`terminal/renderer/`)** | **Implementado e Testado** | LCD 4×20 ASCII estrito + painel ASCII animado com telemetria em tempo real de classe, confiança, janela, latência e rejeições. |
+| **Infraestrutura de Machine Learning (`ml/`)** | **Implementada e Testada (`AWAITING_REAL_DATA`)** | Coleta, filtragem causal, 11 features, split sem vazamento, Baseline/DT/RF/MLP, estabilização de eventos e exportador C++ com paridade nativa. |
 | **Modos Auxiliares (`Pet Launch`, `Air Music`, `Air Slides`)** | **Interfaces Modulares + Física Base** | Contratos de eventos prontos; loop dedicado do jogo no Ciclo 4 e integrações finais no Ciclo 6. |
-| **Pipeline de Machine Learning (`ml/`)** | **Especificado / Estruturado (Ciclo 2)** | Aguardando implementação do pipeline no Ciclo 2 e coleta física real no Ciclo 5 (nenhuma métrica fabricada). |
-| **Firmware C++/FreeRTOS (`firmware/`)** | **Headers de Contrato + `platformio.ini` (Ciclo 3)** | Pinout proposto **não validado fisicamente**; consultar obrigatoriamente `docs/hardware_safety.md` antes de energizar. |
+| **Firmware C++/FreeRTOS (`firmware/`)** | **Headers + `tinyml_model.h` exportável (Ciclo 3)** | Pinout proposto **não validado fisicamente**; consultar obrigatoriamente `docs/hardware_safety.md` antes de energizar. |
 
 ---
 
@@ -86,10 +85,39 @@ Abre o painel ASCII animado com controle instantâneo pelo teclado e espelho do 
 ```
 
 Opções úteis de linha de comando:
+- `--classifier {sim,ml,embedded}`: seleciona o classificador intercambiável de gestos (degrada graciosamente mesmo sem modelo treinado).
+- `--model-path "data/models/best_model.joblib"`: define o artefato usado por `--classifier ml`.
 - `--name "BitChirp"`: define o nome inicial do pet caso ainda não exista save.
 - `--save-path "data/saves/meu_pet.save.json"`: escolhe o arquivo de persistência.
 - `--replay "caminho/sessao.jsonl"`: reproduz leituras gravadas de sensores.
 - `--frames 20`: executa um número fixo de quadros e encerra.
+
+### 3. Pipeline Completo de Machine Learning (Ciclo 2)
+
+> **Aviso Experimental:** Dados sintéticos servem exclusivamente para validar o funcionamento do código. Qualquer execução sem dados físicos carimba automaticamente `experimental_status = AWAITING_REAL_DATA`.
+
+```powershell
+# A. Gerar corpus sintético de verificação do pipeline (ou usar --serial-port COMx para coleta real)
+.\.venv\Scripts\python.exe -m ml.collection --generate-synthetic-corpus --output-dir data/raw/synthetic
+
+# B. Validar integridade, ordenação temporal e qualidade das sessões
+.\.venv\Scripts\python.exe -m ml.collection --validate data/raw/synthetic
+
+# C. Pré-processamento causal e extração das 11 features temporais
+.\.venv\Scripts\python.exe -m ml.preprocessing --input data/raw/synthetic --output data/processed/features_dataset.csv
+
+# D. Treinar Baseline por Regras, Decision Tree, Random Forest e MLP Compacta (split agrupado sem vazamento)
+.\.venv\Scripts\python.exe -m ml.training --input data/processed/features_dataset.csv --output-dir data/models --seed 42
+
+# E. Avaliar modelos (janelas + eventos completos com rejeição/estabilização/cooldown) e gerar relatórios JSON/MD
+.\.venv\Scripts\python.exe -m ml.evaluation --dataset data/processed/features_dataset.csv --models-dir data/models --output-dir data/reports
+
+# F. Exportar modelo para C++ estático (zero heap) e compilar/testar paridade nativa
+.\.venv\Scripts\python.exe -m ml.export --model data/models/best_model.joblib --dataset data/processed/features_dataset.csv --output firmware/gestures/tinyml_model.h
+
+# G. Executar o MotionPet integrado com o classificador de ML
+.\.venv\Scripts\python.exe -m terminal --demo --classifier ml --model-path data/models/best_model.joblib
+```
 
 ### Atalhos de Teclado no Modo Interativo
 
@@ -123,3 +151,4 @@ Opções úteis de linha de comando:
 - [`docs/protocol.md`](docs/protocol.md) — Especificação do protocolo serial JSON Lines v1.
 - [`docs/hardware_safety.md`](docs/hardware_safety.md) — **Leitura obrigatória antes da montagem física**: divisor resistivo para o pino `ECHO` (5 V → 3,3 V) do HC-SR04, aterramento de `RW` e compatibilidade lógica do LCD 2004A V1.1, restrições de GPIOs do ESP32 e checklist de bancada.
 - [`docs/ml_pipeline_spec.md`](docs/ml_pipeline_spec.md) — Especificação do pipeline de Machine Learning e TinyML para séries temporais 1D (Ciclo 2).
+- [`docs/real_data_collection_guide.md`](docs/real_data_collection_guide.md) — Procedimento passo a passo para coleta do dataset físico real na bancada e limitações experimentais.

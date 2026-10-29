@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
-from simulator.gesture_detector_sim import SimulatedWindowGestureDetector
+from ml.classifiers import BaseGestureClassifier, SimulatedGestureClassifier
 from simulator.sensors import SensorSimulator, SensorSource
 from terminal.communication.protocol import (
     AckPayload,
@@ -41,13 +42,14 @@ class SimulatedEsp32Node:
         initial_state: PetState | None = None,
         save_path: str | Path = "data/saves/pet_state.save.json",
         pet_tick_every_n_samples: int = 5,
+        classifier: BaseGestureClassifier | Any | None = None,
     ) -> None:
         self.endpoint = endpoint
         self.sensor_source: SensorSource = sensor_source or SensorSimulator(seed=42)
         self.persistence = PetPersistence(save_path)
         self.engine = PetEngine(state=initial_state, config=pet_config)
         self.lcd_renderer = Lcd20x4Renderer()
-        self.detector = SimulatedWindowGestureDetector()
+        self.detector: Any = classifier if classifier is not None else SimulatedGestureClassifier()
         self.codec = ProtocolCodec()
         self.pet_tick_every_n_samples = max(1, pet_tick_every_n_samples)
 
@@ -83,8 +85,11 @@ class SimulatedEsp32Node:
             self.codec.encode(MessageType.SENSOR_FRAME, sensor_frame.to_dict(), ts_ms=ts_ms)
         )
 
-        # 3. Avalia detector de janela temporal simulada
-        detected = self.detector.push(sensor_frame)
+        # 3. Avalia classificador intercambiável de gestos (Simulado, ML ou Embarcado)
+        if hasattr(self.detector, "push_frame"):
+            detected = self.detector.push_frame(sensor_frame, ts_ms=ts_ms)
+        else:
+            detected = self.detector.push(sensor_frame)
         if detected is not None:
             self.endpoint.write_line(
                 self.codec.encode(MessageType.GESTURE_EVENT, detected.to_dict(), ts_ms=ts_ms)
