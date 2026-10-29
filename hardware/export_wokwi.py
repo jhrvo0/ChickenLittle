@@ -14,7 +14,7 @@ from . import model
 from .model import Layout
 
 ESP_ID = "esp"
-PART_IDS = {"M1": "ultra", "M3": "lcd", "P1": "pot", "R1": "r1", "R2": "r2", "R3": "r3", "R4": "r4"}
+PART_IDS = {"M1": "ultra", "P1": "pot", "R1": "r1", "R2": "r2"}
 GND_MAP = {"J2.14": "GND.1", "J3.1": "GND.2", "J3.7": "GND.3"}   # ASSUMIDO (tudo e GND; irrelevante eletricamente)
 
 
@@ -40,27 +40,24 @@ def wokwi_terminal(lay: Layout, ref_pin: str) -> str | None:
         return f"{PART_IDS[ref]}:{'1' if pin == 'A' else '2'}"
     if t == "potentiometer":
         return f"{PART_IDS[ref]}:{ {'END_A': 'VCC', 'WIPER': 'SIG', 'END_B': 'GND'}[pin] }"
-    if t == "lcd2004a":
-        return f"{PART_IDS[ref]}:{pin}"
-    return None                                  # TCRT5000: sem modelo
+    return None                                  # TCRT5000: sem modelo (LCD: estagio D adiado)
 
 
 NET_COLOR = {"5V": "red", "3V3": "orange", "GND": "black", "TRIG": "gold", "ECHO_5V": "red", "ECHO_NODE": "green",
              "POT_WIPER": "purple"}
 
 
-def build_diagram(lay: Layout, stage: str = "E", distance_cm: int = 25) -> dict:
+def build_diagram(lay: Layout, stage: str = "C", distance_cm: int = 25) -> dict:
     parts = [{"type": "board-esp32-devkit-c-v4", "id": ESP_ID, "top": 0, "left": 0, "attrs": {}}]
     present = {c["ref"] for c in lay.comps(stage)}
     y = -120.0
+    def ohms(ref):
+        return {"value": str(lay.components[ref]["ohms"])} if ref in lay.components else {}
     spec = {
         "M1": ("wokwi-hc-sr04", {"distance": str(distance_cm)}, -160, 240),
-        "R1": ("wokwi-resistor", {"value": str(lay.components["R1"]["ohms"])}, -40, 260),
-        "R2": ("wokwi-resistor", {"value": str(lay.components["R2"]["ohms"])}, 30, 260),
+        "R1": ("wokwi-resistor", ohms("R1"), -40, 260),
+        "R2": ("wokwi-resistor", ohms("R2"), 30, 260),
         "P1": ("wokwi-potentiometer", {}, 150, 260),
-        "M3": ("wokwi-lcd2004", {}, -330, -260),
-        "R3": ("wokwi-resistor", {"value": str(lay.components["R3"]["ohms"])} if "R3" in lay.components else {}, -200, 100),
-        "R4": ("wokwi-resistor", {"value": str(lay.components["R4"]["ohms"])} if "R4" in lay.components else {}, -200, 140),
     }
     for ref, (ptype, attrs, top, left) in spec.items():
         if ref in present:
@@ -121,7 +118,7 @@ README = """# Simulacao Wokwi do MotionPet (gerada)
 
 Arquivos gerados por `python -m hardware.build` a partir de `hardware/netlist/motionpet.netlist.json`:
 
-- `diagram.json` — ESP32-DevKitC V4 (`board-esp32-devkit-c-v4`, 38 pinos), HC-SR04, R1/R2, potenciometro, LCD 2004.
+- `diagram.json` — ESP32-DevKitC V4 (`board-esp32-devkit-c-v4`, 38 pinos), HC-SR04, R1/R2 e potenciometro (estagios A-C). O LCD (estagio D) esta adiado.
 - `wokwi.toml` — aponta para o firmware compilado pelo PlatformIO (`pio run -d firmware`).
 - `scenarios/hcsr04.test.yaml` — cenario de teste (sensor_frame, distancias 25 cm e 300 cm).
 

@@ -12,10 +12,10 @@
 
 | componente | descricao | pino | furo | rede | estado |
 |---|---|---|---|---|---|
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 17B | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | 5V | 22B | 5V | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 4I | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 10I | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 14B | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | 5V | 19B | 5V | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 1I | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 7I | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
 
 ## Fios (fio a fio)
 
@@ -25,10 +25,10 @@ _(vazio)_
 
 | furo | coluna | fileira | ocupante | rede |
 |---|---|---|---|---|
-| 4I | 4 | I | U1 ESP32 DevKit: pino GND [J3.1] | GND |
-| 10I | 10 | I | U1 ESP32 DevKit: pino GND [J3.7] | GND |
-| 17B | 17 | B | U1 ESP32 DevKit: pino GND [J2.14] | GND |
-| 22B | 22 | B | U1 ESP32 DevKit: pino 5V [J2.19] | 5V |
+| 1I | 1 | I | U1 ESP32 DevKit: pino GND [J3.1] | GND |
+| 7I | 7 | I | U1 ESP32 DevKit: pino GND [J3.7] | GND |
+| 14B | 14 | B | U1 ESP32 DevKit: pino GND [J2.14] | GND |
+| 19B | 19 | B | U1 ESP32 DevKit: pino 5V [J2.19] | 5V |
 
 ## Validacao automatica (software)
 

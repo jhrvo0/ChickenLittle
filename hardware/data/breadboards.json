@@ -1,0 +1,33 @@
+{
+  "_comment": "Perfis de protoboard. Geometria medida nos SVGs/fzp do fritzing-parts (Chromium getBoundingClientRect). Unidades fz_*: unidades do SVG do Fritzing; fz_scale converte para pixels de cena (90 dpi).",
+  "profiles": {
+    "bb400": {
+      "title": "Meia-protoboard 30 colunas (A-J x 1-30)",
+      "n_cols": 30,
+      "rail_cols": [3,4,5,6,7,9,10,11,12,13,15,16,17,18,19,21,22,23,24,25,27,28,29,30,31],
+      "rails_in_this_project": false,
+      "fz_module_id": "0152b316-ca6e-11ee-a6fa-8be78db221f8BreadboardModuleID",
+      "fz_path": ":/resources/parts/core/Half_breadboard_v2.fzp",
+      "fz_reference_fzp": "core/Half_breadboard_v2.fzp",
+      "fz_scale": 1.0,
+      "fz_x0": 13.65,
+      "fz_y_a": 144.0,
+      "fz_pitch": 9.0,
+      "fz_size": [292.41, 189.0]
+    },
+    "bb830": {
+      "title": "Protoboard completa 830 pontos (63 colunas)",
+      "n_cols": 63,
+      "rail_cols": [3,4,5,6,7,9,10,11,12,13,15,16,17,18,19,21,22,23,24,25,27,28,29,30,31,33,34,35,36,37,39,40,41,42,43,45,46,47,48,49,51,52,53,54,55,57,58,59,60,61],
+      "rails_in_this_project": false,
+      "fz_module_id": "Breadboard-RSR03MB102-ModuleID",
+      "fz_path": ":/resources/parts/core/breadboard2.fzp",
+      "fz_reference_fzp": "core/breadboard2.fzp",
+      "fz_scale": 1.25,
+      "fz_x0": 10.94,
+      "fz_y_a": 115.19,
+      "fz_pitch": 7.2,
+      "fz_size": [468.238, 151.2]
+    }
+  }
+}

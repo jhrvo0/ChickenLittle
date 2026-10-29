@@ -18,9 +18,16 @@ from . import fz_parts, model
 from .model import Layout, parse_hole
 
 SCENE_DPI = 90.0
-BB_SCALE = SCENE_DPI / 72.0          # SVG do Fritzing (Illustrator) = 72 dpi
 
-BB_MODULE_ID = "Breadboard-RSR03MB102-ModuleID"
+
+def bb_module_id() -> str:
+    return model.active().fz_module_id
+
+
+def bb_scale() -> float:
+    return model.active().fz_scale
+
+
 HCSR04_MODULE_ID = "hc-sr0489a24442a28f4051a3a8757dd4825d87"
 RESISTOR_MODULE_ID = "ResistorModuleID"
 WIRE_MODULE_ID = "WireModuleID"
@@ -91,7 +98,7 @@ class _Inst:
 
 def bb_hole_px(hole: str) -> tuple[float, float]:
     x, y = model.fz_hole_xy(hole)
-    return round(x * BB_SCALE, 3), round(y * BB_SCALE, 3)
+    return round(x * bb_scale(), 3), round(y * bb_scale(), 3)
 
 
 def build_fz(lay: Layout, stage: str) -> tuple[bytes, dict[str, bytes], dict]:
@@ -99,7 +106,7 @@ def build_fz(lay: Layout, stage: str) -> tuple[bytes, dict[str, bytes], dict]:
     gen = generic_parts(lay)
     mi = 3000
     insts: list[_Inst] = []
-    bb = _Inst("BB1", BB_MODULE_ID, mi, "breadboardbreadboard", 0.0, 0.0, {}, {}, {})
+    bb = _Inst("BB1", bb_module_id(), mi, "breadboardbreadboard", 0.0, 0.0, {}, {}, {})
     insts.append(bb)
     mi += 1
     by_ref: dict[str, _Inst] = {"BB1": bb}
@@ -198,8 +205,8 @@ def build_fz(lay: Layout, stage: str) -> tuple[bytes, dict[str, bytes], dict]:
 
     for inst in insts:
         attrs = {"moduleIdRef": inst.module_id, "modelIndex": str(inst.model_index)}
-        if inst.module_id == BB_MODULE_ID:
-            attrs["path"] = ":/resources/parts/core/breadboard2.fzp"
+        if inst.module_id == bb_module_id():
+            attrs["path"] = model.active().fz_path
         elif inst.module_id == RESISTOR_MODULE_ID:
             attrs["path"] = ":/resources/parts/core/resistor.fzp"
         e = ET.SubElement(instances, "instance", attrs)
@@ -274,8 +281,7 @@ def nets_from_fzz(path_or_bytes, lay: Layout, stage: str) -> list[frozenset[str]
     def node(midx: str, cid: str):
         inst = idx_to_inst[midx]
         mid = inst.get("moduleIdRef")
-        if mid == BB_MODULE_ID:
-            m = model.HOLE_RE.match(cid[3:])
+        if mid == bb_module_id():
             return ("hole", cid[3:])
         return ("pin", title[midx], cid)
 
