@@ -1,0 +1,23 @@
+furo,coluna,fileira,ocupante,rede
+4I,4,I,U1 ESP32 DevKit: pino GND [J3.1],GND
+8A,8,A,"fio W4 (verde), ponta final",
+8B,8,B,U1 ESP32 DevKit: pino IO34 (GPIO34) [J2.5],ECHO_NODE
+10I,10,I,U1 ESP32 DevKit: pino GND [J3.7],GND
+10J,10,J,"fio W2 (preto), ponta inicial",
+13I,13,I,U1 ESP32 DevKit: pino IO5 (GPIO5) [J3.10],TRIG
+13J,13,J,"fio W3 (amarelo), ponta inicial",
+17B,17,B,U1 ESP32 DevKit: pino GND [J2.14],GND
+22A,22,A,"fio W1 (vermelho), ponta inicial",
+22B,22,B,U1 ESP32 DevKit: pino 5V [J2.19],5V
+30H,30,H,"fio W1 (vermelho), ponta final",
+30J,30,J,M1 HC-SR04: pino VCC,5V
+31I,31,I,"fio W3 (amarelo), ponta final",
+31J,31,J,M1 HC-SR04: pino TRIG,TRIG
+32H,32,H,"R1 2,2 kΩ: perna A",ECHO_5V
+32J,32,J,M1 HC-SR04: pino ECHO,ECHO_5V
+33G,33,G,"R2 3,3 kΩ: perna B",GND
+33I,33,I,"fio W2 (preto), ponta final",
+33J,33,J,M1 HC-SR04: pino GND,GND
+36F,36,F,"fio W4 (verde), ponta inicial",
+36G,36,G,"R2 3,3 kΩ: perna A",ECHO_NODE
+36H,36,H,"R1 2,2 kΩ: perna B",ECHO_NODE

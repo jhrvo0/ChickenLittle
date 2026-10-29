@@ -1,0 +1,95 @@
+furo,coluna,fileira,ocupante,rede
+4A,4,A,"fio W5 (laranja), ponta inicial",
+4B,4,B,U1 ESP32 DevKit: pino 3V3 [J2.1],3V3
+4I,4,I,U1 ESP32 DevKit: pino GND [J3.1],GND
+5I,5,I,U1 ESP32 DevKit: pino IO23 (GPIO23) [J3.2],LCD_D6
+5J,5,J,"fio W22 (laranja), ponta inicial",
+6A,6,A,"fio W10 (roxo), ponta final",
+6B,6,B,U1 ESP32 DevKit: pino VP (GPIO36) [J2.3],POT_WIPER
+6I,6,I,U1 ESP32 DevKit: pino IO22 (GPIO22) [J3.3],LCD_D5
+6J,6,J,"fio W21 (marrom), ponta inicial",
+8A,8,A,"fio W4 (verde), ponta final",
+8B,8,B,U1 ESP32 DevKit: pino IO34 (GPIO34) [J2.5],ECHO_NODE
+9A,9,A,"fio W9 (azul), ponta final",
+9B,9,B,U1 ESP32 DevKit: pino IO35 (GPIO35) [J2.6],IR_DO
+9I,9,I,U1 ESP32 DevKit: pino IO21 (GPIO21) [J3.6],LCD_D4
+9J,9,J,"fio W20 (branco), ponta inicial",
+10I,10,I,U1 ESP32 DevKit: pino GND [J3.7],GND
+10J,10,J,"fio W2 (preto), ponta inicial",
+11I,11,I,U1 ESP32 DevKit: pino IO19 (GPIO19) [J3.8],LCD_RS
+11J,11,J,"fio W18 (azul), ponta inicial",
+12I,12,I,U1 ESP32 DevKit: pino IO18 (GPIO18) [J3.9],LCD_E
+12J,12,J,"fio W19 (verde), ponta inicial",
+13I,13,I,U1 ESP32 DevKit: pino IO5 (GPIO5) [J3.10],TRIG
+13J,13,J,"fio W3 (amarelo), ponta inicial",
+14A,14,A,"fio W23 (roxo), ponta inicial",
+14B,14,B,U1 ESP32 DevKit: pino IO27 (GPIO27) [J2.11],LCD_D7
+17A,17,A,"fio W7 (preto), ponta inicial",
+17B,17,B,U1 ESP32 DevKit: pino GND [J2.14],GND
+22A,22,A,"fio W1 (vermelho), ponta inicial",
+22B,22,B,U1 ESP32 DevKit: pino 5V [J2.19],5V
+27A,27,A,M2 TCRT5000 (modulo LM393): pino VCC,3V3
+27B,27,B,"fio W5 (laranja), ponta final",
+27C,27,C,"fio W6 (laranja), ponta inicial",
+28A,28,A,M2 TCRT5000 (modulo LM393): pino GND,GND
+28B,28,B,"fio W7 (preto), ponta final",
+28C,28,C,"fio W8 (preto), ponta inicial",
+29A,29,A,M2 TCRT5000 (modulo LM393): pino DO,IR_DO
+29B,29,B,"fio W9 (azul), ponta inicial",
+30A,30,A,M2 TCRT5000 (modulo LM393): pino AO,
+30G,30,G,"fio W16 (vermelho), ponta inicial",
+30H,30,H,"fio W1 (vermelho), ponta final",
+30J,30,J,M1 HC-SR04: pino VCC,5V
+31I,31,I,"fio W3 (amarelo), ponta final",
+31J,31,J,M1 HC-SR04: pino TRIG,TRIG
+32H,32,H,"R1 2,2 kΩ: perna A",ECHO_5V
+32J,32,J,M1 HC-SR04: pino ECHO,ECHO_5V
+33A,33,A,P1 Potenciometro rotativo: pino END_A,3V3
+33C,33,C,"fio W6 (laranja), ponta final",
+33G,33,G,"R2 3,3 kΩ: perna B",GND
+33H,33,H,"fio W12 (preto), ponta inicial",
+33I,33,I,"fio W2 (preto), ponta final",
+33J,33,J,M1 HC-SR04: pino GND,GND
+34A,34,A,P1 Potenciometro rotativo: pino WIPER,POT_WIPER
+34B,34,B,"fio W10 (roxo), ponta inicial",
+35A,35,A,P1 Potenciometro rotativo: pino END_B,GND
+35C,35,C,"fio W8 (preto), ponta final",
+36F,36,F,"fio W4 (verde), ponta inicial",
+36G,36,G,"R2 3,3 kΩ: perna A",ECHO_NODE
+36H,36,H,"R1 2,2 kΩ: perna B",ECHO_NODE
+44F,44,F,"fio W14 (preto), ponta inicial",
+44G,44,G,R3 1 kΩ: perna B,GND
+44H,44,H,"fio W13 (preto), ponta inicial",
+44I,44,I,"fio W12 (preto), ponta final",
+46H,46,H,"fio W13 (preto), ponta final",
+46J,46,J,M3 LCD 2004A V1.1: pino VSS,GND
+47H,47,H,"fio W17 (vermelho), ponta inicial",
+47I,47,I,"fio W16 (vermelho), ponta final",
+47J,47,J,M3 LCD 2004A V1.1: pino VDD,5V
+48G,48,G,R3 1 kΩ: perna A,LCD_V0
+48J,48,J,M3 LCD 2004A V1.1: pino V0,LCD_V0
+49I,49,I,"fio W18 (azul), ponta final",
+49J,49,J,M3 LCD 2004A V1.1: pino RS,LCD_RS
+50H,50,H,"fio W15 (preto), ponta inicial",
+50I,50,I,"fio W14 (preto), ponta final",
+50J,50,J,M3 LCD 2004A V1.1: pino RW,GND
+51I,51,I,"fio W19 (verde), ponta final",
+51J,51,J,M3 LCD 2004A V1.1: pino E,LCD_E
+52J,52,J,M3 LCD 2004A V1.1: pino D0,
+53J,53,J,M3 LCD 2004A V1.1: pino D1,
+54J,54,J,M3 LCD 2004A V1.1: pino D2,
+55J,55,J,M3 LCD 2004A V1.1: pino D3,
+56I,56,I,"fio W20 (branco), ponta final",
+56J,56,J,M3 LCD 2004A V1.1: pino D4,LCD_D4
+57I,57,I,"fio W21 (marrom), ponta final",
+57J,57,J,M3 LCD 2004A V1.1: pino D5,LCD_D5
+58I,58,I,"fio W22 (laranja), ponta final",
+58J,58,J,M3 LCD 2004A V1.1: pino D6,LCD_D6
+59I,59,I,"fio W23 (roxo), ponta final",
+59J,59,J,M3 LCD 2004A V1.1: pino D7,LCD_D7
+60G,60,G,R4 150 Ω: perna B,LCD_A
+60J,60,J,M3 LCD 2004A V1.1: pino A,LCD_A
+61I,61,I,"fio W15 (preto), ponta final",
+61J,61,J,M3 LCD 2004A V1.1: pino K,GND
+63G,63,G,R4 150 Ω: perna A,5V
+63H,63,H,"fio W17 (vermelho), ponta final",

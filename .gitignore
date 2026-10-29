@@ -35,3 +35,5 @@ sdkconfig.old
 # OS / IDE
 .DS_Store
 Thumbs.db
+
+tools/

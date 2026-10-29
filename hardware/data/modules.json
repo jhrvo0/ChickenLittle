@@ -1,0 +1,91 @@
+{
+  "_comment": "Catalogo de modulos usados no MotionPet. Dimensoes marcadas ASSUMED nao foram medidas na peca fisica real.",
+  "modules": {
+    "hc_sr04": {
+      "title": "HC-SR04 sensor ultrassonico",
+      "status": "STANDARD_PINOUT_PENDING_PHYSICAL_CONFIRMATION",
+      "pin_order": ["VCC", "TRIG", "ECHO", "GND"],
+      "pin_order_note": "Ordem padrao da serigrafia do HC-SR04 (VCC, Trig, Echo, GND). Confirmar na peca.",
+      "pin_pitch_in": 0.1,
+      "body_mm": [45.0, 20.0],
+      "supply_v": 5.0,
+      "pin_electrical": {
+        "VCC": {"role": "power_in", "v": 5.0},
+        "TRIG": {"role": "input", "v_max": 5.0, "note": "Aceita 3,3 V do ESP32 (VIH minimo ~2,0 V)"},
+        "ECHO": {"role": "output", "v": 5.0, "note": "Saida de ~5 V: NUNCA ligar direto ao ESP32"},
+        "GND": {"role": "ground", "v": 0.0}
+      },
+      "fritzing_module_id": "hc-sr0489a24442a28f4051a3a8757dd4825d87",
+      "fritzing_connectors": {"VCC": "connector0", "TRIG": "connector1", "ECHO": "connector2", "GND": "connector3"},
+      "wokwi_part": "wokwi-hc-sr04"
+    },
+    "tcrt5000_module": {
+      "title": "Modulo TCRT5000 (comparador LM393) 4 pinos",
+      "status": "PIN_ORDER_UNCONFIRMED",
+      "pin_order": ["VCC", "GND", "DO", "AO"],
+      "pin_order_note": "ASSUMED: modulos LM393 aparecem como VCC-GND-DO-AO ou AO-DO-GND-VCC. LER A SERIGRAFIA e editar 'pin_order' se divergir.",
+      "pin_pitch_in": 0.1,
+      "body_mm": [32.0, 14.0],
+      "supply_v": 3.3,
+      "pin_electrical": {
+        "VCC": {"role": "power_in", "v": 3.3},
+        "GND": {"role": "ground", "v": 0.0},
+        "DO": {"role": "output", "v": 3.3},
+        "AO": {"role": "analog_output", "v_max": 3.3}
+      },
+      "wokwi_part": null
+    },
+    "potentiometer": {
+      "title": "Potenciometro rotativo 3 terminais",
+      "status": "PENDING_PHYSICAL_CONFIRMATION",
+      "pin_order": ["END_A", "WIPER", "END_B"],
+      "pin_order_note": "Terminais externos sao intercambiaveis (inverte o sentido); o cursor e o do meio.",
+      "pin_pitch_in": 0.1,
+      "body_mm": [17.0, 17.0],
+      "supply_v": 3.3,
+      "pin_electrical": {
+        "END_A": {"role": "power_in", "v": 3.3},
+        "WIPER": {"role": "analog_output", "v_max": 3.3},
+        "END_B": {"role": "ground", "v": 0.0}
+      },
+      "wokwi_part": "wokwi-potentiometer"
+    },
+    "lcd2004a": {
+      "title": "LCD 2004A V1.1 20x4 (HD44780, 16 pinos)",
+      "status": "PENDING_PHYSICAL_CONFIRMATION",
+      "pin_order": ["VSS", "VDD", "V0", "RS", "RW", "E", "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "A", "K"],
+      "pin_order_note": "Pinos 1..16 da serigrafia padrao HD44780.",
+      "pin_pitch_in": 0.1,
+      "body_mm": [98.0, 60.0],
+      "supply_v": 5.0,
+      "pin_electrical": {
+        "VSS": {"role": "ground", "v": 0.0},
+        "VDD": {"role": "power_in", "v": 5.0},
+        "V0": {"role": "analog_in", "v": "0.4-0.8 (contraste)"},
+        "RS": {"role": "input", "v_max": 5.0},
+        "RW": {"role": "input", "v_max": 5.0, "note": "DEVE ir ao GND"},
+        "E": {"role": "input", "v_max": 5.0},
+        "D0": {"role": "nc"}, "D1": {"role": "nc"}, "D2": {"role": "nc"}, "D3": {"role": "nc"},
+        "D4": {"role": "input", "v_max": 5.0},
+        "D5": {"role": "input", "v_max": 5.0},
+        "D6": {"role": "input", "v_max": 5.0},
+        "D7": {"role": "input", "v_max": 5.0},
+        "A": {"role": "power_in", "v": 5.0, "note": "Anodo do backlight; verificar resistor SMD na placa"},
+        "K": {"role": "ground", "v": 0.0}
+      },
+      "wokwi_part": "wokwi-lcd2004"
+    },
+    "resistor": {
+      "title": "Resistor axial 1/4 W",
+      "pin_order": ["A", "B"],
+      "tolerance_default": 0.05,
+      "default_span_holes": 4,
+      "fritzing_module_id": "ResistorModuleID",
+      "wokwi_part": "wokwi-resistor"
+    }
+  },
+  "resistor_color_code": {
+    "0": "black", "1": "brown", "2": "red", "3": "orange", "4": "yellow",
+    "5": "green", "6": "blue", "7": "violet", "8": "grey", "9": "white"
+  }
+}

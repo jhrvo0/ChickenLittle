@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "author": "MotionPet (gerado de hardware/netlist)",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "ultra",
+      "top": -160,
+      "left": 240,
+      "attrs": {
+        "distance": "25"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": -40,
+      "left": 260,
+      "attrs": {
+        "value": "2200"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 30,
+      "left": 260,
+      "attrs": {
+        "value": "3300"
+      }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot",
+      "top": 150,
+      "left": 260,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-lcd2004",
+      "id": "lcd",
+      "top": -330,
+      "left": -260,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": -200,
+      "left": 100,
+      "attrs": {
+        "value": "1000"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r4",
+      "top": -200,
+      "left": 140,
+      "attrs": {
+        "value": "150"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp:TX",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "lcd:K",
+      "black",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "lcd:RW",
+      "black",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "lcd:VSS",
+      "black",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "pot:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "r2:2",
+      "black",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "r3:2",
+      "black",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "ultra:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:5V",
+      "lcd:VDD",
+      "red",
+      []
+    ],
+    [
+      "esp:5V",
+      "r4:1",
+      "red",
+      []
+    ],
+    [
+      "esp:5V",
+      "ultra:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:3V3",
+      "pot:VCC",
+      "orange",
+      []
+    ],
+    [
+      "esp:5",
+      "ultra:TRIG",
+      "gold",
+      []
+    ],
+    [
+      "r1:1",
+      "ultra:ECHO",
+      "red",
+      []
+    ],
+    [
+      "esp:34",
+      "r1:2",
+      "green",
+      []
+    ],
+    [
+      "esp:34",
+      "r2:1",
+      "green",
+      []
+    ],
+    [
+      "esp:VP",
+      "pot:SIG",
+      "purple",
+      []
+    ],
+    [
+      "lcd:V0",
+      "r3:1",
+      "blue",
+      []
+    ],
+    [
+      "lcd:A",
+      "r4:2",
+      "blue",
+      []
+    ],
+    [
+      "esp:19",
+      "lcd:RS",
+      "blue",
+      []
+    ],
+    [
+      "esp:18",
+      "lcd:E",
+      "blue",
+      []
+    ],
+    [
+      "esp:21",
+      "lcd:D4",
+      "blue",
+      []
+    ],
+    [
+      "esp:22",
+      "lcd:D5",
+      "blue",
+      []
+    ],
+    [
+      "esp:23",
+      "lcd:D6",
+      "blue",
+      []
+    ],
+    [
+      "esp:27",
+      "lcd:D7",
+      "blue",
+      []
+    ]
+  ],
+  "dependencies": {},
+  "_comment": "GERADO por python -m hardware.build. TCRT5000 nao possui modelo Wokwi e foi omitido. O divisor 2,2k/3,3k existe no diagrama mas o Wokwi NAO o valida analogicamente."
+}

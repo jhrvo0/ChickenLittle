@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+# Compile antes:  pio run -d firmware   (gera firmware/.pio/build/esp32dev/*, que esta no .gitignore)
+firmware = '../../firmware/.pio/build/esp32dev/firmware.bin'
+elf = '../../firmware/.pio/build/esp32dev/firmware.elf'

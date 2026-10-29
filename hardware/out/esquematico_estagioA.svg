@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 330" width="1360" height="330" font-family="DejaVu Sans, Verdana, Arial, sans-serif">
+<rect width="100%" height="100%" fill="#f7f5ee"/>
+<text x="14.0" y="24.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="17" fill="#17212b" text-anchor="start" font-weight="bold" >MotionPet - Esquematico eletrico - Estagio A</text>
+<text x="14.0" y="42.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#4a5560" text-anchor="start" font-weight="normal" >Cada rede tem o MESMO nome em todos os pinos ligados a ela (rotulos de rede). Status: PENDING_PHYSICAL_VALIDATION.</text>
+<rect x="40" y="70" width="150" height="64" rx="8" fill="#1c2733" stroke="#0d141b" stroke-width="2"/>
+<text x="115.0" y="92.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold" >U1  ESP32</text>
+<path d="M190,114 h24" stroke="#222" stroke-width="2"/>
+<text x="182.0" y="118.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#e6eef6" text-anchor="end" font-weight="normal" >GND x3</text>
+<g><rect x="218" y="104" width="38" height="20" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="237.0" y="118.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
+
+<text x="14.0" y="318.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#6b7682" text-anchor="start" font-weight="normal" >Gerado por hardware/render_schematic.py a partir de hardware/netlist/motionpet.netlist.json</text>
+</svg>
