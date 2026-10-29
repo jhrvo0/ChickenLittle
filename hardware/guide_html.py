@@ -1,4 +1,9 @@
-"""Guia HTML navegavel (autocontido, sem dependencias externas) para montagem em protoboard."""
+"""Guia de montagem em SLIDES (HTML autocontido, sem dependencias externas).
+
+Um slide por passo: a protoboard vai sendo montada na tela (item novo destacado, zoom na regiao), com o painel
+"ADICIONE AGORA" (cor do fio, furos, resistor com faixas) e "COMO". Tudo e gerado da netlist.
+Teclado: setas / espaco = navegar, A = ver tudo, F = tela cheia, Home/End.
+"""
 from __future__ import annotations
 
 import html
@@ -7,181 +12,335 @@ import re
 
 from . import model, reports
 from .model import Layout
-from .render_bb import Scene, WIRE_COLORS, render_scene
-from .render_schematic import render_schematic
+from .render_bb import BAND_COLORS, K, WIRE_COLORS, Scene, item_bbox, render_scene
 
 CSS = """
-:root{--bg:#f6f4ec;--card:#fff;--ink:#17212b;--mut:#5b6773;--line:#d9d5c7;--ok:#157a35;--warn:#b45309;--bad:#b91c1c;--acc:#0f5c9e}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,Arial,sans-serif}
-header{padding:18px 22px;background:#17212b;color:#fff}header h1{margin:0;font-size:21px}header p{margin:4px 0 0;color:#c8d2dc}
-.banner{background:#fff3cd;border-bottom:2px solid #e0a800;padding:10px 22px;color:#5a4300;font-weight:600}
-nav.tabs{position:sticky;top:0;z-index:5;display:flex;gap:6px;padding:8px 14px;background:#e9e5d6;border-bottom:1px solid var(--line);flex-wrap:wrap}
-nav.tabs button{border:1px solid #bdb7a0;background:#fff;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer}
-nav.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}nav.tabs button.prio{outline:2px solid #e0007a}
-main{max-width:1500px;margin:0 auto;padding:16px}
-section.stage{display:none}section.stage.on{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 16px}
-.card h2,.card h3{margin:0 0 8px}.goal{color:var(--mut);margin:0 0 10px}
-.fig{overflow:auto;border:1px solid var(--line);border-radius:10px;background:#f7f5ee;max-height:78vh}
-.fig svg{width:var(--zoom,100%);height:auto;display:block}.tool{display:flex;gap:14px;align-items:center;margin:0 0 8px;flex-wrap:wrap;color:var(--mut)}
-.cols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}@media(max-width:1100px){.cols{grid-template-columns:1fr}}
-table{border-collapse:collapse;width:100%;font-size:13.5px}th,td{border:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top}
-th{background:#efece0}tr.sel,tr:hover{background:#ffe3f3;cursor:pointer}
-.sw{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid #333;vertical-align:-2px;margin-right:6px}
-ol.steps{padding-left:0;list-style:none;margin:0}ol.steps li{border:1px solid var(--line);border-radius:10px;margin:0 0 8px;padding:8px 10px;background:#fcfbf6}
-ol.steps li.hold{border-color:#e0007a;background:#fff0f8}ol.steps li h4{margin:0 0 3px;font-size:15px}ol.steps label{display:flex;gap:8px;align-items:flex-start}
-.hold-tag{background:#e0007a;color:#fff;border-radius:6px;padding:1px 7px;font-size:12px;margin-left:6px}
-code{background:#eef1f4;border-radius:4px;padding:1px 5px;font-size:13px}.pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;border:1px solid}
-.pill.pend{color:#8a5a00;border-color:#e0a800;background:#fff7dd}.safe{color:var(--bad);font-weight:600}
-.checks li{margin:3px 0}details{margin:6px 0}details>summary{cursor:pointer;font-weight:600}
-.dim{opacity:.16}
+:root{--ink:#16202b;--mut:#5d6b78;--line:#d6dbe1;--acc:#0f5c9e;--pink:#e0007a;--bad:#b3261e;--ok:#157a35}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{display:grid;grid-template-rows:auto 1fr auto;background:#e9edf1;color:var(--ink);font:16px/1.45 "Segoe UI",system-ui,Arial,sans-serif;overflow:hidden}
+.top{background:#16202b;color:#fff;padding:8px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.brand{font-weight:700;margin-right:6px;white-space:nowrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid #3d4b5a;background:#1f2d3b;color:#cfd8e2;border-radius:999px;padding:4px 12px;font-size:14px;cursor:pointer}
+.chip.on{background:var(--acc);border-color:#5aa7e6;color:#fff;font-weight:600}.chip.prio{outline:2px solid var(--pink)}
+.prog{height:5px;background:#2b3a49;position:relative}.prog i{position:absolute;left:0;top:0;bottom:0;background:var(--pink);transition:width .25s}
+.stagewrap{display:grid;grid-template-rows:auto 1fr;min-height:0}
+main{display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:14px;padding:14px;min-height:0}
+main.textonly{grid-template-columns:minmax(0,1fr)}main.textonly #figbox{display:none}
+#figbox{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px #0001;min-height:0}
+#figbox svg{position:absolute;inset:0;width:100%;height:100%}
+.figtools{position:absolute;right:10px;top:10px;display:flex;gap:6px;z-index:2}
+.figtools button{border:1px solid var(--line);background:#ffffffdd;border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;overflow:auto;box-shadow:0 2px 10px #0001;min-height:0}
+main.textonly .panel{max-width:1100px;margin:0 auto;width:100%}
+.kicker{font-size:13px;letter-spacing:.06em;color:var(--acc);font-weight:700;text-transform:uppercase}
+h1{font-size:26px;line-height:1.2;margin:4px 0 10px}
+.hold{display:inline-block;background:var(--pink);color:#fff;border-radius:8px;padding:3px 10px;font-weight:700;font-size:13px;margin:0 0 10px}
+.sec{font-size:12.5px;letter-spacing:.08em;color:var(--mut);font-weight:700;margin:14px 0 6px;text-transform:uppercase}
+.card{border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:10px;padding:8px 10px;margin:0 0 8px;background:#fbfcfd}
+.card .t{font-weight:700}.card .m{color:var(--mut);font-size:14px}
+.hole{display:inline-block;background:#fff;border:2px solid #16202b;border-radius:7px;padding:0 7px;font-weight:800;font-family:Consolas,monospace;font-size:15px;margin:0 2px}
+.swatch{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid #222;vertical-align:-3px;margin-right:6px}
+.how{font-size:17px}
+.warn{background:#fdecea;border:1px solid #f1b1ab;color:var(--bad);border-radius:10px;padding:8px 10px;margin:10px 0;font-weight:600}
+ul.checks{margin:6px 0;padding-left:0;list-style:none}ul.checks li{margin:4px 0;display:flex;gap:8px;align-items:flex-start}
+ul.checks li:before{content:"☐";font-size:18px;line-height:1.1}
+pre{background:#101820;color:#e6edf3;border-radius:8px;padding:8px 10px;margin:6px 0;white-space:pre-wrap;word-break:break-all;font-size:13.5px;position:relative}
+pre button{position:absolute;right:6px;top:6px;border:0;border-radius:6px;background:#2b3a49;color:#fff;font-size:12px;padding:3px 8px;cursor:pointer}
+table.p{border-collapse:collapse;width:100%;font-size:14px}table.p td,table.p th{border:1px solid var(--line);padding:3px 6px;text-align:left}
+.pill{display:inline-block;border-radius:999px;padding:1px 10px;font-size:12.5px;border:1px solid #e0a800;background:#fff7dd;color:#7a5200}
+.big{font-size:19px}.cols2{columns:2;column-gap:28px}.cols2 li{break-inside:avoid}
+.nav{background:#16202b;color:#fff;display:flex;align-items:center;gap:10px;padding:8px 14px}
+.nav button{border:0;border-radius:10px;background:var(--acc);color:#fff;font-size:17px;font-weight:700;padding:9px 22px;cursor:pointer}
+.nav button.sec2{background:#2b3a49}.nav button:disabled{opacity:.35;cursor:default}
+.nav .cnt{margin-left:auto;color:#aebbc8}.nav .hint{color:#8fa0b1;font-size:13px}
+.now{animation:glow 1.1s ease-in-out infinite alternate}
+@keyframes glow{from{filter:drop-shadow(0 0 2px #ff2aa8)}to{filter:drop-shadow(0 0 11px #ff2aa8) drop-shadow(0 0 3px #ff2aa8)}}
+.old{opacity:.8}.old .htag,.old .wlabel{display:none}.ghost{opacity:.28!important;filter:grayscale(.4)}
+@media(max-width:980px){main{grid-template-columns:1fr;grid-template-rows:55% 45%}}
 """
 
-JS = """
-const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
-function show(st){$$('section.stage').forEach(e=>e.classList.toggle('on',e.dataset.stage===st));
- $$('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.stage===st));try{localStorage.setItem('mp_stage',st)}catch(e){}
- location.hash=st}
-function hl(stage,id){const sec=$('section.stage[data-stage="'+stage+'"]');
- $$('.wire,.part',sec).forEach(e=>{e.classList.remove('hl');e.classList.toggle('dim',!!id&&e.dataset.id!==id&&e.dataset.ref!==id)});
- $$('tr.sel',sec).forEach(e=>e.classList.remove('sel'));
- if(!id)return;$$('[data-id="'+id+'"],[data-ref="'+id+'"]',sec).forEach(e=>{e.classList.add('hl');e.classList.remove('dim')});
- $$('tr[data-hl="'+id+'"]',sec).forEach(e=>e.classList.add('sel'))}
-function zoom(stage,v){const sec=$('section.stage[data-stage="'+stage+'"]');$('.fig',sec).style.setProperty('--zoom',v+'%')}
-function tags(stage,on){const sec=$('section.stage[data-stage="'+stage+'"]');$$('.htag',sec).forEach(e=>e.style.display=on?'inline':'none')}
-document.addEventListener('click',e=>{const tr=e.target.closest('tr[data-hl]');if(tr){hl(tr.closest('section').dataset.stage,tr.dataset.hl)}
- const w=e.target.closest('.wire,.part');if(w&&w.closest('.fig')){hl(w.closest('section').dataset.stage,w.dataset.id||w.dataset.ref)}
- if(e.target.matches('.clr')){hl(e.target.closest('section').dataset.stage,null)}});
-$$('input[type=checkbox][data-k]').forEach(c=>{try{c.checked=localStorage.getItem('mp_'+c.dataset.k)==='1'}catch(e){}
- c.addEventListener('change',()=>{try{localStorage.setItem('mp_'+c.dataset.k,c.checked?'1':'0')}catch(e){}})});
-let st='B';try{st=localStorage.getItem('mp_stage')||'B'}catch(e){}if(/^#[A-E]$/.test(location.hash))st=location.hash[1];show(st);
+JS = r"""
+const SL=window.SLIDES,svg=document.querySelector('#figbox svg'),main=document.querySelector('main');
+let k=0,showAll=false,vb=null,raf=0;const FULL=window.FULLBOX;
+const $=(s)=>document.querySelector(s);
+function setVB(t,animate){if(!vb||!animate){vb=t.slice();svg.setAttribute('viewBox',vb.join(' '));return}
+ const from=vb.slice(),t0=performance.now(),D=380;cancelAnimationFrame(raf);
+ (function step(now){const p=Math.min(1,(now-t0)/D),e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+  vb=from.map((v,i)=>v+(t[i]-v)*e);svg.setAttribute('viewBox',vb.join(' '));if(p<1)raf=requestAnimationFrame(step)})(t0)}
+function apply(animate){const s=SL[k];
+ main.classList.toggle('textonly',s.kind!=='step');
+ document.querySelectorAll('[data-gstep]').forEach(e=>{const g=+e.dataset.gstep,u=e.dataset.until;
+  const gh=(s.ghost||[]).includes(e.dataset.ref||e.dataset.id);
+  const vis=(g<=k&&(u===undefined||k<=+u))||gh;e.style.display=vis?'':'none';
+  e.classList.toggle('now',vis&&g===k&&!gh);e.classList.toggle('old',vis&&g<k&&!gh);e.classList.toggle('ghost',gh)});
+ if(s.kind==='step')setVB(showAll?FULL:s.focus,animate);
+ $('#panel').innerHTML=s.html;$('#panel').scrollTop=0;
+ document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.stage===s.stage));
+ $('#bar').style.width=((k)/(SL.length-1)*100)+'%';$('#cnt').textContent=(k+1)+' / '+SL.length;
+ $('#prev').disabled=k===0;$('#next').disabled=k===SL.length-1;
+ try{localStorage.setItem('mp_slide',k)}catch(e){}history.replaceState(null,'','#'+(k+1))}
+function go(i,animate=true){k=Math.max(0,Math.min(SL.length-1,i));apply(animate)}
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
+ if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();go(k+1)}
+ else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();go(k-1)}
+ else if(e.key==='Home')go(0);else if(e.key==='End')go(SL.length-1);
+ else if(e.key==='a'||e.key==='A'){showAll=!showAll;apply(true)}
+ else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+document.addEventListener('click',e=>{const b=e.target.closest('button[data-copy]');if(b){const t=b.dataset.copy;
+ (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(_){}ta.remove()});
+ b.textContent='copiado';setTimeout(()=>b.textContent='copiar',1200)}});
+let sx=null;document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{if(sx===null)return;const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>70)go(k+(d<0?1:-1));sx=null});
+let start=0;const h=parseInt((location.hash||'').slice(1));if(h>=1&&h<=SL.length)start=h-1;
+else{try{start=Math.min(SL.length-1,parseInt(localStorage.getItem('mp_slide')||'0')||0)}catch(e){}}
+go(start,false);
 """
 
-COMMON_ERRORS = [
-    "ESP32 deslocada uma coluna: TODOS os pinos ficam errados. Confira: 3V3 na coluna 4 e 5V na coluna 22 (fileira de baixo).",
-    "Letras da protoboard invertidas (A no topo em vez de J): use sempre a coluna pelo NUMERO e confira pelo desenho; se invertida, vire a protoboard.",
-    "HC-SR04 com VCC e GND trocados: pode queimar o modulo. Leia a serigrafia (VCC | TRIG | ECHO | GND) antes de encaixar.",
-    "ECHO ligado direto ao GPIO34 (sem divisor): proibido; entrega ~5 V a um pino de 3,3 V.",
-    "R1 e R2 trocados: o no cai para 2,0 V (abaixo de 2,475 V) e a leitura falha (sem dano, mas sem distancia).",
-    "TCRT5000 ou potenciometro ligados em 5 V: eles so podem usar 3V3.",
-    "Fio em IO12, IO6..IO11 (SD0..CLK) ou TX0/RX0: proibido (boot loop / falha de flash / serial).",
-    "LCD com RW (pino 5) no ar: obrigatorio ligar no GND antes de energizar.",
-    "Cabo USB so de carga (sem dados): a porta COM nunca aparece.",
-    "Jumper 'quase' encaixado: empurre ate o fim e puxe de leve para testar.",
-]
-NO_PORT = [
-    "Troque o cabo por um cabo USB DE DADOS e teste outra porta USB do notebook.",
-    "Deixe SOMENTE a ESP32 na protoboard (Estagio A) — sem sensores ou fios.",
-    "Windows: Gerenciador de Dispositivos > Portas (COM e LPT). Sem porta? Instale o driver da ponte USB-serial da sua placa (CP210x ou CH340).",
-    "Rode `python -m terminal.bench ports` para listar as portas.",
-    "Nao use a ESP32 se 5V/3V3 medirem fora de 4,75-5,25 V / 3,25-3,35 V.",
-    "Para gravar o firmware pode ser preciso segurar BOOT ao iniciar o upload.",
-]
-PRE_POWER = [
-    "01 Sem curto 5V/VIN x GND (> 1 kΩ).",
-    "02 Sem curto 3V3 x GND (> 500 Ω).",
-    "03 R1 entre 2,09 e 2,31 kΩ (2,2 kΩ).",
-    "04 R2 entre 3,14 e 3,47 kΩ (3,3 kΩ).",
-    "05 LCD pino 5 (RW) com 0 Ω ate o GND (a partir do Estagio D).",
-    "06 TCRT5000 VCC somente em 3V3 (Estagio C).",
-    "07 Potenciometro: extremos em 3V3 e GND, cursor em IO36/VP (Estagio C).",
-    "08 Nada nos pinos IO6..IO11 (SD0..CLK).",
-    "09 Nada em IO12, TX0, RX0.",
-]
-
-
-def _clean_svg(svg: str) -> str:
-    svg = re.sub(r'<svg xmlns="http://www.w3.org/2000/svg" ', '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMin meet" ', svg, count=1)
-    svg = re.sub(r'\s(width|height)="[\d.]+"', "", svg, count=2)          # escala pelo CSS
-    return re.sub(r'\sid="[^"]*"', "", svg)
+NAMES = {"U1": "ESP32", "M1": "HC-SR04", "M2": "TCRT5000", "P1": "potenciômetro", "M3": "LCD"}
+STAGE_CHIP = {"A": "A · ESP32", "B": "B · HC-SR04 ★", "C": "C · TCRT5000 + pot", "D": "D · LCD", "E": "E · Completo"}
 
 
 def _h(s) -> str:
     return html.escape(str(s))
 
 
-def stage_section(lay: Layout, stage: str, extra_figs: list[tuple[str, str]]) -> str:
-    st = lay.raw["stages"][stage]
-    svg, _ = render_scene(lay, Scene(stage=stage, title=f"Estagio {stage} - {st['title']}", subtitle=st["goal"]))
-    sch = render_schematic(lay, stage)
-    steps = lay.raw["build_steps"].get(stage, [])
-    wrows = reports.wire_rows(lay, stage)
-    crows = reports.component_rows(lay, stage)
-    issues = model.validate(lay, stage)
-    out = [f'<section class="stage" data-stage="{stage}" id="s{stage}">',
-           f'<div class="card"><h2>Estagio {stage} — {_h(st["title"])}</h2><p class="goal">{_h(st["goal"])}</p>',
-           '<span class="pill pend">PENDING_PHYSICAL_VALIDATION</span> '
-           f'<span class="pill pend">{sum(1 for i in issues if i.level == "ERROR")} erros de consistencia (software)</span></div>']
-    out.append('<div class="cols"><div>')
-    out.append('<div class="card"><h3>Montagem na protoboard</h3><div class="tool">'
-               f'<label>Zoom <input type="range" min="60" max="400" value="100" oninput="zoom(\'{stage}\',this.value)"></label>'
-               f'<label><input type="checkbox" checked onchange="tags(\'{stage}\',this.checked)"> etiquetas de furo</label>'
-               '<button class="clr">limpar destaque</button><span>Clique num fio, componente ou linha da tabela para destacar.</span></div>')
-    out.append(f'<div class="fig">{_clean_svg(svg)}</div></div>')
-    for title, fig in extra_figs:
-        out.append(f'<div class="card"><h3>{_h(title)}</h3><div class="fig">{_clean_svg(fig)}</div></div>')
-    out.append(f'<div class="card"><h3>Esquematico eletrico</h3><div class="fig">{_clean_svg(sch)}</div></div>')
-    out.append("</div><div>")
-    out.append('<div class="card"><h3>Passo a passo</h3><ol class="steps">')
-    for s_ in steps:
-        key = f"{stage}_{s_['n']}"
-        hold = " hold" if s_.get("hold") else ""
-        tag = '<span class="hold-tag">PONTO DE PARADA</span>' if s_.get("hold") else ""
-        refs = "".join(f' <a href="#" onclick="hl(\'{stage}\',\'{r}\');return false">{r}</a>' for r in s_.get("refs", []))
-        text = re.sub(r"`([^`]+)`", r"<code>\1</code>", _h(s_["text"]))
-        out.append(f'<li class="{hold.strip()}"><label><input type="checkbox" data-k="{key}"><span><h4>{s_["n"]}. {_h(s_["title"])}{tag}</h4>{text}{refs}</span></label></li>')
-    out.append("</ol></div>")
-    out.append('<div class="card"><h3>Fio a fio</h3><table><tr><th>Fio</th><th>Cor</th><th>De</th><th>Ate</th><th>Rede</th><th>V</th></tr>')
-    for r in wrows:
-        colr = WIRE_COLORS.get(next((k for k, v in reports.COLOR_PT.items() if v == r["cor"]), "grey"), "#999")
-        out.append(f'<tr data-hl="{r["id"]}"><td><b>{r["id"]}</b></td><td><span class="sw" style="background:{colr}"></span>{_h(r["cor"])}</td>'
-                   f'<td><b>{r["de_furo"]}</b></td><td><b>{r["ate_furo"]}</b></td><td>{_h(r["rede"])}</td><td>{_h(r["tensao_esperada"])}</td></tr>')
-        if r["seguranca"]:
-            out.append(f'<tr data-hl="{r["id"]}"><td colspan="6" class="safe">⚠ {_h(r["seguranca"])}</td></tr>')
-    out.append("</table></div>")
-    out.append('<div class="card"><h3>Pinos e furos dos componentes</h3><table><tr><th>Comp.</th><th>Pino</th><th>Furo</th><th>Rede</th></tr>')
-    for r in crows:
-        out.append(f'<tr data-hl="{r["componente"]}"><td>{r["componente"]}</td><td>{_h(r["pino"])}</td><td><b>{r["furo"]}</b></td><td>{_h(r["rede"])}</td></tr>')
-    out.append("</table></div>")
-    if "R1" in {c["ref"] for c in lay.comps(stage)}:
-        r1, r2 = lay.components["R1"], lay.components["R2"]
-        lo, hi = model.divider_extremes(4.75, 5.25, r1["ohms"], r2["ohms"], r1["tolerance"])
-        out.append('<div class="card"><h3>Como o divisor protege o GPIO34</h3>'
-                   f'<p>O HC-SR04 responde no pino ECHO com pulsos de <b>~5 V</b>; o ESP32 so aguenta <b>3,3 V</b>. '
-                   f'Dois resistores em serie dividem a tensao: <code>Vout = Vecho × R2/(R1+R2)</code> = Vecho × {r2["ohms"]/(r1["ohms"]+r2["ohms"]):.3f}.</p>'
-                   f'<ul><li>5,00 V → <b>{model.divider_vout(5.0, r1["ohms"], r2["ohms"]):.2f} V</b></li>'
-                   f'<li>5,25 V → {model.divider_vout(5.25, r1["ohms"], r2["ohms"]):.2f} V</li>'
-                   f'<li>Pior caso com resistores de ±5%: {lo:.2f} V a <b>{hi:.3f} V</b> (teto seguro 3,30 V; <span class="safe">margem de so {1000*(3.30-hi):.0f} mV</span> — prefira resistores de 1% ou meça os seus).</li></ul>'
-                   '<p>Caminho: <b>ECHO → R1 → NÓ → GPIO34</b> e <b>NÓ → R2 → GND</b>. O fio verde W4 sai do NÓ (furo 36F), nunca do ECHO.</p></div>')
-    if any(i.level == "WARN" for i in issues):
-        out.append('<div class="card"><h3>Avisos da validacao (software)</h3><ul>' + "".join(f"<li>{_h(i)}</li>" for i in issues if i.level == "WARN") + "</ul></div>")
-    out.append("</div></div></section>")
-    return "\n".join(out)
+def _md(s: str) -> str:
+    return re.sub(r"`([^`]+)`", r"<code>\1</code>", _h(s))
 
 
-def build_guide(lay: Layout, figs: dict[str, list[tuple[str, str]]] | None = None) -> str:
-    figs = figs or {}
+def hole_ctx(lay: Layout, hole: str, placed: set[str]) -> str:
+    """O que esta (ou ficara) na mesma tira da protoboard, para o iniciante achar o furo."""
+    grp = model.hole_group(hole)
+    occ = lay.occupied_holes("E")
+    now, later = [], []
+    for h, users in occ.items():
+        if h == hole or model.hole_group(h) != grp:
+            continue
+        for u in users:
+            if re.match(r"^W\d+\.[ab]$", u):
+                continue
+            ref, pin = u.split(".", 1)
+            c = lay.components[ref]
+            if c["type"] == "esp32":
+                phrase = f"do pino {lay.board.resolve(pin).label} da ESP32"
+            elif c["type"] == "resistor":
+                phrase = f"da perna de {ref}"
+            else:
+                phrase = f"do pino {pin} do {NAMES.get(ref, ref)}"
+            (now if ref in placed else later).append(phrase)
+    if now:
+        return "coluna " + " e ".join(dict.fromkeys(now))
+    col = model.parse_hole(hole)[0]
+    if later:
+        return f"coluna {col}: onde ficará o pino {later[0].split('pino ')[-1] if 'pino' in later[0] else later[0]} (entra depois)"
+    return f"coluna {col} (livre)"
+
+
+def _res_svg(bands: list[str]) -> str:
+    out = ['<svg width="132" height="30" viewBox="0 0 132 30" xmlns="http://www.w3.org/2000/svg">',
+           '<path d="M2,15 H26 M106,15 H130" stroke="#9aa0a6" stroke-width="3" stroke-linecap="round"/>',
+           '<rect x="24" y="4" width="84" height="22" rx="11" fill="#d9c28e" stroke="#8a7440"/>']
+    xs = [44, 58, 72, 92]
+    for x, b in zip(xs, bands):
+        out.append(f'<rect x="{x}" y="4" width="7" height="22" fill="{BAND_COLORS[b]}" stroke="#0003" stroke-width=".6"/>')
+    out.append("</svg>")
+    return "".join(out)
+
+
+BAND_PT = {"black": "preto", "brown": "marrom", "red": "vermelho", "orange": "laranja", "yellow": "amarelo", "green": "verde",
+           "blue": "azul", "violet": "violeta", "grey": "cinza", "white": "branco", "gold": "dourado", "silver": "prata"}
+
+
+def _card_resistor(lay: Layout, ref: str, measure: bool) -> str:
+    c = lay.components[ref]
+    bands = model.resistor_bands(c["ohms"], c["tolerance"], lay.modules["resistor_color_code"])
+    lo, hi = c["ohms"] * (1 - c["tolerance"]), c["ohms"] * (1 + c["tolerance"])
+    legs = " e ".join(f'<span class="hole">{h}</span>' for h in c["legs"])
+    names = "–".join(BAND_PT[b] for b in bands)
+    extra = (f'<div class="m">Meça: <b>{model.fmt_ohms(lo)} a {model.fmt_ohms(hi)}</b></div>' if measure
+             else f'<div class="m">Pernas nos furos {legs}</div>')
+    note = f'<div class="m">{_h(c["note"])}</div>' if c.get("note") and not measure else ""
+    return (f'<div class="card" style="border-left-color:#8a7440"><div class="t">{ref} · {model.fmt_ohms(c["ohms"])} <span class="m">({_h(c["label"])})</span></div>'
+            f'{_res_svg(bands)}<div class="m">{names}</div>{extra}{note}</div>')
+
+
+def _card_wire(lay: Layout, w: dict, placed: set[str], temp: bool = False) -> str:
+    colr = WIRE_COLORS.get(w.get("color", "grey"), "#999")
+    cname = reports.COLOR_PT.get(w.get("color", "grey"), w.get("color", ""))
+    a, b = w["from"], w["to"]
+    saf = f'<div class="m" style="color:var(--bad)">⚠ {_h(w["safety"])}</div>' if w.get("safety") else ""
+    label = _h(w.get("label", ""))
+    return (f'<div class="card" style="border-left-color:{colr}"><div class="t"><span class="swatch" style="background:{colr}"></span>'
+            f'{"jumper TEMPORÁRIO" if temp else "Fio " + w["id"]} · {cname}</div><div class="m">{label}</div>'
+            f'<div>Ponta 1: <span class="hole">{a}</span> <span class="m">{_h(hole_ctx(lay, a, placed))}</span></div>'
+            f'<div>Ponta 2: <span class="hole">{b}</span> <span class="m">{_h(hole_ctx(lay, b, placed))}</span></div>{saf}</div>')
+
+
+def _card_comp(lay: Layout, c: dict) -> str:
+    if c["type"] == "esp32":
+        return ('<div class="card"><div class="t">ESP32 DevKit</div><div class="m">Atravessando o canal central: pino 1 de cada lado na coluna '
+                f'<b>{c["placement"]["col0"]}</b>; USB-C para a <b>esquerda</b>. Fileira B = lado 3V3…5V; fileira I = lado GND…CLK. '
+                'Só as fileiras <b>A</b> e <b>J</b> ficam livres.</div></div>')
+    rows = "".join(f'<tr><td><b>{n}</b></td><td><span class="hole">{h}</span></td></tr>' for n, h in c["pins"].items()
+                   if not (c["type"] == "lcd2004a" and n in ("D0", "D1", "D2", "D3")))
+    nc = '<div class="m">D0–D3: encaixam mas ficam sem fio.</div>' if c["type"] == "lcd2004a" else ""
+    note = f'<div class="m">{_h(c["note"])}</div>' if c.get("note") else ""
+    return (f'<div class="card"><div class="t">{c["ref"]} · {_h(c["label"])}</div><div class="m">Encaixe os pinos nestes furos:</div>'
+            f'<table class="p"><tr><th>Pino</th><th>Furo</th></tr>{rows}</table>{nc}{note}</div>')
+
+
+def build_slides(lay: Layout):
+    """Retorna (slides, step_of, until_of, scene)."""
+    steps = lay.raw["build_steps"]
+    temp = {t["id"]: t for t in lay.raw.get("temporary_wires", [])}
+    markers = {m["id"]: m for m in lay.raw.get("markers", [])}
+    slides: list[dict] = []
+    # --- intro e materiais ---
+    slides.append({"kind": "intro", "stage": "", "title": "MotionPet · montagem em protoboard"})
+    slides.append({"kind": "materials", "stage": "", "title": "O que você vai precisar"})
+    index = {}
+    for st in model.STAGE_ORDER:
+        for s in steps[st]:
+            index[(st, s["n"])] = len(slides)
+            slides.append({"kind": "step", "stage": st, "step": s})
+    slides.append({"kind": "errors", "stage": "", "title": "Se algo der errado"})
+    slides.append({"kind": "noport", "stage": "", "title": "A ESP32 não aparece como porta COM"})
+
+    step_of: dict[str, int] = {}
+    until_of: dict[str, int] = {}
+    for (st, n), idx in index.items():
+        s = next(x for x in steps[st] if x["n"] == n)
+        for ident in s.get("adds", []):
+            assert ident not in step_of, f"{ident} aparece em dois passos"
+            step_of[ident] = idx
+        for ident in s.get("temp", []):
+            step_of[ident] = idx
+            until_of[ident] = idx
+        if s.get("marker"):
+            step_of[s["marker"]] = idx
+            until_of[s["marker"]] = idx
+    scene = Scene(stage="E", bare=True, show_tags=True, tag_scale=1.4, highlight_new=False, step_of=step_of, until_of=until_of,
+                  temp_wires=[dict(t) for t in temp.values()], markers=[dict(m) for m in markers.values()])
+    return slides, index, step_of, until_of, scene, temp, markers
+
+
+def _focus_rect(boxes: list[tuple[float, float, float, float]], full: tuple[float, float, float, float], aspect: float = 1.6):
+    x0 = min(b[0] for b in boxes); y0 = min(b[1] for b in boxes)
+    x1 = max(b[2] for b in boxes); y1 = max(b[3] for b in boxes)
+    w, h = x1 - x0, y1 - y0
+    w, h = max(w, 780.0), max(h, 780.0 / aspect)
+    if w / h < aspect:
+        w = h * aspect
+    else:
+        h = w / aspect
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    fx, fy, fw, fh = full
+    w, h = min(w, fw), min(h, fh)
+    x = min(max(cx - w / 2, fx), fx + fw - w)
+    y = min(max(cy - h / 2, fy), fy + fh - h)
+    return [round(x, 1), round(y, 1), round(w, 1), round(h, 1)]
+
+
+MATERIALS = [
+    ("ESP32 DevKit (ESP-WROOM-32, USB-C)", "1", "Conte os pinos e meça a distância entre as fileiras (confirmação C01)."),
+    ("Protoboard 830 pontos", "1", "Letras A–J e números 1–63 visíveis."),
+    ("Cabo USB de DADOS", "1", "Cabo só de carga não cria a porta COM."),
+    ("HC-SR04", "1", "Estágio B."),
+    ("Resistor 2,2 kΩ (verm-verm-verm-dourado)", "1", "R1 do divisor."),
+    ("Resistor 3,3 kΩ (lar-lar-verm-dourado)", "1", "R2 do divisor."),
+    ("Módulo TCRT5000 (LM393, 4 pinos)", "1", "Estágio C."),
+    ("Potenciômetro rotativo", "1", "Estágio C."),
+    ("LCD 2004A V1.1 (16 pinos soldados)", "1", "Estágio D."),
+    ("Resistores 1 kΩ e 150 Ω", "1 de cada", "Estágio D (contraste e backlight)."),
+    ("Jumpers macho-macho de ponta sólida", "~25", "Vários longos (W4, W9, W10, W18–W23)."),
+    ("Multímetro", "1", "Resistência, continuidade e tensão DC."),
+]
+
+
+def build_guide(lay: Layout, figs=None) -> str:
+    slides, index, step_of, until_of, scene, temp, markers = build_slides(lay)
+    svg, meta = render_scene(lay, scene)
+    full = (0.0, 0.0, meta["width"], meta["height"])
     proj = lay.raw["project"]
-    parts = ['<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
-             f"<title>MotionPet — Guia de montagem em protoboard</title><style>{CSS}</style></head><body>",
-             f'<header><h1>MotionPet — Guia de montagem em protoboard</h1><p>Firmware {_h(proj["firmware_version"])} • pinagem {_h(proj["pinout_status"])} • gerado de hardware/netlist/motionpet.netlist.json</p></header>',
-             '<div class="banner">STATUS OFICIAL: PENDING_PHYSICAL_VALIDATION — nada aqui foi medido numa bancada real. Com a USB DESCONECTADA monte, meça com o multimetro e so depois energize. A serigrafia da sua placa SEMPRE prevalece sobre o desenho.</div>',
-             '<nav class="tabs">'
-             + "".join(f'<button data-stage="{s}" onclick="show(\'{s}\')" class="{"prio" if s == "B" else ""}">{s} — {_h(lay.raw["stages"][s]["title"])}{" ★" if s == "B" else ""}</button>' for s in model.STAGE_ORDER)
-             + '<button data-stage="X" onclick="show(\'X\')">Antes de comecar / erros / ajuda</button></nav><main>']
-    for s in model.STAGE_ORDER:
-        parts.append(stage_section(lay, s, figs.get(s, [])))
-    parts.append('<section class="stage" data-stage="X"><div class="cols"><div>')
-    parts.append('<div class="card"><h2>Confirmacoes fisicas pendentes</h2><p>Marque conforme for conferindo na SUA bancada.</p><ul class="checks">'
-                 + "".join(f'<li><label><input type="checkbox" data-k="{c["id"]}"> <b>{c["id"]}</b> (bloqueia estagio {c["blocks"]}) — {_h(c["text"])}</label></li>' for c in lay.raw["confirmations"])
-                 + "</ul></div>")
-    parts.append('<div class="card"><h2>Hipoteses usadas nos desenhos</h2><ul>' + "".join(f'<li><b>{a["id"]}</b> {_h(a["text"])}</li>' for a in lay.raw["assumptions"]) + "</ul></div>")
-    parts.append("</div><div>")
-    parts.append('<div class="card"><h2>Checklist antes de ligar (USB desconectada)</h2><ul class="checks">'
-                 + "".join(f'<li><label><input type="checkbox" data-k="pp{i}"> {_h(t)}</label></li>' for i, t in enumerate(PRE_POWER))
-                 + "</ul><p>Detalhes e criterios em <code>docs/bench_assembly_guide.md</code> e <code>docs/hardware_safety.md</code>.</p></div>")
-    parts.append('<div class="card"><h2>Erros comuns</h2><ul>' + "".join(f"<li>{_h(e)}</li>" for e in COMMON_ERRORS) + "</ul></div>")
-    parts.append('<div class="card"><h2>A ESP32 nao e reconhecida</h2><ol>' + "".join(f"<li>{re.sub(r'`([^`]+)`', r'<code>\\1</code>', _h(e))}</li>" for e in NO_PORT) + "</ol></div>")
-    parts.append("</div></div></section></main>")
-    parts.append(f"<script>{JS}</script></body></html>")
-    return "\n".join(parts)
+    placed_by_slide: dict[int, set[str]] = {}
+    out_slides = []
+    last_focus = list(full)
+    n_by_stage = {st: len(lay.raw["build_steps"][st]) for st in model.STAGE_ORDER}
+    first_of_stage = {st: index[(st, 1)] for st in model.STAGE_ORDER}
+    for i, s in enumerate(slides):
+        kind = s["kind"]
+        d = {"kind": "step" if kind == "step" else "text", "stage": s.get("stage", "")}
+        if kind == "intro":
+            conf = "".join(f"<li><b>{c['id']}</b> — {_h(c['text'])}</li>" for c in lay.raw["confirmations"] if c["blocks"] in ("B",))
+            d["html"] = (f'<div class="kicker">{_h(proj["name"])} · Ciclo {proj["cycle"]} · firmware {_h(proj["firmware_version"])}</div>'
+                         '<h1 style="font-size:40px">Montagem em protoboard, passo a passo</h1>'
+                         '<p class="big">Cada slide mostra <b>o que adicionar</b> e <b>onde encaixar</b>. A protoboard vai crescendo na tela; '
+                         'o item novo pisca em rosa. Use as setas do teclado (← →) ou os botões.</p>'
+                         '<div class="warn">Status oficial: PENDING_PHYSICAL_VALIDATION — nada aqui foi medido numa bancada. '
+                         'Monte com a USB DESCONECTADA, meça com o multímetro e só então energize. A serigrafia da SUA placa sempre prevalece sobre o desenho.</div>'
+                         '<div class="sec">Confirme antes (bloqueiam o Estágio B)</div><ul class="checks">' + conf + '</ul>'
+                         f'<p class="m">Dica: tecla <b>A</b> mostra a protoboard inteira; <b>F</b> tela cheia. Estágio B (★) é a prioridade.</p>')
+        elif kind == "materials":
+            rows = "".join(f"<tr><td>{_h(a)}</td><td>{_h(b)}</td><td>{_h(c)}</td></tr>" for a, b, c in MATERIALS)
+            d["html"] = (f'<div class="kicker">Antes de começar</div><h1>{_h(s["title"])}</h1>'
+                         f'<table class="p"><tr><th>Item</th><th>Qtd.</th><th>Observação</th></tr>{rows}</table>')
+        elif kind == "errors":
+            from .guide_extra import COMMON_ERRORS
+            d["html"] = f'<div class="kicker">Ajuda</div><h1>{_h(s["title"])}</h1><ul class="cols2">' + "".join(f"<li>{_h(e)}</li>" for e in COMMON_ERRORS) + "</ul>"
+        elif kind == "noport":
+            from .guide_extra import NO_PORT
+            d["html"] = f'<div class="kicker">Ajuda</div><h1>{_h(s["title"])}</h1><ol class="how">' + "".join(f"<li>{_md(e)}</li>" for e in NO_PORT) + "</ol>"
+        else:
+            st = s["stage"]
+            step = s["step"]
+            n, total = step["n"], n_by_stage[st]
+            placed = {c["ref"] for c in lay.components.values() if step_of.get(c["ref"], -1) <= i and c["ref"] in step_of}
+            placed |= {"BB1"}
+            parts = [f'<div class="kicker">Estágio {st} · {_h(lay.raw["stages"][st]["title"])} · passo {n} de {total}</div>',
+                     f'<h1>{_h(step["title"])}</h1>']
+            if step.get("hold"):
+                parts.append('<div class="hold">PONTO DE PARADA — não avance sem conferir</div>')
+            cards = []
+            for ident in step.get("measure", []):
+                cards.append(_card_resistor(lay, ident, True))
+            for ident in step.get("adds", []):
+                if ident in lay.components:
+                    c = lay.components[ident]
+                    cards.append(_card_resistor(lay, ident, False) if c["type"] == "resistor" else _card_comp(lay, c))
+                else:
+                    cards.append(_card_wire(lay, lay.wires[ident], placed))
+            for ident in step.get("temp", []):
+                cards.append(_card_wire(lay, temp[ident], placed, temp=True))
+            if cards:
+                parts.append('<div class="sec">' + ("Meça agora" if step.get("measure") and not step.get("adds") else "Adicione agora") + '</div>' + "".join(cards))
+            parts.append(f'<div class="sec">Como</div><div class="how">{_md(step["text"])}</div>')
+            if step.get("checks"):
+                parts.append('<ul class="checks">' + "".join(f"<li>{_h(c)}</li>" for c in step["checks"]) + "</ul>")
+            if step.get("warn"):
+                parts.append(f'<div class="warn">⚠ {_h(step["warn"])}</div>')
+            for cmd in step.get("commands", []):
+                parts.append(f'<pre>{_h(cmd)}<button data-copy="{_h(cmd)}">copiar</button></pre>')
+            # zoom
+            ids = list(step.get("focus", [])) or (list(step.get("adds", [])) + list(step.get("temp", [])) + ([step["marker"]] if step.get("marker") else []))
+            boxes = [b for b in (item_bbox(lay, meta, x, scene) for x in ids) if b]
+            if boxes:
+                last_focus = _focus_rect(boxes, full)
+            d["focus"] = last_focus
+            d["ghost"] = [x for x in step.get("focus", []) if x in lay.components and step_of.get(x, -1) > i]
+            d["html"] = "".join(parts)
+            d["stage"] = st
+        d["title"] = s.get("title", "")
+        out_slides.append(d)
+    chips = "".join(f'<button class="chip{" prio" if st == "B" else ""}" data-stage="{st}" onclick="go({first_of_stage[st]})">{_h(STAGE_CHIP[st])}</button>' for st in model.STAGE_ORDER)
+    svg = re.sub(r'\s(width|height)="[\d.]+"', "", svg, count=2)
+    svg = svg.replace('<svg ', '<svg preserveAspectRatio="xMidYMid meet" ', 1)
+    payload = json.dumps(out_slides, ensure_ascii=False).replace("</", "<\\/")
+    return ("<!doctype html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+            f"<title>MotionPet — montagem em slides</title><style>{CSS}</style></head><body>"
+            f'<div class="stagewrap"><div class="top"><span class="brand">MotionPet</span><div class="chips">{chips}</div></div><div class="prog"><i id="bar"></i></div></div>'
+            f'<main><div id="figbox"><div class="figtools"><button onclick="showAll=!showAll;apply(true)">ver tudo (A)</button></div>{svg}</div>'
+            '<div class="panel" id="panel"></div></main>'
+            '<div class="nav"><button class="sec2" id="prev" onclick="go(k-1)">◀ Voltar</button><button id="next" onclick="go(k+1)">Avançar ▶</button>'
+            '<span class="hint">← → navegam · A ver tudo · F tela cheia</span><span class="cnt" id="cnt"></span></div>'
+            f"<script>window.SLIDES={payload};window.FULLBOX={json.dumps([0, 0, round(meta['width'], 1), round(meta['height'], 1)])};{JS}</script></body></html>")

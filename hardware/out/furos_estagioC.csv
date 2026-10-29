@@ -31,15 +31,15 @@ furo,coluna,fileira,ocupante,rede
 31J,31,J,M1 HC-SR04: pino TRIG,TRIG
 32H,32,H,"R1 2,2 kΩ: perna A",ECHO_5V
 32J,32,J,M1 HC-SR04: pino ECHO,ECHO_5V
-33A,33,A,P1 Potenciometro rotativo: pino END_A,3V3
-33C,33,C,"fio W6 (laranja), ponta final",
 33G,33,G,"R2 3,3 kΩ: perna B",GND
 33I,33,I,"fio W2 (preto), ponta final",
 33J,33,J,M1 HC-SR04: pino GND,GND
-34A,34,A,P1 Potenciometro rotativo: pino WIPER,POT_WIPER
-34B,34,B,"fio W10 (roxo), ponta inicial",
-35A,35,A,P1 Potenciometro rotativo: pino END_B,GND
-35C,35,C,"fio W8 (preto), ponta final",
+34A,34,A,P1 Potenciometro rotativo: pino END_A,3V3
+34C,34,C,"fio W6 (laranja), ponta final",
+35A,35,A,P1 Potenciometro rotativo: pino WIPER,POT_WIPER
+35B,35,B,"fio W10 (roxo), ponta inicial",
+36A,36,A,P1 Potenciometro rotativo: pino END_B,GND
+36C,36,C,"fio W8 (preto), ponta final",
 36F,36,F,"fio W4 (verde), ponta inicial",
 36G,36,G,"R2 3,3 kΩ: perna A",ECHO_NODE
 36H,36,H,"R1 2,2 kΩ: perna B",ECHO_NODE

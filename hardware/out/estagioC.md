@@ -40,9 +40,9 @@
 | M2 | TCRT5000 (modulo LM393) | GND | 28A | GND | PIN_ORDER_UNCONFIRMED |
 | M2 | TCRT5000 (modulo LM393) | DO | 29A | IR_DO | PIN_ORDER_UNCONFIRMED |
 | M2 | TCRT5000 (modulo LM393) | AO | 30A | (sem conexao: NC) | PIN_ORDER_UNCONFIRMED |
-| P1 | Potenciometro rotativo | END_A | 33A | 3V3 | PENDING_PHYSICAL_CONFIRMATION |
-| P1 | Potenciometro rotativo | WIPER | 34A | POT_WIPER | PENDING_PHYSICAL_CONFIRMATION |
-| P1 | Potenciometro rotativo | END_B | 35A | GND | PENDING_PHYSICAL_CONFIRMATION |
+| P1 | Potenciometro rotativo | END_A | 34A | 3V3 | PENDING_PHYSICAL_CONFIRMATION |
+| P1 | Potenciometro rotativo | WIPER | 35A | POT_WIPER | PENDING_PHYSICAL_CONFIRMATION |
+| P1 | Potenciometro rotativo | END_B | 36A | GND | PENDING_PHYSICAL_CONFIRMATION |
 
 ## Fios (fio a fio)
 
@@ -53,11 +53,11 @@
 | W3 | amarelo | 13J | 31I | TRIG | 0 / 3,3 V | GPIO5 -> TRIG | GPIO5 e pino de strapping; usa-lo como saida e aceitavel. |
 | W4 | verde | 36F | 8A | ECHO_NODE | 0 / 3,00 V (3,15 V max. nominal) | No do divisor -> GPIO34 | NAO instalar antes de medir o no <= 3,30 V (ponto de parada da etapa B). |
 | W5 | laranja | 4A | 27B | 3V3 | 3,25-3,35 V | 3V3 -> VCC do TCRT5000 | NUNCA ligar o TCRT5000 em 5 V. |
-| W6 | laranja | 27C | 33C | 3V3 | 3,25-3,35 V | 3V3 -> extremo do potenciometro | NUNCA ligar o potenciometro em 5 V. |
+| W6 | laranja | 27C | 34C | 3V3 | 3,25-3,35 V | 3V3 -> extremo do potenciometro | NUNCA ligar o potenciometro em 5 V. |
 | W7 | preto | 17A | 28B | GND | 0 V | GND -> GND do TCRT5000 |  |
-| W8 | preto | 28C | 35C | GND | 0 V | GND -> extremo do potenciometro |  |
+| W8 | preto | 28C | 36C | GND | 0 V | GND -> extremo do potenciometro |  |
 | W9 | azul | 29B | 9A | IR_DO | 0 / 3,3 V | DO -> GPIO35 |  |
-| W10 | roxo | 34B | 6A | POT_WIPER | 0-3,3 V | Cursor -> GPIO36 (VP) |  |
+| W10 | roxo | 35B | 6A | POT_WIPER | 0-3,3 V | Cursor -> GPIO36 (VP) |  |
 
 ## Mapa de furos ocupados
 
@@ -95,15 +95,15 @@
 | 31J | 31 | J | M1 HC-SR04: pino TRIG | TRIG |
 | 32H | 32 | H | R1 2,2 kΩ: perna A | ECHO_5V |
 | 32J | 32 | J | M1 HC-SR04: pino ECHO | ECHO_5V |
-| 33A | 33 | A | P1 Potenciometro rotativo: pino END_A | 3V3 |
-| 33C | 33 | C | fio W6 (laranja), ponta final |  |
 | 33G | 33 | G | R2 3,3 kΩ: perna B | GND |
 | 33I | 33 | I | fio W2 (preto), ponta final |  |
 | 33J | 33 | J | M1 HC-SR04: pino GND | GND |
-| 34A | 34 | A | P1 Potenciometro rotativo: pino WIPER | POT_WIPER |
-| 34B | 34 | B | fio W10 (roxo), ponta inicial |  |
-| 35A | 35 | A | P1 Potenciometro rotativo: pino END_B | GND |
-| 35C | 35 | C | fio W8 (preto), ponta final |  |
+| 34A | 34 | A | P1 Potenciometro rotativo: pino END_A | 3V3 |
+| 34C | 34 | C | fio W6 (laranja), ponta final |  |
+| 35A | 35 | A | P1 Potenciometro rotativo: pino WIPER | POT_WIPER |
+| 35B | 35 | B | fio W10 (roxo), ponta inicial |  |
+| 36A | 36 | A | P1 Potenciometro rotativo: pino END_B | GND |
+| 36C | 36 | C | fio W8 (preto), ponta final |  |
 | 36F | 36 | F | fio W4 (verde), ponta inicial |  |
 | 36G | 36 | G | R2 3,3 kΩ: perna A | ECHO_NODE |
 | 36H | 36 | H | R1 2,2 kΩ: perna B | ECHO_NODE |
