@@ -4,18 +4,19 @@ Sistema embarcado interativo que combina **ESP32**, **TinyML** (reconhecimento d
 
 ---
 
-## Status do Projeto — Ciclos 1, 2, 3 e 4
+## Status do Projeto — Ciclos 1 a 5 (`PENDING_PHYSICAL_VALIDATION`)
 
 | Subsistema | Status Atual | Observação |
 | :--- | :--- | :--- |
 | **Motor de Estado do Pet (`terminal/pet/` & `firmware/pet/`)** | **Implementado e Testado (Python + C++)** | Paridade 1:1 verificada entre `PetEngine` (Python) e `pet_state.cpp` (C++), integrado a moedas, recordes, loja de melhorias e persistência NVS/JSON. |
-| **Protocolo Serial JSON Lines v1 (`terminal/communication/` & `firmware/communication/`)** | **Implementado e Testado (Python + C++)** | Envelopes versionados (`v=1`) zero-heap no ESP32 (`sensor_frame`, `gesture_event`, `pet_state`, `lcd_frame`, `ack`, `error`). |
-| **Simulador ESP32 + Sensores (`simulator/`)** | **Implementado e Testado** | Simulação determinística 1D do HC-SR04, TCRT5000, potenciômetro, replay `.jsonl`/`.csv`, isolamento de modos e classificador intercambiável. |
+| **Protocolo Serial JSON Lines v1 (`terminal/communication/` & `firmware/communication/`)** | **Implementado e Testado (Python + C++)** | Envelopes versionados (`v=1`) zero-heap no ESP32 (`sensor_frame`, `gesture_event`, `pet_state`, `lcd_frame`, `ack`, `error`) + comandos de bancada (`DIAG`, `START`, `STOP`, `PERIOD`, `IR`). |
+| **Simulador ESP32 + Sensores (`simulator/`)** | **Implementado e Testado** | Simulação determinística 1D do HC-SR04, TCRT5000, potenciômetro, replay `.jsonl`/`.csv`, comandos `DIAG` (`origin=SIMULATOR`) e classificador intercambiável. |
 | **Espelho LCD 20×4 & Terminal ASCII (`terminal/renderer/` & `firmware/display/`)** | **Implementado e Testado (Python + C++)** | Renderização diferencial anti-flicker, modo compacto (60 cols) e 6 estados LCD 20×4 dedicados ao Pet Launch. |
-| **Infraestrutura de Machine Learning (`ml/` & `firmware/gestures/`)** | **Implementada e Testada (`AWAITING_REAL_DATA`)** | Coleta real/simulada, filtro causal, 11 features, estabilizador e inferência TinyML C++ estática (`mlp_compact` 11→16→8→4, 364 parâmetros treináveis). |
-| **Minijogo `Pet Launch` (`terminal/games/`)** | **Jogável Ponta a Ponta (Ciclo 4)** | Loop arcade completo de 10 etapas, física 2D de timestep fixo (`0.02s`), câmera horizontal, estrelas, loja de 3 melhorias e entradas unificadas (Teclado/Sim/TinyML). |
-| **Modos Auxiliares (`Air Music`, `Air Slides`)** | **Interfaces Modulares Prontas** | Contratos de eventos preservados para integração final no Ciclo 6. |
-| **Firmware C++/FreeRTOS (`firmware/`)** | **Implementado e Compilado (`esp32dev`)** | 5 tasks FreeRTOS em `APP_CPU_NUM` (`RAM: 7.2%`, `Flash: 23.2%`). Pinout `PROPOSED_PENDING_BENCH_INSPECTION`; ler `docs/bench_assembly_guide.md`. |
+| **Infraestrutura de Machine Learning (`ml/` & `firmware/gestures/`)** | **Pronta p/ Coleta Real (`AWAITING_REAL_DATA`)** | Coleta guiada multi-participante, filtro causal, 11 features, seleção multicritério embarcada, guarda anti-sintético (`ml.real_pipeline`) e TinyML C++ estático (`mlp_compact`). |
+| **Minijogo `Pet Launch` (`terminal/games/`)** | **Jogável Ponta a Ponta (Ciclo 4/5)** | Loop arcade completo de 10 etapas, física 2D de timestep fixo (`0.02s`), loja de melhorias e validador E2E gestual (`terminal.bench e2e`). |
+| **Assistente de Bancada & Painel Diag (`terminal/bench/` & `terminal/diag/`)** | **Implementados e Testados (Ciclo 5)** | Validação incremental Etapas A–D com bloqueios elétricos (`<= 3,30 V`, `2,2 kΩ / 3,3 kΩ`), `DIAG`, inspeção de telemetria e painel ASCII de séries temporais em tempo real. |
+| **Firmware C++/FreeRTOS (`firmware/`)** | **Compilado (`0.5.0-cycle5`, `esp32dev`)** | 5 tasks FreeRTOS em `APP_CPU_NUM` (`RAM: 7.2%`, `Flash: 23.3%`). Pinout canônico reconciliado em `GPIO34` (`CANONICAL_GPIO34_PENDING_PHYSICAL_VALIDATION`). |
+| **Validação Física no Hardware Real** | **`PENDING_PHYSICAL_VALIDATION`** | Aguardando conexão física do ESP32 + sensores na bancada (seguir `docs/cycle5_bench_checklist.md`). |
 
 ---
 
@@ -23,25 +24,28 @@ Sistema embarcado interativo que combina **ESP32**, **TinyML** (reconhecimento d
 
 ```text
 .
-├── firmware/           # Contratos C++/FreeRTOS e platformio.ini (implementação no Ciclo 3)
+├── firmware/           # Firmware C++/FreeRTOS real para ESP32 e platformio.ini (Ciclos 3 a 5)
 │   ├── sensors/
 │   ├── gestures/
 │   ├── display/
 │   ├── pet/
 │   ├── communication/
 │   └── main/
-├── terminal/           # Aplicação Python do notebook, motor de domínio e protocolo
+├── terminal/           # Aplicação Python do notebook, motor de domínio, bancada e protocolo
+│   ├── bench/          # Assistente CLI de bancada, etapas A-D, pinout canônico e teste E2E (Ciclo 5)
+│   ├── diag/           # Painel ASCII em tempo real de diagnóstico e séries temporais (Ciclo 5)
 │   ├── renderer/       # Renderizadores sincronizados (LCD 20x4 e Terminal ASCII)
 │   ├── pet/            # Motor de estado independente de UI, configuração e persistência
-│   ├── games/          # Física base e interface modular do Pet Launch (Ciclo 4)
+│   ├── games/          # Física 2D, modo jogável, loja e renderer do Pet Launch (Ciclo 4)
 │   ├── modes/          # Interfaces modulares Air Music e Air Slides (Ciclo 6)
 │   └── communication/  # Protocolo JSON Lines v1 e transportes Virtual / PySerial
-├── ml/                 # Estrutura do pipeline de coleta, treino, avaliação e exportação TinyML (Ciclo 2)
+├── ml/                 # Pipeline de coleta, treino, avaliação, seleção multicritério e exportação TinyML
 │   ├── collection/
 │   ├── preprocessing/
 │   ├── training/
 │   ├── evaluation/
-│   └── export/
+│   ├── export/
+│   └── real_pipeline.py
 ├── simulator/          # Simulador de sensores 1D, replay de datasets e nó ESP32 virtual
 ├── tests/              # Suíte automatizada pytest
 ├── data/               # Diretório para saves locais e futuros datasets coletados
@@ -127,6 +131,38 @@ Opções úteis de linha de comando:
 .\.venv\Scripts\python.exe -m terminal --demo --classifier ml --model-path data/models/best_model.joblib
 ```
 
+### 4. Integração Física de Bancada, Diagnóstico e Dataset Real (Ciclo 5)
+
+> **Regra de Segurança e Honestidade Experimental:** O assistente de bancada **nunca** energiza a montagem nem grava firmware automaticamente. Não aceite `3,5 V` como seguro no `ECHO`: utilize preferencialmente **`R1 = 2,2 kΩ` + `R2 = 3,3 kΩ`** (`3,00 V` @ `5,0 V`; `<= 3,30 V`) no pino canônico **`GPIO34`**, aterre `LCD RW` em `GND` e alimente `TCRT5000`/potenciômetro em `3,3 V`.
+
+```powershell
+# A. Verificar dependências, portas COM, checklist de segurança e divisor resistivo (<= 3,30 V)
+.\.venv\Scripts\python.exe -m terminal.bench check-deps
+.\.venv\Scripts\python.exe -m terminal.bench ports
+.\.venv\Scripts\python.exe -m terminal.bench checklist
+.\.venv\Scripts\python.exe -m terminal.bench divider --r1 2200 --r2 3300 --measured-v 3.00
+
+# B. Validação incremental guiada (adicione --simulate para testar antes de conectar o ESP32 em COMx)
+.\.venv\Scripts\python.exe -m terminal.bench stage A --serial-port COM3
+.\.venv\Scripts\python.exe -m terminal.bench stage B --serial-port COM3 --r1 2200 --r2 3300 --measured-echo-v 3.00 --reference-cm 25
+.\.venv\Scripts\python.exe -m terminal.bench stage C --serial-port COM3 --component both --vcc-measured-v 3.30
+.\.venv\Scripts\python.exe -m terminal.bench stage D --serial-port COM3 --lcd-vdd-v 5.00
+
+# C. Painel ASCII de diagnóstico em tempo real (indica explicitamente HARDWARE REAL vs SIMULADOR)
+.\.venv\Scripts\python.exe -m terminal.diag --serial-port COM3
+.\.venv\Scripts\python.exe -m terminal.diag --simulate --frames 32
+
+# D. Plano de campanha (>= 5 participantes) e captura guiada real (sem mistura sintética)
+.\.venv\Scripts\python.exe -m ml.collection --plan-campaign
+.\.venv\Scripts\python.exe -m ml.collection --serial-port COM3 --participant p01 --guided --conditions "bancada_interna_vel_normal" --output-dir data/raw/real
+
+# E. Treino multicritério com dados 100% reais, exportação C++ com paridade e rebuild do firmware
+.\.venv\Scripts\python.exe -m ml.real_pipeline --raw-dir data/raw/real --models-dir data/models/real --reports-dir data/reports --export-header firmware/gestures/tinyml_model.h --verify-firmware-build
+
+# F. Validação ponta a ponta do Pet Launch (gestos -> serial -> jogo -> LCD -> persistência)
+.\.venv\Scripts\python.exe -m terminal.bench e2e --serial-port COM3
+```
+
 ### Atalhos de Teclado no Modo Interativo
 
 | Tecla | Ação |
@@ -165,4 +201,5 @@ Opções úteis de linha de comando:
 - [`docs/hardware_safety.md`](docs/hardware_safety.md) — **Leitura obrigatória antes da montagem física**: divisor resistivo para o pino `ECHO` (5 V → 3,3 V) do HC-SR04, aterramento de `RW` e compatibilidade lógica do LCD 2004A V1.1, restrições de GPIOs do ESP32 e checklist de bancada.
 - [`docs/bench_assembly_guide.md`](docs/bench_assembly_guide.md) — **Guia incremental de bancada (Ciclo 3)**: montagem em 4 estágios (priorizando P0 HC-SR04), checklist de multímetro pré-energização e comandos de gravação/coleta real.
 - [`docs/ml_pipeline_spec.md`](docs/ml_pipeline_spec.md) — Especificação do pipeline de Machine Learning e TinyML para séries temporais 1D (Ciclo 2).
-- [`docs/real_data_collection_guide.md`](docs/real_data_collection_guide.md) — Procedimento passo a passo para coleta do dataset físico real na bancada e limitações experimentais.
+- [`docs/real_data_collection_guide.md`](docs/real_data_collection_guide.md) — Procedimento passo a passo para coleta multi-participante do dataset físico real na bancada e limitações experimentais.
+- [`docs/cycle5_bench_checklist.md`](docs/cycle5_bench_checklist.md) — **Checklist físico rápido e objetivo (Ciclo 5)**: tabela canônica única (`GPIO34`), regras elétricas (`<= 3,30 V`) e comandos das Etapas A–D até o teste E2E do Pet Launch.

@@ -1,4 +1,4 @@
-"""Treinamento dos modelos candidatos, seleção e serialização de bundles."""
+"""Treinamento dos modelos candidatos, seleção multicritério embarcada e serialização de bundles."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 import joblib
-from sklearn.metrics import f1_score
+from sklearn.metrics import accuracy_score, f1_score
 
 from ml.schemas import (
     CORE_GESTURE_CLASSES,
@@ -16,6 +16,8 @@ from ml.schemas import (
     DataOrigin,
     ExperimentalStatus,
     PreprocessingConfig,
+    RawSampleRecord,
+    StabilizerConfig,
     WindowSample,
 )
 from ml.training.models import (
@@ -27,6 +29,66 @@ from ml.training.splitter import (
     split_windows_grouped,
     windows_to_xy,
 )
+
+
+class SyntheticDataContaminationError(ValueError):
+    """Levantada quando amostras sintéticas são detectadas em um fluxo estritamente físico/real."""
+
+
+def assert_strictly_real_data(
+    items: Sequence[RawSampleRecord | WindowSample],
+    context: str = "treinamento/avaliacao de modelo real",
+) -> None:
+    """Garante que 100% dos registros ou janelas tenham `data_origin == 'real_hardware'`.
+
+    Atende à regra inegociável da Seção 4 do Ciclo 5:
+    'Não misturar amostras sintéticas nos resultados de avaliação do modelo real.'
+    """
+    if not items:
+        raise ValueError(f"Conjunto de dados vazio em {context}.")
+    bad_origins = sorted({x.data_origin for x in items if x.data_origin != DataOrigin.REAL_HARDWARE.value})
+    if bad_origins:
+        raise SyntheticDataContaminationError(
+            f"CONTAMINACAO SINTETICA BLOQUEADA em {context}: detectadas origens {bad_origins}. "
+            "Remova qualquer arquivo 'synthetic_simulator' antes de treinar/avaliar o modelo fisico real."
+        )
+
+
+def compute_embedded_selection_score(
+    val_f1_macro: float,
+    val_event_f1: float,
+    val_neutral_far: float,
+    estimated_flash_bytes: int,
+    estimated_sram_bytes: int,
+    max_flash_budget_bytes: int = 32768,
+    max_sram_budget_bytes: int = 4096,
+) -> float:
+    """Calcula índice multicritério para seleção TinyML no ESP32 (Seção 5 do Ciclo 5).
+
+    Não escolhe exclusivamente pela acurácia de janelas! Pondera:
+    - 45% F1-Macro de janelas na validação agrupada (`val_f1_macro`)
+    - 35% F1 em nível de eventos contínuos com `EventStabilizer` (`val_event_f1`)
+    - 15% Supressão de falsos acionamentos em sequências NEUTRAL (`1 - val_neutral_far`)
+    -  5% Eficiência de memória Flash/SRAM embarcada (modelos <= 4 KiB Flash recebem nota máxima)
+    """
+    if estimated_flash_bytes > max_flash_budget_bytes or estimated_sram_bytes > max_sram_budget_bytes:
+        return -1.0
+
+    if estimated_flash_bytes <= 4096:
+        compactness = 1.0
+    else:
+        compactness = max(
+            0.0,
+            1.0 - ((estimated_flash_bytes - 4096) / max(1, max_flash_budget_bytes - 4096)),
+        )
+
+    score = (
+        0.45 * float(val_f1_macro)
+        + 0.35 * float(val_event_f1)
+        + 0.15 * max(0.0, 1.0 - float(val_neutral_far))
+        + 0.05 * float(compactness)
+    )
+    return round(float(score), 6)
 
 
 @dataclass
@@ -44,6 +106,12 @@ class TrainedBundle:
     data_origins: tuple[str, ...]
     experimental_status: str
     val_f1_macro: float = 0.0
+    val_accuracy: float = 0.0
+    val_event_f1: float = 0.0
+    val_neutral_far: float = 0.0
+    estimated_flash_bytes: int = 0
+    estimated_sram_bytes: int = 0
+    selection_score: float = 0.0
 
     def to_meta_dict(self) -> dict[str, Any]:
         """Gera dicionário legível em JSON sem o objeto binário do estimador."""
@@ -58,6 +126,12 @@ class TrainedBundle:
             "data_origins": list(self.data_origins),
             "experimental_status": self.experimental_status,
             "val_f1_macro": round(float(self.val_f1_macro), 4),
+            "val_accuracy": round(float(self.val_accuracy), 4),
+            "val_event_f1": round(float(self.val_event_f1), 4),
+            "val_neutral_far": round(float(self.val_neutral_far), 4),
+            "estimated_flash_bytes": int(self.estimated_flash_bytes),
+            "estimated_sram_bytes": int(self.estimated_sram_bytes),
+            "selection_score": round(float(self.selection_score), 6),
         }
 
 
@@ -65,11 +139,23 @@ def train_candidate_models(
     windows: Sequence[WindowSample],
     training_config: TrainingConfig | None = None,
     preprocessing_config: PreprocessingConfig | None = None,
+    stabilizer_config: StabilizerConfig | None = None,
+    require_real_data: bool = False,
 ) -> tuple[dict[str, TrainedBundle], DatasetSplit]:
-    """Particiona os dados sem vazamento, treina os 4 modelos candidatos e calcula F1 de validação."""
+    """Particiona os dados sem vazamento, treina os 4 modelos candidatos e calcula métricas multicritério."""
+    from ml.evaluation.metrics import (
+        estimate_esp32_memory,
+        evaluate_classification_metrics,
+        evaluate_event_level,
+    )
+
+    if require_real_data:
+        assert_strictly_real_data(windows, context="train_candidate_models(require_real_data=True)")
+
     cfg = training_config or TrainingConfig()
     p_cfg = preprocessing_config or PreprocessingConfig()
 
+    # Regra estrita de ML: split agrupado ANTES de ajustar qualquer pipeline/StandardScaler!
     split = split_windows_grouped(
         windows,
         seed=cfg.seed,
@@ -91,11 +177,36 @@ def train_candidate_models(
 
     for name, model in models.items():
         model.fit(X_train, y_train)
+        mem = estimate_esp32_memory(model, cfg.class_names)
+        flash_b = int(mem.get("estimated_esp32_flash_bytes", 0))
+        sram_b = int(mem.get("estimated_esp32_sram_bytes", 0))
+
         if len(y_val) > 0:
             y_pred = model.predict(X_val)
             val_f1 = float(f1_score(y_val, y_pred, average="macro", zero_division=0))
+            val_acc = float(accuracy_score(y_val, y_pred))
+            cls_val = evaluate_classification_metrics(model, X_val, y_val, class_names=cfg.class_names)
+            val_far = float(cls_val.get("false_activation_rate_neutral", 0.0))
+            evt_val = evaluate_event_level(
+                model,
+                split.val,
+                class_names=cfg.class_names,
+                stabilizer_config=stabilizer_config,
+            )
+            val_evt_f1 = float(evt_val.get("event_f1", 0.0))
         else:
             val_f1 = 0.0
+            val_acc = 0.0
+            val_far = 0.0
+            val_evt_f1 = 0.0
+
+        sel_score = compute_embedded_selection_score(
+            val_f1_macro=val_f1,
+            val_event_f1=val_evt_f1,
+            val_neutral_far=val_far,
+            estimated_flash_bytes=flash_b,
+            estimated_sram_bytes=sram_b,
+        )
 
         bundles[name] = TrainedBundle(
             model_name=name,
@@ -109,33 +220,49 @@ def train_candidate_models(
             data_origins=origins,
             experimental_status=exp_status,
             val_f1_macro=val_f1,
+            val_accuracy=val_acc,
+            val_event_f1=val_evt_f1,
+            val_neutral_far=val_far,
+            estimated_flash_bytes=flash_b,
+            estimated_sram_bytes=sram_b,
+            selection_score=sel_score,
         )
 
     return bundles, split
+
+
+def _effective_rank_score(bundle: TrainedBundle) -> float:
+    """Retorna `selection_score` multicritério quando populado, ou `val_f1_macro` em mocks simples."""
+    if bundle.selection_score != 0.0 or bundle.estimated_flash_bytes > 0:
+        return float(bundle.selection_score)
+    return float(bundle.val_f1_macro)
 
 
 def select_best_embeddable_bundle(
     bundles: dict[str, TrainedBundle],
     prefer_compact_margin: float = 0.03,
 ) -> TrainedBundle:
-    """Seleciona o modelo ótimo para embarque em microcontrolador (ESP32).
+    """Seleciona o modelo ótimo para embarque em microcontrolador (ESP32) por critério composto.
 
-    Avalia os modelos aprendidos estatisticamente (decision_tree, random_forest, mlp_compact).
-    Prioriza `decision_tree` se sua métrica F1 de validação estiver a até `prefer_compact_margin`
-    do melhor modelo, dado o seu baixo consumo de Flash/SRAM e ausência de alocação dinâmica.
+    Não seleciona apenas por acurácia de janela: combina F1-Macro de janelas, F1 de eventos
+    contínuos (`EventStabilizer`), baixa taxa de falsos acionamentos em `NEUTRAL` e custo de
+    memória Flash/SRAM. Prioriza `decision_tree` se seu índice multicritério estiver a até
+    `prefer_compact_margin` do líder e sem degradação excessiva de FAR Neutro.
     """
     learned_names = ("decision_tree", "random_forest", "mlp_compact")
     learned_bundles = [b for name, b in bundles.items() if name in learned_names]
 
     if not learned_bundles:
-        # Fallback caso apenas o rule_baseline esteja presente
-        return max(bundles.values(), key=lambda b: b.val_f1_macro)
+        return max(bundles.values(), key=_effective_rank_score)
 
-    best_learned = max(learned_bundles, key=lambda b: b.val_f1_macro)
+    best_learned = max(learned_bundles, key=_effective_rank_score)
     dt_bundle = bundles.get("decision_tree")
 
-    if dt_bundle is not None:
-        if dt_bundle.val_f1_macro >= (best_learned.val_f1_macro - prefer_compact_margin):
+    if dt_bundle is not None and dt_bundle is not best_learned:
+        dt_score = _effective_rank_score(dt_bundle)
+        best_score = _effective_rank_score(best_learned)
+        far_ok = dt_bundle.val_neutral_far <= (best_learned.val_neutral_far + 0.05)
+        if dt_score >= (best_score - prefer_compact_margin) and far_ok:
             return dt_bundle
 
     return best_learned

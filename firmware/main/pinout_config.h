@@ -6,20 +6,24 @@
 
 /**
  * @file pinout_config.h
- * @brief Pinagem candidata provisoria e parametros temporais do MotionPet (ESP-WROOM-32).
+ * @brief Tabela canonica unica de pinagem e parametros temporais do MotionPet (ESP-WROOM-32).
  *
- * AVISO CRITICO DE SEGURANCA ELETRICA (PENDENTE DE INSPECAO FISICA NA BANCADA):
- * 1. O pino ECHO do HC-SR04 (5 V TTL) NUNCA deve ser ligado direto ao GPIO34.
- *    Exige divisor resistivo obrigatorio (ex.: R1=1k / R2=2k -> ~3.3 V) validado com multimetro.
- * 2. O pino RW (pino 5) do LCD 2004A DEVE ser aterrado permanentemente no GND (modo somente-escrita).
- * 3. O TCRT5000 e o potenciometro devem ser alimentados exclusivamente em 3.3 V (pino 3V3), NUNCA em 5 V.
- * 4. Pinos reservados de SPI Flash (GPIO6..GPIO11) e strapping critico (GPIO12/MTDI, GPIO0) NAO sao usados.
- * 5. Todas as leituras analogicas residem no bloco ADC1 (GPIO32..GPIO39).
+ * RECONCILIACAO CANONICA DE PINAGEM E SEGURANCA ELETRICA (CICLO 5):
+ * 1. HC-SR04 ECHO reside CANONICAMENTE no `GPIO34` (GPI somente-entrada, alta impedancia, zero
+ *    conflito com strapping/ADC/LCD; corrige mencao textual divergente a GPIO32 no resumo do Ciclo 4).
+ * 2. O pino ECHO do HC-SR04 (5 V TTL) NUNCA deve ser ligado direto ao GPIO34 nem exceder 3.30 V.
+ *    3.50 V NAO e aceito como tensao segura para GPIO de 3.3 V!
+ *    Utilize divisor com margem abaixo de 3.3 V: preferencialmente R1=2.2 kOhm (ECHO->No) e
+ *    R2=3.3 kOhm (No->GND), resultando em Vout=3.00 V @ 5.00 V e Vout_max=3.15 V @ 5.25 V.
+ * 3. O pino RW (pino 5) do LCD 2004A DEVE ser aterrado permanentemente no GND (modo somente-escrita).
+ * 4. O TCRT5000 e o potenciometro devem ser alimentados exclusivamente em 3.3 V (pino 3V3), NUNCA em 5 V.
+ * 5. Pinos reservados de SPI Flash (GPIO6..GPIO11) e strapping critico (GPIO12/MTDI, GPIO0) NAO sao usados.
+ * 6. Todas as leituras analogicas residem exclusivamente no bloco ADC1 (GPIO36=POT, GPIO39=IR_AO opcional).
  */
 
 // Status explicito de validacao fisica
-#define MOTIONPET_PINOUT_STATUS "PROPOSED_PENDING_BENCH_INSPECTION"
-#define MOTIONPET_FW_VERSION    "0.3.0-cycle3"
+#define MOTIONPET_PINOUT_STATUS "CANONICAL_GPIO34_PENDING_PHYSICAL_VALIDATION"
+#define MOTIONPET_FW_VERSION    "0.5.0-cycle5"
 
 // Comunicacao Serial USB (UART0)
 #ifndef MOTIONPET_SERIAL_BAUD

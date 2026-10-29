@@ -1740,7 +1740,13 @@ def test_firmware_zero_heap_safety_status_and_xtensa_cross_compile() -> None:
         assert verify_zero_dynamic_allocation(path), f"Alocação dinâmica proibida detectada em {path}"
 
     pinout_hdr = (FIRMWARE_DIR / "main" / "pinout_config.h").read_text(encoding="utf-8")
-    assert 'MOTIONPET_PINOUT_STATUS "PROPOSED_PENDING_BENCH_INSPECTION"' in pinout_hdr
+    assert any(
+        status in pinout_hdr
+        for status in (
+            'MOTIONPET_PINOUT_STATUS "PROPOSED_PENDING_BENCH_INSPECTION"',
+            'MOTIONPET_PINOUT_STATUS "CANONICAL_GPIO34_PENDING_PHYSICAL_VALIDATION"',
+        )
+    )
 
     # Verifica compilação cruzada real com `xtensa-esp32-elf-g++` nos módulos independentes de Arduino
     xtensa_gpp = detect_esp32_xtensa_compiler()

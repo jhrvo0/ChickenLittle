@@ -1,92 +1,169 @@
-# Protocolo de Coleta do Dataset Real e Limitações Experimentais — MotionPet (Ciclo 2)
+# Protocolo de Coleta do Dataset Físico Real e Pipeline TinyML — MotionPet (Ciclo 5)
 
 > [!IMPORTANT]
-> **Status Experimental Atual: `AWAITING_REAL_DATA`**
+> **Status Experimental Atual: `PENDING_PHYSICAL_VALIDATION` / `AWAITING_REAL_DATA`**
 >
-> Toda a infraestrutura de coleta, validação, pré-processamento causal, treinamento, avaliação (janelas e eventos completos) e exportação C++ estática está funcional e verificada com testes automatizados e paridade nativa em C++. Contudo, **nenhuma métrica obtida sobre dados sintéticos representa o desempenho físico real do sensor HC-SR04**. A validação científica depende da coleta na bancada física descrita abaixo.
+> - **Firmware de Aquisição Alvo:** `MOTIONPET_FW_VERSION = "0.5.0-cycle5"`
+> - **Pinagem Canônica:** `MOTIONPET_PINOUT_STATUS = "CANONICAL_GPIO34_PENDING_PHYSICAL_VALIDATION"` ([pinout_config.h](file:///c:/Users/joaoh/Downloads/ChickenLittle/firmware/main/pinout_config.h))
+>
+> Toda a cadeia de coleta guiada (`ml.collection`), pré-processamento estritamente causal, treinamento comparativo, avaliação por janela e por evento estabilizado, exportação C++ estática e orquestração automatizada (`ml.real_pipeline`) está implementada e verificada por testes automatizados. Contudo, **nenhuma métrica obtida sobre dados sintéticos representa o desempenho físico real do sensor HC-SR04**.
+>
+> **REGRA CIENTÍFICA INEGOCIÁVEL:** **É terminantemente proibido misturar amostras sintéticas (`synthetic_simulator`) com dados físicos reais nos diretórios, treinamentos ou relatórios de avaliação real.** Todas as capturas físicas devem ser gravadas exclusivamente em `data/raw/real`.
 
 ---
 
-## 1. Pré-requisitos Antes da Coleta Física
+## 1. Pré-requisitos de Segurança Elétrica, Firmware e Bancada
 
-1. **Segurança Elétrica Confirmada**:
-   - Seguir integralmente [`docs/hardware_safety.md`](hardware_safety.md), especialmente o **divisor resistivo obrigatório ($5\text{ V} \rightarrow \le 3,3\text{ V}$) no pino `ECHO` do HC-SR04**, alimentação em **3,3 V** para o TCRT5000 e **GND comum**.
-2. **Pacote `pyserial` instalado no `.venv`**:
+1. **Comissionamento Físico Aprovado (`Etapas A -> B -> C`)**:
+   - Seguir integralmente [hardware_safety.md](file:///c:/Users/joaoh/Downloads/ChickenLittle/docs/hardware_safety.md) e [cycle5_bench_checklist.md](file:///c:/Users/joaoh/Downloads/ChickenLittle/docs/cycle5_bench_checklist.md):
+     - **`HC-SR04 ECHO -> Divisor Canônico 2,2 kΩ / 3,3 kΩ -> GPIO34`**, medido previamente com multímetro/osciloscópio garantindo **`<= 3,30 V`** (`3,00 V` @ `5,00 V`; **`3,5 V` é proibido!**).
+     - **`TCRT5000`** (`DO -> GPIO35`) e **`Potenciômetro`** (`GPIO36`) alimentados estritamente em **`3,3 V` (`3V3`)** e **barramento `GND` comum**.
+2. **Verificação de Dependências e Saúde Metrológica na Bancada**:
    ```powershell
-   .\.venv\Scripts\pip.exe install pyserial
+   .\.venv\Scripts\python.exe -m terminal.bench check-deps
+   .\.venv\Scripts\python.exe -m terminal.bench inspect --serial-port COMx --duration 5 --reference-cm 25
+   .\.venv\Scripts\python.exe -m terminal.diag --serial-port COMx
    ```
-3. **Firmware de Telemetria no ESP32 (Ciclo 3)**:
-   - O ESP32 deve emitir linhas JSON Lines v1 do tipo `sensor_frame` a **115200 baud** com intervalo estável entre **60 ms e 80 ms** (~12,5 Hz a 16,6 Hz) para evitar eco residual acústico:
+   *(Substitua `COMx` pela porta real do ESP32, identificada com `.\.venv\Scripts\python.exe -m terminal.bench ports`).*
+3. **Firmware `0.5.0-cycle5` Gravado no ESP32**:
+   - Emissão contínua de quadros JSON Lines v1 `sensor_frame` a **`115200 baud`** com período nominal de **`70 ms`** (~`14,3 Hz`, faixa recomendada `60..80 ms` para evitar interferência de eco residual acústico):
    ```json
-   {"v":1,"seq":1,"type":"sensor_frame","ts_ms":70,"data":{"distance_cm":34.2,"ir_detected":false,"pot_norm":0.5,"valid_ultrasonic":true}}
+   {"v":1,"seq":1,"type":"sensor_frame","ts_ms":70,"data":{"distance_cm":24.8,"ir_detected":false,"pot_norm":0.50,"valid_ultrasonic":true}}
    ```
-4. **Geometria Fixa de Bancada**:
-   - Fixar o HC-SR04 apontado horizontalmente ou levemente inclinado para cima ($15^\circ$), sem obstáculos fixos a menos de $80\text{ cm}$ dentro do cone acústico (~$15^\circ\text{--}20^\circ$).
-   - Marcar na mesa as referências visuais de distância: $10\text{ cm}$, $25\text{ cm}$ e $45\text{ cm}$.
+4. **Geometria Padronizada de Bancada**:
+   - Fixar o sensor HC-SR04 horizontalmente na borda da protoboard ou levemente inclinado para cima (`~15°`), com cone acústico livre (`~15°..20°`) sem obstáculos estáticos a menos de `80 cm`.
+   - Demarcar com fita na bancada três referências visuais de distância frontal: **`10 cm`**, **`25 cm`** e **`45 cm`**.
 
 ---
 
-## 2. Procedimento Objetivo de Coleta (`python -m ml.collection`)
+## 2. Taxonomia de Classes: 4 Principais + 2 Experimentais
 
-### 2.1 Coleta por Sessões Contínuas com `NEUTRAL` e Transições (Recomendado)
-Gravar sessões contínuas intercalando repouso (`NEUTRAL`) e gestos ativos permite avaliar tanto a classificação por janela quanto a **taxa real de falsos acionamentos e transições** no `EventStabilizer`:
+A campanha de coleta do Ciclo 5 concentra-se nas **4 classes principais de operação embarcada**, mantendo as 2 classes rápidas explicitamente segregadas como **experimentais**:
+
+| Classe | Categoria | Descrição Cinemática na Bancada (`10 cm` a `45 cm`) | Uso no Produto |
+| :--- | :---: | :--- | :--- |
+| **`NEUTRAL`** | **Principal** | Ausência de mão no cone acústico, repouso distante (`> 55 cm`), pequenos movimentos laterais fora do eixo ou passagem acidental distante. | Estado base sem disparo de eventos. |
+| **`APPROACH`** | **Principal** | Aproximação contínua e intencional da palma da mão aberta em direção ao sensor (ex.: de `~45 cm` até `~12 cm`). | Aproximar / Interagir / Avançar ação. |
+| **`RETREAT`** | **Principal** | Afastamento contínuo e intencional da palma da mão para longe do sensor (ex.: de `~12 cm` até `~45 cm`). | Recuar / Cancelar / Soltar ação. |
+| **`HOLD`** | **Principal** | Manutenção estacionária da palma aberta na zona ativa (`~12 cm` a `30 cm`) por pelo menos `1,0..1,5 s` (incluindo proximidade curta com eventual apoio de `ir_detected`). | Carregar força no *Pet Launch* / Carinho / Sustentação no *Air Music*. |
+| **`IMPULSE`** | *Experimental* | Entrada e retirada brusca da mão em pulso único muito curto (`< 0,6 s`). | *Experimental* — sujeito à resolução temporal de `70 ms` (~`14,3 Hz`). |
+| **`DOUBLE`** | *Experimental* | Dois pulsos rápidos consecutivos de aproximação e recuo na mesma janela. | *Experimental* — avaliado separadamente somente se houver separabilidade física comprovada. |
+
+---
+
+## 3. Metadados e Campos Obrigatórios de Registro
+
+Cada sessão capturada por `ml.collection` em `data/raw/real/` registra obrigatoriamente metadados auditáveis de sessão e séries temporais brutas completas:
+
+1. **Identificador de Participante Anonimizado (`participant`)**: código pseudonimizado padronizado (`p01`, `p02`, `p03`, `p04`, `p05`, ...), **sem nenhum dado pessoal sensível (PII)**.
+2. **Identificador Único de Sessão (`session_id`)**: carimbo rastreável associando participante, índice de sessão e timestamp UTC.
+3. **Classe Alvo (`target_gesture` / `label`)**: classe solicitada ao participante em cada segmento do cronograma guiado (`NEUTRAL`, `APPROACH`, `RETREAT`, `HOLD`, ou classes experimentais em sessões dedicadas).
+4. **Leituras Brutas e Sequenciamento (`seq` e `sensor_frame`)**: preservação fiel das leituras sem filtragem destrutiva prévia.
+5. **Timestamps (`ts_ms`)**: tempo monotônico em milissegundos emitido pelo firmware (e timestamp de chegada no host) para auditoria de *jitter* e lacunas temporais.
+6. **Distância Ultrassônica (`distance_cm`)**: valor em centímetros ou `null` quando ocorrer perda de eco.
+7. **Estado Infravermelho (`ir_detected`)** e **Potenciômetro (`pot_norm`)**: leitura booleana do TCRT5000 (`GPIO35`) e leitura normalizada `0.0..1.0` do ADC1 (`GPIO36`).
+8. **Registro Explícito de Falhas e Timeouts (`valid_ultrasonic`)**: marcação `valid_ultrasonic: false` em todo eco perdido/timeout acústico, além de contadores consolidados de falhas e descartes seriais nos metadados da sessão.
+9. **Condições de Coleta (`--conditions`)**: string descritiva obrigatória registrando ambiente, velocidade e geometria da sessão (ex.: `"bancada_interna_vel_normal"`, `"bancada_interna_vel_lenta"`, `"bancada_interna_vel_rapida"`, `"cone_deslocado_5cm"`).
+10. **Versão do Firmware (`firmware_version`)**: registro explícito da versão **`0.5.0-cycle5`** reportada pelo ESP32 (e origem `source = "real_hardware"`).
+
+---
+
+## 4. Campanha Multi-Participante Recomendada (`>= 5` Participantes) e Particionamento Sem Vazamento
+
+Antes de iniciar as gravações, consulte o plano estruturado da campanha diretamente na CLI:
 
 ```powershell
-# Exemplo para participante p01 (sessão 01 na porta COM3):
-.\.venv\Scripts\python.exe -m ml.collection `
-  --serial-port COM3 `
-  --participant p01 `
-  --session-id session_real_p01_s01 `
-  --schedule "NEUTRAL:25,APPROACH:18,NEUTRAL:20,HOLD:22,NEUTRAL:20,RETREAT:18,NEUTRAL:25" `
-  --output-dir data/raw
+.\.venv\Scripts\python.exe -m ml.collection --plan-campaign
 ```
 
-Durante a captura, o terminal exibirá o prompt em tempo real (`>>> Execute agora: APPROACH (18 amostras)...`) orientando o participante.
+### 4.1 Diretrizes da Campanha (`p01..p05+`)
 
-### 2.2 Coleta Isolada por Classe (Opcional para Reforço)
+- **Número recomendado de participantes:** **5 ou mais participantes distintos** (`p01`, `p02`, `p03`, `p04`, `p05`, ...).
+- **Diversidade intra-participante (`3 a 5` sessões contínuas por pessoa):**
+  - Sessão 1: posição frontal centralizada, velocidade normal (`--conditions "bancada_interna_vel_normal"`).
+  - Sessão 2: velocidade mais lenta e suave (`--conditions "bancada_interna_vel_lenta"`).
+  - Sessão 3: velocidade rápida dentro da cadência natural (`--conditions "bancada_interna_vel_rapida"`).
+  - Sessões adicionais (4–5): leve variação de postura/abertura da mão e leve deslocamento angular dentro do cone acústico (`--conditions "bancada_interna_variacao_posicao"`).
+- **Reserva Estrita para Avaliação Final de Teste (*Hold-out*):**
+  - Com `>= 5` participantes (`strategy = "by_participant"`): **participantes inteiros** são reservados exclusivamente para validação e para o **conjunto final de teste** (ex.: `p01, p02, p03` para treino; `p04` para validação/seleção de hiperparâmetros; `p05` — e participantes extras — bloqueados exclusivamente para avaliação final de teste).
+  - Em coletas preliminares com número reduzido de participantes, **sessões inteiras independentes** devem ser reservadas exclusivamente para teste final (`by_session_fallback`), documentando explicitamente que a generalização inter-participante aguarda o fechamento de `p01..p05`. **Jamais** misture janelas deslizantes da mesma sessão entre treino e teste.
+- **Isolamento Absoluto contra Dados Sintéticos:**
+  - Nenhuma amostra com `source = "synthetic_simulator"` ou gerada por simuladores pode existir em `data/raw/real/` ou participar de treino, validação ou teste do relatório real. O pipeline `ml.real_pipeline` audita a proveniência e aborta caso detecte contaminação sintética.
+
+---
+
+## 5. Procedimento Prático: Coleta Guiada, Treinamento e Exportação C++
+
+### 5.1 Coleta Contínua Guiada Multi-Participante (`--guided`)
+
+Gravar sessões contínuas intercalando `NEUTRAL` entre cada gesto ativo permite medir não apenas F1 por janela, mas também a **taxa real de falsos disparos e latência de estabilização** no `EventStabilizer`:
+
+```powershell
+# Exemplo para participante p01 na porta COMx (gravando exclusivamente em data/raw/real):
+.\.venv\Scripts\python.exe -m ml.collection `
+  --serial-port COMx `
+  --participant p01 `
+  --schedule "NEUTRAL:20,APPROACH:15,NEUTRAL:15,RETREAT:15,NEUTRAL:15,HOLD:15,NEUTRAL:20" `
+  --conditions "bancada_interna_vel_normal" `
+  --guided `
+  --output-dir data/raw/real
+```
+
+*(Repita variando `--participant p01..p05` e `--conditions` conforme o plano da Seção 4.1).*
+
+### 5.2 Coleta Isolada Opcional para Reforço de `NEUTRAL` ou Casos Difíceis
+
 ```powershell
 .\.venv\Scripts\python.exe -m ml.collection `
-  --serial-port COM3 `
+  --serial-port COMx `
   --participant p01 `
   --gesture NEUTRAL `
   --samples 60 `
-  --output-dir data/raw
+  --conditions "bancada_interna_repouso_e_passagem_distante" `
+  --guided `
+  --output-dir data/raw/real
 ```
-*(Incluir em `NEUTRAL`: ausência de mão, pequenos movimentos laterais fora do cone e passagem acidental distante para reduzir falsos positivos).*
 
-### 2.3 Meta Mínima Recomendada de Amostragem Real
-- **Participantes:** idealmente **$\ge 4$ pessoas distintas** (mínimo absoluto de 3 participantes para ativar `strategy="by_participant"`, reservando participantes inteiros para validação e teste). Caso apenas 1 pessoa colete inicialmente, gravar **$\ge 6$ sessões independentes** em momentos distintos (`strategy="by_session_fallback"`), documentando que a generalização inter-pessoal permanece não testada.
-- **Volume inicial:** 3 a 5 sessões contínuas por participante, variando velocidade moderada/rápida e abertura da mão.
+### 5.3 Execução Automatizada do Pipeline Real Ponta a Ponta (`ml.real_pipeline`)
 
----
-
-## 3. Validação, Treinamento, Avaliação e Exportação C++
-
-Após coletar as sessões reais em `data/raw/` (removendo quaisquer arquivos sintéticos de teste):
+Após concluir a coleta das sessões reais em `data/raw/real`, execute o orquestrador único do Ciclo 5, que valida a pureza dos dados reais (bloqueando dados sintéticos), extrai as 11 *features* causais, treina os modelos candidatos (*Rule-Based Baseline*, *Decision Tree*, *Random Forest*, *MLP Compacta*), gera os relatórios comparativos honestos em `data/reports`, exporta o modelo vencedor para `firmware/gestures/tinyml_model.h` com verificação de paridade C++ e confere a compilação do firmware:
 
 ```powershell
-# 1. Validar integridade, monotonicidade temporal (ts_ms) e taxa de timeouts
-.\.venv\Scripts\python.exe -m ml.collection --validate data/raw
+.\.venv\Scripts\python.exe -m ml.real_pipeline `
+  --raw-dir data/raw/real `
+  --models-dir data/models `
+  --reports-dir data/reports `
+  --export-header firmware/gestures/tinyml_model.h `
+  --verify-firmware-build
+```
 
-# 2. Pré-processamento estritamente causal e extração das 11 features
-.\.venv\Scripts\python.exe -m ml.preprocessing --input data/raw --output data/processed/features_dataset.csv
+*(Caso deseje inspecionar cada etapa isoladamente para depuração, os módulos individuais permanecem disponíveis:)*
+```powershell
+.\.venv\Scripts\python.exe -m ml.collection --validate data/raw/real
+.\.venv\Scripts\python.exe -m ml.preprocessing --input data/raw/real --output data/processed/real_features_dataset.csv
+.\.venv\Scripts\python.exe -m ml.training --input data/processed/real_features_dataset.csv --output-dir data/models --seed 42
+.\.venv\Scripts\python.exe -m ml.evaluation --dataset data/processed/real_features_dataset.csv --models-dir data/models --output-dir data/reports
+.\.venv\Scripts\python.exe -m ml.export --model data/models/best_model.joblib --dataset data/processed/real_features_dataset.csv --output firmware/gestures/tinyml_model.h
+```
 
-# 3. Treinar Baseline por Regras, Decision Tree, Random Forest e MLP Compacta
-.\.venv\Scripts\python.exe -m ml.training --input data/processed/features_dataset.csv --output-dir data/models --seed 42
+### 5.4 Regravação Manual do Firmware e Validação Ponta a Ponta na Placa
 
-# 4. Gerar relatório comparativo completo (JSON + Markdown)
-.\.venv\Scripts\python.exe -m ml.evaluation --dataset data/processed/features_dataset.csv --models-dir data/models --output-dir data/reports
+Com `firmware/gestures/tinyml_model.h` atualizado pelo modelo real:
 
-# 5. Exportar modelo vencedor para C++ estático (ESP32) e verificar paridade nativa
-.\.venv\Scripts\python.exe -m ml.export --model data/models/best_model.joblib --dataset data/processed/features_dataset.csv --output firmware/gestures/tinyml_model.h
+```powershell
+# 1. Gravar manualmente o firmware atualizado no ESP32
+pio run -d firmware -t upload --upload-port COMx
+
+# 2. Validar inferência embarcada e telemetria ponta a ponta
+.\.venv\Scripts\python.exe -m terminal.bench e2e --serial-port COMx
 ```
 
 ---
 
-## 4. Limitações Experimentais Documentadas
+## 6. Limitações Experimentais Documentadas
 
-1. **Sensor 1D Escalar (HC-SR04):** mede apenas distância radial ao refletor mais próximo no cone acústico (~$15^\circ$). Movimentos laterais (esquerda/direita) não possuem direção distinguível.
-2. **Limite Temporal de Aquisição (~12–20 Hz):** intervalos menores que $50\text{--}60\text{ ms}$ sofrem interferência de ecos residuais. Por isso, gestos muito bruscos (`IMPULSE` e `DOUBLE`) permanecem marcados como **experimentais** até verificação de separabilidade nos dados físicos.
-3. **Reflexão Especular e Perda de Eco:** inclinação excessiva da palma da mão pode desviar a onda de $40\text{ kHz}$ para fora do receptor, gerando `timeout` (`valid_ultrasonic=false`). O pipeline mitiga falhas curtas com retenção causal de 2 passos e expõe `invalid_ratio` ao classificador.
-4. **Generalização entre Participantes:** caso o treinamento seja feito no modo `by_session_fallback` (< 3 participantes), as métricas refletirão apenas consistência intra-usuário entre sessões, não podendo ser extrapoladas para novos usuários.
-5. **Paridade C++ no Host vs Execução no ESP32:** o teste nativo com MSVC `cl.exe` comprova equivalência matemática e ausência de alocação dinâmica do código C gerado, mas latência real em microssegundos e consumo exato de SRAM/Flash no Xtensa LX6 só serão confirmados na placa física (Ciclos 3 e 5).
+1. **Sensor Escalar 1D (`HC-SR04`)**: mede unicamente a distância radial até o refletor acústico mais próximo dentro do cone de `~15°`. Movimentos puramente laterais (esquerda/direita) não possuem assinatura direcional própria.
+2. **Cadência Acústica (~`12,5` a `16,6 Hz` / `70 ms` nominal)**: períodos inferiores a `50 ms` sofrem reverberação de ecos residuais de `40 kHz`. Por essa razão física, gestos ultrarrápidos (`IMPULSE` e `DOUBLE`) permanecem classificados como **experimentais** até comprovação empírica em bancada.
+3. **Reflexão Especular e Perda de Eco (`valid_ultrasonic = false`)**: inclinação acentuada da mão pode refletir a frente de onda para fora do receptor, produzindo timeouts pontuais. O pré-processador aplica retenção causal curta (máximo de 2 amostras) e fornece `invalid_ratio` ao classificador para evitar transições espúrias.
+4. **Fronteira de Generalização Inter-Participante**: métricas de generalização para novos usuários só têm validade estatística quando calculadas sobre participantes inteiros retidos no conjunto de teste (`>= 5` participantes recomendados). Avaliações preliminares por sessão (`by_session_fallback`) medem apenas repetibilidade intra-usuário.
+5. **Paridade Matemática Host vs Execução Real no `ESP-WROOM-32`**: a verificação nativa C++ garante equivalência numérica e alocação estática zero-heap, enquanto o teste `terminal.bench e2e` após regravação confirma latência em tempo real, estabilidade de filas FreeRTOS e resposta interativa nos modos *Tamagotchi*, *Pet Launch* e *Air Music*.

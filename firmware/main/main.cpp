@@ -114,7 +114,11 @@ static void format_diag_status(char *out_buf, size_t cap) {
 
     FwJsonWriter w;
     jw_init(&w, out_buf, cap);
-    jw_puts(&w, "diag:acq=");
+    jw_puts(&w, "diag:fw=");
+    jw_puts(&w, MOTIONPET_FW_VERSION);
+    jw_puts(&w, ",origin=ESP32_HW,pins=");
+    jw_puts(&w, MOTIONPET_PINOUT_STATUS);
+    jw_puts(&w, ",acq=");
     jw_puts(&w, snap.collection_active ? "on" : "off");
     jw_puts(&w, ",per_ms=");
     jw_put_u32(&w, snap.sample_period_ms);
@@ -132,6 +136,8 @@ static void format_diag_status(char *out_buf, size_t cap) {
     jw_put_u32(&w, snap.total_windows_inferred);
     jw_puts(&w, ",gest=");
     jw_put_u32(&w, snap.total_gestures_emitted);
+    jw_puts(&w, ",rej=");
+    jw_put_u32(&w, snap.total_windows_rejected);
     jw_puts(&w, ",to_us=");
     jw_put_u32(&w, snap.ultrasonic_timeouts);
     jw_puts(&w, ",drop_si=");
