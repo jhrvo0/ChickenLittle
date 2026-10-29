@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime & user saves
+*.save.json
+data/saves/
+data/raw/*.jsonl
+data/raw/*.csv
+data/processed/*
+!data/.gitkeep
+!data/README.md
+
+# PlatformIO / Firmware build artifacts
+firmware/.pio/
+firmware/.vscode/
+firmware/build/
+sdkconfig
+sdkconfig.old
+
+# OS / IDE
+.DS_Store
+Thumbs.db

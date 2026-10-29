@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "motionpet"
+version = "0.1.0"
+description = "MotionPet — Sistema embarcado interativo com ESP32, TinyML, reconhecimento de gestos e pet virtual ASCII"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "MotionPet Engineering" }
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+serial = [
+    "pyserial>=3.5",
+]
+ml = [
+    "numpy>=1.26",
+    "scikit-learn>=1.4",
+]
+
+[project.scripts]
+motionpet = "terminal.app:main"
+
+[tool.setuptools.packages.find]
+include = ["terminal*", "simulator*", "ml*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra -q"

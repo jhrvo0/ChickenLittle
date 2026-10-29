@@ -1,0 +1,51 @@
+"""Módulo de comunicação JSON Lines e transporte serial."""
+
+from terminal.communication.protocol import (
+    PROTOCOL_VERSION,
+    AckPayload,
+    AppModeId,
+    CommandType,
+    ErrorPayload,
+    GestureEventPayload,
+    GestureSource,
+    GestureType,
+    LcdFramePayload,
+    MessageType,
+    PetCommandPayload,
+    ProtocolCodec,
+    ProtocolEnvelope,
+    ProtocolError,
+    SensorFramePayload,
+)
+from terminal.communication.transport import (
+    HardwareNotConnectedError,
+    PySerialEndpoint,
+    SerialEndpoint,
+    TransportClosedError,
+    VirtualSerialEndpoint,
+    create_virtual_serial_pair,
+)
+
+__all__ = [
+    "PROTOCOL_VERSION",
+    "AckPayload",
+    "AppModeId",
+    "CommandType",
+    "ErrorPayload",
+    "GestureEventPayload",
+    "GestureSource",
+    "GestureType",
+    "HardwareNotConnectedError",
+    "LcdFramePayload",
+    "MessageType",
+    "PetCommandPayload",
+    "ProtocolCodec",
+    "ProtocolEnvelope",
+    "ProtocolError",
+    "PySerialEndpoint",
+    "SensorFramePayload",
+    "SerialEndpoint",
+    "TransportClosedError",
+    "VirtualSerialEndpoint",
+    "create_virtual_serial_pair",
+]
