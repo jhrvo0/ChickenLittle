@@ -11,16 +11,15 @@
   "language": "pt-BR"
  },
  "breadboard": {
-  "profile": "bb830",
+  "profile": "bb400",
   "rail_split": null,
-  "orientation": "Convencao do Fritzing: fileira J no topo e A embaixo; trilhos Z/Y em cima e X/W embaixo."
+  "rails_used": false,
+  "orientation": "Convencao do Fritzing: fileira J no topo e A embaixo; 30 colunas. Os trilhos de alimentacao NAO sao usados nesta montagem."
  },
  "stage_order": [
   "A",
   "B",
-  "C",
-  "D",
-  "E"
+  "C"
  ],
  "stages": {
   "A": {
@@ -34,14 +33,6 @@
   "C": {
    "title": "TCRT5000 + potenciometro",
    "goal": "Adicionar deteccao IR (GPIO35) e entrada analogica (GPIO36), ambos em 3,3 V."
-  },
-  "D": {
-   "title": "LCD 2004A",
-   "goal": "Adicionar o display 20x4 em modo paralelo de 4 bits com RW = GND."
-  },
-  "E": {
-   "title": "Montagem completa",
-   "goal": "Todos os componentes conectados, separados visualmente em alimentacao, sensores, LCD e controle."
   }
  },
  "components": [
@@ -49,7 +40,7 @@
    "ref": "BB1",
    "type": "breadboard",
    "stage": "A",
-   "label": "Protoboard 830 pontos",
+   "label": "Meia-protoboard 30 colunas (A-J x 1-30)",
    "status": "ASSUMED_PENDING_PHYSICAL_CONFIRMATION"
   },
   {
@@ -59,7 +50,7 @@
    "label": "ESP32 DevKit (ESP-WROOM-32, USB-C)",
    "profile": "esp32_devkit_38pin",
    "placement": {
-    "col0": 4,
+    "col0": 1,
     "usb": "left",
     "rows": {
      "J2": "B",
@@ -67,7 +58,7 @@
     }
    },
    "status": "ASSUMED_PENDING_PHYSICAL_CONFIRMATION",
-   "note": "Perfil de 38 pinos assumido (0,9 pol entre fileiras => 1 furo livre acessivel de cada lado). Confirmar contagem de pinos, distancia entre fileiras e serigrafia."
+   "note": "Perfil de 38 pinos assumido (0,9 pol entre fileiras => 1 furo livre acessivel de cada lado). Pino 1 de cada lado na coluna 1; a USB-C sai um pouco para fora da borda esquerda da protoboard. Confirmar contagem de pinos, distancia entre fileiras e serigrafia."
   },
   {
    "ref": "M1",
@@ -75,10 +66,10 @@
    "stage": "B",
    "label": "HC-SR04",
    "pins": {
-    "VCC": "30J",
-    "TRIG": "31J",
-    "ECHO": "32J",
-    "GND": "33J"
+    "VCC": "21J",
+    "TRIG": "22J",
+    "ECHO": "23J",
+    "GND": "24J"
    },
    "status": "STANDARD_PINOUT_PENDING_PHYSICAL_CONFIRMATION"
   },
@@ -90,8 +81,8 @@
    "ohms": 2200,
    "tolerance": 0.05,
    "legs": [
-    "32H",
-    "36H"
+    "23H",
+    "27H"
    ],
    "role": "divider_top",
    "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION",
@@ -105,8 +96,8 @@
    "ohms": 3300,
    "tolerance": 0.05,
    "legs": [
-    "36G",
-    "33G"
+    "27G",
+    "24G"
    ],
    "role": "divider_bottom",
    "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION"
@@ -117,10 +108,10 @@
    "stage": "C",
    "label": "TCRT5000 (modulo LM393)",
    "pins": {
-    "VCC": "27A",
-    "GND": "28A",
-    "DO": "29A",
-    "AO": "30A"
+    "VCC": "21A",
+    "GND": "22A",
+    "DO": "23A",
+    "AO": "24A"
    },
    "status": "PIN_ORDER_UNCONFIRMED"
   },
@@ -130,66 +121,11 @@
    "stage": "C",
    "label": "Potenciometro rotativo",
    "pins": {
-    "END_A": "34A",
-    "WIPER": "35A",
-    "END_B": "36A"
+    "END_A": "28A",
+    "WIPER": "29A",
+    "END_B": "30A"
    },
    "status": "PENDING_PHYSICAL_CONFIRMATION"
-  },
-  {
-   "ref": "M3",
-   "type": "lcd2004a",
-   "stage": "D",
-   "label": "LCD 2004A V1.1",
-   "pins": {
-    "VSS": "46J",
-    "VDD": "47J",
-    "V0": "48J",
-    "RS": "49J",
-    "RW": "50J",
-    "E": "51J",
-    "D0": "52J",
-    "D1": "53J",
-    "D2": "54J",
-    "D3": "55J",
-    "D4": "56J",
-    "D5": "57J",
-    "D6": "58J",
-    "D7": "59J",
-    "A": "60J",
-    "K": "61J"
-   },
-   "status": "PENDING_PHYSICAL_CONFIRMATION"
-  },
-  {
-   "ref": "R3",
-   "type": "resistor",
-   "stage": "D",
-   "label": "R3 contraste V0 -> GND",
-   "ohms": 1000,
-   "tolerance": 0.05,
-   "legs": [
-    "48G",
-    "44G"
-   ],
-   "role": "lcd_contrast",
-   "status": "DESIGN_ISSUE_FLAGGED",
-   "note": "Conforme docs/hardware_safety.md (1,0-2,2 kOhm de V0 a GND). ATENCAO: um resistor sozinho de V0 a GND deixa V0 ~ 0 V (contraste maximo); 0,4-0,8 V exige um divisor 5 V/GND ou o potenciometro. Decidir na bancada (C07)."
-  },
-  {
-   "ref": "R4",
-   "type": "resistor",
-   "stage": "D",
-   "label": "R4 backlight 5 V -> A (condicional)",
-   "ohms": 150,
-   "tolerance": 0.05,
-   "legs": [
-    "63G",
-    "60G"
-   ],
-   "role": "lcd_backlight",
-   "status": "CONDITIONAL_PENDING_PHYSICAL_CONFIRMATION",
-   "note": "Docs: 100-220 Ohm em serie se a placa nao tiver SMD R8/R9. Seguro mesmo que ja exista (apenas reduz o brilho)."
   }
  ],
  "wires": [
@@ -197,20 +133,20 @@
    "id": "W1",
    "stage": "B",
    "net": "5V",
-   "from": "22A",
-   "to": "30H",
+   "from": "19A",
+   "to": "21H",
    "color": "red",
    "via": [
     [
-     22,
+     19,
      -1.0
     ],
     [
-     27,
+     20.65,
      -1.0
     ],
     [
-     27,
+     20.65,
      "H"
     ]
    ],
@@ -224,20 +160,20 @@
    "id": "W2",
    "stage": "B",
    "net": "GND",
-   "from": "10J",
-   "to": "33I",
+   "from": "7J",
+   "to": "24I",
    "color": "black",
    "via": [
     [
-     10,
+     7,
      12.5
     ],
     [
-     34,
+     25.5,
      12.5
     ],
     [
-     34,
+     25.5,
      "I"
     ]
    ],
@@ -251,20 +187,20 @@
    "id": "W3",
    "stage": "B",
    "net": "TRIG",
-   "from": "13J",
-   "to": "31I",
+   "from": "10J",
+   "to": "22I",
    "color": "yellow",
    "via": [
     [
-     13,
+     10,
      11.8
     ],
     [
-     28,
+     20.65,
      11.8
     ],
     [
-     28,
+     20.65,
      "I"
     ]
    ],
@@ -278,17 +214,21 @@
    "id": "W4",
    "stage": "B",
    "net": "ECHO_NODE",
-   "from": "36F",
-   "to": "8A",
+   "from": "27F",
+   "to": "5A",
    "color": "green",
    "via": [
     [
-     36,
-     -1.8
+     26.4,
+     "F"
     ],
     [
-     8,
-     -1.8
+     26.4,
+     -2.2
+    ],
+    [
+     5,
+     -2.2
     ]
    ],
    "label": "No do divisor -> GPIO34",
@@ -301,17 +241,21 @@
    "id": "W5",
    "stage": "C",
    "net": "3V3",
-   "from": "4A",
-   "to": "27B",
+   "from": "1A",
+   "to": "21D",
    "color": "orange",
    "via": [
     [
-     4,
-     -2.6
+     1,
+     -3.0
     ],
     [
-     27,
-     -2.6
+     24.8,
+     -3.0
+    ],
+    [
+     24.8,
+     "D"
     ]
    ],
    "label": "3V3 -> VCC do TCRT5000",
@@ -324,12 +268,12 @@
    "id": "W6",
    "stage": "C",
    "net": "3V3",
-   "from": "27C",
-   "to": "34C",
+   "from": "21E",
+   "to": "28E",
    "color": "orange",
    "via": [],
    "label": "3V3 -> extremo do potenciometro",
-   "purpose": "Alimenta o potenciometro em 3,3 V (derivado da coluna 27).",
+   "purpose": "Alimenta o potenciometro em 3,3 V (derivado da coluna 21).",
    "voltage": "3,25-3,35 V",
    "safety": "NUNCA ligar o potenciometro em 5 V.",
    "validation": "PENDING_PHYSICAL_VALIDATION"
@@ -338,21 +282,12 @@
    "id": "W7",
    "stage": "C",
    "net": "GND",
-   "from": "17A",
-   "to": "28B",
+   "from": "22C",
+   "to": "24F",
    "color": "black",
-   "via": [
-    [
-     17,
-     -1.0
-    ],
-    [
-     28,
-     -1.0
-    ]
-   ],
-   "label": "GND -> GND do TCRT5000",
-   "purpose": "Terra do modulo IR.",
+   "via": [],
+   "label": "GND do TCRT5000 -> GND do sensor",
+   "purpose": "Leva o terra do modulo IR ate a coluna 24 (GND comum do lado de cima).",
    "voltage": "0 V",
    "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
@@ -361,12 +296,12 @@
    "id": "W8",
    "stage": "C",
    "net": "GND",
-   "from": "28C",
-   "to": "36C",
+   "from": "30D",
+   "to": "24H",
    "color": "black",
    "via": [],
-   "label": "GND -> extremo do potenciometro",
-   "purpose": "Terra do potenciometro (derivado da coluna 28).",
+   "label": "GND do potenciometro -> GND do sensor",
+   "purpose": "Leva o terra do potenciometro ate a coluna 24 (GND comum).",
    "voltage": "0 V",
    "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
@@ -375,17 +310,21 @@
    "id": "W9",
    "stage": "C",
    "net": "IR_DO",
-   "from": "29B",
-   "to": "9A",
+   "from": "23B",
+   "to": "6A",
    "color": "blue",
    "via": [
     [
-     29,
-     -0.6
+     25.5,
+     "B"
     ],
     [
-     9,
-     -0.6
+     25.5,
+     -1.8
+    ],
+    [
+     6,
+     -1.8
     ]
    ],
    "label": "DO -> GPIO35",
@@ -398,277 +337,26 @@
    "id": "W10",
    "stage": "C",
    "net": "POT_WIPER",
-   "from": "35B",
-   "to": "6A",
+   "from": "29B",
+   "to": "3A",
    "color": "purple",
    "via": [
     [
-     35,
-     -2.2
+     26.9,
+     "B"
     ],
     [
-     6,
-     -2.2
+     26.9,
+     -2.6
+    ],
+    [
+     3,
+     -2.6
     ]
    ],
    "label": "Cursor -> GPIO36 (VP)",
    "purpose": "Cursor do potenciometro (0-3,3 V) ao ADC1_CH0.",
    "voltage": "0-3,3 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W12",
-   "stage": "D",
-   "net": "GND",
-   "from": "33H",
-   "to": "44I",
-   "color": "black",
-   "via": [
-    [
-     38,
-     9.6
-    ]
-   ],
-   "label": "GND -> no de terra do LCD",
-   "purpose": "Leva o terra a coluna 44 (no de terra do LCD).",
-   "voltage": "0 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W13",
-   "stage": "D",
-   "net": "GND",
-   "from": "44H",
-   "to": "46H",
-   "color": "black",
-   "via": [],
-   "label": "GND -> VSS (pino 1)",
-   "purpose": "Terra logico do LCD.",
-   "voltage": "0 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W14",
-   "stage": "D",
-   "net": "GND",
-   "from": "44F",
-   "to": "50I",
-   "color": "black",
-   "via": [
-    [
-     47,
-     7.0
-    ]
-   ],
-   "label": "GND -> RW (pino 5)",
-   "purpose": "RW permanentemente em GND: o LCD so recebe dados (nunca devolve 5 V aos GPIOs).",
-   "voltage": "0 V",
-   "safety": "OBRIGATORIO: RW = 0,0 Ohm para GND antes de ligar.",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W15",
-   "stage": "D",
-   "net": "GND",
-   "from": "50H",
-   "to": "61I",
-   "color": "black",
-   "via": [
-    [
-     56,
-     8.6
-    ]
-   ],
-   "label": "GND -> K (pino 16)",
-   "purpose": "Catodo do backlight.",
-   "voltage": "0 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W16",
-   "stage": "D",
-   "net": "5V",
-   "from": "30G",
-   "to": "47I",
-   "color": "red",
-   "via": [
-    [
-     39,
-     7.6
-    ]
-   ],
-   "label": "5V -> VDD (pino 2)",
-   "purpose": "Alimenta o LCD em 5 V (derivado da coluna 30 do 5 V).",
-   "voltage": "4,75-5,25 V",
-   "safety": "Se os caracteres vierem corrompidos, ver contingencia do diodo em docs/hardware_safety.md.",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W17",
-   "stage": "D",
-   "net": "5V",
-   "from": "47H",
-   "to": "63H",
-   "color": "red",
-   "via": [
-    [
-     55,
-     9.4
-    ]
-   ],
-   "label": "5V -> R4 (backlight)",
-   "purpose": "Leva 5 V ao resistor serie do backlight.",
-   "voltage": "4,75-5,25 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W18",
-   "stage": "D",
-   "net": "LCD_RS",
-   "from": "11J",
-   "to": "49I",
-   "color": "blue",
-   "via": [
-    [
-     11,
-     16.1
-    ],
-    [
-     49,
-     16.1
-    ]
-   ],
-   "label": "GPIO19 -> RS (pino 4)",
-   "purpose": "Selecao de registrador.",
-   "voltage": "0 / 3,3 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W19",
-   "stage": "D",
-   "net": "LCD_E",
-   "from": "12J",
-   "to": "51I",
-   "color": "green",
-   "via": [
-    [
-     12,
-     16.8
-    ],
-    [
-     51,
-     16.8
-    ]
-   ],
-   "label": "GPIO18 -> E (pino 6)",
-   "purpose": "Enable.",
-   "voltage": "0 / 3,3 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W20",
-   "stage": "D",
-   "net": "LCD_D4",
-   "from": "9J",
-   "to": "56I",
-   "color": "white",
-   "via": [
-    [
-     9,
-     17.5
-    ],
-    [
-     56,
-     17.5
-    ]
-   ],
-   "label": "GPIO21 -> D4 (pino 11)",
-   "purpose": "Dado D4.",
-   "voltage": "0 / 3,3 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W21",
-   "stage": "D",
-   "net": "LCD_D5",
-   "from": "6J",
-   "to": "57I",
-   "color": "brown",
-   "via": [
-    [
-     6,
-     18.2
-    ],
-    [
-     57,
-     18.2
-    ]
-   ],
-   "label": "GPIO22 -> D5 (pino 12)",
-   "purpose": "Dado D5.",
-   "voltage": "0 / 3,3 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W22",
-   "stage": "D",
-   "net": "LCD_D6",
-   "from": "5J",
-   "to": "58I",
-   "color": "orange",
-   "via": [
-    [
-     5,
-     18.9
-    ],
-    [
-     58,
-     18.9
-    ]
-   ],
-   "label": "GPIO23 -> D6 (pino 13)",
-   "purpose": "Dado D6.",
-   "voltage": "0 / 3,3 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W23",
-   "stage": "D",
-   "net": "LCD_D7",
-   "from": "14A",
-   "to": "59I",
-   "color": "purple",
-   "via": [
-    [
-     14,
-     -3.2
-    ],
-    [
-     66,
-     -3.2
-    ],
-    [
-     66,
-     19.6
-    ],
-    [
-     59,
-     19.6
-    ]
-   ],
-   "label": "GPIO27 -> D7 (pino 14)",
-   "purpose": "Dado D7 (GPIO27 fica na fileira inferior da ESP32).",
-   "voltage": "0 / 3,3 V",
    "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   }
@@ -687,11 +375,7 @@
     "M1.GND",
     "R2.B",
     "M2.GND",
-    "P1.END_B",
-    "M3.VSS",
-    "M3.RW",
-    "M3.K",
-    "R3.B"
+    "P1.END_B"
    ],
    "note": "Terra comum. Os 3 pinos GND da placa sao ligados entre si pela propria PCB da ESP32."
   },
@@ -703,9 +387,7 @@
    "v_max": 5.25,
    "pins": [
     "U1.5V",
-    "M1.VCC",
-    "M3.VDD",
-    "R4.A"
+    "M1.VCC"
    ],
    "note": "5 V vindos da USB (pino 5V da ESP32)."
   },
@@ -786,108 +468,6 @@
    ],
    "note": "Cursor do potenciometro.",
    "v_max_at_gpio": 3.3
-  },
-  {
-   "name": "LCD_V0",
-   "stage": "D",
-   "domain": "ANALOG_LOW",
-   "v_nominal": 0.0,
-   "v_max": 0.8,
-   "pins": [
-    "M3.V0",
-    "R3.A"
-   ],
-   "note": "Contraste do LCD (ver item C07)."
-  },
-  {
-   "name": "LCD_A",
-   "stage": "D",
-   "domain": "POWER_5V_LED",
-   "v_nominal": 5.0,
-   "v_max": 5.25,
-   "pins": [
-    "R4.B",
-    "M3.A"
-   ],
-   "note": "Anodo do backlight (via R4)."
-  },
-  {
-   "name": "LCD_RS",
-   "stage": "D",
-   "domain": "SIGNAL_3V3",
-   "v_nominal": 3.3,
-   "v_max": 3.3,
-   "pins": [
-    "U1.IO19",
-    "M3.RS"
-   ],
-   "note": "GPIO19 -> RS.",
-   "v_max_at_gpio": 3.3
-  },
-  {
-   "name": "LCD_E",
-   "stage": "D",
-   "domain": "SIGNAL_3V3",
-   "v_nominal": 3.3,
-   "v_max": 3.3,
-   "pins": [
-    "U1.IO18",
-    "M3.E"
-   ],
-   "note": "GPIO18 -> E.",
-   "v_max_at_gpio": 3.3
-  },
-  {
-   "name": "LCD_D4",
-   "stage": "D",
-   "domain": "SIGNAL_3V3",
-   "v_nominal": 3.3,
-   "v_max": 3.3,
-   "pins": [
-    "U1.IO21",
-    "M3.D4"
-   ],
-   "note": "GPIO21 -> D4.",
-   "v_max_at_gpio": 3.3
-  },
-  {
-   "name": "LCD_D5",
-   "stage": "D",
-   "domain": "SIGNAL_3V3",
-   "v_nominal": 3.3,
-   "v_max": 3.3,
-   "pins": [
-    "U1.IO22",
-    "M3.D5"
-   ],
-   "note": "GPIO22 -> D5.",
-   "v_max_at_gpio": 3.3
-  },
-  {
-   "name": "LCD_D6",
-   "stage": "D",
-   "domain": "SIGNAL_3V3",
-   "v_nominal": 3.3,
-   "v_max": 3.3,
-   "pins": [
-    "U1.IO23",
-    "M3.D6"
-   ],
-   "note": "GPIO23 -> D6.",
-   "v_max_at_gpio": 3.3
-  },
-  {
-   "name": "LCD_D7",
-   "stage": "D",
-   "domain": "SIGNAL_3V3",
-   "v_nominal": 3.3,
-   "v_max": 3.3,
-   "pins": [
-    "U1.IO27",
-    "M3.D7"
-   ],
-   "note": "GPIO27 -> D7.",
-   "v_max_at_gpio": 3.3
   }
  ],
  "firmware_pin_map": {
@@ -920,32 +500,38 @@
   "PIN_LCD_RS": {
    "gpio": 19,
    "net": "LCD_RS",
-   "pin": "U1.IO19"
+   "pin": "U1.IO19",
+   "deferred": "D"
   },
   "PIN_LCD_EN": {
    "gpio": 18,
    "net": "LCD_E",
-   "pin": "U1.IO18"
+   "pin": "U1.IO18",
+   "deferred": "D"
   },
   "PIN_LCD_D4": {
    "gpio": 21,
    "net": "LCD_D4",
-   "pin": "U1.IO21"
+   "pin": "U1.IO21",
+   "deferred": "D"
   },
   "PIN_LCD_D5": {
    "gpio": 22,
    "net": "LCD_D5",
-   "pin": "U1.IO22"
+   "pin": "U1.IO22",
+   "deferred": "D"
   },
   "PIN_LCD_D6": {
    "gpio": 23,
    "net": "LCD_D6",
-   "pin": "U1.IO23"
+   "pin": "U1.IO23",
+   "deferred": "D"
   },
   "PIN_LCD_D7": {
    "gpio": 27,
    "net": "LCD_D7",
-   "pin": "U1.IO27"
+   "pin": "U1.IO27",
+   "deferred": "D"
   }
  },
  "assumptions": [
@@ -955,15 +541,15 @@
   },
   {
    "id": "A2",
-   "text": "Protoboard de 830 pontos com a geometria do Fritzing 'breadboard2': colunas 1-63, fileiras A-E / F-J, trilhos W/X (embaixo) e Y/Z (em cima), trilhos continuos."
+   "text": "Meia-protoboard de 30 colunas (A-E / F-J por coluna), geometria do Fritzing 'Half breadboard v2'. Os trilhos de alimentacao NAO sao usados (podem existir ou nao)."
   },
   {
    "id": "A3",
-   "text": "USB a esquerda; ESP32 encaixada nas fileiras B (lado J2) e I (lado J3), pino 1 na coluna 4. As fileiras A e J ficam acessiveis; B..E e F..I ficam sob a placa."
+   "text": "USB a esquerda; ESP32 nas fileiras B (lado J2) e I (lado J3), pino 1 na coluna 1 (a USB-C sai um pouco da borda). Ficam livres as fileiras A e J (19 colunas) e as colunas 21-30 (10 colunas) para o resto."
   },
   {
    "id": "A4",
-   "text": "Modulos de pinos retos 2,54 mm encaixam direto na protoboard em colunas consecutivas (HC-SR04, TCRT5000, potenciometro, LCD)."
+   "text": "Modulos de pinos retos 2,54 mm encaixam direto na protoboard em colunas consecutivas (HC-SR04, TCRT5000, potenciometro)."
   },
   {
    "id": "A5",
@@ -983,7 +569,7 @@
   {
    "id": "C02",
    "blocks": "B",
-   "text": "Protoboard: confirmar 830 pontos, letras A-J/numeros e o sentido das letras (podem estar invertidos), e testar com multimetro se os trilhos sao continuos (alguns modelos sao partidos ao meio)."
+   "text": "Protoboard: confirmar 30 colunas e fileiras A-J (os numeros e as letras podem estar invertidos: guie-se pelo NUMERO da coluna)."
   },
   {
    "id": "C03",
@@ -1006,19 +592,19 @@
    "text": "Potenciometro: confirmar 3 terminais de 2,54 mm (cursor no meio) e valor (qualquer 5-100 kΩ serve para ADC)."
   },
   {
-   "id": "C07",
-   "blocks": "D",
-   "text": "LCD 2004A: (a) pinos soldados no header de 16 vias; (b) V0: um resistor sozinho para GND deixa V0≈0 V — definir na bancada um divisor 5V/GND (ex.: 4,7 kΩ + 680 Ω ≈ 0,63 V) ou V0 direto ao GND; (c) existe SMD R8/R9 no backlight?; (d) controlador HD44780 'genuino' (VIH 2,2 V) ou clone CMOS (VIH 3,5 V → diodo no VDD)."
-  },
-  {
-   "id": "C08",
-   "blocks": "D",
-   "text": "Alimentacao: medir 5V/VIN (4,75-5,25 V) e considerar a corrente do backlight do LCD na porta USB (usar porta/cabo adequados)."
-  },
-  {
    "id": "C09",
    "blocks": "B",
    "text": "Jumpers: tipo macho-macho de ponta solida; comprimento suficiente (os fios W4, W9, W10 e W23 sao longos)."
+  },
+  {
+   "id": "C10",
+   "blocks": "D",
+   "text": "LCD 2004A: o display de 16 pinos NAO cabe nesta meia-protoboard junto com a ESP32. Decidir: 2a protoboard (meia) ou ~12 jumpers femea-macho (aguardando sua resposta)."
+  },
+  {
+   "id": "C07",
+   "blocks": "D",
+   "text": "LCD (quando o estagio D for retomado): V0 (contraste) precisa de divisor 5 V/GND ou GND direto; conferir resistor SMD do backlight e se o controlador e genuino ou clone."
   }
  ],
  "build_steps": {
@@ -1042,7 +628,7 @@
    {
     "n": 2,
     "title": "Encaixe a ESP32 atravessando o canal",
-    "text": "Cabo USB DESCONECTADO. USB-C virada para a esquerda. O pino 3V3 fica na coluna 4 (fileira B) e o GND, na coluna 4 (fileira I). Empurre por igual dos dois lados.",
+    "text": "Cabo USB DESCONECTADO. USB-C virada para a esquerda, saindo um pouco para fora da protoboard. O pino 3V3 vai no furo 1B e o GND (lado de cima) no furo 1I: pino 1 de cada lado na coluna 1. Empurre por igual dos dois lados.",
     "adds": [
      "U1"
     ],
@@ -1088,7 +674,7 @@
    {
     "n": 3,
     "title": "Instale R1 e R2 (ainda sem o sensor)",
-    "text": "R1 nos furos 32H e 36H. R2 nos furos 36G e 33G. A coluna 36 é o NÓ do divisor.",
+    "text": "R1 nos furos 23H e 27H. R2 nos furos 27G e 24G. A coluna 27 é o NÓ do divisor.",
     "adds": [
      "R1",
      "R2"
@@ -1098,7 +684,7 @@
    {
     "n": 4,
     "title": "Ligue 5 V e GND",
-    "text": "Fio vermelho: 22A → 30H (pino 5V da ESP32 até a coluna do VCC). Fio preto: 10J → 33I (GND da ESP32 até a coluna do GND).",
+    "text": "Fio vermelho: 19A → 21H (pino 5V da ESP32 até a coluna do VCC). Fio preto: 7J → 24I (GND da ESP32 até a coluna do GND).",
     "adds": [
      "W1",
      "W2"
@@ -1108,7 +694,7 @@
    {
     "n": 5,
     "title": "PARE: ensaio do divisor",
-    "text": "Sem o HC-SR04 e sem o fio verde. O jumper temporário (tracejado) leva 5 V à ponta de R1. Conecte a USB e meça entre o furo 36F e o GND: esperado ≈ 3,0 V.",
+    "text": "Sem o HC-SR04 e sem o fio verde. O jumper temporário (tracejado) leva 5 V à ponta de R1. Conecte a USB e meça entre o furo 27F e o GND: esperado ≈ 3,0 V.",
     "adds": [],
     "temp": [
      "T1"
@@ -1140,7 +726,7 @@
    {
     "n": 7,
     "title": "Encaixe o HC-SR04",
-    "text": "Leia a serigrafia do módulo: VCC na coluna 30, depois TRIG, ECHO e GND (coluna 33). Empurre os 4 pinos retos juntos.",
+    "text": "Leia a serigrafia do módulo: VCC na coluna 21, depois TRIG, ECHO e GND (coluna 24). Empurre os 4 pinos retos juntos.",
     "adds": [
      "M1"
     ],
@@ -1150,7 +736,7 @@
    {
     "n": 8,
     "title": "Fio do TRIG",
-    "text": "Fio amarelo: 13J → 31I (GPIO5 → TRIG).",
+    "text": "Fio amarelo: 10J → 22I (GPIO5 → TRIG).",
     "adds": [
      "W3"
     ],
@@ -1169,14 +755,14 @@
     "hold": false,
     "checks": [
      "Sem curto 5V↔GND nem 3V3↔GND",
-     "A coluna 32 (ECHO) NÃO tem continuidade com nenhum pino da ESP32",
+     "A coluna 23 (ECHO) NÃO tem continuidade com nenhum pino da ESP32",
      "Nada ligado em IO12, IO6…IO11 (SD0…CLK), TX0 ou RX0"
     ]
    },
    {
     "n": 10,
     "title": "Último fio: NÓ → GPIO34",
-    "text": "Fio verde: 36F → 8A. É o único fio que leva o sinal do ECHO ao ESP32, e só entra depois do ensaio.",
+    "text": "Fio verde: 27F → 5A. É o único fio que leva o sinal do ECHO ao ESP32, e só entra depois do ensaio.",
     "adds": [
      "W4"
     ],
@@ -1213,7 +799,7 @@
    {
     "n": 2,
     "title": "TCRT5000 e alimentação 3,3 V",
-    "text": "Módulo em 27A–30A na ordem VCC, GND, DO, AO (CONFIRA a serigrafia). Laranja: 4A → 27B (3V3 → VCC). Preto: 17A → 28B (GND).",
+    "text": "Módulo em 21A–24A na ordem VCC, GND, DO, AO (CONFIRA a serigrafia). Laranja: 1A → 21D (3V3 → VCC). Preto: 22C → 24F (GND do módulo até a coluna do GND do sensor).",
     "adds": [
      "M2",
      "W5",
@@ -1225,7 +811,7 @@
    {
     "n": 3,
     "title": "Potenciômetro",
-    "text": "Pinos em 34A, 35A e 36A (cursor no meio). Laranja: 27C → 34C (3,3 V). Preto: 28C → 36C (GND).",
+    "text": "Pinos em 28A, 29A e 30A (cursor no meio). Laranja: 21E → 28E (3,3 V). Preto: 30D → 24H (GND).",
     "adds": [
      "P1",
      "W6",
@@ -1237,7 +823,7 @@
    {
     "n": 4,
     "title": "Sinais",
-    "text": "Azul: 29B → 9A (DO → IO35). Roxo: 35B → 6A (cursor → VP / GPIO36).",
+    "text": "Azul: 23B → 6A (DO → IO35). Roxo: 29B → 3A (cursor → VP / GPIO36).",
     "adds": [
      "W9",
      "W10"
@@ -1259,144 +845,6 @@
      "python -m terminal.diag --serial-port COMx"
     ]
    }
-  ],
-  "D": [
-   {
-    "n": 1,
-    "title": "Desligue tudo",
-    "text": "Desconecte a USB antes de mexer.",
-    "adds": [],
-    "focus": [
-     "U1"
-    ],
-    "hold": false
-   },
-   {
-    "n": 2,
-    "title": "Confira o LCD",
-    "text": "Olhe o módulo antes de encaixar. Anote o que achar (confirmações C07 e C08).",
-    "adds": [],
-    "focus": [
-     "M3"
-    ],
-    "hold": false,
-    "checks": [
-     "Header de 16 pinos soldado?",
-     "Existe o resistor SMD R8/R9 do backlight? (se não, o R4 é obrigatório)",
-     "Controlador HD44780 genuíno ou clone?"
-    ]
-   },
-   {
-    "n": 3,
-    "title": "Encaixe o LCD",
-    "text": "Pino 1 (VSS) em 46J … pino 16 (K) em 61J.",
-    "adds": [
-     "M3"
-    ],
-    "hold": false
-   },
-   {
-    "n": 4,
-    "title": "Terra, inclusive o RW",
-    "text": "Pretos: 33H → 44I; 44H → 46H (VSS); 44F → 50I (RW); 50H → 61I (K). Meça RW↔GND: 0 Ω.",
-    "adds": [
-     "W12",
-     "W13",
-     "W14",
-     "W15"
-    ],
-    "hold": true,
-    "warn": "O RW (pino 5) PRECISA estar no GND antes de ligar: protege os GPIOs de 5 V."
-   },
-   {
-    "n": 5,
-    "title": "Contraste, backlight e 5 V",
-    "text": "R3 (1 kΩ): 48G e 44G. R4 (150 Ω): 63G e 60G. Vermelhos: 30G → 47I (VDD) e 47H → 63H.",
-    "adds": [
-     "R3",
-     "R4",
-     "W16",
-     "W17"
-    ],
-    "hold": false,
-    "warn": "O contraste (V0) ainda está em aberto: veja a confirmação C07."
-   },
-   {
-    "n": 6,
-    "title": "Sinais do display (1/3): RS e E",
-    "text": "11J → 49I (GPIO19 → RS) e 12J → 51I (GPIO18 → E). Os fios de sinal são longos: deixe-os folgados.",
-    "adds": [
-     "W18",
-     "W19"
-    ],
-    "hold": false
-   },
-   {
-    "n": 7,
-    "title": "Sinais do display (2/3): D4 e D5",
-    "text": "9J → 56I (GPIO21 → D4) e 6J → 57I (GPIO22 → D5).",
-    "adds": [
-     "W20",
-     "W21"
-    ],
-    "hold": false
-   },
-   {
-    "n": 8,
-    "title": "Sinais do display (3/3): D6 e D7",
-    "text": "5J → 58I (GPIO23 → D6) e 14A → 59I (GPIO27 → D7). O D7 vem da fileira de BAIXO da ESP32 (14A).",
-    "adds": [
-     "W22",
-     "W23"
-    ],
-    "hold": false
-   },
-   {
-    "n": 9,
-    "title": "Ligue e valide",
-    "text": "Conecte a USB e rode o comando. Ajuste o contraste se o display estiver só com blocos.",
-    "adds": [],
-    "focus": [
-     "M3"
-    ],
-    "hold": false,
-    "commands": [
-     "python -m terminal.bench stage D --serial-port COMx"
-    ]
-   }
-  ],
-  "E": [
-   {
-    "n": 1,
-    "title": "Revisão final",
-    "text": "Com a USB desconectada, repita as medições 01–09 do guia de bancada.",
-    "adds": [],
-    "focus": [
-     "BB1"
-    ],
-    "hold": true,
-    "checks": [
-     "01 Sem curto 5V↔GND (> 1 kΩ)",
-     "02 Sem curto 3V3↔GND (> 500 Ω)",
-     "03/04 R1 = 2,09–2,31 kΩ e R2 = 3,14–3,47 kΩ",
-     "05 RW do LCD com 0 Ω até o GND",
-     "06/07 TCRT5000 e potenciômetro só em 3V3",
-     "08/09 Nada em IO6…IO12, TX0, RX0"
-    ]
-   },
-   {
-    "n": 2,
-    "title": "Teste ponta a ponta",
-    "text": "Tudo montado: rode o teste completo.",
-    "adds": [],
-    "focus": [
-     "BB1"
-    ],
-    "hold": false,
-    "commands": [
-     "python -m terminal.bench e2e --serial-port COMx"
-    ]
-   }
   ]
  },
  "temporary_wires": [
@@ -1405,11 +853,11 @@
    "stage": "B",
    "net": "TEMP",
    "color": "grey",
-   "from": "30G",
-   "to": "32G",
+   "from": "21G",
+   "to": "23G",
    "via": [
     [
-     31,
+     22,
      6.2
     ]
    ],
@@ -1420,8 +868,104 @@
   {
    "id": "MK5",
    "stage": "B",
-   "hole": "36F",
-   "text": "MEDIR AQUI (36F x GND) ~ 3,0 V"
+   "hole": "27F",
+   "text": "MEDIR AQUI (27F x GND) ~ 3,0 V"
+  }
+ ],
+ "deferred_stages": {
+  "D": {
+   "title": "LCD 2004A",
+   "status": "DEFERRED_NEEDS_DECISION",
+   "note": "O LCD de 16 pinos não cabe numa meia-protoboard junto com a ESP32 de 38 pinos (19 colunas). Opções: 2ª protoboard ou ~12 jumpers fêmea–macho. Aguardando a sua decisão."
+  },
+  "E": {
+   "title": "Montagem completa",
+   "status": "DEFERRED_NEEDS_DECISION",
+   "note": "Depende do estágio D."
+  }
+ },
+ "deferred_nets": [
+  {
+   "name": "LCD_V0",
+   "domain": "ANALOG_LOW",
+   "pins": [
+    "M3.V0",
+    "R3.A"
+   ]
+  },
+  {
+   "name": "LCD_A",
+   "domain": "POWER_5V_LED",
+   "pins": [
+    "R4.B",
+    "M3.A"
+   ]
+  },
+  {
+   "name": "LCD_RS",
+   "domain": "SIGNAL_3V3",
+   "pins": [
+    "U1.IO19",
+    "M3.RS"
+   ]
+  },
+  {
+   "name": "LCD_E",
+   "domain": "SIGNAL_3V3",
+   "pins": [
+    "U1.IO18",
+    "M3.E"
+   ]
+  },
+  {
+   "name": "LCD_D4",
+   "domain": "SIGNAL_3V3",
+   "pins": [
+    "U1.IO21",
+    "M3.D4"
+   ]
+  },
+  {
+   "name": "LCD_D5",
+   "domain": "SIGNAL_3V3",
+   "pins": [
+    "U1.IO22",
+    "M3.D5"
+   ]
+  },
+  {
+   "name": "LCD_D6",
+   "domain": "SIGNAL_3V3",
+   "pins": [
+    "U1.IO23",
+    "M3.D6"
+   ]
+  },
+  {
+   "name": "LCD_D7",
+   "domain": "SIGNAL_3V3",
+   "pins": [
+    "U1.IO27",
+    "M3.D7"
+   ]
+  },
+  {
+   "name": "GND",
+   "domain": "GND",
+   "pins": [
+    "M3.VSS",
+    "M3.RW",
+    "M3.K",
+    "R3.B"
+   ]
+  },
+  {
+   "name": "5V",
+   "domain": "5V",
+   "pins": [
+    "M3.VDD",
+    "R4.A"
+   ]
   }
  ]
 }

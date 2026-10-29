@@ -18,13 +18,14 @@ ROOT = Path(__file__).resolve().parent
 
 
 def divider_test_scene(lay: model.Layout) -> Scene:
+    t1 = next(t for t in lay.raw["temporary_wires"] if t["id"] == "T1")
+    mk = next(m for m in lay.raw["markers"] if m["id"] == "MK5")
     return Scene(
         stage="B", title="Estagio B - passo 5: ENSAIO ESTATICO DO DIVISOR (sem o HC-SR04, sem o fio W4)",
-        subtitle="Jumper TEMPORARIO tracejado 30G -> 32G leva 5 V a R1. Meça entre o furo 36F (no) e GND: esperado ~3,0 V (aceitavel 2,50-3,20 V; NUNCA > 3,30 V).",
+        subtitle=(f"Jumper TEMPORARIO tracejado {t1['from']} -> {t1['to']} leva 5 V a R1. Meça entre o furo {mk['hole']} (no) e GND: "
+                  "esperado ~3,0 V (aceitavel 2,50-3,20 V; NUNCA > 3,30 V)."),
         include_refs={"BB1", "U1", "R1", "R2", "W1", "W2"},
-        temp_wires=[{"id": "T1", "from": "30G", "to": "32G", "net": "TEMP", "color": "grey", "via": [[31, 6.2]]}],
-        markers=[{"hole": "36F", "text": "MEDIR AQUI (36F x GND) ~ 3,0 V"}],
-        highlight_new=False)
+        temp_wires=[dict(t1)], markers=[dict(mk)], highlight_new=False)
 
 
 def sha(path: Path) -> str:

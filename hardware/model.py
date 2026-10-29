@@ -26,19 +26,65 @@ NETLIST_PATH = PKG_DIR / "netlist" / "motionpet.netlist.json"
 # Geometria da protoboard (medida no SVG do Fritzing "breadboard2", 830 pontos).
 # Unidades: passo de 0,1 pol = 1 "passo" (pitch). A = y 0 ... J = y 11, canal entre E e F.
 # ----------------------------------------------------------------------------
-N_COLS = 63
 ROW_Y = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 7, "G": 8, "H": 9, "I": 10, "J": 11,
          "X": -3, "W": -4, "Y": 14, "Z": 15}
 LOWER_ROWS = "ABCDE"   # grupo inferior (cada coluna: A-E ligadas)
 UPPER_ROWS = "FGHIJ"   # grupo superior (cada coluna: F-J ligadas)
 RAIL_ROWS = "WXYZ"
-RAIL_COLS = [c for g in range(10) for c in range(3 + 6 * g, 8 + 6 * g)]  # 3-7, 9-13, ... 57-61
 
-# Medidas do SVG do Fritzing (px a 72 dpi) usadas pelo renderizador/exportador .fz
-FZ_BB_PITCH = 7.2
-FZ_BB_X0 = 10.94            # centro da coluna 1
-FZ_BB_Y_A = 115.19          # centro da fileira A
-FZ_BB_SIZE = (468.238, 151.2)
+
+@dataclass(frozen=True)
+class BreadboardProfile:
+    """Protoboard ATIVA (a netlist declara qual: breadboard.profile)."""
+    key: str
+    title: str
+    n_cols: int
+    rail_cols: tuple
+    rails_in_this_project: bool
+    fz_module_id: str
+    fz_path: str
+    fz_scale: float
+    fz_x0: float
+    fz_y_a: float
+    fz_pitch: float
+    fz_size: tuple
+
+
+def _load_breadboards() -> dict:
+    raw = json.load(open(DATA_DIR / "breadboards.json", encoding="utf-8"))["profiles"]
+    return {k: BreadboardProfile(k, v["title"], v["n_cols"], tuple(v["rail_cols"]), v["rails_in_this_project"], v["fz_module_id"],
+                                 v["fz_path"], v["fz_scale"], v["fz_x0"], v["fz_y_a"], v["fz_pitch"], tuple(v["fz_size"]))
+            for k, v in raw.items()}
+
+
+BREADBOARDS: dict = {}
+_ACTIVE: list = []
+
+
+def breadboard_profiles() -> dict:
+    if not BREADBOARDS:
+        BREADBOARDS.update(_load_breadboards())
+    return BREADBOARDS
+
+
+def set_active_breadboard(key: str) -> BreadboardProfile:
+    prof = breadboard_profiles()[key]
+    _ACTIVE[:] = [prof]
+    return prof
+
+
+def active() -> BreadboardProfile:
+    if not _ACTIVE:
+        set_active_breadboard("bb400")
+    return _ACTIVE[0]
+
+
+def n_cols() -> int:
+    return active().n_cols
+
+
+def rail_cols() -> tuple:
+    return active().rail_cols
 
 HOLE_RE = re.compile(r"^(\d{1,2})([A-JW-Z])$")
 WIRE_END_RE = re.compile(r"^W\d+\.[ab]$")
@@ -66,9 +112,9 @@ def parse_hole(hole: str) -> tuple[int, str]:
     if not m:
         raise NetlistError(f"Furo invalido: {hole!r} (esperado ex.: 17A, 30J, 5Z)")
     col, row = int(m.group(1)), m.group(2)
-    if not 1 <= col <= N_COLS:
-        raise NetlistError(f"Coluna fora da protoboard: {hole!r}")
-    if row in RAIL_ROWS and col not in RAIL_COLS:
+    if not 1 <= col <= n_cols():
+        raise NetlistError(f"Coluna fora da protoboard ({n_cols()} colunas): {hole!r}")
+    if row in RAIL_ROWS and col not in rail_cols():
         raise NetlistError(f"Nao existe furo de trilho na coluna {col}: {hole!r}")
     return col, row
 
@@ -92,10 +138,11 @@ def hole_xy(hole: str) -> tuple[float, float]:
 
 
 def fz_hole_xy(hole: str) -> tuple[float, float]:
-    """Posicao do furo nas coordenadas do SVG do Fritzing (72 dpi, y para baixo)."""
+    """Posicao do furo nas coordenadas do SVG do Fritzing (unidades do SVG, y para baixo)."""
     col, row = parse_hole(hole)
-    x = FZ_BB_X0 + (col - 1) * FZ_BB_PITCH
-    y = FZ_BB_Y_A - ROW_Y[row] * FZ_BB_PITCH
+    b = active()
+    x = b.fz_x0 + (col - 1) * b.fz_pitch
+    y = b.fz_y_a - ROW_Y[row] * b.fz_pitch
     return round(x, 3), round(y, 3)
 
 
@@ -115,7 +162,7 @@ def load_modules() -> dict:
     return load_json(DATA_DIR / "modules.json")
 
 
-STAGE_ORDER = ["A", "B", "C", "D", "E"]
+STAGE_ORDER = ["A", "B", "C"]   # D (LCD) e E ficam adiados: ver netlist.deferred_stages
 
 
 def stage_index(stage: str) -> int:
@@ -195,6 +242,7 @@ class Layout:
 
     @classmethod
     def from_raw(cls, raw: dict) -> "Layout":
+        set_active_breadboard(raw.get("breadboard", {}).get("profile", "bb400"))
         lay = cls(raw=raw, boards=load_boards(), modules=load_modules())
         lay.components = {c["ref"]: c for c in raw["components"]}
         lay.wires = {w["id"]: w for w in raw["wires"]}
@@ -237,7 +285,7 @@ class Layout:
         # USB a esquerda: J2 fica na fileira inferior (B), J3 na superior (I); pino 1 junto a USB.
         row = pl["rows"][pin.side]
         col = col0 + (pin.index - 1)
-        if not 1 <= col <= N_COLS:
+        if not 1 <= col <= n_cols():
             raise NetlistError("ESP32 fora da protoboard")
         assert n >= pin.index
         return f"{col}{row}"

@@ -79,45 +79,46 @@ def _text(x, y, s, size=8, fill="#222", anchor="middle", weight="normal", rotate
 
 
 def draw_breadboard(f: Frame, parts: list[str]) -> None:
-    x_left, y_top = f.px(0.15, 16.2)
-    x_right, y_bot = f.px(63.85, -5.2)
+    prof = model.active()
+    n = prof.n_cols
+    rails = prof.rails_in_this_project
+    y_hi, y_lo = (16.2, -5.2) if rails else (12.6, -1.7)
+    x_left, y_top = f.px(0.15, y_hi)
+    x_right, y_bot = f.px(n + 0.85, y_lo)
     parts.append(f'<g id="breadboard" data-ref="BB1">')
     parts.append(f'<rect x="{x_left:.1f}" y="{y_top:.1f}" width="{x_right - x_left:.1f}" height="{y_bot - y_top:.1f}" rx="6" '
                  f'fill="#e8e6df" stroke="#b9b6aa" stroke-width="1.5"/>')
     # canal central
     cx0, cy0 = f.px(0.15, 5.9)
-    cx1, cy1 = f.px(63.85, 5.1)
+    cx1, cy1 = f.px(n + 0.85, 5.1)
     parts.append(f'<rect x="{cx0:.1f}" y="{cy0:.1f}" width="{cx1 - cx0:.1f}" height="{cy1 - cy0:.1f}" fill="#cfccc2"/>')
-    # listras dos trilhos (vermelho = +, azul = -) como no Fritzing
-    for yv, col in ((15.9, "#1d4ed8"), (13.2, "#d11a1a"), (-3.2, "#1d4ed8"), (-4.35, "#d11a1a")):
-        a = f.px(1.5, yv)
-        b = f.px(62.5, yv)
-        parts.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="{col}" stroke-width="1.4"/>')
+    if rails:
+        for yv, col in ((15.9, "#1d4ed8"), (13.2, "#d11a1a"), (-3.2, "#1d4ed8"), (-4.35, "#d11a1a")):
+            a = f.px(1.5, yv)
+            b = f.px(n - 0.5, yv)
+            parts.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="{col}" stroke-width="1.4"/>')
     # furos
-    for col in range(1, model.N_COLS + 1):
+    for col in range(1, n + 1):
         for row in "ABCDEFGHIJ":
             x, y = f.px(col, model.ROW_Y[row])
             parts.append(f'<rect x="{x - 3:.1f}" y="{y - 3:.1f}" width="6" height="6" rx="1.2" fill="#3b3b3b"/>')
-    for row in "WXYZ":
-        for col in model.RAIL_COLS:
-            x, y = f.px(col, model.ROW_Y[row])
-            parts.append(f'<rect x="{x - 3:.1f}" y="{y - 3:.1f}" width="6" height="6" rx="1.2" fill="#3b3b3b"/>')
+    if rails:
+        for row in "WXYZ":
+            for col in prof.rail_cols:
+                x, y = f.px(col, model.ROW_Y[row])
+                parts.append(f'<rect x="{x - 3:.1f}" y="{y - 3:.1f}" width="6" height="6" rx="1.2" fill="#3b3b3b"/>')
     # numeros de coluna (de 1 em 1) e letras de fileira
-    for col in range(1, model.N_COLS + 1):
+    for col in range(1, n + 1):
         x, yj = f.px(col, 11.95)
         _, ya = f.px(col, -0.95)
-        size = 6.4 if col % 5 else 7.6
+        size = 6.8 if col % 5 else 8.2
         weight = "normal" if col % 5 else "bold"
         parts.append(_text(x, yj, col, size, "#555", weight=weight))
         parts.append(_text(x, ya + 3, col, size, "#555", weight=weight))
     for row in "ABCDEFGHIJ":
-        for cx in (0.1, 63.9):
+        for cx in (0.1, n + 0.9):
             x, y = f.px(cx, model.ROW_Y[row])
             parts.append(_text(x, y + 3, row, 7.4, "#555", weight="bold"))
-    for row, name in (("Z", "Z"), ("Y", "Y"), ("X", "X"), ("W", "W")):
-        for cx in (0.1, 63.9):
-            x, y = f.px(cx, model.ROW_Y[row])
-            parts.append(_text(x, y + 2.6, name, 6.2, "#888"))
     parts.append("</g>")
 
 
@@ -381,7 +382,8 @@ def draw_wire(f: Frame, w: dict, parts: list[str], new: bool, show_tags: bool, t
 
 
 def _bounds_pitch(lay: Layout, scene: Scene) -> tuple[float, float, float, float]:
-    xs, ys = [0.0, 64.0], [-5.6, 16.6]
+    prof = model.active()
+    xs, ys = [0.0, prof.n_cols + 1.0], ([-5.6, 16.6] if prof.rails_in_this_project else [-2.2, 13.2])
     for comp in lay.comps(scene.stage):
         t = comp["type"]
         if t in ("breadboard", "esp32", "resistor"):
@@ -399,6 +401,10 @@ def _bounds_pitch(lay: Layout, scene: Scene) -> tuple[float, float, float, float
             ys.append(11 + lift_for(comp) + hp)
         else:
             ys.append(-lift_for(comp) - hp)
+    for mk in scene.markers:
+        col = parse_hole(mk["hole"])[0]
+        xs.append(col + (50 + 6.6 * len(mk["text"])) / K)
+        ys.append(model.ROW_Y[parse_hole(mk["hole"])[1]] - 4.5)
     for w in lay.wires_at(scene.stage):
         if w["id"] in scene.exclude_wires or (scene.include_refs is not None and w["id"] not in scene.include_refs):
             continue
@@ -489,11 +495,13 @@ def render_scene(lay: Layout, scene: Scene) -> tuple[str, dict]:
     if "R1" in {c["ref"] for c in comps}:
         body.append(f'<g class="zone"{gx("R1")}>')
         ze = [lay.pin_hole("M1", "ECHO")]
-        zx, zy = f.hole("32F")
-        zx2, zy2 = f.hole("32J")
+        echo_col = parse_hole(lay.pin_hole("M1", "ECHO"))[0]
+        node_col = parse_hole(lay.components["R1"]["legs"][1])[0]
+        zx, zy = f.hole(f"{echo_col}F")
+        zx2, zy2 = f.hole(f"{echo_col}J")
         body.append(f'<rect x="{zx - 12:.1f}" y="{zy2 - 12:.1f}" width="24" height="{zy - zy2 + 24:.1f}" rx="6" fill="#ff5a5a" fill-opacity="0.16" stroke="#e03b3b" stroke-width="1.2" stroke-dasharray="4 3"/>')
-        nx, ny = f.hole("36F")
-        nx2, ny2 = f.hole("36J")
+        nx, ny = f.hole(f"{node_col}F")
+        nx2, ny2 = f.hole(f"{node_col}J")
         body.append(f'<rect x="{nx - 12:.1f}" y="{ny2 - 12:.1f}" width="24" height="{ny - ny2 + 24:.1f}" rx="6" fill="#3ecf6b" fill-opacity="0.16" stroke="#1f9d46" stroke-width="1.2" stroke-dasharray="4 3"/>')
         cy_ch = f.px(0, 5.5)[1]
         body.append(_text(zx, cy_ch - 2, "ECHO", 8.6, "#b02020", weight="bold"))
@@ -551,8 +559,9 @@ def item_bbox(lay: Layout, meta: dict, ident: str, scene: Scene) -> tuple[float,
     pts: list[tuple[float, float]] = []
     pad = 14.0
     if ident == "BB1":
-        a = f.px(0.15, 16.2)
-        b = f.px(63.85, -5.2)
+        prof = model.active()
+        a = f.px(0.15, 16.2 if prof.rails_in_this_project else 12.6)
+        b = f.px(prof.n_cols + 0.85, -5.2 if prof.rails_in_this_project else -1.7)
         pts = [a, b]
         pad = 0
     elif ident in lay.wires:

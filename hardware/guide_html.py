@@ -98,7 +98,7 @@ go(start,false);
 """
 
 NAMES = {"U1": "ESP32", "M1": "HC-SR04", "M2": "TCRT5000", "P1": "potenciômetro", "M3": "LCD"}
-STAGE_CHIP = {"A": "A · ESP32", "B": "B · HC-SR04 ★", "C": "C · TCRT5000 + pot", "D": "D · LCD", "E": "E · Completo"}
+STAGE_CHIP = {"A": "A · ESP32", "B": "B · HC-SR04 ★", "C": "C · TCRT5000 + pot"}
 
 
 def _h(s) -> str:
@@ -112,7 +112,7 @@ def _md(s: str) -> str:
 def hole_ctx(lay: Layout, hole: str, placed: set[str]) -> str:
     """O que esta (ou ficara) na mesma tira da protoboard, para o iniciante achar o furo."""
     grp = model.hole_group(hole)
-    occ = lay.occupied_holes("E")
+    occ = lay.occupied_holes(model.STAGE_ORDER[-1])
     now, later = [], []
     for h, users in occ.items():
         if h == hole or model.hole_group(h) != grp:
@@ -204,6 +204,7 @@ def build_slides(lay: Layout):
         for s in steps[st]:
             index[(st, s["n"])] = len(slides)
             slides.append({"kind": "step", "stage": st, "step": s})
+    slides.append({"kind": "lcd", "stage": "", "title": "Próximo: o LCD (Estágio D)"})
     slides.append({"kind": "errors", "stage": "", "title": "Se algo der errado"})
     slides.append({"kind": "noport", "stage": "", "title": "A ESP32 não aparece como porta COM"})
 
@@ -220,7 +221,7 @@ def build_slides(lay: Layout):
         if s.get("marker"):
             step_of[s["marker"]] = idx
             until_of[s["marker"]] = idx
-    scene = Scene(stage="E", bare=True, show_tags=True, tag_scale=1.4, highlight_new=False, step_of=step_of, until_of=until_of,
+    scene = Scene(stage=model.STAGE_ORDER[-1], bare=True, show_tags=True, tag_scale=1.4, highlight_new=False, step_of=step_of, until_of=until_of,
                   temp_wires=[dict(t) for t in temp.values()], markers=[dict(m) for m in markers.values()])
     return slides, index, step_of, until_of, scene, temp, markers
 
@@ -244,17 +245,16 @@ def _focus_rect(boxes: list[tuple[float, float, float, float]], full: tuple[floa
 
 MATERIALS = [
     ("ESP32 DevKit (ESP-WROOM-32, USB-C)", "1", "Conte os pinos e meça a distância entre as fileiras (confirmação C01)."),
-    ("Protoboard 830 pontos", "1", "Letras A–J e números 1–63 visíveis."),
+    ("Meia-protoboard 30 colunas (A–J × 1–30)", "1", "Os trilhos de alimentação não são usados."),
     ("Cabo USB de DADOS", "1", "Cabo só de carga não cria a porta COM."),
     ("HC-SR04", "1", "Estágio B."),
     ("Resistor 2,2 kΩ (verm-verm-verm-dourado)", "1", "R1 do divisor."),
     ("Resistor 3,3 kΩ (lar-lar-verm-dourado)", "1", "R2 do divisor."),
     ("Módulo TCRT5000 (LM393, 4 pinos)", "1", "Estágio C."),
     ("Potenciômetro rotativo", "1", "Estágio C."),
-    ("LCD 2004A V1.1 (16 pinos soldados)", "1", "Estágio D."),
-    ("Resistores 1 kΩ e 150 Ω", "1 de cada", "Estágio D (contraste e backlight)."),
-    ("Jumpers macho-macho de ponta sólida", "~25", "Vários longos (W4, W9, W10, W18–W23)."),
+    ("Jumpers macho-macho de ponta sólida", "~12", "W4, W5, W9 e W10 são os longos."),
     ("Multímetro", "1", "Resistência, continuidade e tensão DC."),
+    ("(LCD 2004A — Estágio D)", "—", "ADIADO: não cabe nesta protoboard; precisa de 2ª protoboard ou jumpers fêmea–macho."),
 ]
 
 
@@ -285,6 +285,14 @@ def build_guide(lay: Layout, figs=None) -> str:
             rows = "".join(f"<tr><td>{_h(a)}</td><td>{_h(b)}</td><td>{_h(c)}</td></tr>" for a, b, c in MATERIALS)
             d["html"] = (f'<div class="kicker">Antes de começar</div><h1>{_h(s["title"])}</h1>'
                          f'<table class="p"><tr><th>Item</th><th>Qtd.</th><th>Observação</th></tr>{rows}</table>')
+        elif kind == "lcd":
+            note = _h(lay.raw["deferred_stages"]["D"]["note"])
+            d["html"] = (f'<div class="kicker">Estágio D · adiado</div><h1>{_h(s["title"])}</h1>'
+                         f'<p class="big">{note}</p>'
+                         '<div class="sec">O que muda</div><ul class="how">'
+                         '<li><b>Opção 1 — 2ª meia-protoboard:</b> o LCD encaixa direto (16 colunas) e os fios longos vêm da ESP32.</li>'
+                         '<li><b>Opção 2 — ~12 jumpers fêmea–macho:</b> o LCD fica solto ao lado; cada pino usado recebe um jumper (fêmea no pino do LCD, macho na protoboard).</li></ul>'
+                         '<p class="m">Quando você escolher, gero os slides do Estágio D e o teste ponta a ponta (E). Os firmwares e a pinagem do LCD não mudam.</p>')
         elif kind == "errors":
             from .guide_extra import COMMON_ERRORS
             d["html"] = f'<div class="kicker">Ajuda</div><h1>{_h(s["title"])}</h1><ul class="cols2">' + "".join(f"<li>{_h(e)}</li>" for e in COMMON_ERRORS) + "</ul>"

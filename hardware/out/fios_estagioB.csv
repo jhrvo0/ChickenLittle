@@ -1,5 +1,5 @@
 id,estagio_de_introducao,cor,de_furo,ate_furo,rede,tensao_esperada,funcao,justificativa,seguranca,validacao
-W1,B,vermelho,22A,30H,5V,"4,75-5,25 V",5V -> VCC do HC-SR04,Alimenta o HC-SR04 com 5 V (pino 5V da ESP32).,Somente HC-SR04 e LCD usam 5 V. NUNCA levar este fio ao TCRT5000 ou ao potenciometro.,PENDING_PHYSICAL_VALIDATION
-W2,B,preto,10J,33I,GND,0 V,GND -> GND do HC-SR04,Terra comum entre ESP32 e HC-SR04 (inclui o ramo inferior R2 do divisor).,Sem terra comum o ECHO flutua e pode injetar 5 V no GPIO.,PENDING_PHYSICAL_VALIDATION
-W3,B,amarelo,13J,31I,TRIG,"0 / 3,3 V",GPIO5 -> TRIG,"Pulso de disparo: saida 3,3 V do GPIO5 (o TTL do HC-SR04 aceita >= 2,0 V).",GPIO5 e pino de strapping; usa-lo como saida e aceitavel.,PENDING_PHYSICAL_VALIDATION
-W4,B,verde,36F,8A,ECHO_NODE,"0 / 3,00 V (3,15 V max. nominal)",No do divisor -> GPIO34,"Leva o ECHO ja reduzido (3,00 V nominal) ao GPIO34, pino somente-entrada.","NAO instalar antes de medir o no <= 3,30 V (ponto de parada da etapa B).",PENDING_PHYSICAL_VALIDATION
+W1,B,vermelho,19A,21H,5V,"4,75-5,25 V",5V -> VCC do HC-SR04,Alimenta o HC-SR04 com 5 V (pino 5V da ESP32).,Somente HC-SR04 e LCD usam 5 V. NUNCA levar este fio ao TCRT5000 ou ao potenciometro.,PENDING_PHYSICAL_VALIDATION
+W2,B,preto,7J,24I,GND,0 V,GND -> GND do HC-SR04,Terra comum entre ESP32 e HC-SR04 (inclui o ramo inferior R2 do divisor).,Sem terra comum o ECHO flutua e pode injetar 5 V no GPIO.,PENDING_PHYSICAL_VALIDATION
+W3,B,amarelo,10J,22I,TRIG,"0 / 3,3 V",GPIO5 -> TRIG,"Pulso de disparo: saida 3,3 V do GPIO5 (o TTL do HC-SR04 aceita >= 2,0 V).",GPIO5 e pino de strapping; usa-lo como saida e aceitavel.,PENDING_PHYSICAL_VALIDATION
+W4,B,verde,27F,5A,ECHO_NODE,"0 / 3,00 V (3,15 V max. nominal)",No do divisor -> GPIO34,"Leva o ECHO ja reduzido (3,00 V nominal) ao GPIO34, pino somente-entrada.","NAO instalar antes de medir o no <= 3,30 V (ponto de parada da etapa B).",PENDING_PHYSICAL_VALIDATION
