@@ -9,6 +9,8 @@ from .model import Layout, parse_hole
 
 COLOR_PT = {"red": "vermelho", "black": "preto", "orange": "laranja", "yellow": "amarelo", "green": "verde", "blue": "azul",
             "purple": "roxo", "white": "branco", "brown": "marrom", "grey": "cinza"}
+BAND_PT = {"black": "preto", "brown": "marrom", "red": "vermelho", "orange": "laranja", "yellow": "amarelo", "green": "verde",
+           "blue": "azul", "violet": "violeta", "grey": "cinza", "white": "branco", "gold": "dourado", "silver": "prata"}
 
 
 def occupant_label(lay: Layout, occ: str) -> str:

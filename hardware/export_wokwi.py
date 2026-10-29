@@ -14,7 +14,7 @@ from . import model
 from .model import Layout
 
 ESP_ID = "esp"
-PART_IDS = {"M1": "ultra", "P1": "pot", "R1": "r1", "R2": "r2"}
+PART_IDS = {"M1": "ultra", "P1": "pot", "R1": "r1", "R2": "r2", "R3": "r3"}
 GND_MAP = {"J2.14": "GND.1", "J3.1": "GND.2", "J3.7": "GND.3"}   # ASSUMIDO (tudo e GND; irrelevante eletricamente)
 
 
@@ -57,6 +57,7 @@ def build_diagram(lay: Layout, stage: str = "C", distance_cm: int = 25) -> dict:
         "M1": ("wokwi-hc-sr04", {"distance": str(distance_cm)}, -160, 240),
         "R1": ("wokwi-resistor", ohms("R1"), -40, 260),
         "R2": ("wokwi-resistor", ohms("R2"), 30, 260),
+        "R3": ("wokwi-resistor", ohms("R3"), 100, 260),
         "P1": ("wokwi-potentiometer", {}, 150, 260),
     }
     for ref, (ptype, attrs, top, left) in spec.items():
@@ -83,7 +84,7 @@ def build_diagram(lay: Layout, stage: str = "C", distance_cm: int = 25) -> dict:
     return {"version": 1, "author": "MotionPet (gerado de hardware/netlist)", "editor": "wokwi",
             "parts": parts, "connections": conns, "dependencies": {},
             "_comment": ("GERADO por python -m hardware.build. TCRT5000 nao possui modelo Wokwi e foi omitido. "
-                         "O divisor 2,2k/3,3k existe no diagrama mas o Wokwi NAO o valida analogicamente.")}
+                         "O divisor 1k / (1k+300) existe no diagrama mas o Wokwi NAO o valida analogicamente.")}
 
 
 WOKWI_TOML = """[wokwi]
@@ -118,7 +119,7 @@ README = """# Simulacao Wokwi do MotionPet (gerada)
 
 Arquivos gerados por `python -m hardware.build` a partir de `hardware/netlist/motionpet.netlist.json`:
 
-- `diagram.json` — ESP32-DevKitC V4 (`board-esp32-devkit-c-v4`, 38 pinos), HC-SR04, R1/R2 e potenciometro (estagios A-C). O LCD (estagio D) esta adiado.
+- `diagram.json` — ESP32-DevKitC V4 (`board-esp32-devkit-c-v4`, 38 pinos), HC-SR04, R1/R2/R3 e potenciometro (estagios A-C). O LCD (estagio D) esta adiado.
 - `wokwi.toml` — aponta para o firmware compilado pelo PlatformIO (`pio run -d firmware`).
 - `scenarios/hcsr04.test.yaml` — cenario de teste (sensor_frame, distancias 25 cm e 300 cm).
 

@@ -45,7 +45,7 @@ h1{font-size:26px;line-height:1.2;margin:4px 0 10px}
 .warn{background:#fdecea;border:1px solid #f1b1ab;color:var(--bad);border-radius:10px;padding:8px 10px;margin:10px 0;font-weight:600}
 ul.checks{margin:6px 0;padding-left:0;list-style:none}ul.checks li{margin:4px 0;display:flex;gap:8px;align-items:flex-start}
 ul.checks li:before{content:"☐";font-size:18px;line-height:1.1}
-pre{background:#101820;color:#e6edf3;border-radius:8px;padding:8px 10px;margin:6px 0;white-space:pre-wrap;word-break:break-all;font-size:13.5px;position:relative}
+pre{background:#101820;color:#e6edf3;border-radius:8px;padding:8px 70px 8px 10px;margin:6px 0;white-space:pre-wrap;word-break:break-all;font-size:13.5px;position:relative}
 pre button{position:absolute;right:6px;top:6px;border:0;border-radius:6px;background:#2b3a49;color:#fff;font-size:12px;padding:3px 8px;cursor:pointer}
 table.p{border-collapse:collapse;width:100%;font-size:14px}table.p td,table.p th{border:1px solid var(--line);padding:3px 6px;text-align:left}
 .pill{display:inline-block;border-radius:999px;padding:1px 10px;font-size:12.5px;border:1px solid #e0a800;background:#fff7dd;color:#7a5200}
@@ -148,8 +148,7 @@ def _res_svg(bands: list[str]) -> str:
     return "".join(out)
 
 
-BAND_PT = {"black": "preto", "brown": "marrom", "red": "vermelho", "orange": "laranja", "yellow": "amarelo", "green": "verde",
-           "blue": "azul", "violet": "violeta", "grey": "cinza", "white": "branco", "gold": "dourado", "silver": "prata"}
+BAND_PT = reports.BAND_PT
 
 
 def _card_resistor(lay: Layout, ref: str, measure: bool) -> str:
@@ -158,11 +157,13 @@ def _card_resistor(lay: Layout, ref: str, measure: bool) -> str:
     lo, hi = c["ohms"] * (1 - c["tolerance"]), c["ohms"] * (1 + c["tolerance"])
     legs = " e ".join(f'<span class="hole">{h}</span>' for h in c["legs"])
     names = "–".join(BAND_PT[b] for b in bands)
+    names_rev = "–".join(BAND_PT[b] for b in reversed(bands))      # lendo a partir da faixa dourada
     extra = (f'<div class="m">Meça: <b>{model.fmt_ohms(lo)} a {model.fmt_ohms(hi)}</b></div>' if measure
              else f'<div class="m">Pernas nos furos {legs}</div>')
     note = f'<div class="m">{_h(c["note"])}</div>' if c.get("note") and not measure else ""
     return (f'<div class="card" style="border-left-color:#8a7440"><div class="t">{ref} · {model.fmt_ohms(c["ohms"])} <span class="m">({_h(c["label"])})</span></div>'
-            f'{_res_svg(bands)}<div class="m">{names}</div>{extra}{note}</div>')
+            f'{_res_svg(bands)}<div class="m">{names}</div>'
+            f'<div class="m">a partir do dourado: <b>{names_rev}</b></div>{extra}{note}</div>')
 
 
 def _card_wire(lay: Layout, w: dict, placed: set[str], temp: bool = False) -> str:
@@ -248,8 +249,8 @@ MATERIALS = [
     ("Meia-protoboard 30 colunas (A–J × 1–30)", "1", "Os trilhos de alimentação não são usados."),
     ("Cabo USB de DADOS", "1", "Cabo só de carga não cria a porta COM."),
     ("HC-SR04", "1", "Estágio B."),
-    ("Resistor 2,2 kΩ (verm-verm-verm-dourado)", "1", "R1 do divisor."),
-    ("Resistor 3,3 kΩ (lar-lar-verm-dourado)", "1", "R2 do divisor."),
+    ("Resistor 1 kΩ (dourado, vermelho, preto, marrom — lendo da faixa dourada)", "2", "R1 e R2 do divisor."),
+    ("Resistor 300 Ω (dourado, marrom, preto, laranja — lendo da faixa dourada)", "1", "R3 do divisor (em série com R2)."),
     ("Módulo TCRT5000 (LM393, 4 pinos)", "1", "Estágio C."),
     ("Potenciômetro rotativo", "1", "Estágio C."),
     ("Jumpers macho-macho de ponta sólida", "~12", "W4, W5, W9 e W10 são os longos."),

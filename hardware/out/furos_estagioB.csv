@@ -13,11 +13,13 @@ furo,coluna,fileira,ocupante,rede
 21J,21,J,M1 HC-SR04: pino VCC,5V
 22I,22,I,"fio W3 (amarelo), ponta final",
 22J,22,J,M1 HC-SR04: pino TRIG,TRIG
-23H,23,H,"R1 2,2 kΩ: perna A",ECHO_5V
+23H,23,H,R1 1 kΩ: perna A,ECHO_5V
 23J,23,J,M1 HC-SR04: pino ECHO,ECHO_5V
-24G,24,G,"R2 3,3 kΩ: perna B",GND
+24G,24,G,R3 300 Ω: perna B,GND
 24I,24,I,"fio W2 (preto), ponta final",
 24J,24,J,M1 HC-SR04: pino GND,GND
-27F,27,F,"fio W4 (verde), ponta inicial",
-27G,27,G,"R2 3,3 kΩ: perna A",ECHO_NODE
-27H,27,H,"R1 2,2 kΩ: perna B",ECHO_NODE
+27F,27,F,R2 1 kΩ: perna A,ECHO_NODE
+27H,27,H,R1 1 kΩ: perna B,ECHO_NODE
+27I,27,I,"fio W4 (verde), ponta inicial",
+30F,30,F,R2 1 kΩ: perna B,DIV_MID
+30G,30,G,R3 300 Ω: perna A,DIV_MID

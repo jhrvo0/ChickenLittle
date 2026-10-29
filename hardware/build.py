@@ -23,8 +23,8 @@ def divider_test_scene(lay: model.Layout) -> Scene:
     return Scene(
         stage="B", title="Estagio B - passo 5: ENSAIO ESTATICO DO DIVISOR (sem o HC-SR04, sem o fio W4)",
         subtitle=(f"Jumper TEMPORARIO tracejado {t1['from']} -> {t1['to']} leva 5 V a R1. Meça entre o furo {mk['hole']} (no) e GND: "
-                  "esperado ~3,0 V (aceitavel 2,50-3,20 V; NUNCA > 3,30 V)."),
-        include_refs={"BB1", "U1", "R1", "R2", "W1", "W2"},
+                  "esperado ~2,8 V (aceitavel 2,50-3,20 V; NUNCA > 3,30 V)."),
+        include_refs={"BB1", "U1", "R1", "R2", "R3", "W1", "W2"},
         temp_wires=[dict(t1)], markers=[dict(mk)], highlight_new=False)
 
 

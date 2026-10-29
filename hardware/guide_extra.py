@@ -5,7 +5,7 @@ COMMON_ERRORS = [
     "Letras da protoboard invertidas (A no topo em vez de J): guie-se pelo NÚMERO da coluna; se as letras estiverem ao contrário, gire a protoboard.",
     "HC-SR04 com VCC e GND trocados: pode queimar o módulo. Leia a serigrafia (VCC | TRIG | ECHO | GND) antes de encaixar.",
     "ECHO ligado direto ao GPIO34 (sem divisor): proibido; entrega ~5 V a um pino de 3,3 V.",
-    "R1 e R2 trocados: o nó cai para 2,0 V (abaixo de 2,475 V) e a leitura falha (sem dano, mas sem distância).",
+    "Ramos do divisor trocados (os 1,3 kΩ em cima, o 1 kΩ embaixo): o nó cai para 2,2 V (abaixo de 2,475 V) e a leitura falha (sem dano, mas sem distância).",
     "TCRT5000 ou potenciômetro ligados em 5 V: só podem usar 3V3.",
     "Fio em IO12, IO6…IO11 (SD0…CLK) ou TX0/RX0: proibido (boot loop, falha de flash ou serial).",
     "LCD com RW (pino 5) no ar: obrigatório ligar ao GND antes de energizar.",
