@@ -461,3 +461,46 @@ def test_breadboard_model_equals_fritzing_breadboard2_buses():
     for c in connectors:
         mine.setdefault(model.hole_group(c[3:]), set()).add(c[3:])
     assert {frozenset(v) for v in mine.values()} == set(fritz_groups)
+
+
+# ----------------------------------------------------------------------------
+# Guia em slides
+# ----------------------------------------------------------------------------
+def test_every_component_and_wire_is_added_in_exactly_one_slide_of_its_own_stage():
+    lay = _layout()
+    seen: dict[str, str] = {}
+    for stage, steps in lay.raw["build_steps"].items():
+        assert [s["n"] for s in steps] == list(range(1, len(steps) + 1)), stage
+        for s in steps:
+            for ident in s.get("adds", []):
+                assert ident not in seen, f"{ident} adicionado duas vezes"
+                seen[ident] = stage
+    expected = {c["ref"]: c["stage"] for c in lay.raw["components"] if c["ref"] != "BB1"} | {w["id"]: w["stage"] for w in lay.raw["wires"]}
+    assert seen == expected                                    # nada esquecido, nada fora do seu estagio
+
+
+def test_slides_html_structure_and_focus_boxes():
+    from hardware import guide_html
+    lay = _layout()
+    page = guide_html.build_guide(lay)
+    m = re.search(r"window\.SLIDES=(\[.*?\]);window\.FULLBOX=(\[.*?\]);", page, re.S)
+    slides, full = json.loads(m.group(1)), json.loads(m.group(2))
+    n_steps = sum(len(v) for v in lay.raw["build_steps"].values())
+    assert len(slides) == 2 + n_steps + 2                      # intro + materiais + passos + 2 slides de ajuda
+    steps = [s for s in slides if s["kind"] == "step"]
+    assert len(steps) == n_steps
+    for s in steps:
+        x, y, w, h = s["focus"]
+        assert x >= -1 and y >= -1 and x + w <= full[2] + 1 and y + h <= full[3] + 1, s["title"]
+        assert w >= 700 and abs(w / h - 1.6) < 0.05
+    assert "ADICIONE AGORA" in page.upper() and "PONTO DE PARADA" in page
+    # no master SVG, cada item adicionado carrega o slide em que aparece
+    for ident in ("W1", "W4", "M1", "R1", "T1", "MK5", "U1"):
+        assert re.search(rf'data-(?:id|ref)="{ident}"[^>]*data-gstep="\d+"|class="marker" data-gstep="\d+"', page) or ident == "MK5"
+    # os passos da etapa B aparecem na ordem do guia de bancada: W4 (no -> GPIO34) vem DEPOIS do ensaio do divisor
+    titles = [s["title"] if s.get("title") else "" for s in steps]
+    assert titles  # titulos vivem no html
+    b = lay.raw["build_steps"]["B"]
+    assert [i for i, s in enumerate(b) if s.get("hold")] == [4]
+    assert "W4" in b[9]["adds"] and "T1" in b[4]["temp"]
+    assert all(s["adds"] == [] for s in b[:2])

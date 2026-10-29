@@ -43,6 +43,10 @@ class Scene:
     temp_wires: list[dict] = field(default_factory=list)
     markers: list[dict] = field(default_factory=list)      # [{"hole": "36F", "text": "..."}]
     show_tags: bool = True                       # etiquetas de furo (ex.: 22A) nas pontas
+    bare: bool = False                           # sem titulo/rodape (slides)
+    step_of: dict | None = None                  # id -> indice do slide em que o item aparece (modo slides)
+    until_of: dict | None = None                 # id -> ultimo slide em que o item ainda aparece
+    tag_scale: float = 1.0                       # aumenta etiquetas/rotulos de fio (slides)
     highlight_new: bool = True
     notes: list[str] = field(default_factory=list)
 
@@ -117,7 +121,7 @@ def draw_breadboard(f: Frame, parts: list[str]) -> None:
     parts.append("</g>")
 
 
-def draw_esp32(f: Frame, lay: Layout, badges: dict[str, str], parts: list[str], new: bool) -> None:
+def draw_esp32(f: Frame, lay: Layout, badges: dict[str, str], parts: list[str], new: bool, extra: str = "", badge_steps: dict | None = None) -> None:
     esp = lay.esp32()
     pl = esp["placement"]
     col0 = pl["col0"]
@@ -132,7 +136,7 @@ def draw_esp32(f: Frame, lay: Layout, badges: dict[str, str], parts: list[str], 
     ymid = (model.ROW_Y["B"] + model.ROW_Y["I"]) / 2.0
     _, y_top = f.px(0, ymid + width_p / 2)
     _, y_bot = f.px(0, ymid - width_p / 2)
-    parts.append(f'<g id="U1" class="part{" new" if new else ""}" data-ref="U1">')
+    parts.append(f'<g id="U1" class="part{" new" if new else ""}" data-ref="U1"{extra}>')
     parts.append(f'<rect x="{x_left:.1f}" y="{y_top:.1f}" width="{x_right - x_left:.1f}" height="{y_bot - y_top:.1f}" rx="4" '
                  f'fill="#1c2733" stroke="#0d141b" stroke-width="2"/>')
     # modulo ESP-WROOM-32 (lata prateada) + antena
@@ -169,20 +173,21 @@ def draw_esp32(f: Frame, lay: Layout, badges: dict[str, str], parts: list[str], 
         ly = y + inward * 9
         name = lay.board.ref_name(p).split("@")[0]
         key = f"U1.{lay.board.ref_name(p)}"
+        # rotulo de serigrafia SEMPRE desenhado (o selo colorido, quando existe, cobre-o por cima)
+        col_t = "#8fa5ba" if p.kind in ("flash_forbidden", "strapping_forbidden", "uart_reserved") else "#c9d6e2"
+        if p.kind in ("flash_forbidden", "strapping_forbidden"):
+            col_t = "#ff8d8d"
+        parts.append(_text(x, ly + (8 if inward > 0 else -1), name, 7.2, col_t))
         if key in badges:
             colr = WIRE_COLORS[badges[key]]
             tcol = "#111" if badges[key] in ("yellow", "white", "orange") else "#fff"
             w = max(26, 6.4 * len(name) + 8)
             h = 13
             by = ly if inward > 0 else ly - h
-            parts.append(f'<g class="badge" data-pin="{esc(key)}"><rect x="{x - w / 2:.1f}" y="{by:.1f}" width="{w:.1f}" height="{h}" rx="3" '
+            bst = f' data-gstep="{badge_steps[key]}"' if badge_steps and key in badge_steps else ""
+            parts.append(f'<g class="badge" data-pin="{esc(key)}"{bst}><rect x="{x - w / 2:.1f}" y="{by:.1f}" width="{w:.1f}" height="{h}" rx="3" '
                          f'fill="{colr}" stroke="#fff" stroke-width="1"/>'
                          + _text(x, by + 9.6, name, 8, tcol, weight="bold") + "</g>")
-        else:
-            col_t = "#8fa5ba" if p.kind in ("flash_forbidden", "strapping_forbidden", "uart_reserved") else "#c9d6e2"
-            if p.kind in ("flash_forbidden", "strapping_forbidden"):
-                col_t = "#ff8d8d"
-            parts.append(_text(x, ly + (8 if inward > 0 else -1), name, 7.2, col_t))
     # legenda da placa
     cxl, cyl = f.px(first + 6.2, ymid + 0.0)
     parts.append(_text(cxl, cyl + 3, "ESP32 DevKit 38 pinos", 9, "#8aa0b4", weight="bold"))
@@ -194,7 +199,7 @@ def _hole_pin_marker(parts, x, y, colr="#d9b24a"):
     parts.append(f'<rect x="{x - 3.6:.1f}" y="{y - 3.6:.1f}" width="7.2" height="7.2" fill="{colr}" stroke="#7a5f12" stroke-width="0.8"/>')
 
 
-def draw_module(f: Frame, lay: Layout, comp: dict, parts: list[str], new: bool) -> None:
+def draw_module(f: Frame, lay: Layout, comp: dict, parts: list[str], new: bool, extra: str = "") -> None:
     t = comp["type"]
     mod = lay.modules["modules"][t]
     ref = comp["ref"]
@@ -210,7 +215,7 @@ def draw_module(f: Frame, lay: Layout, comp: dict, parts: list[str], new: bool) 
     w, h = wmm * MM, hmm * MM
     ybase = ys[0] + (-1 if up else 1) * lift_for(comp) * K   # borda do corpo (modulo "em pe" sobre os pinos)
     top = ybase - h if up else ybase
-    parts.append(f'<g id="{ref}" class="part{" new" if new else ""}" data-ref="{ref}">')
+    parts.append(f'<g id="{ref}" class="part{" new" if new else ""}" data-ref="{ref}"{extra}>')
     if t == "hc_sr04":
         parts.append(f'<rect x="{cx - w / 2:.1f}" y="{top:.1f}" width="{w:.1f}" height="{h:.1f}" rx="3" fill="#1e6fb5" fill-opacity="0.93" stroke="#0e3f6b" stroke-width="1.5"/>')
         for k in (0.25, 0.75):
@@ -238,7 +243,7 @@ def draw_module(f: Frame, lay: Layout, comp: dict, parts: list[str], new: bool) 
         parts.append(f'<rect x="{wx:.1f}" y="{wy:.1f}" width="{76 * MM:.1f}" height="{wh:.1f}" fill="#1c3b34" fill-opacity="0.95" stroke="#0b2018" stroke-width="2"/>')
         for r in range(4):
             parts.append(f'<rect x="{wx + 5:.1f}" y="{wy + 3 + r * (wh - 6) / 4:.1f}" width="{76 * MM - 10:.1f}" height="{(wh - 6) / 4 - 3:.1f}" fill="#2c5e52" fill-opacity="0.7"/>')
-        parts.append(_text(cx, top + h - 7, "LCD 2004A V1.1 (20x4) - altura recortada", 9, "#d9fbe9", weight="bold"))
+        parts.append(_text(cx, (top + 16) if up else (top + h - 7), "LCD 2004A V1.1 (20x4) - altura recortada", 9, "#d9fbe9", weight="bold"))
     # pinos dourados descendo ate os furos + rotulos
     names = list(comp["pins"].keys())
     for name, (px_, py_) in zip(names, holes):
@@ -270,7 +275,7 @@ def _band_rects(bands, x0, x1, y, h):
     return out
 
 
-def draw_resistor(f: Frame, lay: Layout, comp: dict, parts: list[str], new: bool) -> None:
+def draw_resistor(f: Frame, lay: Layout, comp: dict, parts: list[str], new: bool, extra: str = "") -> None:
     (xa, ya), (xb, yb) = f.hole(comp["legs"][0]), f.hole(comp["legs"][1])
     bands = model.resistor_bands(comp["ohms"], comp["tolerance"], lay.modules["resistor_color_code"])
     dx, dy = xb - xa, yb - ya
@@ -284,7 +289,7 @@ def draw_resistor(f: Frame, lay: Layout, comp: dict, parts: list[str], new: bool
     import math
     ang = math.degrees(math.atan2(dy, dx))
     ref = comp["ref"]
-    parts.append(f'<g id="{ref}" class="part res{" new" if new else ""}" data-ref="{ref}">')
+    parts.append(f'<g id="{ref}" class="part res{" new" if new else ""}" data-ref="{ref}"{extra}>')
     parts.append(f'<path d="M{xa:.1f},{ya:.1f} L{bx0:.1f},{by0:.1f} M{bx1:.1f},{by1:.1f} L{xb:.1f},{yb:.1f}" stroke="#9aa0a6" stroke-width="3.2" stroke-linecap="round" fill="none"/>')
     parts.append(f'<g transform="translate({mx:.1f} {my:.1f}) rotate({ang:.2f})">')
     parts.append(f'<rect x="{-body / 2:.1f}" y="-6.2" width="{body:.1f}" height="12.4" rx="6" fill="#d9c28e" stroke="#8a7440" stroke-width="1.2"/>')
@@ -325,11 +330,11 @@ def wire_points(f: Frame, w: dict) -> list[tuple[float, float]]:
     return pts
 
 
-def _place_tag(x: float, y: float, text: str, taken: list[tuple[float, float, float, float]]) -> tuple[float, float]:
+def _place_tag(x: float, y: float, text: str, taken: list[tuple[float, float, float, float]], sc: float = 1.0) -> tuple[float, float]:
     """Escolhe o canto (4 candidatos x 2 distancias) que nao colide com etiquetas ja posicionadas."""
-    wtag, htag = 7.2 * len(text) + 6, 12.0
+    wtag, htag = (7.2 * len(text) + 6) * sc, 12.0 * sc
     cands = []
-    for dist in (9.0, 17.0, 26.0):
+    for dist in (9.0 * sc, 17.0 * sc, 26.0 * sc):
         for dx, dy in ((1, -1), (-1, -1), (1, 1), (-1, 1)):
             cx = x + dx * dist - (wtag if dx < 0 else 0)
             cy = y + dy * dist - (htag if dy < 0 else 0)
@@ -347,13 +352,13 @@ def _place_tag(x: float, y: float, text: str, taken: list[tuple[float, float, fl
 TAKEN_TAGS: list[tuple[float, float, float, float]] = []
 
 
-def draw_wire(f: Frame, w: dict, parts: list[str], new: bool, show_tags: bool, temp: bool = False) -> None:
+def draw_wire(f: Frame, w: dict, parts: list[str], new: bool, show_tags: bool, temp: bool = False, extra: str = "", sc: float = 1.0) -> None:
     pts = wire_points(f, w)
     colr = WIRE_COLORS.get(w.get("color", "grey"), "#999")
     d = _rounded_polyline(pts)
     cls = "wire" + (" new" if new else "") + (" temp" if temp else "")
     dash = ' stroke-dasharray="7 5"' if temp else ""
-    parts.append(f'<g id="{w["id"]}" class="{cls}" data-id="{w["id"]}" data-net="{esc(w.get("net", ""))}">')
+    parts.append(f'<g id="{w["id"]}" class="{cls}" data-id="{w["id"]}" data-net="{esc(w.get("net", ""))}"{extra}>')
     parts.append(f'<path d="{d}" fill="none" stroke="#000" stroke-opacity="0.55" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"{dash}/>')
     parts.append(f'<path class="core" d="{d}" fill="none" stroke="{colr}" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"{dash}/>')
     for (x, y) in (pts[0], pts[-1]):
@@ -363,15 +368,15 @@ def draw_wire(f: Frame, w: dict, parts: list[str], new: bool, show_tags: bool, t
     lx = (pts[best][0] + pts[best + 1][0]) / 2
     ly = (pts[best][1] + pts[best + 1][1]) / 2
     label = w["id"]
-    parts.append(f'<g class="wlabel"><rect x="{lx - 11:.1f}" y="{ly - 7:.1f}" width="22" height="14" rx="4" fill="#fff" stroke="{colr if colr != "#f4f4f4" else "#888"}" stroke-width="1.6"/>'
-                 + _text(lx, ly + 3.6, label, 8.6, "#111", weight="bold") + "</g>")
+    parts.append(f'<g class="wlabel"><rect x="{lx - 11 * sc:.1f}" y="{ly - 7 * sc:.1f}" width="{22 * sc:.1f}" height="{14 * sc:.1f}" rx="4" fill="#fff" stroke="{colr if colr != "#f4f4f4" else "#888"}" stroke-width="1.6"/>'
+                 + _text(lx, ly + 3.6 * sc, label, 8.6 * sc, "#111", weight="bold") + "</g>")
     if show_tags:
         for (x, y), hole in ((pts[0], w["from"]), (pts[-1], w["to"])):
-            tx, ty = _place_tag(x, y, hole, TAKEN_TAGS)
-            tw_ = 7.2 * len(hole) + 6
-            parts.append(f'<g class="htag"><line x1="{x:.1f}" y1="{y:.1f}" x2="{tx + tw_ / 2:.1f}" y2="{ty + 6:.1f}" stroke="#555" stroke-width="0.7"/>'
-                         f'<rect x="{tx:.1f}" y="{ty:.1f}" width="{tw_:.1f}" height="12" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/>'
-                         + _text(tx + tw_ / 2, ty + 9, hole, 8.2, "#111", weight="bold") + "</g>")
+            tx, ty = _place_tag(x, y, hole, TAKEN_TAGS, sc)
+            tw_ = (7.2 * len(hole) + 6) * sc
+            parts.append(f'<g class="htag"><line x1="{x:.1f}" y1="{y:.1f}" x2="{tx + tw_ / 2:.1f}" y2="{ty + 6 * sc:.1f}" stroke="#555" stroke-width="0.7"/>'
+                         f'<rect x="{tx:.1f}" y="{ty:.1f}" width="{tw_:.1f}" height="{12 * sc:.1f}" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/>'
+                         + _text(tx + tw_ / 2, ty + 9 * sc, hole, 8.2 * sc, "#111", weight="bold") + "</g>")
     parts.append("</g>")
 
 
@@ -444,20 +449,45 @@ def render_scene(lay: Layout, scene: Scene) -> tuple[str, dict]:
         if grp in occ_cols:
             badges[f"U1.{lay.board.ref_name(p)}"] = occ_cols[grp]
 
+    def gx(ident: str) -> str:
+        """atributos data-gstep/data-until (modo slides)."""
+        if not scene.step_of or ident not in scene.step_of:
+            return ""
+        a = f' data-gstep="{scene.step_of[ident]}"'
+        if scene.until_of and ident in scene.until_of:
+            a += f' data-until="{scene.until_of[ident]}"'
+        return a
+
+    # selos dos badges da ESP32: aparecem quando o primeiro fio chega na coluna do pino
+    badge_steps: dict[str, int] = {}
+    if scene.step_of:
+        for w in wires:
+            for h in (w["from"], w["to"]):
+                grp = model.hole_group(h)
+                for p in lay.board.pins:
+                    if model.hole_group(lay.esp32_pin_hole(p)) == grp:
+                        key = f"U1.{lay.board.ref_name(p)}"
+                        st_ = scene.step_of.get(w["id"])
+                        if st_ is not None:
+                            badge_steps[key] = min(badge_steps.get(key, st_), st_)
+
+    y_off = 0 if scene.bare else 56
+    extra_h = 0 if scene.bare else 66
     out: list[str] = []
-    out.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width:.0f} {height + 66:.0f}" width="{width:.0f}" height="{height + 66:.0f}" '
+    out.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width:.0f} {height + extra_h:.0f}" width="{width:.0f}" height="{height + extra_h:.0f}" '
                f'data-stage="{scene.stage}" font-family="{FONT}" role="img" aria-label="{esc(scene.title)}">')
     out.append(f"<style>{CSS}</style>")
-    out.append(f'<rect width="100%" height="100%" fill="#f7f5ee"/>')
-    # titulo
-    out.append(_text(14, 22, scene.title or f"MotionPet - Estagio {scene.stage}", 17, "#17212b", anchor="start", weight="bold"))
-    if scene.subtitle:
-        out.append(_text(14, 40, scene.subtitle, 10.5, "#4a5560", anchor="start"))
-    out.append(f'<g transform="translate(0 56)">')
+    out.append(f'<rect x="-3000" y="-3000" width="{width + 6000:.0f}" height="{height + extra_h + 6000:.0f}" fill="#f7f5ee"/>')
+    if not scene.bare:
+        out.append(_text(14, 22, scene.title or f"MotionPet - Estagio {scene.stage}", 17, "#17212b", anchor="start", weight="bold"))
+        if scene.subtitle:
+            out.append(_text(14, 40, scene.subtitle, 10.5, "#4a5560", anchor="start"))
+    out.append(f'<g transform="translate(0 {y_off})">')
     body: list[str] = []
     draw_breadboard(f, body)
     # zonas de dominio de tensao (Estagio B+): ECHO 5 V x no <= 3,3 V
     if "R1" in {c["ref"] for c in comps}:
+        body.append(f'<g class="zone"{gx("R1")}>')
         ze = [lay.pin_hole("M1", "ECHO")]
         zx, zy = f.hole("32F")
         zx2, zy2 = f.hole("32J")
@@ -470,27 +500,28 @@ def render_scene(lay: Layout, scene: Scene) -> tuple[str, dict]:
         body.append(_text(zx, cy_ch + 8, "5 V", 8.6, "#b02020", weight="bold"))
         body.append(_text(nx, cy_ch - 2, "NÓ", 8.6, "#157a35", weight="bold"))
         body.append(_text(nx, cy_ch + 8, "≤3,3 V", 8.6, "#157a35", weight="bold"))
+        body.append("</g>")
         _ = ze
     for comp in comps:
         t = comp["type"]
         if t == "esp32":
-            draw_esp32(f, lay, badges, body, new(comp))
+            draw_esp32(f, lay, badges, body, new(comp), gx(comp["ref"]), badge_steps)
         elif t in ("hc_sr04", "tcrt5000_module", "potentiometer", "lcd2004a"):
-            draw_module(f, lay, comp, body, new(comp))
+            draw_module(f, lay, comp, body, new(comp), gx(comp["ref"]))
     for comp in comps:
         if comp["type"] == "resistor":
-            draw_resistor(f, lay, comp, body, new(comp))
+            draw_resistor(f, lay, comp, body, new(comp), gx(comp["ref"]))
     for w in wires:
-        draw_wire(f, w, body, new(w), scene.show_tags)
+        draw_wire(f, w, body, new(w), scene.show_tags, extra=gx(w["id"]), sc=scene.tag_scale)
     for tw in scene.temp_wires:
         tw = dict(tw)
         tw.setdefault("via", [])
         tw.setdefault("color", "grey")
-        draw_wire(f, tw, body, True, scene.show_tags, temp=True)
+        draw_wire(f, tw, body, True, scene.show_tags, temp=True, extra=gx(tw["id"]), sc=scene.tag_scale)
     for mk in scene.markers:
         mx_, my_ = f.hole(mk["hole"])
         tw_ = 6.6 * len(mk["text"]) + 14
-        body.append(f'<g class="marker"><circle cx="{mx_:.1f}" cy="{my_:.1f}" r="11" fill="none" stroke="#e0007a" stroke-width="3"/>'
+        body.append(f'<g class="marker"{gx(mk.get("id", ""))}><circle cx="{mx_:.1f}" cy="{my_:.1f}" r="11" fill="none" stroke="#e0007a" stroke-width="3"/>'
                     f'<line x1="{mx_:.1f}" y1="{my_ + 11:.1f}" x2="{mx_ + 24:.1f}" y2="{my_ + 44:.1f}" stroke="#e0007a" stroke-width="2"/>'
                     f'<rect x="{mx_ + 24:.1f}" y="{my_ + 44:.1f}" width="{tw_:.1f}" height="20" rx="5" fill="#fff0f8" stroke="#e0007a" stroke-width="1.6"/>'
                     + _text(mx_ + 24 + tw_ / 2, my_ + 58, mk["text"], 10.5, "#8a004c", weight="bold") + "</g>")
@@ -500,11 +531,71 @@ def render_scene(lay: Layout, scene: Scene) -> tuple[str, dict]:
     foot_y = height + 56 + 4
     foot = ["Fonte: hardware/netlist/motionpet.netlist.json  |  Status: PENDING_PHYSICAL_VALIDATION  |  "
             "Ilustracao tecnica gerada da netlist (nao e foto; confira SEMPRE a serigrafia da sua placa)."]
-    out.append(_text(14, foot_y + 6, foot[0], 8.6, "#6b7682", anchor="start"))
+    if not scene.bare:
+        out.append(_text(14, foot_y + 6, foot[0], 8.6, "#6b7682", anchor="start"))
     out.append("</svg>")
     meta = {
-        "width": width, "height": height + 66,
+        "width": width, "height": height + extra_h, "y_off": y_off,
         "frame_x0": f.x0, "frame_y0": f.y0,
         "holes": {w["id"]: {"from": w["from"], "to": w["to"]} for w in wires},
     }
     return "\n".join(out), meta
+
+
+# ----------------------------------------------------------------------------
+# Caixas delimitadoras (px do SVG) para dar zoom em cada slide
+# ----------------------------------------------------------------------------
+def item_bbox(lay: Layout, meta: dict, ident: str, scene: Scene) -> tuple[float, float, float, float] | None:
+    f = Frame(meta["frame_x0"], meta["frame_y0"])
+    yo = meta.get("y_off", 0)
+    pts: list[tuple[float, float]] = []
+    pad = 14.0
+    if ident == "BB1":
+        a = f.px(0.15, 16.2)
+        b = f.px(63.85, -5.2)
+        pts = [a, b]
+        pad = 0
+    elif ident in lay.wires:
+        pts = wire_points(f, lay.wires[ident])
+        pad = 30.0
+    elif any(t["id"] == ident for t in scene.temp_wires):
+        tw = next(t for t in scene.temp_wires if t["id"] == ident)
+        pts = wire_points(f, {**tw, "via": tw.get("via", [])})
+        pad = 30.0
+    elif any(m.get("id") == ident for m in scene.markers):
+        m = next(m for m in scene.markers if m.get("id") == ident)
+        x, y = f.hole(m["hole"])
+        pts = [(x - 12, y - 12), (x + 40 + 6.6 * len(m["text"]), y + 70)]
+        pad = 0
+    elif ident in lay.components:
+        comp = lay.components[ident]
+        t = comp["type"]
+        if t == "esp32":
+            prof = lay.board.data
+            n = lay.board.n
+            length_p = prof["pcb_mm"][0] / 2.54
+            width_p = prof["pcb_mm"][1] / 2.54
+            first = comp["placement"]["col0"] - (length_p - (n - 1)) / 2.0
+            ymid = (model.ROW_Y["B"] + model.ROW_Y["I"]) / 2.0
+            pts = [f.px(first - 0.4, ymid + width_p / 2 + 0.6), f.px(first + length_p, ymid - width_p / 2 - 0.6)]
+            pad = 6
+        elif t == "resistor":
+            pts = [f.hole(h) for h in comp["legs"]]
+            pad = 34.0
+        else:
+            mod = lay.modules["modules"][t]
+            holes = [f.hole(h) for h in comp["pins"].values()]
+            row = parse_hole(next(iter(comp["pins"].values())))[1]
+            up = row in model.UPPER_ROWS
+            hmm = min(mod["body_mm"][1], 25.4) if t == "lcd2004a" else mod["body_mm"][1]
+            w, h = mod["body_mm"][0] * MM, hmm * MM
+            cx = (min(x for x, _ in holes) + max(x for x, _ in holes)) / 2
+            ybase = holes[0][1] + (-1 if up else 1) * lift_for(comp) * K
+            y2 = ybase - h if up else ybase + h
+            pts = holes + [(cx - w / 2, ybase), (cx + w / 2, y2)]
+            pad = 14
+    if not pts:
+        return None
+    xs = [p[0] for p in pts]
+    ys = [p[1] + yo for p in pts]
+    return min(xs) - pad, min(ys) - pad, max(xs) + pad, max(ys) + pad

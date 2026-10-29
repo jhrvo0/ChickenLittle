@@ -8,7 +8,7 @@
 .part.hl rect:first-of-type { stroke: #ff00aa; stroke-width: 3; }
 .htag { display: var(--tags, inline); }
 </style>
-<rect width="100%" height="100%" fill="#f7f5ee"/>
+<rect x="-3000" y="-3000" width="7380" height="6743" fill="#f7f5ee"/>
 <text x="14.0" y="22.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="17" fill="#17212b" text-anchor="start" font-weight="bold" >MotionPet - Estagio B - HC-SR04 + divisor de ECHO</text>
 <text x="14.0" y="40.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#4a5560" text-anchor="start" font-weight="normal" >Medir distancia com ECHO protegido (&lt;= 3,30 V no GPIO34). PRIORIDADE MAXIMA.</text>
 <g transform="translate(0 56)">
@@ -1004,12 +1004,14 @@
 <text x="52.0" y="598.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="6.2" fill="#888" text-anchor="middle" font-weight="normal" >W</text>
 <text x="1328.0" y="598.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="6.2" fill="#888" text-anchor="middle" font-weight="normal" >W</text>
 </g>
+<g class="zone">
 <rect x="678.0" y="283.5" width="24" height="104.0" rx="6" fill="#ff5a5a" fill-opacity="0.16" stroke="#e03b3b" stroke-width="1.2" stroke-dasharray="4 3"/>
 <rect x="758.0" y="283.5" width="24" height="104.0" rx="6" fill="#3ecf6b" fill-opacity="0.16" stroke="#1f9d46" stroke-width="1.2" stroke-dasharray="4 3"/>
 <text x="690.0" y="403.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#b02020" text-anchor="middle" font-weight="bold" >ECHO</text>
 <text x="690.0" y="413.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#b02020" text-anchor="middle" font-weight="bold" >5 V</text>
 <text x="770.0" y="403.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#157a35" text-anchor="middle" font-weight="bold" >NÓ</text>
 <text x="770.0" y="413.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#157a35" text-anchor="middle" font-weight="bold" >≤3,3 V</text>
+</g>
 <g id="U1" class="part" data-ref="U1">
 <rect x="105.3" y="303.1" width="409.4" height="204.7" rx="4" fill="#1c2733" stroke="#0d141b" stroke-width="2"/>
 <rect x="310.9" y="334.6" width="153.5" height="141.7" rx="2" fill="#b8bdc4" stroke="#7d848c"/>
@@ -1034,6 +1036,7 @@
 <rect x="185.5" y="491.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
 <text x="190.0" y="485.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >VN</text>
 <rect x="205.5" y="491.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="210.0" y="485.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO34</text>
 <g class="badge" data-pin="U1.IO34"><rect x="193.2" y="473.5" width="33.6" height="13" rx="3" fill="#2fa84f" stroke="#fff" stroke-width="1"/><text x="210.0" y="483.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold" >IO34</text></g>
 <rect x="225.5" y="491.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
 <text x="230.0" y="485.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO35</text>
@@ -1062,6 +1065,7 @@
 <rect x="465.5" y="491.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
 <text x="470.0" y="485.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >CMD</text>
 <rect x="485.5" y="491.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="490.0" y="485.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >5V</text>
 <g class="badge" data-pin="U1.5V"><rect x="477.0" y="473.5" width="26.0" height="13" rx="3" fill="#e0312f" stroke="#fff" stroke-width="1"/><text x="490.0" y="483.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold" >5V</text></g>
 <rect x="125.5" y="311.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
 <text x="130.0" y="332.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >GND</text>
@@ -1076,12 +1080,14 @@
 <rect x="225.5" y="311.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
 <text x="230.0" y="332.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO21</text>
 <rect x="245.5" y="311.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="250.0" y="332.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >GND</text>
 <g class="badge" data-pin="U1.GND@J3.7"><rect x="236.4" y="324.5" width="27.2" height="13" rx="3" fill="#2b2b2b" stroke="#fff" stroke-width="1"/><text x="250.0" y="334.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold" >GND</text></g>
 <rect x="265.5" y="311.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
 <text x="270.0" y="332.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO19</text>
 <rect x="285.5" y="311.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
 <text x="290.0" y="332.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO18</text>
 <rect x="305.5" y="311.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="310.0" y="332.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO5</text>
 <g class="badge" data-pin="U1.IO5"><rect x="296.4" y="324.5" width="27.2" height="13" rx="3" fill="#f2c30f" stroke="#fff" stroke-width="1"/><text x="310.0" y="334.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8" fill="#111" text-anchor="middle" font-weight="bold" >IO5</text></g>
 <rect x="325.5" y="311.0" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
 <text x="330.0" y="332.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO17</text>
@@ -1153,36 +1159,36 @@
 <path class="core" d="M490.0,515.5 L490.0,528.5 Q490.0,535.5 497.0,535.5 L583.0,535.5 Q590.0,535.5 590.0,528.5 L590.0,342.5 Q590.0,335.5 597.0,335.5 L650.0,335.5" fill="none" stroke="#e0312f" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
 <circle cx="490.0" cy="515.5" r="4.4" fill="#e0312f" stroke="#000" stroke-width="1.2"/>
 <circle cx="650.0" cy="335.5" r="4.4" fill="#e0312f" stroke="#000" stroke-width="1.2"/>
-<g class="wlabel"><rect x="579.0" y="428.5" width="22" height="14" rx="4" fill="#fff" stroke="#e0312f" stroke-width="1.6"/><text x="590.0" y="439.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#111" text-anchor="middle" font-weight="bold" >W1</text></g>
-<g class="htag"><line x1="490.0" y1="515.5" x2="512.8" y2="500.5" stroke="#555" stroke-width="0.7"/><rect x="499.0" y="494.5" width="27.6" height="12" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="512.8" y="503.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >22A</text></g>
-<g class="htag"><line x1="650.0" y1="335.5" x2="672.8" y2="320.5" stroke="#555" stroke-width="0.7"/><rect x="659.0" y="314.5" width="27.6" height="12" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="672.8" y="323.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >30H</text></g>
+<g class="wlabel"><rect x="579.0" y="428.5" width="22.0" height="14.0" rx="4" fill="#fff" stroke="#e0312f" stroke-width="1.6"/><text x="590.0" y="439.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#111" text-anchor="middle" font-weight="bold" >W1</text></g>
+<g class="htag"><line x1="490.0" y1="515.5" x2="512.8" y2="500.5" stroke="#555" stroke-width="0.7"/><rect x="499.0" y="494.5" width="27.6" height="12.0" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="512.8" y="503.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >22A</text></g>
+<g class="htag"><line x1="650.0" y1="335.5" x2="672.8" y2="320.5" stroke="#555" stroke-width="0.7"/><rect x="659.0" y="314.5" width="27.6" height="12.0" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="672.8" y="323.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >30H</text></g>
 </g>
 <g id="W2" class="wire new" data-id="W2" data-net="GND">
 <path d="M250.0,295.5 L250.0,272.5 Q250.0,265.5 257.0,265.5 L723.0,265.5 Q730.0,265.5 730.0,272.5 L730.0,308.5 Q730.0,315.5 723.0,315.5 L710.0,315.5" fill="none" stroke="#000" stroke-opacity="0.55" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"/>
 <path class="core" d="M250.0,295.5 L250.0,272.5 Q250.0,265.5 257.0,265.5 L723.0,265.5 Q730.0,265.5 730.0,272.5 L730.0,308.5 Q730.0,315.5 723.0,315.5 L710.0,315.5" fill="none" stroke="#2b2b2b" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
 <circle cx="250.0" cy="295.5" r="4.4" fill="#2b2b2b" stroke="#000" stroke-width="1.2"/>
 <circle cx="710.0" cy="315.5" r="4.4" fill="#2b2b2b" stroke="#000" stroke-width="1.2"/>
-<g class="wlabel"><rect x="479.0" y="258.5" width="22" height="14" rx="4" fill="#fff" stroke="#2b2b2b" stroke-width="1.6"/><text x="490.0" y="269.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#111" text-anchor="middle" font-weight="bold" >W2</text></g>
-<g class="htag"><line x1="250.0" y1="295.5" x2="272.8" y2="280.5" stroke="#555" stroke-width="0.7"/><rect x="259.0" y="274.5" width="27.6" height="12" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="272.8" y="283.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >10J</text></g>
-<g class="htag"><line x1="710.0" y1="315.5" x2="732.8" y2="300.5" stroke="#555" stroke-width="0.7"/><rect x="719.0" y="294.5" width="27.6" height="12" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="732.8" y="303.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >33I</text></g>
+<g class="wlabel"><rect x="479.0" y="258.5" width="22.0" height="14.0" rx="4" fill="#fff" stroke="#2b2b2b" stroke-width="1.6"/><text x="490.0" y="269.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#111" text-anchor="middle" font-weight="bold" >W2</text></g>
+<g class="htag"><line x1="250.0" y1="295.5" x2="272.8" y2="280.5" stroke="#555" stroke-width="0.7"/><rect x="259.0" y="274.5" width="27.6" height="12.0" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="272.8" y="283.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >10J</text></g>
+<g class="htag"><line x1="710.0" y1="315.5" x2="732.8" y2="300.5" stroke="#555" stroke-width="0.7"/><rect x="719.0" y="294.5" width="27.6" height="12.0" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="732.8" y="303.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >33I</text></g>
 </g>
 <g id="W3" class="wire new" data-id="W3" data-net="TRIG">
 <path d="M310.0,295.5 L310.0,286.5 Q310.0,279.5 317.0,279.5 L603.0,279.5 Q610.0,279.5 610.0,286.5 L610.0,308.5 Q610.0,315.5 617.0,315.5 L670.0,315.5" fill="none" stroke="#000" stroke-opacity="0.55" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"/>
 <path class="core" d="M310.0,295.5 L310.0,286.5 Q310.0,279.5 317.0,279.5 L603.0,279.5 Q610.0,279.5 610.0,286.5 L610.0,308.5 Q610.0,315.5 617.0,315.5 L670.0,315.5" fill="none" stroke="#f2c30f" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
 <circle cx="310.0" cy="295.5" r="4.4" fill="#f2c30f" stroke="#000" stroke-width="1.2"/>
 <circle cx="670.0" cy="315.5" r="4.4" fill="#f2c30f" stroke="#000" stroke-width="1.2"/>
-<g class="wlabel"><rect x="449.0" y="272.5" width="22" height="14" rx="4" fill="#fff" stroke="#f2c30f" stroke-width="1.6"/><text x="460.0" y="283.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#111" text-anchor="middle" font-weight="bold" >W3</text></g>
-<g class="htag"><line x1="310.0" y1="295.5" x2="332.8" y2="280.5" stroke="#555" stroke-width="0.7"/><rect x="319.0" y="274.5" width="27.6" height="12" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="332.8" y="283.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >13J</text></g>
-<g class="htag"><line x1="670.0" y1="315.5" x2="692.8" y2="300.5" stroke="#555" stroke-width="0.7"/><rect x="679.0" y="294.5" width="27.6" height="12" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="692.8" y="303.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >31I</text></g>
+<g class="wlabel"><rect x="449.0" y="272.5" width="22.0" height="14.0" rx="4" fill="#fff" stroke="#f2c30f" stroke-width="1.6"/><text x="460.0" y="283.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#111" text-anchor="middle" font-weight="bold" >W3</text></g>
+<g class="htag"><line x1="310.0" y1="295.5" x2="332.8" y2="280.5" stroke="#555" stroke-width="0.7"/><rect x="319.0" y="274.5" width="27.6" height="12.0" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="332.8" y="283.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >13J</text></g>
+<g class="htag"><line x1="670.0" y1="315.5" x2="692.8" y2="300.5" stroke="#555" stroke-width="0.7"/><rect x="679.0" y="294.5" width="27.6" height="12.0" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="692.8" y="303.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >31I</text></g>
 </g>
 <g id="W4" class="wire new" data-id="W4" data-net="ECHO_NODE">
 <path d="M770.0,375.5 L770.0,544.5 Q770.0,551.5 763.0,551.5 L217.0,551.5 Q210.0,551.5 210.0,544.5 L210.0,515.5" fill="none" stroke="#000" stroke-opacity="0.55" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"/>
 <path class="core" d="M770.0,375.5 L770.0,544.5 Q770.0,551.5 763.0,551.5 L217.0,551.5 Q210.0,551.5 210.0,544.5 L210.0,515.5" fill="none" stroke="#2fa84f" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
 <circle cx="770.0" cy="375.5" r="4.4" fill="#2fa84f" stroke="#000" stroke-width="1.2"/>
 <circle cx="210.0" cy="515.5" r="4.4" fill="#2fa84f" stroke="#000" stroke-width="1.2"/>
-<g class="wlabel"><rect x="479.0" y="544.5" width="22" height="14" rx="4" fill="#fff" stroke="#2fa84f" stroke-width="1.6"/><text x="490.0" y="555.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#111" text-anchor="middle" font-weight="bold" >W4</text></g>
-<g class="htag"><line x1="770.0" y1="375.5" x2="792.8" y2="360.5" stroke="#555" stroke-width="0.7"/><rect x="779.0" y="354.5" width="27.6" height="12" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="792.8" y="363.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >36F</text></g>
-<g class="htag"><line x1="210.0" y1="515.5" x2="229.2" y2="500.5" stroke="#555" stroke-width="0.7"/><rect x="219.0" y="494.5" width="20.4" height="12" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="229.2" y="503.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >8A</text></g>
+<g class="wlabel"><rect x="479.0" y="544.5" width="22.0" height="14.0" rx="4" fill="#fff" stroke="#2fa84f" stroke-width="1.6"/><text x="490.0" y="555.1" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#111" text-anchor="middle" font-weight="bold" >W4</text></g>
+<g class="htag"><line x1="770.0" y1="375.5" x2="792.8" y2="360.5" stroke="#555" stroke-width="0.7"/><rect x="779.0" y="354.5" width="27.6" height="12.0" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="792.8" y="363.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >36F</text></g>
+<g class="htag"><line x1="210.0" y1="515.5" x2="229.2" y2="500.5" stroke="#555" stroke-width="0.7"/><rect x="219.0" y="494.5" width="20.4" height="12.0" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/><text x="229.2" y="503.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.2" fill="#111" text-anchor="middle" font-weight="bold" >8A</text></g>
 </g>
 </g>
 <text x="14.0" y="743.5" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#6b7682" text-anchor="start" font-weight="normal" >Fonte: hardware/netlist/motionpet.netlist.json  |  Status: PENDING_PHYSICAL_VALIDATION  |  Ilustracao tecnica gerada da netlist (nao e foto; confira SEMPRE a serigrafia da sua placa).</text>
