@@ -42,3 +42,6 @@ Thumbs.db
 # bancada (gerados localmente)
 teste_bancada_saida.txt
 hardware/tools/wheels/
+
+# gravacao de firmware (saida local)
+gravar_firmware_saida.txt
