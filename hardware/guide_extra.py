@@ -1,8 +1,8 @@
 """Textos estaticos do guia em slides (ajuda). Em portugues; mantidos fora do gerador para facilitar a revisao."""
 
 COMMON_ERRORS = [
-    "ESP32 virada 180° (USB-C para o lado da coluna 19): os fios caem nos pinos da memória flash e ela reinicia sem parar ('invalid header' na serial). A USB-C fica na ponta da COLUNA 1.",
-    "ESP32 deslocada uma coluna: TODOS os pinos ficam errados. Confira: 3V3 na coluna 1 e 5V na coluna 19 (fileira de baixo).",
+    "ESP32 virada 180° (USB-C para o lado da coluna 19): os fios caem nos pinos da memória flash e ela reinicia sem parar ('invalid header' na serial). A USB-C fica na ponta da COLUNA 1, com o 5V e o CLK nessa ponta.",
+    "ESP32 deslocada uma coluna: TODOS os pinos ficam errados. Confira: 5V na coluna 1 e 3V3 na coluna 19, ambos na fileira de cima (J).",
     "Letras da protoboard invertidas (A no topo em vez de J): guie-se pelo NÚMERO da coluna; se as letras estiverem ao contrário, gire a protoboard.",
     "HC-SR04 com VCC e GND trocados: pode queimar o módulo. Leia a serigrafia (VCC | TRIG | ECHO | GND) antes de encaixar.",
     "ECHO ligado direto ao GPIO34 (sem divisor): proibido; entrega ~5 V a um pino de 3,3 V.",

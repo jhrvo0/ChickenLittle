@@ -1,4 +1,4 @@
 id,estagio_de_introducao,cor,de_furo,ate_furo,rede,tensao_esperada,funcao,justificativa,seguranca,validacao
-W1,B,vermelho,19A,21W,5V,"4,75-5,25 V",5V da ESP32 -> trilho + (vermelho) de baixo,Leva os 5 V da USB ao trilho + de baixo da P1.,So o HC-SR04 e o LCD usam 5 V. NUNCA ligue o TCRT5000 no trilho +.,PENDING_PHYSICAL_VALIDATION
-W2,B,preto,14A,15X,GND,0 V,GND da ESP32 -> trilho - (azul) de baixo,Terra comum no trilho - de baixo da P1.,,PENDING_PHYSICAL_VALIDATION
-W3,B,verde,26E,5A,ECHO_NODE,"0 / 2,83 V (pior caso 3,10 V)",No do divisor -> GPIO34,"Leva o ECHO ja reduzido (2,83 V nominal) ao GPIO34, pino somente-entrada.",So instale depois do ensaio do passo 5.,PENDING_PHYSICAL_VALIDATION
+W1,B,vermelho,1J,3W,5V,"4,75-5,25 V","5V da ESP32 (1J, junto da USB) -> trilho + (vermelho) de baixo",Leva os 5 V da USB ao trilho + de baixo da P1.,So o HC-SR04 e o LCD usam 5 V. NUNCA ligue o TCRT5000 no trilho +.,PENDING_PHYSICAL_VALIDATION
+W2,B,preto,13A,15X,GND,0 V,GND da ESP32 -> trilho - (azul) de baixo,Terra comum no trilho - de baixo da P1.,,PENDING_PHYSICAL_VALIDATION
+W3,B,verde,26E,15J,ECHO_NODE,"0 / 2,83 V (pior caso 3,10 V)",No do divisor -> GPIO34,"Leva o ECHO ja reduzido (2,83 V nominal) ao GPIO34, pino somente-entrada.",So instale depois do ensaio do passo 5.,PENDING_PHYSICAL_VALIDATION

@@ -55,12 +55,15 @@ def generic_parts(lay: Layout) -> dict[str, fz_parts.PartSpec]:
     gap = prof["row_spacing_in"]
     y_top = (Wd - gap) / 2
     pins = []
-    # USB a esquerda: fileira superior = J3, inferior = J2 (ver Layout.esp32_pin_hole)
+    # mesma posicao relativa da netlist (Layout.esp32_pin_hole): lado na fileira de cima (I) ou de baixo (B)
+    pl = lay.esp32()["placement"]
+    top_side = next(sd for sd, r in pl["rows"].items() if r in model.UPPER_ROWS)
     order = [(p, "J3") for p in lay.board.pins if p.side == "J3"] + [(p, "J2") for p in lay.board.pins if p.side == "J2"]
     for p, side in order:
-        y = y_top if side == "J3" else y_top + gap
+        y = y_top if side == top_side else y_top + gap
+        xi = (p.index - 1) if pl.get("pin1_at_usb") else (n - p.index)
         pins.append((lay.board.ref_name(p).split("@")[0] + (f"#{p.pid}" if "@" in lay.board.ref_name(p) else ""),
-                     off + (p.index - 1) * 0.1, y))
+                     off + xi * 0.1, y))
     specs["esp32"] = fz_parts.PartSpec("esp32_38pin", "ESP32 DevKit 38 pinos (generico MotionPet)", "ESP32", (L, Wd), pins,
                                        pin_edge="bottom", color="#1c2733",
                                        tags=["ESP32", "DevKit", "MotionPet"],
@@ -103,7 +106,7 @@ def offboard_pin0_px(comp: dict) -> tuple[float, float]:
     ax, ay = comp["offboard"]["anchor"]
     n = len(mod["pin_order"])
     col = ax - (n - 1) / 2
-    y = ay + mod["body_mm"][1] / 2.54 / 2 + 0.6
+    y = ay - mod["body_mm"][1] / 2.54 / 2 - 0.6 if ay > 6 else ay + mod["body_mm"][1] / 2.54 / 2 + 0.6
     return (round((prof.fz_x0 + (model.col_x(col) - 1) * prof.fz_pitch) * bb_scale(), 3),
             round((prof.fz_y_a - y * prof.fz_pitch) * bb_scale(), 3))
 

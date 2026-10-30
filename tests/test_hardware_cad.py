@@ -206,7 +206,7 @@ def test_no_forbidden_esp32_pin_receives_a_connection_in_any_stage():
 def test_usb_side_and_pin_columns_are_consistent_with_assumed_orientation():
     lay = _layout()
     holes = {p.label: lay.esp32_pin_hole(p) for p in lay.board.pins if p.label in ("3V3", "5V", "IO34", "IO5", "IO12")}
-    assert holes == {"3V3": "1B", "5V": "19B", "IO34": "5B", "IO5": "10I", "IO12": "13B"}
+    assert holes == {"3V3": "19I", "5V": "1I", "IO34": "15I", "IO5": "10B", "IO12": "7I"}   # DevKitC: 5V junto da USB (coluna 1)
     # a ESP32 ocupa as fileiras B e I: A e J sao as unicas fileiras acessiveis
     esp_rows = {model.parse_hole(lay.esp32_pin_hole(p))[1] for p in lay.board.pins}
     assert esp_rows == {"B", "I"}
@@ -216,13 +216,13 @@ def test_usb_side_and_pin_columns_are_consistent_with_assumed_orientation():
 # Mutacoes: o validador DEVE reprovar montagens perigosas ou erradas
 # ----------------------------------------------------------------------------
 def test_mutation_echo_wire_to_wrong_pin_is_rejected():
-    lay = _mutated(lambda r: _wire(r, "W3").update({"to": "7A"}))       # IO32 em vez de IO34
+    lay = _mutated(lambda r: _wire(r, "W3").update({"to": "13J"}))      # IO32 em vez de IO34
     assert "NET_OPEN" in _codes(lay, "B")
 
 
 def test_mutation_echo_directly_on_gpio34_without_divider_is_rejected():
     def mut(r):
-        r["wires"].append({"id": "W99", "stage": "B", "net": "ECHO_5V", "from": "22D", "to": "5A", "color": "red",
+        r["wires"].append({"id": "W99", "stage": "B", "net": "ECHO_5V", "from": "22D", "to": "15J", "color": "red",
                            "via": [], "label": "x", "purpose": "x", "voltage": "x", "safety": "", "validation": "x"})
     codes = _codes(_mutated(mut), "B")
     assert {"NET_EXTRA_PINS", "NET_OPEN"} & codes
@@ -230,12 +230,12 @@ def test_mutation_echo_directly_on_gpio34_without_divider_is_rejected():
 
 
 def test_mutation_5v_to_flash_pin_column_is_rejected():
-    lay = _mutated(lambda r: _wire(r, "W1").update({"to": "17A"}))     # coluna 17 = SD3 (GPIO10, flash)
+    lay = _mutated(lambda r: _wire(r, "W1").update({"to": "3J"}))      # coluna 3 de cima = SD3 (GPIO10, flash)
     assert "FORBIDDEN_PIN_TOUCHED" in _codes(lay, "B")
 
 
 def test_mutation_gpio12_touched_is_rejected():
-    lay = _mutated(lambda r: _wire(r, "W2").update({"from": "13A"}))   # coluna 13 = IO12 (MTDI)
+    lay = _mutated(lambda r: _wire(r, "W2").update({"from": "7J"}))    # 7J = IO12 (MTDI)
     assert "FORBIDDEN_PIN_TOUCHED" in _codes(lay, "B")
 
 
@@ -426,9 +426,9 @@ def test_outputs_are_deterministic_and_wire_table_matches_netlist():
     assert a == b
     rows = reports.wire_rows(lay, "B")
     assert [r["id"] for r in rows] == ["W1", "W2", "W3"]
-    assert {(r["de_furo"], r["ate_furo"]) for r in rows} == {("19A", "21W"), ("14A", "15X"), ("26E", "5A")}
+    assert {(r["de_furo"], r["ate_furo"]) for r in rows} == {("1J", "3W"), ("13A", "15X"), ("26E", "15J")}
     hm = {r["furo"] for r in reports.hole_map_rows(lay, "B")}
-    assert {"22C", "26C", "26D", "29D", "29A", "30X", "26E", "5A", "22E", "10J", "24W", "25X", "19A", "14A"} <= hm
+    assert {"22C", "26C", "26D", "29D", "29A", "30X", "26E", "15J", "22E", "10A", "24W", "25X", "1J", "13A"} <= hm
 
 
 def test_stage_b_wires_do_not_reach_forbidden_pins_nor_5v_gpio():
@@ -583,7 +583,7 @@ def test_mutation_lcd_rw_not_grounded_is_rejected():
 
 
 def test_mutation_lcd_vdd_on_gpio_is_rejected():
-    lay = _mutated(lambda r: _wire(r, "W7").update({"to": "8J"}))     # VDD do LCD ligado ao GPIO19 em vez do trilho +
+    lay = _mutated(lambda r: _wire(r, "W7").update({"to": "12A"}))    # VDD do LCD ligado ao GPIO19 em vez do trilho +
     assert model.errors(model.validate(lay, "D"))
 
 
@@ -620,9 +620,18 @@ def test_offboard_modules_use_female_male_leads_and_keep_signals_safe():
     for ref in ("M1", "M2"):
         c = lay.components[ref]
         assert c["offboard"]["leads"].keys() == c["pins"].keys()
-    assert lay.components["M2"]["pins"]["VCC"] == "1A"                             # TCRT5000 so no 3V3
+    assert lay.components["M2"]["pins"]["VCC"] == "19J"                            # TCRT5000 so no 3V3 (pino 3V3 = 19J)
     assert model.rail_sign(lay.components["M1"]["pins"]["VCC"]) == "+"
     pin_net = lay.pin_net_map("B")
     assert pin_net["M1.ECHO"] == frozenset({"M1.ECHO", "R1.A"})                    # ECHO so ve o divisor
     nets = export_fz.nets_from_fzz(export_fz.build_fz(lay, "C")[0], lay, "C")
     assert frozenset({"M2.DO", "U1.IO35"}) in {frozenset(n) for n in nets}         # os fios dos modulos aparecem no .fzz
+
+
+def test_esp32_pinout_follows_devkitc_5v_and_clk_next_to_usb():
+    """Correcao 2026-10-29: na DevKitC o 5V e o CLK ficam junto da USB; o 3V3 (pino 1) na outra ponta."""
+    lay = _layout()
+    hole = {p.label: lay.esp32_pin_hole(p) for p in lay.board.pins if p.kind != "ground"}
+    assert lay.esp32()["placement"]["usb"] == "left"
+    assert hole["5V"] == "1I" and hole["CLK"] == "1B"                 # coluna 1 = ponta da USB
+    assert hole["3V3"] == "19I" and hole["IO34"] == "15I" and hole["IO5"] == "10B"
