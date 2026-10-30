@@ -353,9 +353,11 @@ class Layout:
         usb = pl.get("usb", "left")
         if usb != "left":
             raise NetlistError("Somente USB a esquerda foi modelada nesta versao")
-        # USB a esquerda: J2 fica na fileira inferior (B), J3 na superior (I); pino 1 junto a USB.
+        # DevKitC: o pino 1 (3V3 / GND) fica na ponta OPOSTA a USB; 5V e CLK ficam junto da USB.
+        # Com a USB a esquerda (coluna col0), o pino 1 fica na coluna col0 + n - 1. "pin1_at_usb" so para
+        # compatibilidade com layouts antigos (modelo errado, corrigido em 2026-10-29).
         row = pl["rows"][pin.side]
-        col = col0 + (pin.index - 1)
+        col = col0 + (pin.index - 1) if pl.get("pin1_at_usb") else col0 + (n - pin.index)
         if not 1 <= col <= n_cols():
             raise NetlistError("ESP32 fora da protoboard")
         assert n >= pin.index

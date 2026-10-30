@@ -187,7 +187,7 @@ def _card_wire(lay: Layout, w: dict, placed: set[str], temp: bool = False) -> st
 def _card_comp(lay: Layout, c: dict) -> str:
     if c["type"] == "esp32":
         return ('<div class="card"><div class="t">ESP32 DevKit</div><div class="m">Atravessando o canal central: pino 1 de cada lado na coluna '
-                f'<b>{c["placement"]["col0"]}</b>; USB-C para a <b>esquerda</b>. Fileira B = lado 3V3…5V; fileira I = lado GND…CLK. '
+                f'<b>{c["placement"]["col0"]}</b> a 19; USB-C para a <b>esquerda</b>, para fora da placa. Fileira I (de cima) = lado 3V3…5V, com o <b>5V na coluna 1</b>; fileira B (de baixo) = lado GND…CLK, com o <b>CLK na coluna 1</b>. '
                 'Só as fileiras <b>A</b> e <b>J</b> ficam livres.</div></div>')
     note = f'<div class="m">{_h(c["note"])}</div>' if c.get("note") else ""
     if c.get("offboard"):

@@ -63,9 +63,10 @@
     "col0": 1,
     "usb": "left",
     "rows": {
-     "J2": "B",
-     "J3": "I"
-    }
+     "J2": "I",
+     "J3": "B"
+    },
+    "note": "USB-C na ponta da coluna 1 (para fora da placa). Como na DevKitC, 5V e CLK ficam junto da USB (coluna 1) e o 3V3/GND do pino 1 ficam na coluna 19. Lado J2 (3V3...5V) na fileira I (acesso pela J); lado J3 (GND...CLK) na fileira B (acesso pela A)."
    },
    "status": "ASSUMED_PENDING_PHYSICAL_CONFIRMATION",
    "note": "Perfil de 38 pinos assumido (0,9 pol entre fileiras => 1 furo livre acessivel de cada lado). Pino 1 de cada lado na coluna 1; a USB-C sai um pouco para fora da borda esquerda da protoboard. Confirmar contagem de pinos, distancia entre fileiras e serigrafia."
@@ -77,7 +78,7 @@
    "label": "HC-SR04",
    "pins": {
     "VCC": "24W",
-    "TRIG": "10J",
+    "TRIG": "10A",
     "ECHO": "22E",
     "GND": "25X"
    },
@@ -144,15 +145,15 @@
    "stage": "C",
    "label": "TCRT5000 (modulo LM393)",
    "pins": {
-    "VCC": "1A",
-    "GND": "9X",
-    "DO": "6A"
+    "VCC": "19J",
+    "GND": "6J",
+    "DO": "14J"
    },
    "status": "PIN_ORDER_UNCONFIRMED",
    "offboard": {
     "anchor": [
-     5.0,
-     -15.5
+     12.0,
+     23.0
     ],
     "leads": {
      "VCC": "orange",
@@ -160,7 +161,7 @@
      "DO": "blue"
     }
    },
-   "note": "Fica FORA da protoboard, ligado por 3 jumpers femea-macho. O pino AO fica sem fio."
+   "note": "Fica FORA da protoboard, ligado por 3 jumpers femea-macho direto nos furos da ESP32 (3V3, GND e GPIO35). O pino AO fica sem fio."
   },
   {
    "ref": "M3",
@@ -224,11 +225,20 @@
    "id": "W1",
    "stage": "B",
    "net": "5V",
-   "from": "19A",
-   "to": "21W",
+   "from": "1J",
+   "to": "3W",
    "color": "red",
-   "via": [],
-   "label": "5V da ESP32 -> trilho + (vermelho) de baixo",
+   "via": [
+    [
+     0.55,
+     "J"
+    ],
+    [
+     0.55,
+     -4.0
+    ]
+   ],
+   "label": "5V da ESP32 (1J, junto da USB) -> trilho + (vermelho) de baixo",
    "purpose": "Leva os 5 V da USB ao trilho + de baixo da P1.",
    "voltage": "4,75-5,25 V",
    "safety": "So o HC-SR04 e o LCD usam 5 V. NUNCA ligue o TCRT5000 no trilho +.",
@@ -238,7 +248,7 @@
    "id": "W2",
    "stage": "B",
    "net": "GND",
-   "from": "14A",
+   "from": "13A",
    "to": "15X",
    "color": "black",
    "via": [],
@@ -253,7 +263,7 @@
    "stage": "B",
    "net": "ECHO_NODE",
    "from": "26E",
-   "to": "5A",
+   "to": "15J",
    "color": "green",
    "via": [
     [
@@ -262,11 +272,11 @@
     ],
     [
      26.4,
-     -1.3
+     11.7
     ],
     [
-     5,
-     -1.3
+     15,
+     11.7
     ]
    ],
    "label": "No do divisor -> GPIO34",
@@ -391,17 +401,17 @@
    "id": "W12",
    "stage": "D",
    "net": "LCD_RS",
-   "from": "8J",
+   "from": "12A",
    "to": "P2:15I",
    "color": "blue",
    "via": [
     [
-     8,
-     13.0
+     12,
+     -0.9
     ],
     [
      20.9,
-     13.0
+     -0.9
     ],
     [
      20.9,
@@ -422,17 +432,17 @@
    "id": "W13",
    "stage": "D",
    "net": "LCD_E",
-   "from": "9J",
+   "from": "11A",
    "to": "P2:17I",
    "color": "green",
    "via": [
     [
-     9,
-     12.65
+     11,
+     -1.2
     ],
     [
      20.7,
-     12.65
+     -1.2
     ],
     [
      20.7,
@@ -453,17 +463,17 @@
    "id": "W14",
    "stage": "D",
    "net": "LCD_D4",
-   "from": "6J",
+   "from": "14A",
    "to": "P2:22I",
    "color": "white",
    "via": [
     [
-     6,
-     12.3
+     14,
+     -1.5
     ],
     [
      20.5,
-     12.3
+     -1.5
     ],
     [
      20.5,
@@ -484,17 +494,17 @@
    "id": "W15",
    "stage": "D",
    "net": "LCD_D5",
-   "from": "3J",
+   "from": "17A",
    "to": "P2:23I",
    "color": "brown",
    "via": [
     [
-     3,
-     11.95
+     17,
+     -1.8
     ],
     [
      20.3,
-     11.95
+     -1.8
     ],
     [
      20.3,
@@ -515,17 +525,17 @@
    "id": "W16",
    "stage": "D",
    "net": "LCD_D6",
-   "from": "2J",
+   "from": "18A",
    "to": "P2:24I",
    "color": "orange",
    "via": [
     [
-     2,
-     11.6
+     18,
+     -2.1
     ],
     [
      20.1,
-     11.6
+     -2.1
     ],
     [
      20.1,
@@ -546,21 +556,21 @@
    "id": "W17",
    "stage": "D",
    "net": "LCD_D7",
-   "from": "11A",
+   "from": "9J",
    "to": "P2:25G",
    "color": "purple",
    "via": [
     [
-     11,
-     -1.9
+     9,
+     12.1
     ],
     [
      55,
-     -1.9
+     12.1
     ]
    ],
    "label": "GPIO27 -> D7 (pino 14)",
-   "purpose": "Dado D7 (o GPIO27 fica na fileira de BAIXO da ESP32).",
+   "purpose": "Dado D7 (o GPIO27 fica na fileira de CIMA da ESP32, furo 9J).",
    "voltage": "0 / 3,3 V",
    "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
@@ -850,7 +860,7 @@
   },
   {
    "id": "A3",
-   "text": "USB a esquerda; ESP32 nas fileiras B (lado J2) e I (lado J3), pino 1 na coluna 1 (a USB-C sai um pouco da borda). Ficam livres as fileiras A e J (19 colunas) e as colunas 21-30 (10 colunas) para o resto."
+   "text": "USB-C na ponta da coluna 1, para fora da placa. Pinagem DevKitC: 5V (lado J2) e CLK (lado J3) junto da USB, na coluna 1; 3V3 e o GND do pino 1 na coluna 19. Lado J2 na fileira I (acesso pela J), lado J3 na fileira B (acesso pela A). Ficam livres as colunas 20-30."
   },
   {
    "id": "A4",
@@ -869,7 +879,7 @@
   {
    "id": "C01",
    "blocks": "B",
-   "text": "ESP32: contar os pinos (19+19=38 ou 15+15=30), medir a distancia entre as fileiras de pinos (22,86 mm = 9 furos; 25,4 mm = 10 furos) e conferir na serigrafia as posicoes de 5V, 3V3, GND, IO34, IO5."
+   "text": "ESP32: contar os pinos (19+19=38), medir a distancia entre as fileiras (22,86 mm = 9 furos) e conferir na serigrafia: 5V e CLK junto da USB; 3V3 e GND na outra ponta; IO34, IO5, IO35 nas posicoes do guia."
   },
   {
    "id": "C02",
@@ -964,7 +974,7 @@
     "hold": false,
     "n": 2,
     "title": "5 V e GND nos trilhos de baixo",
-    "text": "Fio vermelho: 19A → trilho + (vermelho) de baixo. Fio preto: 14A → trilho − (azul) de baixo. Qualquer furo do trilho serve; use o mais perto.",
+    "text": "Fio vermelho: 1J (pino 5V, junto da USB) → trilho + (vermelho) de baixo; ele passa por cima da ponta da ESP32. Fio preto: 13A (GND) → trilho − (azul) de baixo. Qualquer furo do trilho serve.",
     "adds": [
      "W1",
      "W2"
@@ -1032,7 +1042,7 @@
     "hold": false,
     "n": 7,
     "title": "Ligue o HC-SR04 (4 jumpers fêmea–macho)",
-    "text": "Ponta fêmea nos pinos do sensor (leia a serigrafia). VCC → trilho + de baixo; GND → trilho − de baixo; TRIG → 10J; ECHO → 22E. O sensor fica fora da placa, apontado para onde você quiser.",
+    "text": "Ponta fêmea nos pinos do sensor (leia a serigrafia). VCC → trilho + de baixo; GND → trilho − de baixo; TRIG → 10A; ECHO → 22E. O sensor fica fora da placa, apontado para onde você quiser.",
     "adds": [
      "M1"
     ],
@@ -1060,7 +1070,7 @@
     "hold": false,
     "n": 9,
     "title": "Último fio: NÓ → GPIO34",
-    "text": "Fio verde: 26E → 5A. É o único fio que leva o sinal do ECHO ao ESP32, e só entra depois do ensaio.",
+    "text": "Fio verde: 26E → 15J (pino IO34, fileira de cima). É o único fio que leva o sinal do ECHO ao ESP32, e só entra depois do ensaio.",
     "adds": [
      "W3"
     ],
@@ -1097,11 +1107,11 @@
     "hold": false,
     "n": 2,
     "title": "Ligue o TCRT5000 (3 jumpers fêmea–macho)",
-    "text": "Ponta fêmea nos pinos do módulo (confira a serigrafia). VCC → 1A (3V3 da ESP32); GND → trilho − de baixo; DO → 6A (GPIO35). O AO fica sem fio.",
+    "text": "Ponta fêmea nos pinos do módulo (confira a serigrafia). VCC → 19J (3V3 da ESP32); GND → 6J (GND da ESP32); DO → 14J (GPIO35). O AO fica sem fio.",
     "adds": [
      "M2"
     ],
-    "warn": "NUNCA ligue o VCC do TCRT5000 no trilho + (5 V). Ele vai no 1A (3,3 V)."
+    "warn": "NUNCA ligue o VCC do TCRT5000 no trilho + (5 V) nem no 1J (5V). Ele vai no 19J (3,3 V)."
    },
    {
     "hold": false,
@@ -1210,7 +1220,7 @@
     "hold": false,
     "n": 9,
     "title": "Sinais do display (1/3): RS e E",
-    "text": "8J → P2:15I (GPIO19 → RS) e 9J → P2:17I (GPIO18 → E). Os fios de sinal são longos: deixe-os folgados.",
+    "text": "12A → P2:15I (GPIO19 → RS) e 11A → P2:17I (GPIO18 → E). Os fios de sinal são longos: deixe-os folgados.",
     "adds": [
      "W12",
      "W13"
@@ -1220,7 +1230,7 @@
     "hold": false,
     "n": 10,
     "title": "Sinais do display (2/3): D4 e D5",
-    "text": "6J → P2:22I (GPIO21 → D4) e 3J → P2:23I (GPIO22 → D5).",
+    "text": "14A → P2:22I (GPIO21 → D4) e 17A → P2:23I (GPIO22 → D5).",
     "adds": [
      "W14",
      "W15"
@@ -1230,7 +1240,7 @@
     "hold": false,
     "n": 11,
     "title": "Sinais do display (3/3): D6 e D7",
-    "text": "2J → P2:24I (GPIO23 → D6) e 11A → P2:25G (GPIO27 → D7). O D7 vem da fileira de BAIXO da ESP32 (11A).",
+    "text": "18A → P2:24I (GPIO23 → D6) e 9J → P2:25G (GPIO27 → D7). O D7 vem da fileira de CIMA da ESP32 (9J).",
     "adds": [
      "W16",
      "W17"
@@ -1265,7 +1275,7 @@
      "Sem curto 3V3↔GND (> 500 Ω)",
      "R1, R2, R4 = 0,95–1,05 kΩ; R3, R5 = 285–315 Ω (medidos soltos)",
      "RW do LCD com 0 Ω até o GND",
-     "TCRT5000 só em 3V3 (1A)",
+     "TCRT5000 só em 3V3 (19J)",
      "Nada em IO6…IO12, TX0, RX0"
     ]
    },

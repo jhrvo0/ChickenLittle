@@ -1,7 +1,7 @@
 id,estagio_de_introducao,cor,de_furo,ate_furo,rede,tensao_esperada,funcao,justificativa,seguranca,validacao
-W1,B,vermelho,19A,21W,5V,"4,75-5,25 V",5V da ESP32 -> trilho + (vermelho) de baixo,Leva os 5 V da USB ao trilho + de baixo da P1.,So o HC-SR04 e o LCD usam 5 V. NUNCA ligue o TCRT5000 no trilho +.,PENDING_PHYSICAL_VALIDATION
-W2,B,preto,14A,15X,GND,0 V,GND da ESP32 -> trilho - (azul) de baixo,Terra comum no trilho - de baixo da P1.,,PENDING_PHYSICAL_VALIDATION
-W3,B,verde,26E,5A,ECHO_NODE,"0 / 2,83 V (pior caso 3,10 V)",No do divisor -> GPIO34,"Leva o ECHO ja reduzido (2,83 V nominal) ao GPIO34, pino somente-entrada.",So instale depois do ensaio do passo 5.,PENDING_PHYSICAL_VALIDATION
+W1,B,vermelho,1J,3W,5V,"4,75-5,25 V","5V da ESP32 (1J, junto da USB) -> trilho + (vermelho) de baixo",Leva os 5 V da USB ao trilho + de baixo da P1.,So o HC-SR04 e o LCD usam 5 V. NUNCA ligue o TCRT5000 no trilho +.,PENDING_PHYSICAL_VALIDATION
+W2,B,preto,13A,15X,GND,0 V,GND da ESP32 -> trilho - (azul) de baixo,Terra comum no trilho - de baixo da P1.,,PENDING_PHYSICAL_VALIDATION
+W3,B,verde,26E,15J,ECHO_NODE,"0 / 2,83 V (pior caso 3,10 V)",No do divisor -> GPIO34,"Leva o ECHO ja reduzido (2,83 V nominal) ao GPIO34, pino somente-entrada.",So instale depois do ensaio do passo 5.,PENDING_PHYSICAL_VALIDATION
 W4,D,vermelho,30W,P2:3W,5V,"4,75-5,25 V",Ponte 5 V: trilho + da P1 -> trilho + da P2,Os trilhos da P1 e da P2 nao se ligam sozinhos.,,PENDING_PHYSICAL_VALIDATION
 W5,D,preto,29X,P2:3X,GND,0 V,Ponte GND: trilho - da P1 -> trilho - da P2,Os trilhos da P1 e da P2 nao se ligam sozinhos.,,PENDING_PHYSICAL_VALIDATION
 W6,D,preto,P2:12F,P2:13X,GND,0 V,VSS (pino 1) -> trilho -,Terra logico do LCD.,,PENDING_PHYSICAL_VALIDATION
@@ -10,9 +10,9 @@ W8,D,preto,P2:16F,P2:17X,GND,0 V,RW (pino 5) -> trilho -,RW permanentemente em G
 W9,D,preto,P2:27F,P2:29X,GND,0 V,K (pino 16) -> trilho -,Catodo do backlight.,,PENDING_PHYSICAL_VALIDATION
 W10,D,preto,P2:14A,P2:16X,GND,0 V,Ponta de baixo do R4 -> trilho -,Fecha o contraste (V0 -> R4 -> GND).,,PENDING_PHYSICAL_VALIDATION
 W11,D,vermelho,P2:26A,P2:28W,5V,"4,75-5,25 V",Ponta de baixo do R5 -> trilho +,Leva 5 V ao resistor do backlight.,,PENDING_PHYSICAL_VALIDATION
-W12,D,azul,8J,P2:15I,LCD_RS,"0 / 3,3 V",GPIO19 -> RS (pino 4),Selecao de registrador.,,PENDING_PHYSICAL_VALIDATION
-W13,D,verde,9J,P2:17I,LCD_E,"0 / 3,3 V",GPIO18 -> E (pino 6),Enable.,,PENDING_PHYSICAL_VALIDATION
-W14,D,branco,6J,P2:22I,LCD_D4,"0 / 3,3 V",GPIO21 -> D4 (pino 11),Dado D4.,,PENDING_PHYSICAL_VALIDATION
-W15,D,marrom,3J,P2:23I,LCD_D5,"0 / 3,3 V",GPIO22 -> D5 (pino 12),Dado D5.,,PENDING_PHYSICAL_VALIDATION
-W16,D,laranja,2J,P2:24I,LCD_D6,"0 / 3,3 V",GPIO23 -> D6 (pino 13),Dado D6.,,PENDING_PHYSICAL_VALIDATION
-W17,D,roxo,11A,P2:25G,LCD_D7,"0 / 3,3 V",GPIO27 -> D7 (pino 14),Dado D7 (o GPIO27 fica na fileira de BAIXO da ESP32).,,PENDING_PHYSICAL_VALIDATION
+W12,D,azul,12A,P2:15I,LCD_RS,"0 / 3,3 V",GPIO19 -> RS (pino 4),Selecao de registrador.,,PENDING_PHYSICAL_VALIDATION
+W13,D,verde,11A,P2:17I,LCD_E,"0 / 3,3 V",GPIO18 -> E (pino 6),Enable.,,PENDING_PHYSICAL_VALIDATION
+W14,D,branco,14A,P2:22I,LCD_D4,"0 / 3,3 V",GPIO21 -> D4 (pino 11),Dado D4.,,PENDING_PHYSICAL_VALIDATION
+W15,D,marrom,17A,P2:23I,LCD_D5,"0 / 3,3 V",GPIO22 -> D5 (pino 12),Dado D5.,,PENDING_PHYSICAL_VALIDATION
+W16,D,laranja,18A,P2:24I,LCD_D6,"0 / 3,3 V",GPIO23 -> D6 (pino 13),Dado D6.,,PENDING_PHYSICAL_VALIDATION
+W17,D,roxo,9J,P2:25G,LCD_D7,"0 / 3,3 V",GPIO27 -> D7 (pino 14),"Dado D7 (o GPIO27 fica na fileira de CIMA da ESP32, furo 9J).",,PENDING_PHYSICAL_VALIDATION

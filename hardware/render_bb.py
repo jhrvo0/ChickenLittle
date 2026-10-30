@@ -231,8 +231,10 @@ def offboard_geometry(f: Frame, lay: Layout, comp: dict) -> dict:
         w, h = max(w, 4 * K + 10), h
     names = mod["pin_order"]
     top = cy - h / 2
-    pins = {nm: (cx + (i - (len(names) - 1) / 2) * K, top - 10) for i, nm in enumerate(names)}
-    return {"cx": cx, "cy": cy, "w": w, "h": h, "top": top, "pins": pins, "names": names}
+    above = ob["anchor"][1] > 6                     # modulo desenhado ACIMA da placa: conector na borda de baixo
+    py = (top + h) if above else (top - 10)
+    pins = {nm: (cx + (i - (len(names) - 1) / 2) * K, py) for i, nm in enumerate(names)}
+    return {"cx": cx, "cy": cy, "w": w, "h": h, "top": top, "pins": pins, "names": names, "above": above}
 
 
 def lead_points(f: Frame, lay: Layout, comp: dict, geo: dict | None = None) -> dict[str, list[tuple[float, float]]]:
@@ -241,11 +243,13 @@ def lead_points(f: Frame, lay: Layout, comp: dict, geo: dict | None = None) -> d
     out = {}
     pins = [p for p in geo["names"] if p in comp["pins"]]
     order = sorted(pins, key=lambda p: abs(f.hole(comp["pins"][p])[0] - geo["pins"][p][0]))
-    base = f.px(0, -5.9)[1]
+    above = geo.get("above")
+    base = f.px(0, 16.9 if above else -5.9)[1]
     for k, p in enumerate(order):
         x0, y0 = geo["pins"][p]
+        y0 = y0 + (10 if above else 0)
         hx, hy = f.hole(comp["pins"][p])
-        lvl = base + k * 0.45 * K
+        lvl = base + (-1 if above else 1) * k * 0.45 * K
         out[p] = [(x0, y0), (x0, lvl), (hx, lvl), (hx, hy)]
     return out
 
@@ -268,12 +272,13 @@ def draw_offboard_module(f: Frame, lay: Layout, comp: dict, parts: list[str], ne
         parts.append(f'<rect x="{cx - w * 0.38:.1f}" y="{top + h * 0.62:.1f}" width="{w * 0.30:.1f}" height="{h * 0.3:.1f}" fill="#101010" stroke="#555"/>')
         parts.append(f'<rect x="{cx + w * 0.08:.1f}" y="{top + h * 0.62:.1f}" width="{w * 0.24:.1f}" height="{h * 0.3:.1f}" fill="#2b66d9" stroke="#0a2a7a"/>')
         parts.append(_text(cx, top + h * 0.45, "TCRT5000", 8, "#cfe0ff", weight="bold"))
-    parts.append(_text(cx, top + h + 12, "fora da protoboard · jumpers fêmea–macho", 7.5, "#555"))
-    # conector (pinos) na borda de cima, com o nome
+    above = geo.get("above")
+    parts.append(_text(cx, (top - 6) if above else (top + h + 12), "fora da protoboard · jumpers fêmea–macho", 7.5, "#555"))
+    # conector (pinos) na borda voltada para a placa, com o nome
     for nm in geo["names"]:
         x, y = geo["pins"][nm]
         parts.append(f'<rect x="{x - 4:.1f}" y="{y:.1f}" width="8" height="10" fill="#222" stroke="#000" stroke-width="0.6"/>')
-        parts.append(_text(x, top + 9, nm, 6.6, "#fff", weight="bold"))
+        parts.append(_text(x, (top + h - 3) if above else (top + 9), nm, 6.6, "#fff", weight="bold"))
     # jumpers
     colors = comp["offboard"].get("leads", {})
     for nm, pts in lead_points(f, lay, comp, geo).items():
@@ -726,7 +731,7 @@ def item_bbox(lay: Layout, meta: dict, ident: str, scene: Scene) -> tuple[float,
             pad = 34.0
         elif comp.get("offboard"):
             geo = offboard_geometry(f, lay, comp)
-            pts = [f.hole(h) for h in comp["pins"].values()] + [(geo["cx"] - geo["w"] / 2, geo["top"] - 12), (geo["cx"] + geo["w"] / 2, geo["top"] + geo["h"] + 16)]
+            pts = [f.hole(h) for h in comp["pins"].values()] + [(geo["cx"] - geo["w"] / 2, geo["top"] - 16), (geo["cx"] + geo["w"] / 2, geo["top"] + geo["h"] + 16)]
             pad = 20
         else:
             mod = lay.modules["modules"][t]

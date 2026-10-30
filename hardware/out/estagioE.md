@@ -27,22 +27,22 @@
 
 | componente | descricao | pino | furo | rede | estado |
 |---|---|---|---|---|---|
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | 3V3 | 1B | 3V3 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO34 (GPIO34) | 5B | ECHO_NODE | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO35 (GPIO35) | 6B | IR_DO | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO27 (GPIO27) | 11B | LCD_D7 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 14B | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | 5V | 19B | 5V | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 1I | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO23 (GPIO23) | 2I | LCD_D6 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO22 (GPIO22) | 3I | LCD_D5 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO21 (GPIO21) | 6I | LCD_D4 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 7I | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO19 (GPIO19) | 8I | LCD_RS | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO18 (GPIO18) | 9I | LCD_E | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
-| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO5 (GPIO5) | 10I | TRIG | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | 3V3 | 19I | 3V3 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO34 (GPIO34) | 15I | ECHO_NODE | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO35 (GPIO35) | 14I | IR_DO | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO27 (GPIO27) | 9I | LCD_D7 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 6I | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | 5V | 1I | 5V | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 19B | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO23 (GPIO23) | 18B | LCD_D6 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO22 (GPIO22) | 17B | LCD_D5 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO21 (GPIO21) | 14B | LCD_D4 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 13B | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO19 (GPIO19) | 12B | LCD_RS | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO18 (GPIO18) | 11B | LCD_E | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO5 (GPIO5) | 10B | TRIG | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
 | M1 | HC-SR04 | VCC | 24W | 5V | STANDARD_PINOUT_PENDING_PHYSICAL_CONFIRMATION |
-| M1 | HC-SR04 | TRIG | 10J | TRIG | STANDARD_PINOUT_PENDING_PHYSICAL_CONFIRMATION |
+| M1 | HC-SR04 | TRIG | 10A | TRIG | STANDARD_PINOUT_PENDING_PHYSICAL_CONFIRMATION |
 | M1 | HC-SR04 | ECHO | 22E | ECHO_5V | STANDARD_PINOUT_PENDING_PHYSICAL_CONFIRMATION |
 | M1 | HC-SR04 | GND | 25X | GND | STANDARD_PINOUT_PENDING_PHYSICAL_CONFIRMATION |
 | R1 | R1 divisor (ECHO -> no) | A | 22C | ECHO_5V | VALUE_PENDING_PHYSICAL_CONFIRMATION |
@@ -51,9 +51,9 @@
 | R2 | R2 divisor (no -> meio) | B | 29D | DIV_MID | VALUE_PENDING_PHYSICAL_CONFIRMATION |
 | R3 | R3 divisor (meio -> trilho -) | A | 29A | DIV_MID | VALUE_PENDING_PHYSICAL_CONFIRMATION |
 | R3 | R3 divisor (meio -> trilho -) | B | 30X | GND | VALUE_PENDING_PHYSICAL_CONFIRMATION |
-| M2 | TCRT5000 (modulo LM393) | VCC | 1A | 3V3 | PIN_ORDER_UNCONFIRMED |
-| M2 | TCRT5000 (modulo LM393) | GND | 9X | GND | PIN_ORDER_UNCONFIRMED |
-| M2 | TCRT5000 (modulo LM393) | DO | 6A | IR_DO | PIN_ORDER_UNCONFIRMED |
+| M2 | TCRT5000 (modulo LM393) | VCC | 19J | 3V3 | PIN_ORDER_UNCONFIRMED |
+| M2 | TCRT5000 (modulo LM393) | GND | 6J | GND | PIN_ORDER_UNCONFIRMED |
+| M2 | TCRT5000 (modulo LM393) | DO | 14J | IR_DO | PIN_ORDER_UNCONFIRMED |
 | M3 | LCD 2004A V1.1 | VSS | P2:12J | GND | PENDING_PHYSICAL_CONFIRMATION |
 | M3 | LCD 2004A V1.1 | VDD | P2:13J | 5V | PENDING_PHYSICAL_CONFIRMATION |
 | M3 | LCD 2004A V1.1 | V0 | P2:14J | LCD_V0 | PENDING_PHYSICAL_CONFIRMATION |
@@ -79,9 +79,9 @@
 
 | id | cor | de_furo | ate_furo | rede | tensao_esperada | funcao | seguranca |
 |---|---|---|---|---|---|---|---|
-| W1 | vermelho | 19A | 21W | 5V | 4,75-5,25 V | 5V da ESP32 -> trilho + (vermelho) de baixo | So o HC-SR04 e o LCD usam 5 V. NUNCA ligue o TCRT5000 no trilho +. |
-| W2 | preto | 14A | 15X | GND | 0 V | GND da ESP32 -> trilho - (azul) de baixo |  |
-| W3 | verde | 26E | 5A | ECHO_NODE | 0 / 2,83 V (pior caso 3,10 V) | No do divisor -> GPIO34 | So instale depois do ensaio do passo 5. |
+| W1 | vermelho | 1J | 3W | 5V | 4,75-5,25 V | 5V da ESP32 (1J, junto da USB) -> trilho + (vermelho) de baixo | So o HC-SR04 e o LCD usam 5 V. NUNCA ligue o TCRT5000 no trilho +. |
+| W2 | preto | 13A | 15X | GND | 0 V | GND da ESP32 -> trilho - (azul) de baixo |  |
+| W3 | verde | 26E | 15J | ECHO_NODE | 0 / 2,83 V (pior caso 3,10 V) | No do divisor -> GPIO34 | So instale depois do ensaio do passo 5. |
 | W4 | vermelho | 30W | P2:3W | 5V | 4,75-5,25 V | Ponte 5 V: trilho + da P1 -> trilho + da P2 |  |
 | W5 | preto | 29X | P2:3X | GND | 0 V | Ponte GND: trilho - da P1 -> trilho - da P2 |  |
 | W6 | preto | P2:12F | P2:13X | GND | 0 V | VSS (pino 1) -> trilho - |  |
@@ -90,46 +90,46 @@
 | W9 | preto | P2:27F | P2:29X | GND | 0 V | K (pino 16) -> trilho - |  |
 | W10 | preto | P2:14A | P2:16X | GND | 0 V | Ponta de baixo do R4 -> trilho - |  |
 | W11 | vermelho | P2:26A | P2:28W | 5V | 4,75-5,25 V | Ponta de baixo do R5 -> trilho + |  |
-| W12 | azul | 8J | P2:15I | LCD_RS | 0 / 3,3 V | GPIO19 -> RS (pino 4) |  |
-| W13 | verde | 9J | P2:17I | LCD_E | 0 / 3,3 V | GPIO18 -> E (pino 6) |  |
-| W14 | branco | 6J | P2:22I | LCD_D4 | 0 / 3,3 V | GPIO21 -> D4 (pino 11) |  |
-| W15 | marrom | 3J | P2:23I | LCD_D5 | 0 / 3,3 V | GPIO22 -> D5 (pino 12) |  |
-| W16 | laranja | 2J | P2:24I | LCD_D6 | 0 / 3,3 V | GPIO23 -> D6 (pino 13) |  |
-| W17 | roxo | 11A | P2:25G | LCD_D7 | 0 / 3,3 V | GPIO27 -> D7 (pino 14) |  |
+| W12 | azul | 12A | P2:15I | LCD_RS | 0 / 3,3 V | GPIO19 -> RS (pino 4) |  |
+| W13 | verde | 11A | P2:17I | LCD_E | 0 / 3,3 V | GPIO18 -> E (pino 6) |  |
+| W14 | branco | 14A | P2:22I | LCD_D4 | 0 / 3,3 V | GPIO21 -> D4 (pino 11) |  |
+| W15 | marrom | 17A | P2:23I | LCD_D5 | 0 / 3,3 V | GPIO22 -> D5 (pino 12) |  |
+| W16 | laranja | 18A | P2:24I | LCD_D6 | 0 / 3,3 V | GPIO23 -> D6 (pino 13) |  |
+| W17 | roxo | 9J | P2:25G | LCD_D7 | 0 / 3,3 V | GPIO27 -> D7 (pino 14) |  |
 
 ## Mapa de furos ocupados
 
 | furo | coluna | fileira | ocupante | rede |
 |---|---|---|---|---|
-| 1A | 1 | A | M2 TCRT5000 (modulo LM393): pino VCC | 3V3 |
-| 1B | 1 | B | U1 ESP32 DevKit: pino 3V3 [J2.1] | 3V3 |
-| 1I | 1 | I | U1 ESP32 DevKit: pino GND [J3.1] | GND |
-| 2I | 2 | I | U1 ESP32 DevKit: pino IO23 (GPIO23) [J3.2] | LCD_D6 |
-| 2J | 2 | J | fio W16 (laranja), ponta inicial |  |
-| 3I | 3 | I | U1 ESP32 DevKit: pino IO22 (GPIO22) [J3.3] | LCD_D5 |
-| 3J | 3 | J | fio W15 (marrom), ponta inicial |  |
-| 5A | 5 | A | fio W3 (verde), ponta final |  |
-| 5B | 5 | B | U1 ESP32 DevKit: pino IO34 (GPIO34) [J2.5] | ECHO_NODE |
-| 6A | 6 | A | M2 TCRT5000 (modulo LM393): pino DO | IR_DO |
-| 6B | 6 | B | U1 ESP32 DevKit: pino IO35 (GPIO35) [J2.6] | IR_DO |
-| 6I | 6 | I | U1 ESP32 DevKit: pino IO21 (GPIO21) [J3.6] | LCD_D4 |
-| 6J | 6 | J | fio W14 (branco), ponta inicial |  |
-| 7I | 7 | I | U1 ESP32 DevKit: pino GND [J3.7] | GND |
-| 8I | 8 | I | U1 ESP32 DevKit: pino IO19 (GPIO19) [J3.8] | LCD_RS |
-| 8J | 8 | J | fio W12 (azul), ponta inicial |  |
-| 9X | 9 | X | M2 TCRT5000 (modulo LM393): pino GND | GND |
-| 9I | 9 | I | U1 ESP32 DevKit: pino IO18 (GPIO18) [J3.9] | LCD_E |
-| 9J | 9 | J | fio W13 (verde), ponta inicial |  |
-| 10I | 10 | I | U1 ESP32 DevKit: pino IO5 (GPIO5) [J3.10] | TRIG |
-| 10J | 10 | J | M1 HC-SR04: pino TRIG | TRIG |
-| 11A | 11 | A | fio W17 (roxo), ponta inicial |  |
-| 11B | 11 | B | U1 ESP32 DevKit: pino IO27 (GPIO27) [J2.11] | LCD_D7 |
-| 14A | 14 | A | fio W2 (preto), ponta inicial |  |
-| 14B | 14 | B | U1 ESP32 DevKit: pino GND [J2.14] | GND |
+| 1I | 1 | I | U1 ESP32 DevKit: pino 5V [J2.19] | 5V |
+| 1J | 1 | J | fio W1 (vermelho), ponta inicial |  |
+| 3W | 3 | W | fio W1 (vermelho), ponta final |  |
+| 6I | 6 | I | U1 ESP32 DevKit: pino GND [J2.14] | GND |
+| 6J | 6 | J | M2 TCRT5000 (modulo LM393): pino GND | GND |
+| 9I | 9 | I | U1 ESP32 DevKit: pino IO27 (GPIO27) [J2.11] | LCD_D7 |
+| 9J | 9 | J | fio W17 (roxo), ponta inicial |  |
+| 10A | 10 | A | M1 HC-SR04: pino TRIG | TRIG |
+| 10B | 10 | B | U1 ESP32 DevKit: pino IO5 (GPIO5) [J3.10] | TRIG |
+| 11A | 11 | A | fio W13 (verde), ponta inicial |  |
+| 11B | 11 | B | U1 ESP32 DevKit: pino IO18 (GPIO18) [J3.9] | LCD_E |
+| 12A | 12 | A | fio W12 (azul), ponta inicial |  |
+| 12B | 12 | B | U1 ESP32 DevKit: pino IO19 (GPIO19) [J3.8] | LCD_RS |
+| 13A | 13 | A | fio W2 (preto), ponta inicial |  |
+| 13B | 13 | B | U1 ESP32 DevKit: pino GND [J3.7] | GND |
+| 14A | 14 | A | fio W14 (branco), ponta inicial |  |
+| 14B | 14 | B | U1 ESP32 DevKit: pino IO21 (GPIO21) [J3.6] | LCD_D4 |
+| 14I | 14 | I | U1 ESP32 DevKit: pino IO35 (GPIO35) [J2.6] | IR_DO |
+| 14J | 14 | J | M2 TCRT5000 (modulo LM393): pino DO | IR_DO |
 | 15X | 15 | X | fio W2 (preto), ponta final |  |
-| 19A | 19 | A | fio W1 (vermelho), ponta inicial |  |
-| 19B | 19 | B | U1 ESP32 DevKit: pino 5V [J2.19] | 5V |
-| 21W | 21 | W | fio W1 (vermelho), ponta final |  |
+| 15I | 15 | I | U1 ESP32 DevKit: pino IO34 (GPIO34) [J2.5] | ECHO_NODE |
+| 15J | 15 | J | fio W3 (verde), ponta final |  |
+| 17A | 17 | A | fio W15 (marrom), ponta inicial |  |
+| 17B | 17 | B | U1 ESP32 DevKit: pino IO22 (GPIO22) [J3.3] | LCD_D5 |
+| 18A | 18 | A | fio W16 (laranja), ponta inicial |  |
+| 18B | 18 | B | U1 ESP32 DevKit: pino IO23 (GPIO23) [J3.2] | LCD_D6 |
+| 19B | 19 | B | U1 ESP32 DevKit: pino GND [J3.1] | GND |
+| 19I | 19 | I | U1 ESP32 DevKit: pino 3V3 [J2.1] | 3V3 |
+| 19J | 19 | J | M2 TCRT5000 (modulo LM393): pino VCC | 3V3 |
 | 22C | 22 | C | R1 1 kΩ: perna A | ECHO_5V |
 | 22E | 22 | E | M1 HC-SR04: pino ECHO | ECHO_5V |
 | 24W | 24 | W | M1 HC-SR04: pino VCC | 5V |

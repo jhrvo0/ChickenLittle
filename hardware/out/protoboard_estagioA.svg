@@ -1012,82 +1012,82 @@
 <text x="57.3" y="295.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.5" fill="#2a2f35" text-anchor="middle" font-weight="bold" transform="rotate(-90 57.3 295.0)" >USB-C</text>
 <rect x="84.3" y="282.0" width="10" height="20" rx="2" fill="#555" stroke="#222"/>
 <rect x="124.3" y="282.0" width="10" height="20" rx="2" fill="#555" stroke="#222"/>
-<rect x="65.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="70.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >3V3</text>
-<rect x="85.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="90.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >EN</text>
-<rect x="105.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="110.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >VP</text>
-<rect x="125.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="130.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >VN</text>
-<rect x="145.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="150.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO34</text>
-<rect x="165.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="170.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO35</text>
-<rect x="185.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="190.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO32</text>
-<rect x="205.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="210.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO33</text>
-<rect x="225.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="230.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO25</text>
-<rect x="245.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="250.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO26</text>
-<rect x="265.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="270.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO27</text>
-<rect x="285.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="290.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO14</text>
-<rect x="305.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="310.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >IO12</text>
-<rect x="325.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="330.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >GND</text>
-<rect x="345.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="350.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO13</text>
-<rect x="365.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="370.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >SD2</text>
-<rect x="385.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="390.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >SD3</text>
-<rect x="405.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="410.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >CMD</text>
-<rect x="425.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="430.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >5V</text>
-<rect x="65.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="70.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >GND</text>
-<rect x="85.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="90.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO23</text>
-<rect x="105.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="110.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO22</text>
-<rect x="125.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="130.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#8fa5ba" text-anchor="middle" font-weight="normal" >TX0</text>
-<rect x="145.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="150.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#8fa5ba" text-anchor="middle" font-weight="normal" >RX0</text>
-<rect x="165.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="170.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO21</text>
-<rect x="185.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="190.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >GND</text>
-<rect x="205.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="210.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO19</text>
-<rect x="225.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="230.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO18</text>
-<rect x="245.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="250.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO5</text>
-<rect x="265.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="270.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO17</text>
-<rect x="285.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="290.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO16</text>
-<rect x="305.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="310.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO4</text>
-<rect x="325.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="330.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO0</text>
-<rect x="345.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="350.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO2</text>
-<rect x="365.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="370.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO15</text>
-<rect x="385.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="390.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >SD1</text>
-<rect x="405.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="410.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >SD0</text>
 <rect x="425.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="430.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >CLK</text>
+<text x="430.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >3V3</text>
+<rect x="405.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="410.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >EN</text>
+<rect x="385.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="390.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >VP</text>
+<rect x="365.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="370.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >VN</text>
+<rect x="345.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="350.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO34</text>
+<rect x="325.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="330.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO35</text>
+<rect x="305.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="310.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO32</text>
+<rect x="285.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="290.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO33</text>
+<rect x="265.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="270.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO25</text>
+<rect x="245.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="250.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO26</text>
+<rect x="225.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="230.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO27</text>
+<rect x="205.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="210.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO14</text>
+<rect x="185.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="190.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >IO12</text>
+<rect x="165.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="170.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >GND</text>
+<rect x="145.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="150.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO13</text>
+<rect x="125.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="130.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >SD2</text>
+<rect x="105.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="110.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >SD3</text>
+<rect x="85.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="90.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >CMD</text>
+<rect x="65.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="70.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >5V</text>
+<rect x="425.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="430.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >GND</text>
+<rect x="405.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="410.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO23</text>
+<rect x="385.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="390.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO22</text>
+<rect x="365.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="370.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#8fa5ba" text-anchor="middle" font-weight="normal" >TX0</text>
+<rect x="345.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="350.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#8fa5ba" text-anchor="middle" font-weight="normal" >RX0</text>
+<rect x="325.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="330.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO21</text>
+<rect x="305.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="310.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >GND</text>
+<rect x="285.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="290.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO19</text>
+<rect x="265.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="270.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO18</text>
+<rect x="245.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="250.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO5</text>
+<rect x="225.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="230.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO17</text>
+<rect x="205.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="210.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO16</text>
+<rect x="185.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="190.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO4</text>
+<rect x="165.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="170.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO0</text>
+<rect x="145.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="150.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO2</text>
+<rect x="125.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="130.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >IO15</text>
+<rect x="105.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="110.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >SD1</text>
+<rect x="85.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="90.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >SD0</text>
+<rect x="65.5" y="377.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
+<text x="70.0" y="372.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >CLK</text>
 <text x="169.3" y="295.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9" fill="#8aa0b4" text-anchor="middle" font-weight="bold" >ESP32 DevKit 38 pinos</text>
 <text x="169.3" y="307.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7" fill="#6f8497" text-anchor="middle" font-weight="normal" >(ilustracao; confira a sua placa)</text>
 </g>
