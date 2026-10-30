@@ -96,6 +96,18 @@ class _Inst:
     connects: dict[str, list[tuple[int, str, str]]]   # conector -> [(modelIndex, connectorId, layer)]
 
 
+def offboard_pin0_px(comp: dict) -> tuple[float, float]:
+    """Posicao (px de cena) do 1o pino de um modulo fora da placa (ancora em passos da P1)."""
+    prof = model.active()
+    mod = model.load_modules()["modules"][comp["type"]]
+    ax, ay = comp["offboard"]["anchor"]
+    n = len(mod["pin_order"])
+    col = ax - (n - 1) / 2
+    y = ay + mod["body_mm"][1] / 2.54 / 2 + 0.6
+    return (round((prof.fz_x0 + (model.col_x(col) - 1) * prof.fz_pitch) * bb_scale(), 3),
+            round((prof.fz_y_a - y * prof.fz_pitch) * bb_scale(), 3))
+
+
 def bb_hole_px(hole: str) -> tuple[float, float]:
     x, y = model.fz_hole_xy(hole)
     return round(x * bb_scale(), 3), round(y * bb_scale(), 3)
@@ -126,6 +138,7 @@ def build_fz(lay: Layout, stage: str) -> tuple[bytes, dict[str, bytes], dict]:
         bi.connects.setdefault(pin, []).append((inst.model_index, conn, layer))
 
     extra_files: dict[str, bytes] = {}
+    leads: list = []                                   # jumpers femea-macho de modulos fora da placa
     for comp in lay.comps(stage):
         t, ref = comp["type"], comp["ref"]
         if t == "breadboard":
@@ -145,24 +158,30 @@ def build_fz(lay: Layout, stage: str) -> tuple[bytes, dict[str, bytes], dict]:
         elif t == "hc_sr04":
             order = lay.modules["modules"]["hc_sr04"]["fritzing_connectors"]
             px = {order[n]: (u[0] * HCSR04_PX_PER_UNIT, u[1] * HCSR04_PX_PER_UNIT) for n, u in HCSR04_PIN_UNITS.items()}
-            h0 = comp["pins"]["VCC"]
-            hx, hy = bb_hole_px(h0)
+            hx, hy = offboard_pin0_px(comp) if comp.get("offboard") else bb_hole_px(comp["pins"]["VCC"])
             ox, oy = hx - px["connector0"][0], hy - px["connector0"][1]
             inst = _Inst(ref, HCSR04_MODULE_ID, mi, "breadboard", ox, oy, px, {}, {})
             insts.append(inst); by_ref[ref] = inst; mi += 1
             for n, hole in comp["pins"].items():
-                connect_hole(inst, order[n], hole, "breadboard")
+                if comp.get("offboard"):
+                    leads.append((inst, order[n], hole, comp["offboard"]["leads"].get(n, "grey"), f"{ref}_{n}"))
+                else:
+                    connect_hole(inst, order[n], hole, "breadboard")
         elif t in ("tcrt5000_module", "potentiometer", "lcd2004a"):
             spec = gen[t]
             names = [p[0] for p in spec.pins]
             px = {f"connector{i}": (spec.pins[i][1] * SCENE_DPI, spec.pins[i][2] * SCENE_DPI) for i in range(len(names))}
-            h0 = comp["pins"][names[0]]
-            hx, hy = bb_hole_px(h0)
+            hx, hy = offboard_pin0_px(comp) if comp.get("offboard") else bb_hole_px(comp["pins"][names[0]])
             ox, oy = hx - px["connector0"][0], hy - px["connector0"][1]
             inst = _Inst(ref, spec.module_id, mi, "breadboard", ox, oy, px, {}, {})
             insts.append(inst); by_ref[ref] = inst; mi += 1
             for i, n in enumerate(names):
-                connect_hole(inst, f"connector{i}", comp["pins"][n], "breadboard")
+                if n not in comp["pins"]:
+                    continue                                  # pino sem fio (ex.: AO do TCRT5000)
+                if comp.get("offboard"):
+                    leads.append((inst, f"connector{i}", comp["pins"][n], comp["offboard"]["leads"].get(n, "grey"), f"{ref}_{n}"))
+                else:
+                    connect_hole(inst, f"connector{i}", comp["pins"][n], "breadboard")
             extra_files.update(fz_parts.bundle_files(spec))
         elif t == "resistor":
             ha, hb = comp["legs"]
@@ -189,6 +208,19 @@ def build_fz(lay: Layout, stage: str) -> tuple[bytes, dict[str, bytes], dict]:
             bi, pin = bb_conn(hole)
             winst.connects.setdefault(conn, []).append((bi.model_index, pin, "breadboardbreadboard"))
             bi.connects.setdefault(pin, []).append((winst.model_index, conn, "breadboardWire"))
+        wires.append(winst)
+    for (pinst, conn, hole, color, wid) in leads:      # pino do modulo -> fio -> furo
+        x1 = pinst.x + pinst.pin_xy[conn][0]
+        y1 = pinst.y + pinst.pin_xy[conn][1]
+        x2, y2 = bb_hole_px(hole)
+        winst = _Inst(wid, WIRE_MODULE_ID, mi, "breadboardWire", x1, y1, {"connector0": (0, 0), "connector1": (x2 - x1, y2 - y1)},
+                      {"__color": WIRE_HEX.get(color, "#999999")}, {})
+        mi += 1
+        winst.connects.setdefault("connector0", []).append((pinst.model_index, conn, "breadboard"))
+        pinst.connects.setdefault(conn, []).append((winst.model_index, "connector0", "breadboardWire"))
+        bi, pin = bb_conn(hole)
+        winst.connects.setdefault("connector1", []).append((bi.model_index, pin, "breadboardbreadboard"))
+        bi.connects.setdefault(pin, []).append((winst.model_index, "connector1", "breadboardWire"))
         wires.append(winst)
 
     # ---------- XML ----------

@@ -51,13 +51,17 @@ class BreadboardProfile:
     boards: int = 1                 # quantas placas iguais encaixadas pela ponta
     cols_per_board: int = 0
     board_gap_pitch: float = 0.0    # passos extras entre a ultima coluna de uma placa e a 1a da seguinte
+    rail_x_offset: float = 0.0      # furo de trilho "pinN" fica em x = N + offset (em colunas)
+    rail_polarity: dict | None = None
+    rail_lines_y: dict | None = None
 
 
 def _load_breadboards() -> dict:
     raw = json.load(open(DATA_DIR / "breadboards.json", encoding="utf-8"))["profiles"]
     return {k: BreadboardProfile(k, v["title"], v["n_cols"], tuple(v["rail_cols"]), v["rails_in_this_project"], v["fz_module_id"],
                                  v["fz_path"], v["fz_scale"], v["fz_x0"], v["fz_y_a"], v["fz_pitch"], tuple(v["fz_size"]),
-                                 v.get("boards", 1), v.get("cols_per_board", v["n_cols"]), v.get("board_gap_pitch", 0.0))
+                                 v.get("boards", 1), v.get("cols_per_board", v["n_cols"]), v.get("board_gap_pitch", 0.0),
+                                 v.get("rail_x_offset", 0.0), v.get("rail_polarity"), v.get("rail_lines_y"))
             for k, v in raw.items()}
 
 
@@ -142,11 +146,11 @@ def parse_hole(hole: str) -> tuple[int, str]:
     local, row = int(m.group(2)), m.group(3)
     if not 1 <= board <= prof.boards or not 1 <= local <= prof.cols_per_board:
         raise NetlistError(f"Placa inexistente ou coluna fora da placa: {hole!r}")
+    if row in RAIL_ROWS and (not prof.rails_in_this_project or local not in prof.rail_cols):
+        raise NetlistError(f"Nao existe furo de trilho {local}{row} nesta protoboard: {hole!r}")
     col = (board - 1) * prof.cols_per_board + local
     if not 1 <= col <= n_cols():
         raise NetlistError(f"Coluna fora da protoboard ({n_cols()} colunas): {hole!r}")
-    if row in RAIL_ROWS and col not in rail_cols():
-        raise NetlistError(f"Nao existe furo de trilho na coluna {col}: {hole!r}")
     return col, row
 
 
@@ -157,15 +161,50 @@ def hole_group(hole: str, rail_split: int | None = None) -> tuple:
         return ("col", col, "AE")
     if row in UPPER_ROWS:
         return ("col", col, "FJ")
+    board = board_of(col)[0]
     if rail_split and col >= rail_split:
-        return ("rail", row, "R")
-    return ("rail", row, "L" if rail_split else "ALL")
+        return ("rail", board, row, "R")
+    return ("rail", board, row, "L" if rail_split else "ALL")
+
+
+def rail_sign(hole: str) -> str | None:
+    """'+' ou '-' (cor impressa: vermelho/azul) para furos de trilho; None para o resto."""
+    _, row = parse_hole(hole)
+    pol = active().rail_polarity or {}
+    return pol.get(row) if row in RAIL_ROWS else None
+
+
+def hole_x(col: int, row: str) -> float:
+    """x em passos (com vao entre placas e deslocamento dos furos de trilho)."""
+    if row in RAIL_ROWS:
+        board, local = board_of(col)
+        return col_x(col) + active().rail_x_offset
+    return col_x(col)
+
+
+def hole_label(hole: str) -> str:
+    """Nome curto para o iniciante: furos normais como estao; trilhos por cor/lado/placa."""
+    col, row = parse_hole(hole)
+    if row not in RAIL_ROWS:
+        return hole
+    board = board_of(col)[0]
+    sign = rail_sign(hole)
+    side = "baixo" if row in "WX" else "cima"
+    return f"P{board} trilho {sign} ({'vermelho' if sign == '+' else 'azul'}, {side})"
+
+
+def hole_tag(hole: str) -> str:
+    """Etiqueta curtissima para o desenho."""
+    col, row = parse_hole(hole)
+    if row not in RAIL_ROWS:
+        return hole
+    return f"P{board_of(col)[0]} {rail_sign(hole)}"
 
 
 def hole_xy(hole: str) -> tuple[float, float]:
     """Posicao do furo em passos (x = coluna, y = fileira; y cresce para CIMA)."""
     col, row = parse_hole(hole)
-    return col_x(col), float(ROW_Y[row])
+    return hole_x(col, row), float(ROW_Y[row])
 
 
 def fz_hole_xy(hole: str) -> tuple[float, float]:
@@ -173,7 +212,7 @@ def fz_hole_xy(hole: str) -> tuple[float, float]:
     col, row = parse_hole(hole)
     b = active()
     board, local = board_of(col)
-    x = (board - 1) * b.fz_size[0] + b.fz_x0 + (local - 1) * b.fz_pitch     # placas encostadas lado a lado
+    x = (board - 1) * b.fz_size[0] + b.fz_x0 + (local - 1 + (b.rail_x_offset if row in RAIL_ROWS else 0.0)) * b.fz_pitch
     y = b.fz_y_a - ROW_Y[row] * b.fz_pitch
     return round(x, 3), round(y, 3)
 

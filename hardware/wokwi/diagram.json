@@ -45,13 +45,6 @@
       "attrs": {
         "value": "300"
       }
-    },
-    {
-      "type": "wokwi-potentiometer",
-      "id": "pot",
-      "top": 150,
-      "left": 260,
-      "attrs": {}
     }
   ],
   "connections": [
@@ -65,12 +58,6 @@
       "esp:RX",
       "$serialMonitor:TX",
       "",
-      []
-    ],
-    [
-      "esp:GND.1",
-      "pot:GND",
-      "black",
       []
     ],
     [
@@ -89,12 +76,6 @@
       "esp:5V",
       "ultra:VCC",
       "red",
-      []
-    ],
-    [
-      "esp:3V3",
-      "pot:VCC",
-      "orange",
       []
     ],
     [
@@ -125,12 +106,6 @@
       "r2:2",
       "r3:1",
       "blue",
-      []
-    ],
-    [
-      "esp:VP",
-      "pot:SIG",
-      "purple",
       []
     ]
   ],

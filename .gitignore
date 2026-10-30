@@ -37,4 +37,8 @@ sdkconfig.old
 Thumbs.db
 
 # Ferramentas de terceiros clonadas pelo setup do MCP (hardware/tools/setup_fritzing_mcp.py)
-tools/
+/tools/
+
+# bancada (gerados localmente)
+teste_bancada_saida.txt
+hardware/tools/wheels/
