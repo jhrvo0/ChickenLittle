@@ -36,4 +36,8 @@ sdkconfig.old
 .DS_Store
 Thumbs.db
 
-tools/
+/tools/
+
+# bancada (gerados localmente)
+teste_bancada_saida.txt
+hardware/tools/wheels/

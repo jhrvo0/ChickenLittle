@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 1192" width="1360" height="1192" font-family="DejaVu Sans, Verdana, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 1040" width="1360" height="1040" font-family="DejaVu Sans, Verdana, Arial, sans-serif">
 <rect width="100%" height="100%" fill="#f7f5ee"/>
 <text x="14.0" y="24.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="17" fill="#17212b" text-anchor="start" font-weight="bold" >MotionPet - Esquematico eletrico - Estagio E</text>
 <text x="14.0" y="42.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#4a5560" text-anchor="start" font-weight="normal" >Cada rede tem o MESMO nome em todos os pinos ligados a ela (rotulos de rede). Status: PENDING_PHYSICAL_VALIDATION.</text>
-<rect x="40" y="70" width="150" height="424" rx="8" fill="#1c2733" stroke="#0d141b" stroke-width="2"/>
+<rect x="40" y="70" width="150" height="394" rx="8" fill="#1c2733" stroke="#0d141b" stroke-width="2"/>
 <text x="115.0" y="92.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold" >U1  ESP32</text>
 <path d="M190,114 h24" stroke="#222" stroke-width="2"/>
 <text x="182.0" y="118.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#e6eef6" text-anchor="end" font-weight="normal" >5V</text>
@@ -40,9 +40,6 @@
 <path d="M190,444 h24" stroke="#222" stroke-width="2"/>
 <text x="182.0" y="448.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#e6eef6" text-anchor="end" font-weight="normal" >IO35 (GPIO35)</text>
 <g><rect x="218" y="434" width="54" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="245.0" y="448.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >IR_DO</text></g>
-<path d="M190,474 h24" stroke="#222" stroke-width="2"/>
-<text x="182.0" y="478.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#e6eef6" text-anchor="end" font-weight="normal" >VP (GPIO36)</text>
-<g><rect x="218" y="464" width="86" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="261.0" y="478.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >POT_WIPER</text></g>
 <rect x="470" y="80" width="190" height="130" rx="8" fill="#eef3f8" stroke="#33506b" stroke-width="2"/>
 <text x="565.0" y="100.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#17212b" text-anchor="middle" font-weight="bold" >M1  HC-SR04</text>
 <path d="M470,118 h-24" stroke="#222" stroke-width="2"/>
@@ -57,7 +54,7 @@
 <path d="M470,190 h-24" stroke="#222" stroke-width="2"/>
 <text x="478.0" y="194.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >GND</text>
 <g><rect x="408" y="180" width="38" height="20" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="427.0" y="194.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
-<rect x="470" y="232" width="190" height="130" rx="8" fill="#eef3f8" stroke="#33506b" stroke-width="2"/>
+<rect x="470" y="232" width="190" height="106" rx="8" fill="#eef3f8" stroke="#33506b" stroke-width="2"/>
 <text x="565.0" y="252.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#17212b" text-anchor="middle" font-weight="bold" >M2  TCRT5000 (modulo LM393)</text>
 <path d="M470,270 h-24" stroke="#222" stroke-width="2"/>
 <text x="478.0" y="274.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >VCC</text>
@@ -68,88 +65,74 @@
 <path d="M470,318 h-24" stroke="#222" stroke-width="2"/>
 <text x="478.0" y="322.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >DO</text>
 <g><rect x="392" y="308" width="54" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="419.0" y="322.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >IR_DO</text></g>
-<path d="M470,342 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="346.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >AO</text>
-<text x="438.0" y="346.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="end" font-weight="normal" >NC ✕</text>
-<rect x="470" y="384" width="190" height="106" rx="8" fill="#eef3f8" stroke="#33506b" stroke-width="2"/>
-<text x="565.0" y="404.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#17212b" text-anchor="middle" font-weight="bold" >P1  Potenciometro rotativo</text>
+<rect x="470" y="360" width="190" height="418" rx="8" fill="#eef3f8" stroke="#33506b" stroke-width="2"/>
+<text x="565.0" y="380.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#17212b" text-anchor="middle" font-weight="bold" >M3  LCD 2004A V1.1</text>
+<path d="M470,398 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="402.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >VSS</text>
+<g><rect x="408" y="388" width="38" height="20" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="427.0" y="402.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
 <path d="M470,422 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="426.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >END_A</text>
-<g><rect x="408" y="412" width="38" height="20" rx="4" fill="#ffe9d2" stroke="#e07b00" stroke-width="1.4"/><text x="427.0" y="426.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >3V3</text></g>
+<text x="478.0" y="426.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >VDD</text>
+<g><rect x="416" y="412" width="30" height="20" rx="4" fill="#fde2e2" stroke="#d11a1a" stroke-width="1.4"/><text x="431.0" y="426.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >5V</text></g>
 <path d="M470,446 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="450.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >WIPER</text>
-<g><rect x="360" y="436" width="86" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="403.0" y="450.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >POT_WIPER</text></g>
+<text x="478.0" y="450.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >V0</text>
+<g><rect x="384" y="436" width="62" height="20" rx="4" fill="#e7e1f7" stroke="#6b4fb8" stroke-width="1.4"/><text x="415.0" y="450.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_V0</text></g>
 <path d="M470,470 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="474.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >END_B</text>
-<g><rect x="408" y="460" width="38" height="20" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="427.0" y="474.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
-<rect x="470" y="512" width="190" height="418" rx="8" fill="#eef3f8" stroke="#33506b" stroke-width="2"/>
-<text x="565.0" y="532.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#17212b" text-anchor="middle" font-weight="bold" >M3  LCD 2004A V1.1</text>
-<path d="M470,550 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="554.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >VSS</text>
-<g><rect x="408" y="540" width="38" height="20" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="427.0" y="554.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
-<path d="M470,574 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="578.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >VDD</text>
-<g><rect x="416" y="564" width="30" height="20" rx="4" fill="#fde2e2" stroke="#d11a1a" stroke-width="1.4"/><text x="431.0" y="578.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >5V</text></g>
-<path d="M470,598 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="602.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >V0</text>
-<g><rect x="384" y="588" width="62" height="20" rx="4" fill="#e7e1f7" stroke="#6b4fb8" stroke-width="1.4"/><text x="415.0" y="602.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_V0</text></g>
-<path d="M470,622 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="626.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >RS</text>
-<g><rect x="384" y="612" width="62" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="415.0" y="626.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_RS</text></g>
-<path d="M470,646 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="650.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >RW</text>
-<g><rect x="408" y="636" width="38" height="20" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="427.0" y="650.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
-<path d="M470,670 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="674.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >E</text>
-<g><rect x="392" y="660" width="54" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="419.0" y="674.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_E</text></g>
-<path d="M470,694 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="698.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D0</text>
-<text x="438.0" y="698.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="end" font-weight="normal" >NC ✕</text>
-<path d="M470,718 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="722.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D1</text>
-<text x="438.0" y="722.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="end" font-weight="normal" >NC ✕</text>
-<path d="M470,742 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="746.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D2</text>
-<text x="438.0" y="746.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="end" font-weight="normal" >NC ✕</text>
-<path d="M470,766 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="770.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D3</text>
-<text x="438.0" y="770.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="end" font-weight="normal" >NC ✕</text>
-<path d="M470,790 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="794.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D4</text>
-<g><rect x="384" y="780" width="62" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="415.0" y="794.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_D4</text></g>
-<path d="M470,814 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="818.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D5</text>
-<g><rect x="384" y="804" width="62" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="415.0" y="818.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_D5</text></g>
-<path d="M470,838 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="842.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D6</text>
-<g><rect x="384" y="828" width="62" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="415.0" y="842.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_D6</text></g>
-<path d="M470,862 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="866.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D7</text>
-<g><rect x="384" y="852" width="62" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="415.0" y="866.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_D7</text></g>
-<path d="M470,886 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="890.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >A</text>
-<g><rect x="392" y="876" width="54" height="20" rx="4" fill="#fde2e2" stroke="#d11a1a" stroke-width="1.4"/><text x="419.0" y="890.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_A</text></g>
-<path d="M470,910 h-24" stroke="#222" stroke-width="2"/>
-<text x="478.0" y="914.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >K</text>
-<g><rect x="408" y="900" width="38" height="20" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="427.0" y="914.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
-<rect x="470" y="952" width="190" height="74" rx="8" fill="#fffbe6" stroke="#8a7440" stroke-width="2"/>
-<text x="565.0" y="972.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="11" fill="#3a2f10" text-anchor="middle" font-weight="bold" >R4  1 kΩ</text>
-<text x="565.0" y="988.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#6a5a2a" text-anchor="middle" font-weight="normal" >R4 contraste (V0 -&gt; GND)</text>
-<path d="M470,1000 h-24" stroke="#222" stroke-width="2"/>
-<g><rect x="384" y="991" width="62" height="18" rx="4" fill="#e7e1f7" stroke="#6b4fb8" stroke-width="1.4"/><text x="415.0" y="1004.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#111" text-anchor="middle" font-weight="bold" >LCD_V0</text></g>
-<text x="478.0" y="1004.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9" fill="#3a2f10" text-anchor="start" font-weight="normal" >terminal A</text>
-<path d="M470,1018 h-24" stroke="#222" stroke-width="2"/>
-<g><rect x="408" y="1009" width="38" height="18" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="427.0" y="1022.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
-<text x="478.0" y="1022.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9" fill="#3a2f10" text-anchor="start" font-weight="normal" >terminal B</text>
-<rect x="470" y="1042" width="190" height="74" rx="8" fill="#fffbe6" stroke="#8a7440" stroke-width="2"/>
-<text x="565.0" y="1062.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="11" fill="#3a2f10" text-anchor="middle" font-weight="bold" >R5  300 Ω</text>
-<text x="565.0" y="1078.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#6a5a2a" text-anchor="middle" font-weight="normal" >R5 backlight (5V -&gt; A)</text>
-<path d="M470,1090 h-24" stroke="#222" stroke-width="2"/>
-<g><rect x="416" y="1081" width="30" height="18" rx="4" fill="#fde2e2" stroke="#d11a1a" stroke-width="1.4"/><text x="431.0" y="1094.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#111" text-anchor="middle" font-weight="bold" >5V</text></g>
-<text x="478.0" y="1094.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9" fill="#3a2f10" text-anchor="start" font-weight="normal" >terminal A</text>
-<path d="M470,1108 h-24" stroke="#222" stroke-width="2"/>
-<g><rect x="392" y="1099" width="54" height="18" rx="4" fill="#fde2e2" stroke="#d11a1a" stroke-width="1.4"/><text x="419.0" y="1112.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#111" text-anchor="middle" font-weight="bold" >LCD_A</text></g>
-<text x="478.0" y="1112.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9" fill="#3a2f10" text-anchor="start" font-weight="normal" >terminal B</text>
+<text x="478.0" y="474.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >RS</text>
+<g><rect x="384" y="460" width="62" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="415.0" y="474.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_RS</text></g>
+<path d="M470,494 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="498.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >RW</text>
+<g><rect x="408" y="484" width="38" height="20" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="427.0" y="498.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
+<path d="M470,518 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="522.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >E</text>
+<g><rect x="392" y="508" width="54" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="419.0" y="522.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_E</text></g>
+<path d="M470,542 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="546.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D0</text>
+<text x="438.0" y="546.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="end" font-weight="normal" >NC ✕</text>
+<path d="M470,566 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="570.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D1</text>
+<text x="438.0" y="570.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="end" font-weight="normal" >NC ✕</text>
+<path d="M470,590 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="594.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D2</text>
+<text x="438.0" y="594.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="end" font-weight="normal" >NC ✕</text>
+<path d="M470,614 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="618.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D3</text>
+<text x="438.0" y="618.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="end" font-weight="normal" >NC ✕</text>
+<path d="M470,638 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="642.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D4</text>
+<g><rect x="384" y="628" width="62" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="415.0" y="642.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_D4</text></g>
+<path d="M470,662 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="666.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D5</text>
+<g><rect x="384" y="652" width="62" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="415.0" y="666.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_D5</text></g>
+<path d="M470,686 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="690.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D6</text>
+<g><rect x="384" y="676" width="62" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="415.0" y="690.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_D6</text></g>
+<path d="M470,710 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="714.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >D7</text>
+<g><rect x="384" y="700" width="62" height="20" rx="4" fill="#dff5e6" stroke="#1f9d46" stroke-width="1.4"/><text x="415.0" y="714.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_D7</text></g>
+<path d="M470,734 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="738.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >A</text>
+<g><rect x="392" y="724" width="54" height="20" rx="4" fill="#fde2e2" stroke="#d11a1a" stroke-width="1.4"/><text x="419.0" y="738.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >LCD_A</text></g>
+<path d="M470,758 h-24" stroke="#222" stroke-width="2"/>
+<text x="478.0" y="762.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.5" fill="#17212b" text-anchor="start" font-weight="normal" >K</text>
+<g><rect x="408" y="748" width="38" height="20" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="427.0" y="762.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10.5" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
+<rect x="470" y="800" width="190" height="74" rx="8" fill="#fffbe6" stroke="#8a7440" stroke-width="2"/>
+<text x="565.0" y="820.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="11" fill="#3a2f10" text-anchor="middle" font-weight="bold" >R4  1 kΩ</text>
+<text x="565.0" y="836.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#6a5a2a" text-anchor="middle" font-weight="normal" >R4 contraste (V0 -&gt; GND)</text>
+<path d="M470,848 h-24" stroke="#222" stroke-width="2"/>
+<g><rect x="384" y="839" width="62" height="18" rx="4" fill="#e7e1f7" stroke="#6b4fb8" stroke-width="1.4"/><text x="415.0" y="852.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#111" text-anchor="middle" font-weight="bold" >LCD_V0</text></g>
+<text x="478.0" y="852.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9" fill="#3a2f10" text-anchor="start" font-weight="normal" >terminal A</text>
+<path d="M470,866 h-24" stroke="#222" stroke-width="2"/>
+<g><rect x="408" y="857" width="38" height="18" rx="4" fill="#e4e4e4" stroke="#555" stroke-width="1.4"/><text x="427.0" y="870.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#111" text-anchor="middle" font-weight="bold" >GND</text></g>
+<text x="478.0" y="870.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9" fill="#3a2f10" text-anchor="start" font-weight="normal" >terminal B</text>
+<rect x="470" y="890" width="190" height="74" rx="8" fill="#fffbe6" stroke="#8a7440" stroke-width="2"/>
+<text x="565.0" y="910.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="11" fill="#3a2f10" text-anchor="middle" font-weight="bold" >R5  300 Ω</text>
+<text x="565.0" y="926.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#6a5a2a" text-anchor="middle" font-weight="normal" >R5 backlight (5V -&gt; A)</text>
+<path d="M470,938 h-24" stroke="#222" stroke-width="2"/>
+<g><rect x="416" y="929" width="30" height="18" rx="4" fill="#fde2e2" stroke="#d11a1a" stroke-width="1.4"/><text x="431.0" y="942.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#111" text-anchor="middle" font-weight="bold" >5V</text></g>
+<text x="478.0" y="942.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9" fill="#3a2f10" text-anchor="start" font-weight="normal" >terminal A</text>
+<path d="M470,956 h-24" stroke="#222" stroke-width="2"/>
+<g><rect x="392" y="947" width="54" height="18" rx="4" fill="#fde2e2" stroke="#d11a1a" stroke-width="1.4"/><text x="419.0" y="960.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="10" fill="#111" text-anchor="middle" font-weight="bold" >LCD_A</text></g>
+<text x="478.0" y="960.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9" fill="#3a2f10" text-anchor="start" font-weight="normal" >terminal B</text>
 <g transform="translate(700 70)">
 <rect x="0" y="0" width="640" height="450" rx="10" fill="#fffdf6" stroke="#b9b6aa" stroke-width="1.5"/>
 <text x="16.0" y="26.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="14" fill="#17212b" text-anchor="start" font-weight="bold" >Divisor resistivo do ECHO (a parte que protege o ESP32)</text>
@@ -202,5 +185,5 @@
 <text x="16.0" y="408.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="11" fill="#17212b" text-anchor="start" font-weight="bold" >Vout = Vecho x (R2+R3)/(R1+R2+R3) = Vecho x 0.565</text>
 <text x="16.0" y="424.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="9.8" fill="#333" text-anchor="start" font-weight="normal" >5,00 V -&gt; 2.83 V   |   5,25 V -&gt; 2.97 V   |   pior caso com tolerancia 5%: 2.57 V .. 3.096 V (teto seguro 3,30 V; VIH minimo 2,475 V)</text>
 </g>
-<text x="14.0" y="1180.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#6b7682" text-anchor="start" font-weight="normal" >Gerado por hardware/render_schematic.py a partir de hardware/netlist/motionpet.netlist.json</text>
+<text x="14.0" y="1028.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8.6" fill="#6b7682" text-anchor="start" font-weight="normal" >Gerado por hardware/render_schematic.py a partir de hardware/netlist/motionpet.netlist.json</text>
 </svg>

@@ -98,7 +98,7 @@ go(start,false);
 """
 
 NAMES = {"U1": "ESP32", "M1": "HC-SR04", "M2": "TCRT5000", "P1": "potenciômetro", "M3": "LCD"}
-STAGE_CHIP = {"A": "A · ESP32", "B": "B · HC-SR04 ★", "C": "C · TCRT5000 + pot", "D": "D · LCD", "E": "E · final"}
+STAGE_CHIP = {"A": "A · ESP32", "B": "B · HC-SR04 ★", "C": "C · TCRT5000", "D": "D · LCD", "E": "E · final"}
 
 
 def _h(s) -> str:
@@ -111,6 +111,9 @@ def _md(s: str) -> str:
 
 def hole_ctx(lay: Layout, hole: str, placed: set[str]) -> str:
     """O que esta (ou ficara) na mesma tira da protoboard, para o iniciante achar o furo."""
+    if model.rail_sign(hole):
+        net = "5 V" if model.rail_sign(hole) == "+" else "GND"
+        return f"{net} · qualquer furo desse trilho serve (use o mais perto)"
     grp = model.hole_group(hole)
     occ = lay.occupied_holes(model.STAGE_ORDER[-1])
     now, later = [], []
@@ -158,7 +161,7 @@ def _card_resistor(lay: Layout, ref: str, measure: bool) -> str:
     c = lay.components[ref]
     bands = model.resistor_bands(c["ohms"], c["tolerance"], lay.modules["resistor_color_code"])
     lo, hi = c["ohms"] * (1 - c["tolerance"]), c["ohms"] * (1 + c["tolerance"])
-    legs = " e ".join(f'<span class="hole">{h}</span>' for h in c["legs"])
+    legs = " e ".join(f'<span class="hole">{_h(model.hole_label(h))}</span>' for h in c["legs"])
     names = "–".join(BAND_PT[b] for b in bands)
     names_rev = "–".join(BAND_PT[b] for b in reversed(bands))      # lendo a partir da faixa dourada
     extra = (f'<div class="m">Meça: <b>{model.fmt_ohms(lo)} a {model.fmt_ohms(hi)}</b></div>' if measure
@@ -177,8 +180,8 @@ def _card_wire(lay: Layout, w: dict, placed: set[str], temp: bool = False) -> st
     label = _h(w.get("label", ""))
     return (f'<div class="card" style="border-left-color:{colr}"><div class="t"><span class="swatch" style="background:{colr}"></span>'
             f'{"jumper TEMPORÁRIO" if temp else "Fio " + w["id"]} · {cname}</div><div class="m">{label}</div>'
-            f'<div>Ponta 1: <span class="hole">{a}</span> <span class="m">{_h(hole_ctx(lay, a, placed))}</span></div>'
-            f'<div>Ponta 2: <span class="hole">{b}</span> <span class="m">{_h(hole_ctx(lay, b, placed))}</span></div>{saf}</div>')
+            f'<div>Ponta 1: <span class="hole">{_h(model.hole_label(a))}</span> <span class="m">{_h(hole_ctx(lay, a, placed))}</span></div>'
+            f'<div>Ponta 2: <span class="hole">{_h(model.hole_label(b))}</span> <span class="m">{_h(hole_ctx(lay, b, placed))}</span></div>{saf}</div>')
 
 
 def _card_comp(lay: Layout, c: dict) -> str:
@@ -186,10 +189,22 @@ def _card_comp(lay: Layout, c: dict) -> str:
         return ('<div class="card"><div class="t">ESP32 DevKit</div><div class="m">Atravessando o canal central: pino 1 de cada lado na coluna '
                 f'<b>{c["placement"]["col0"]}</b>; USB-C para a <b>esquerda</b>. Fileira B = lado 3V3…5V; fileira I = lado GND…CLK. '
                 'Só as fileiras <b>A</b> e <b>J</b> ficam livres.</div></div>')
-    rows = "".join(f'<tr><td><b>{n}</b></td><td><span class="hole">{h}</span></td></tr>' for n, h in c["pins"].items()
+    note = f'<div class="m">{_h(c["note"])}</div>' if c.get("note") else ""
+    if c.get("offboard"):
+        leads = c["offboard"].get("leads", {})
+        rows = "".join(
+            f'<tr><td><b>{n}</b></td><td><span class="swatch" style="background:{WIRE_COLORS.get(leads.get(n, "grey"), "#999")}"></span>'
+            f'{_h(reports.COLOR_PT.get(leads.get(n, "grey"), ""))}</td><td><span class="hole">{_h(model.hole_label(h))}</span></td></tr>'
+            for n, h in c["pins"].items())
+        unused = [p for p in lay.modules["modules"][c["type"]]["pin_order"] if p not in c["pins"]]
+        nc = f'<div class="m">Sem fio: {", ".join(unused)}.</div>' if unused else ""
+        return (f'<div class="card"><div class="t">{c["ref"]} · {_h(c["label"])}</div>'
+                '<div class="m">Fora da protoboard: um jumper <b>fêmea–macho</b> por pino (fêmea no pino do módulo, macho no furo). '
+                'Num trilho, qualquer furo serve.</div>'
+                f'<table class="p"><tr><th>Pino</th><th>Fio</th><th>Vai em</th></tr>{rows}</table>{nc}{note}</div>')
+    rows = "".join(f'<tr><td><b>{n}</b></td><td><span class="hole">{_h(model.hole_label(h))}</span></td></tr>' for n, h in c["pins"].items()
                    if not (c["type"] == "lcd2004a" and n in ("D0", "D1", "D2", "D3")))
     nc = '<div class="m">D0–D3: encaixam mas ficam sem fio.</div>' if c["type"] == "lcd2004a" else ""
-    note = f'<div class="m">{_h(c["note"])}</div>' if c.get("note") else ""
     return (f'<div class="card"><div class="t">{c["ref"]} · {_h(c["label"])}</div><div class="m">Encaixe os pinos nestes furos:</div>'
             f'<table class="p"><tr><th>Pino</th><th>Furo</th></tr>{rows}</table>{nc}{note}</div>')
 
@@ -248,15 +263,15 @@ def _focus_rect(boxes: list[tuple[float, float, float, float]], full: tuple[floa
 
 MATERIALS = [
     ("ESP32 DevKit (ESP-WROOM-32, USB-C)", "1", "Conte os pinos e meça a distância entre as fileiras (confirmação C01)."),
-    ("Meia-protoboard 30 colunas (A–J × 1–30)", "2", "Encaixadas pela ponta: P1 (ESP32) e P2 (LCD). Os trilhos de alimentação não são usados."),
+    ("Meia-protoboard 30 colunas (A–J × 1–30) com trilhos + e −", "2", "Encaixadas pela ponta: P1 (ESP32) e P2 (LCD). Só os trilhos de BAIXO são usados: vermelho (+) = 5 V, azul (−) = GND."),
     ("Cabo USB de DADOS", "1", "Cabo só de carga não cria a porta COM."),
-    ("HC-SR04", "1", "Estágio B."),
+    ("HC-SR04", "1", "Estágio B, fora da placa."),
+    ("Módulo TCRT5000 (LM393, 4 pinos)", "1", "Estágio C, fora da placa."),
+    ("LCD 2004A (20×4, 16 pinos)", "1", "Estágio D, encaixado na P2."),
     ("Resistor 1 kΩ (dourado, vermelho, preto, marrom — lendo da faixa dourada)", "3", "R1 e R2 do divisor; R4 do contraste do LCD."),
     ("Resistor 300 Ω (dourado, marrom, preto, laranja — lendo da faixa dourada)", "2", "R3 do divisor; R5 do backlight do LCD."),
-    ("Módulo TCRT5000 (LM393, 4 pinos)", "1", "Estágio C."),
-    ("Potenciômetro rotativo", "1", "Estágio C."),
-    ("LCD 2004A (20×4, 16 pinos)", "1", "Estágio D, na P2."),
-    ("Jumpers macho-macho de ponta sólida", "~22", "Os do LCD (W15–W22) e W4, W5, W9, W10 são os longos (15–20 cm)."),
+    ("Jumpers macho–macho", "~17", "Os 6 sinais do LCD (W12–W17) e o W3 são os longos (15–20 cm); o resto é curto."),
+    ("Jumpers fêmea–macho", "7", "4 para o HC-SR04 e 3 para o TCRT5000."),
     ("Multímetro", "1", "Resistência, continuidade e tensão DC."),
 ]
 

@@ -43,7 +43,7 @@
 
 // Potenciometro Rotativo (alimentado em 3.3 V)
 #define PIN_POT_ADC1          36   // Entrada GPI / ADC1_CH0 (VP)
-#define DEFAULT_POT_ENABLED   true
+#define DEFAULT_POT_ENABLED   false  // potenciometro removido da montagem (bancada 2026-10-29); GPIO36 nao e lido
 
 // LCD 2004A V1.1 (HD44780 em modo paralelo de 4 bits; pino 5 RW conectado direto ao GND!)
 #define PIN_LCD_RS            19

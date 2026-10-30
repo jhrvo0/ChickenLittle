@@ -1,12 +1,14 @@
 """Textos estaticos do guia em slides (ajuda). Em portugues; mantidos fora do gerador para facilitar a revisao."""
 
 COMMON_ERRORS = [
-    "ESP32 deslocada uma coluna: TODOS os pinos ficam errados. Confira: 3V3 na coluna 4 e 5V na coluna 22 (fileira de baixo).",
+    "ESP32 virada 180° (USB-C para o lado da coluna 19): os fios caem nos pinos da memória flash e ela reinicia sem parar ('invalid header' na serial). A USB-C fica na ponta da COLUNA 1.",
+    "ESP32 deslocada uma coluna: TODOS os pinos ficam errados. Confira: 3V3 na coluna 1 e 5V na coluna 19 (fileira de baixo).",
     "Letras da protoboard invertidas (A no topo em vez de J): guie-se pelo NÚMERO da coluna; se as letras estiverem ao contrário, gire a protoboard.",
     "HC-SR04 com VCC e GND trocados: pode queimar o módulo. Leia a serigrafia (VCC | TRIG | ECHO | GND) antes de encaixar.",
     "ECHO ligado direto ao GPIO34 (sem divisor): proibido; entrega ~5 V a um pino de 3,3 V.",
     "Ramos do divisor trocados (os 1,3 kΩ em cima, o 1 kΩ embaixo): o nó cai para 2,2 V (abaixo de 2,475 V) e a leitura falha (sem dano, mas sem distância).",
-    "TCRT5000 ou potenciômetro ligados em 5 V: só podem usar 3V3.",
+    "TCRT5000 ligado no trilho + (5 V): ele só pode usar o 3V3 (furo 1A).",
+    "Trilhos trocados (vermelho/azul): confira a cor antes de encaixar; + é 5 V e − é GND.",
     "Fio em IO12, IO6…IO11 (SD0…CLK) ou TX0/RX0: proibido (boot loop, falha de flash ou serial).",
     "LCD com RW (pino 5) no ar: obrigatório ligar ao GND antes de energizar.",
     "Cabo USB só de carga (sem dados): a porta COM nunca aparece.",

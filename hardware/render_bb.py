@@ -62,7 +62,7 @@ class Frame:
 
     def hole(self, hole: str) -> tuple[float, float]:
         c, r = parse_hole(hole)
-        return self.px(c, model.ROW_Y[r])
+        return self.x0 + (model.hole_x(c, r) - 1) * K, self.y0 - model.ROW_Y[r] * K
 
 
 def _y_from_spec(v) -> float:
@@ -106,10 +106,15 @@ def draw_breadboard(f: Frame, parts: list[str]) -> None:
                 parts.append(_text((x_left + x_right) / 2, (cy0 + cy1) / 2 + 3, f"PROTOBOARD P{b + 1}  ·  furos escritos P{b + 1}:coluna+fileira (ex.: P{b + 1}:12E)",
                                    7.6, "#6a6658", weight="bold"))
         if rails:
-            for yv, col in ((15.9, "#1d4ed8"), (13.2, "#d11a1a"), (-3.2, "#1d4ed8"), (-4.35, "#d11a1a")):
-                a = f.px(c0 + 0.5, yv)
-                bb = f.px(c1 - 0.5, yv)
-                parts.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{bb[0]:.1f}" y2="{bb[1]:.1f}" stroke="{col}" stroke-width="1.4"/>')
+            ly = prof.rail_lines_y or {"red_top": 13.3, "blue_top": 15.6, "blue_bottom": -2.4, "red_bottom": -4.7}
+            for key, col in (("red_top", "#d11a1a"), ("blue_top", "#1d4ed8"), ("blue_bottom", "#1d4ed8"), ("red_bottom", "#d11a1a")):
+                a = f.px(c0 - 0.6, ly[key])
+                bb = f.px(c1 + 0.6, ly[key])
+                parts.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{bb[0]:.1f}" y2="{bb[1]:.1f}" stroke="{col}" stroke-width="1.6"/>')
+                sgn = "+" if key.startswith("red") else "−"
+                for xx in (c0 - 1.05, c1 + 1.05):
+                    tx = f.px(c0, 0)[0] + (xx - c0) * K
+                    parts.append(_text(tx, a[1] + 4, sgn, 11, col, weight="bold"))
         for row in "ABCDEFGHIJ":
             for cx in (c0 - 0.9, c1 + 0.9):
                 x, y = f.px(c0, model.ROW_Y[row])
@@ -121,10 +126,11 @@ def draw_breadboard(f: Frame, parts: list[str]) -> None:
             x, y = f.px(col, model.ROW_Y[row])
             parts.append(f'<rect x="{x - 3:.1f}" y="{y - 3:.1f}" width="6" height="6" rx="1.2" fill="#3b3b3b"/>')
     if rails:
-        for row in "WXYZ":
-            for col in prof.rail_cols:
-                x, y = f.px(col, model.ROW_Y[row])
-                parts.append(f'<rect x="{x - 3:.1f}" y="{y - 3:.1f}" width="6" height="6" rx="1.2" fill="#3b3b3b"/>')
+        for b in range(prof.boards):
+            for row in "WXYZ":
+                for rc in prof.rail_cols:
+                    x, y = f.hole(model.make_hole(b * cpb + rc, row))
+                    parts.append(f'<rect x="{x - 3:.1f}" y="{y - 3:.1f}" width="6" height="6" rx="1.2" fill="#3b3b3b"/>')
     # numeros de coluna impressos em cada placa (de 1 em 1)
     for col in range(1, n + 1):
         _, local = model.board_of(col)
@@ -215,7 +221,82 @@ def _hole_pin_marker(parts, x, y, colr="#d9b24a"):
     parts.append(f'<rect x="{x - 3.6:.1f}" y="{y - 3.6:.1f}" width="7.2" height="7.2" fill="{colr}" stroke="#7a5f12" stroke-width="0.8"/>')
 
 
+def offboard_geometry(f: Frame, lay: Layout, comp: dict) -> dict:
+    """Corpo e pinos (px) de um modulo FORA da protoboard, ligado por jumpers femea-macho."""
+    mod = lay.modules["modules"][comp["type"]]
+    ob = comp["offboard"]
+    cx, cy = f.px(ob["anchor"][0], ob["anchor"][1])
+    w, h = mod["body_mm"][0] * MM, mod["body_mm"][1] * MM
+    if comp["type"] == "tcrt5000_module":
+        w, h = max(w, 4 * K + 10), h
+    names = mod["pin_order"]
+    top = cy - h / 2
+    pins = {nm: (cx + (i - (len(names) - 1) / 2) * K, top - 10) for i, nm in enumerate(names)}
+    return {"cx": cx, "cy": cy, "w": w, "h": h, "top": top, "pins": pins, "names": names}
+
+
+def lead_points(f: Frame, lay: Layout, comp: dict, geo: dict | None = None) -> dict[str, list[tuple[float, float]]]:
+    """Caminho de cada jumper femea-macho: pino do modulo -> nivel abaixo da placa -> furo."""
+    geo = geo or offboard_geometry(f, lay, comp)
+    out = {}
+    pins = [p for p in geo["names"] if p in comp["pins"]]
+    order = sorted(pins, key=lambda p: abs(f.hole(comp["pins"][p])[0] - geo["pins"][p][0]))
+    base = f.px(0, -5.9)[1]
+    for k, p in enumerate(order):
+        x0, y0 = geo["pins"][p]
+        hx, hy = f.hole(comp["pins"][p])
+        lvl = base + k * 0.45 * K
+        out[p] = [(x0, y0), (x0, lvl), (hx, lvl), (hx, hy)]
+    return out
+
+
+def draw_offboard_module(f: Frame, lay: Layout, comp: dict, parts: list[str], new: bool, extra: str = "") -> None:
+    t, ref = comp["type"], comp["ref"]
+    geo = offboard_geometry(f, lay, comp)
+    cx, w, h, top = geo["cx"], geo["w"], geo["h"], geo["top"]
+    parts.append(f'<g id="{ref}" class="part{" new" if new else ""}" data-ref="{ref}"{extra}>')
+    if t == "hc_sr04":
+        parts.append(f'<rect x="{cx - w / 2:.1f}" y="{top:.1f}" width="{w:.1f}" height="{h:.1f}" rx="3" fill="#1e6fb5" fill-opacity="0.95" stroke="#0e3f6b" stroke-width="1.5"/>')
+        for kk in (0.25, 0.75):
+            tx, ty, r = cx - w / 2 + w * kk, top + h * 0.55, 8.0 * MM
+            parts.append(f'<circle cx="{tx:.1f}" cy="{ty:.1f}" r="{r:.1f}" fill="#c4c9cf" stroke="#6b737b" stroke-width="2"/>'
+                         f'<circle cx="{tx:.1f}" cy="{ty:.1f}" r="{r * 0.72:.1f}" fill="#8a9097" stroke="#555"/>'
+                         f'<circle cx="{tx:.1f}" cy="{ty:.1f}" r="{r * 0.28:.1f}" fill="#3d4247"/>')
+        parts.append(_text(cx, top + h * 0.55 + 3, "HC-SR04", 9, "#eaf4ff", weight="bold"))
+    else:
+        parts.append(f'<rect x="{cx - w / 2:.1f}" y="{top:.1f}" width="{w:.1f}" height="{h:.1f}" rx="2" fill="#243a8a" fill-opacity="0.95" stroke="#101c4a" stroke-width="1.5"/>')
+        parts.append(f'<rect x="{cx - w * 0.38:.1f}" y="{top + h * 0.62:.1f}" width="{w * 0.30:.1f}" height="{h * 0.3:.1f}" fill="#101010" stroke="#555"/>')
+        parts.append(f'<rect x="{cx + w * 0.08:.1f}" y="{top + h * 0.62:.1f}" width="{w * 0.24:.1f}" height="{h * 0.3:.1f}" fill="#2b66d9" stroke="#0a2a7a"/>')
+        parts.append(_text(cx, top + h * 0.45, "TCRT5000", 8, "#cfe0ff", weight="bold"))
+    parts.append(_text(cx, top + h + 12, "fora da protoboard · jumpers fêmea–macho", 7.5, "#555"))
+    # conector (pinos) na borda de cima, com o nome
+    for nm in geo["names"]:
+        x, y = geo["pins"][nm]
+        parts.append(f'<rect x="{x - 4:.1f}" y="{y:.1f}" width="8" height="10" fill="#222" stroke="#000" stroke-width="0.6"/>')
+        parts.append(_text(x, top + 9, nm, 6.6, "#fff", weight="bold"))
+    # jumpers
+    colors = comp["offboard"].get("leads", {})
+    for nm, pts in lead_points(f, lay, comp, geo).items():
+        colr = WIRE_COLORS.get(colors.get(nm, "grey"), "#999")
+        d = _rounded_polyline(pts)
+        parts.append(f'<g class="wire lead" data-id="{ref}.{nm}">')
+        parts.append(f'<path d="{d}" fill="none" stroke="#000" stroke-opacity="0.55" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"/>')
+        parts.append(f'<path class="core" d="{d}" fill="none" stroke="{colr}" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>')
+        hx, hy = pts[-1]
+        parts.append(f'<circle cx="{hx:.1f}" cy="{hy:.1f}" r="4.4" fill="{colr}" stroke="#000" stroke-width="1.2"/>')
+        tag = model.hole_tag(comp["pins"][nm])
+        tx, ty = _place_tag(hx, hy, tag, TAKEN_TAGS, 1.0)
+        tw_ = 7.2 * len(tag) + 6
+        parts.append(f'<g class="htag"><line x1="{hx:.1f}" y1="{hy:.1f}" x2="{tx + tw_ / 2:.1f}" y2="{ty + 6:.1f}" stroke="#555" stroke-width="0.7"/>'
+                     f'<rect x="{tx:.1f}" y="{ty:.1f}" width="{tw_:.1f}" height="12" rx="3" fill="#fff" fill-opacity="0.96" stroke="#555" stroke-width="0.8"/>'
+                     + _text(tx + tw_ / 2, ty + 9, tag, 8.2, "#111", weight="bold") + "</g>")
+        parts.append("</g>")
+    parts.append("</g>")
+
+
 def draw_module(f: Frame, lay: Layout, comp: dict, parts: list[str], new: bool, extra: str = "") -> None:
+    if comp.get("offboard"):
+        return draw_offboard_module(f, lay, comp, parts, new, extra)
     t = comp["type"]
     mod = lay.modules["modules"][t]
     ref = comp["ref"]
@@ -396,6 +477,7 @@ def draw_wire(f: Frame, w: dict, parts: list[str], new: bool, show_tags: bool, t
                  + _text(lx, ly + 3.6 * sc, label, 8.6 * sc, "#111", weight="bold") + "</g>")
     if show_tags:
         for (x, y), hole in ((pts[0], w["from"]), (pts[-1], w["to"])):
+            hole = model.hole_tag(hole)
             tx, ty = _place_tag(x, y, hole, TAKEN_TAGS, sc)
             tw_ = (7.2 * len(hole) + 6) * sc
             parts.append(f'<g class="htag"><line x1="{x:.1f}" y1="{y:.1f}" x2="{tx + tw_ / 2:.1f}" y2="{ty + 6 * sc:.1f}" stroke="#555" stroke-width="0.7"/>'
@@ -414,6 +496,11 @@ def _bounds_pitch(lay: Layout, scene: Scene) -> tuple[float, float, float, float
         if comp["ref"] in scene.exclude_refs or (scene.include_refs is not None and comp["ref"] not in scene.include_refs):
             continue
         mod = lay.modules["modules"][t]
+        if comp.get("offboard"):
+            ax, ay = comp["offboard"]["anchor"]
+            xs += [ax - mod["body_mm"][0] / 2.54 / 2 - 0.5, ax + mod["body_mm"][0] / 2.54 / 2 + 0.5]
+            ys += [ay - mod["body_mm"][1] / 2.54 / 2 - 1.2, ay + mod["body_mm"][1] / 2.54 / 2 + 1.2]
+            continue
         cols = [parse_hole(h)[0] for h in comp["pins"].values()]
         row = parse_hole(next(iter(comp["pins"].values())))[1]
         wp = mod["body_mm"][0] / 2.54
@@ -429,7 +516,7 @@ def _bounds_pitch(lay: Layout, scene: Scene) -> tuple[float, float, float, float
     for mk in scene.markers:
         col = parse_hole(mk["hole"])[0]
         xs.append(col + (50 + 6.6 * len(mk["text"])) / K)
-        ys.append(model.ROW_Y[parse_hole(mk["hole"])[1]] + (70 / K if mk.get("dir") == "up" else -4.5))
+        ys.append(model.ROW_Y[parse_hole(mk["hole"])[1]] + (170 / K if mk.get("dir") == "up" else -4.5))
     for w in lay.wires_at(scene.stage):
         if w["id"] in scene.exclude_wires or (scene.include_refs is not None and w["id"] not in scene.include_refs):
             continue
@@ -520,15 +607,19 @@ def render_scene(lay: Layout, scene: Scene) -> tuple[str, dict]:
     # zonas de dominio de tensao (Estagio B+): ECHO 5 V x no <= 3,3 V
     if "R1" in {c["ref"] for c in comps}:
         body.append(f'<g class="zone"{gx("R1")}>')
-        ze = [lay.pin_hole("M1", "ECHO")]
-        echo_col = parse_hole(lay.pin_hole("M1", "ECHO"))[0]
-        node_col = parse_hole(lay.components["R1"]["legs"][1])[0]
-        zx, zy = f.hole(model.make_hole(echo_col, "F"))
-        zx2, zy2 = f.hole(model.make_hole(echo_col, "J"))
-        body.append(f'<rect x="{zx - 12:.1f}" y="{zy2 - 12:.1f}" width="24" height="{zy - zy2 + 24:.1f}" rx="6" fill="#ff5a5a" fill-opacity="0.16" stroke="#e03b3b" stroke-width="1.2" stroke-dasharray="4 3"/>')
-        nx, ny = f.hole(model.make_hole(node_col, "F"))
-        nx2, ny2 = f.hole(model.make_hole(node_col, "J"))
-        body.append(f'<rect x="{nx - 12:.1f}" y="{ny2 - 12:.1f}" width="24" height="{ny - ny2 + 24:.1f}" rx="6" fill="#3ecf6b" fill-opacity="0.16" stroke="#1f9d46" stroke-width="1.2" stroke-dasharray="4 3"/>')
+        ze = []
+        r1 = lay.components["R1"]
+
+        def zone(hole: str, fill: str, stroke: str) -> tuple[float, float]:
+            col, row = parse_hole(hole)
+            rows = ("F", "J") if row in model.UPPER_ROWS else ("A", "E")
+            xa, ya = f.hole(model.make_hole(col, rows[0]))
+            xb, yb = f.hole(model.make_hole(col, rows[1]))
+            y0, y1 = min(ya, yb), max(ya, yb)
+            body.append(f'<rect x="{xa - 12:.1f}" y="{y0 - 12:.1f}" width="24" height="{y1 - y0 + 24:.1f}" rx="6" fill="{fill}" fill-opacity="0.16" stroke="{stroke}" stroke-width="1.2" stroke-dasharray="4 3"/>')
+            return xa, y0
+        zx, _ = zone(r1["legs"][0], "#ff5a5a", "#e03b3b")
+        nx, _ = zone(r1["legs"][1], "#3ecf6b", "#1f9d46")
         cy_ch = f.px(0, 5.5)[1]
         top = [c for c in comps if c.get("role") == "divider_top"]
         bot = [c for c in comps if str(c.get("role", "")).startswith("divider_bottom")]
@@ -537,18 +628,17 @@ def render_scene(lay: Layout, scene: Scene) -> tuple[str, dict]:
         body.append(_text(zx, cy_ch + 8, "5 V", 8.6, "#b02020", weight="bold"))
         body.append(_text(nx, cy_ch - 2, "NÓ", 8.6, "#157a35", weight="bold"))
         body.append(_text(nx, cy_ch + 8, f"≈{vnode:.1f} V".replace(".", ","), 8.6, "#157a35", weight="bold"))
-        # junção entre resistores do ramo de baixo (coluna compartilhada por pernas de dois resistores)
-        legs_cols = {}
+        # junção entre resistores do ramo de baixo (tira compartilhada por pernas de dois resistores; trilhos nao contam)
+        legs_grp: dict = {}
         for c in bot:
             for h_ in c["legs"]:
-                legs_cols.setdefault(parse_hole(h_)[0], []).append(c["ref"])
-        for mc, refs in sorted(legs_cols.items()):
-            if len(refs) == 2:
-                mx0, my0 = f.hole(model.make_hole(mc, "F"))
-                mx1, my1 = f.hole(model.make_hole(mc, "J"))
-                body.append(f'<rect x="{mx0 - 12:.1f}" y="{my1 - 12:.1f}" width="24" height="{my0 - my1 + 24:.1f}" rx="6" fill="#e8c34a" fill-opacity="0.18" stroke="#b08a10" stroke-width="1.2" stroke-dasharray="4 3"/>')
+                if parse_hole(h_)[1] not in model.RAIL_ROWS:
+                    legs_grp.setdefault(model.hole_group(h_), []).append((c["ref"], h_))
+        for grp, items in sorted(legs_grp.items(), key=lambda kv: str(kv[0])):
+            if len(items) == 2:
+                mx0, _ = zone(items[0][1], "#e8c34a", "#b08a10")
                 body.append(_text(mx0, cy_ch - 2, "MEIO", 8.6, "#7a5a00", weight="bold"))
-                body.append(_text(mx0, cy_ch + 8, f"{'/'.join(refs)}", 8.0, "#7a5a00", weight="bold"))
+                body.append(_text(mx0, cy_ch + 8, "/".join(r for r, _ in items), 8.0, "#7a5a00", weight="bold"))
         body.append("</g>")
         _ = ze
     for comp in comps:
@@ -571,9 +661,9 @@ def render_scene(lay: Layout, scene: Scene) -> tuple[str, dict]:
         mx_, my_ = f.hole(mk["hole"])
         tw_ = 6.6 * len(mk["text"]) + 14
         up = mk.get("dir") == "up"                      # chamada para cima (livra os resistores quando o furo esta na fileira J)
-        dy_line, dy_box, dy_txt = (-11, -64, -50) if up else (11, 44, 58)
+        dy_line, dy_box, dy_txt = (-11, -164, -150) if up else (11, 44, 58)
         body.append(f'<g class="marker"{gx(mk.get("id", ""))}><circle cx="{mx_:.1f}" cy="{my_:.1f}" r="11" fill="none" stroke="#e0007a" stroke-width="3"/>'
-                    f'<line x1="{mx_:.1f}" y1="{my_ + dy_line:.1f}" x2="{mx_ + 24:.1f}" y2="{my_ + (-44 if up else 44):.1f}" stroke="#e0007a" stroke-width="2"/>'
+                    f'<line x1="{mx_:.1f}" y1="{my_ + dy_line:.1f}" x2="{mx_ + 24:.1f}" y2="{my_ + (-144 if up else 44):.1f}" stroke="#e0007a" stroke-width="2"/>'
                     f'<rect x="{mx_ + 24:.1f}" y="{my_ + dy_box:.1f}" width="{tw_:.1f}" height="20" rx="5" fill="#fff0f8" stroke="#e0007a" stroke-width="1.6"/>'
                     + _text(mx_ + 24 + tw_ / 2, my_ + dy_txt, mk["text"], 10.5, "#8a004c", weight="bold") + "</g>")
     out.extend(body)
@@ -617,7 +707,7 @@ def item_bbox(lay: Layout, meta: dict, ident: str, scene: Scene) -> tuple[float,
     elif any(m.get("id") == ident for m in scene.markers):
         m = next(m for m in scene.markers if m.get("id") == ident)
         x, y = f.hole(m["hole"])
-        pts = [(x - 12, y - 70), (x + 40 + 6.6 * len(m["text"]), y + 12)] if m.get("dir") == "up" else [(x - 12, y - 12), (x + 40 + 6.6 * len(m["text"]), y + 70)]
+        pts = [(x - 12, y - 170), (x + 40 + 6.6 * len(m["text"]), y + 12)] if m.get("dir") == "up" else [(x - 12, y - 12), (x + 40 + 6.6 * len(m["text"]), y + 70)]
         pad = 0
     elif ident in lay.components:
         comp = lay.components[ident]
@@ -634,6 +724,10 @@ def item_bbox(lay: Layout, meta: dict, ident: str, scene: Scene) -> tuple[float,
         elif t == "resistor":
             pts = [f.hole(h) for h in comp["legs"]]
             pad = 34.0
+        elif comp.get("offboard"):
+            geo = offboard_geometry(f, lay, comp)
+            pts = [f.hole(h) for h in comp["pins"].values()] + [(geo["cx"] - geo["w"] / 2, geo["top"] - 12), (geo["cx"] + geo["w"] / 2, geo["top"] + geo["h"] + 16)]
+            pad = 20
         else:
             mod = lay.modules["modules"][t]
             holes = [f.hole(h) for h in comp["pins"].values()]

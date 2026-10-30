@@ -121,8 +121,33 @@
     "bb400x2": {
       "title": "Duas meias-protoboards de 30 colunas encaixadas pela ponta (P1 = colunas 1-30, P2 = colunas 1-30 da segunda placa)",
       "n_cols": 60,
-      "rail_cols": [],
-      "rails_in_this_project": false,
+      "rail_cols": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        17,
+        18,
+        19,
+        21,
+        22,
+        23,
+        24,
+        25,
+        27,
+        28,
+        29,
+        30
+      ],
+      "rails_in_this_project": true,
       "fz_module_id": "0152b316-ca6e-11ee-a6fa-8be78db221f8BreadboardModuleID",
       "fz_path": ":/resources/parts/core/Half_breadboard_v2.fzp",
       "fz_reference_fzp": "core/Half_breadboard_v2.fzp",
@@ -137,7 +162,21 @@
       "boards": 2,
       "cols_per_board": 30,
       "board_gap_pitch": 2.49,
-      "_note": "Furos da 2a placa sao escritos 'P2:5E'. Internamente a coluna e 30 + 5. As placas encostam pela ponta: a coluna 1 da P2 fica depois da coluna 30 da P1."
+      "_note": "Furos da 2a placa sao escritos 'P2:5E'. Internamente a coluna e 30 + 5. As placas encostam pela ponta: a coluna 1 da P2 fica depois da coluna 30 da P1.",
+      "rail_x_offset": -1.6278,
+      "rail_polarity": {
+        "Y": "+",
+        "Z": "-",
+        "X": "-",
+        "W": "+"
+      },
+      "rail_lines_y": {
+        "red_top": 13.306,
+        "blue_top": 15.639,
+        "blue_bottom": -2.361,
+        "red_bottom": -4.694
+      },
+      "_rails_note": "Trilhos medidos no Half_breadboard56a.svg: furo do trilho pinN em x = 17 + 9*(N-3) (unidades do SVG), fileiras Y/Z (topo) e X/W (base). Cores no SVG: topo Y(interna)=+ vermelho, Z(externa)=- azul; base X(interna)=- azul, W(externa)=+ vermelho. Cada placa tem seus proprios trilhos (P1 e P2 so se ligam por fio). Pino 31 nao e usado (passaria da coluna 30)."
     }
   }
 }

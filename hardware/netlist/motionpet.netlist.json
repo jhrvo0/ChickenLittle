@@ -13,8 +13,8 @@
  "breadboard": {
   "profile": "bb400x2",
   "rail_split": null,
-  "rails_used": false,
-  "orientation": "Duas meias-protoboards (30 colunas, A-J) encaixadas pela ponta. P1 = placa da ESP32 (furos sem prefixo, ex.: 21J). P2 = segunda placa, encostada na coluna 30 da P1 (furos com prefixo, ex.: P2:12E). Fileira J no topo e A embaixo. Os trilhos de alimentacao NAO sao usados."
+  "rails_used": true,
+  "orientation": "Duas meias-protoboards (30 colunas, A-J) encaixadas pela ponta. P1 = placa da ESP32 (furos sem prefixo, ex.: 22C). P2 = segunda placa, encostada na coluna 30 da P1 (furos com prefixo, ex.: P2:12F). Fileira J no topo e A embaixo. Trilhos: so os de BAIXO sao usados (vermelho + = 5 V, azul - = GND); em qualquer furo do trilho da no mesmo. A P2 recebe 5 V e GND por dois fios-ponte vindos dos trilhos da P1."
  },
  "stage_order": [
   "A",
@@ -33,8 +33,8 @@
    "goal": "Medir distancia com ECHO protegido (<= 3,30 V no GPIO34). PRIORIDADE MAXIMA."
   },
   "C": {
-   "title": "TCRT5000 + potenciometro",
-   "goal": "Adicionar deteccao IR (GPIO35) e entrada analogica (GPIO36), ambos em 3,3 V."
+   "title": "TCRT5000",
+   "goal": "Adicionar deteccao IR (GPIO35) em 3,3 V. (O potenciometro foi removido.)"
   },
   "D": {
    "title": "LCD 2004A",
@@ -50,7 +50,7 @@
    "ref": "BB1",
    "type": "breadboard",
    "stage": "A",
-   "label": "Meia-protoboard 30 colunas (A-J x 1-30)",
+   "label": "Duas meias-protoboards de 30 colunas (P1 e P2), com trilhos + e - dos dois lados",
    "status": "ASSUMED_PENDING_PHYSICAL_CONFIRMATION"
   },
   {
@@ -76,12 +76,25 @@
    "stage": "B",
    "label": "HC-SR04",
    "pins": {
-    "VCC": "21J",
-    "TRIG": "22J",
-    "ECHO": "23J",
-    "GND": "24J"
+    "VCC": "24W",
+    "TRIG": "10J",
+    "ECHO": "22E",
+    "GND": "25X"
    },
-   "status": "STANDARD_PINOUT_PENDING_PHYSICAL_CONFIRMATION"
+   "status": "STANDARD_PINOUT_PENDING_PHYSICAL_CONFIRMATION",
+   "offboard": {
+    "anchor": [
+     24.0,
+     -12.6
+    ],
+    "leads": {
+     "VCC": "red",
+     "TRIG": "yellow",
+     "ECHO": "orange",
+     "GND": "black"
+    }
+   },
+   "note": "Fica FORA da protoboard, ligado por 4 jumpers femea-macho (a ponta femea no pino do sensor). Assim voce aponta o sensor para onde quiser."
   },
   {
    "ref": "R1",
@@ -91,12 +104,11 @@
    "ohms": 1000,
    "tolerance": 0.05,
    "legs": [
-    "23H",
-    "27H"
+    "22C",
+    "26C"
    ],
    "role": "divider_top",
-   "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION",
-   "label_pos": "right"
+   "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION"
   },
   {
    "ref": "R2",
@@ -106,27 +118,25 @@
    "ohms": 1000,
    "tolerance": 0.05,
    "legs": [
-    "27F",
-    "30F"
+    "26D",
+    "29D"
    ],
    "role": "divider_bottom",
-   "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION",
-   "label_pos": "right"
+   "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION"
   },
   {
    "ref": "R3",
    "type": "resistor",
    "stage": "B",
-   "label": "R3 divisor (meio -> GND)",
+   "label": "R3 divisor (meio -> trilho -)",
    "ohms": 300,
    "tolerance": 0.05,
    "legs": [
-    "30G",
-    "24G"
+    "29A",
+    "30X"
    ],
    "role": "divider_bottom",
-   "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION",
-   "label_pos": "right"
+   "status": "VALUE_PENDING_PHYSICAL_CONFIRMATION"
   },
   {
    "ref": "M2",
@@ -134,24 +144,23 @@
    "stage": "C",
    "label": "TCRT5000 (modulo LM393)",
    "pins": {
-    "VCC": "21A",
-    "GND": "22A",
-    "DO": "23A",
-    "AO": "24A"
+    "VCC": "1A",
+    "GND": "9X",
+    "DO": "6A"
    },
-   "status": "PIN_ORDER_UNCONFIRMED"
-  },
-  {
-   "ref": "P1",
-   "type": "potentiometer",
-   "stage": "C",
-   "label": "Potenciometro rotativo",
-   "pins": {
-    "END_A": "28A",
-    "WIPER": "29A",
-    "END_B": "30A"
+   "status": "PIN_ORDER_UNCONFIRMED",
+   "offboard": {
+    "anchor": [
+     5.0,
+     -15.5
+    ],
+    "leads": {
+     "VCC": "orange",
+     "GND": "black",
+     "DO": "blue"
+    }
    },
-   "status": "PENDING_PHYSICAL_CONFIRMATION"
+   "note": "Fica FORA da protoboard, ligado por 3 jumpers femea-macho. O pino AO fica sem fio."
   },
   {
    "ref": "M3",
@@ -159,25 +168,25 @@
    "stage": "D",
    "label": "LCD 2004A V1.1",
    "pins": {
-    "VSS": "P2:12A",
-    "VDD": "P2:13A",
-    "V0": "P2:14A",
-    "RS": "P2:15A",
-    "RW": "P2:16A",
-    "E": "P2:17A",
-    "D0": "P2:18A",
-    "D1": "P2:19A",
-    "D2": "P2:20A",
-    "D3": "P2:21A",
-    "D4": "P2:22A",
-    "D5": "P2:23A",
-    "D6": "P2:24A",
-    "D7": "P2:25A",
-    "A": "P2:26A",
-    "K": "P2:27A"
+    "VSS": "P2:12J",
+    "VDD": "P2:13J",
+    "V0": "P2:14J",
+    "RS": "P2:15J",
+    "RW": "P2:16J",
+    "E": "P2:17J",
+    "D0": "P2:18J",
+    "D1": "P2:19J",
+    "D2": "P2:20J",
+    "D3": "P2:21J",
+    "D4": "P2:22J",
+    "D5": "P2:23J",
+    "D6": "P2:24J",
+    "D7": "P2:25J",
+    "A": "P2:26J",
+    "K": "P2:27J"
    },
    "status": "PENDING_PHYSICAL_CONFIRMATION",
-   "note": "Encaixe pelo conector de 16 pinos na fileira A da P2 (pino 1 = VSS na coluna 12); o display fica para FORA da placa, do lado da fileira A."
+   "note": "Encaixe pelo conector de 16 pinos na fileira J da P2 (pino 1 = VSS na coluna 12); o display fica para FORA da placa, do lado de cima."
   },
   {
    "ref": "R4",
@@ -187,12 +196,12 @@
    "ohms": 1000,
    "tolerance": 0.05,
    "legs": [
-    "P2:14B",
-    "P2:10B"
+    "P2:14F",
+    "P2:14E"
    ],
    "role": "lcd_contrast",
    "status": "ADJUST_ON_BENCH",
-   "note": "1 kΩ de V0 ao GND (faixa recomendada nos docs: 1,0-2,2 kΩ). Se aparecerem só blocos pretos, troque por 1 kΩ + 1 kΩ em série; se não aparecer nada, tente 300 Ω (confirmação C07)."
+   "note": "1 kΩ atravessando o canal na coluna 14 da P2: liga o V0 ao GND (via o fio W10). Se aparecerem só blocos pretos, troque por 1 kΩ + 1 kΩ; se a tela ficar vazia, use 300 Ω (C07)."
   },
   {
    "ref": "R5",
@@ -202,12 +211,12 @@
    "ohms": 300,
    "tolerance": 0.05,
    "legs": [
-    "P2:29B",
-    "P2:26B"
+    "P2:26E",
+    "P2:26F"
    ],
    "role": "lcd_backlight",
    "status": "CONDITIONAL_PENDING_PHYSICAL_CONFIRMATION",
-   "note": "Limita a corrente do LED do backlight. Seguro mesmo que a placa já tenha o resistor SMD (só deixa a luz mais fraca)."
+   "note": "300 Ω atravessando o canal na coluna 26 da P2: leva 5 V (via o fio W11) ao anodo do backlight. Seguro mesmo que a placa já tenha o resistor SMD (só deixa a luz mais fraca)."
   }
  ],
  "wires": [
@@ -216,366 +225,191 @@
    "stage": "B",
    "net": "5V",
    "from": "19A",
-   "to": "21H",
+   "to": "21W",
    "color": "red",
-   "via": [
-    [
-     19,
-     -1.0
-    ],
-    [
-     20.65,
-     -1.0
-    ],
-    [
-     20.65,
-     "H"
-    ]
-   ],
-   "label": "5V -> VCC do HC-SR04",
-   "purpose": "Alimenta o HC-SR04 com 5 V (pino 5V da ESP32).",
+   "via": [],
+   "label": "5V da ESP32 -> trilho + (vermelho) de baixo",
+   "purpose": "Leva os 5 V da USB ao trilho + de baixo da P1.",
    "voltage": "4,75-5,25 V",
-   "safety": "Somente HC-SR04 e LCD usam 5 V. NUNCA levar este fio ao TCRT5000 ou ao potenciometro.",
+   "safety": "So o HC-SR04 e o LCD usam 5 V. NUNCA ligue o TCRT5000 no trilho +.",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
    "id": "W2",
    "stage": "B",
    "net": "GND",
-   "from": "7J",
-   "to": "24I",
+   "from": "14A",
+   "to": "15X",
    "color": "black",
-   "via": [
-    [
-     7,
-     12.5
-    ],
-    [
-     25.5,
-     12.5
-    ],
-    [
-     25.5,
-     "I"
-    ]
-   ],
-   "label": "GND -> GND do HC-SR04",
-   "purpose": "Terra comum entre ESP32 e HC-SR04 (inclui o ramo inferior do divisor, R3).",
+   "via": [],
+   "label": "GND da ESP32 -> trilho - (azul) de baixo",
+   "purpose": "Terra comum no trilho - de baixo da P1.",
    "voltage": "0 V",
-   "safety": "Sem terra comum o ECHO flutua e pode injetar 5 V no GPIO.",
+   "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
    "id": "W3",
    "stage": "B",
-   "net": "TRIG",
-   "from": "10J",
-   "to": "22I",
-   "color": "yellow",
-   "via": [
-    [
-     10,
-     11.8
-    ],
-    [
-     20.65,
-     11.8
-    ],
-    [
-     20.65,
-     "I"
-    ]
-   ],
-   "label": "GPIO5 -> TRIG",
-   "purpose": "Pulso de disparo: saida 3,3 V do GPIO5 (o TTL do HC-SR04 aceita >= 2,0 V).",
-   "voltage": "0 / 3,3 V",
-   "safety": "GPIO5 e pino de strapping; usa-lo como saida e aceitavel.",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W4",
-   "stage": "B",
    "net": "ECHO_NODE",
-   "from": "27I",
+   "from": "26E",
    "to": "5A",
    "color": "green",
    "via": [
     [
-     25.9,
-     "I"
+     26.4,
+     "E"
     ],
     [
-     25.9,
-     -2.2
+     26.4,
+     -1.3
     ],
     [
      5,
-     -2.2
+     -1.3
     ]
    ],
    "label": "No do divisor -> GPIO34",
    "purpose": "Leva o ECHO ja reduzido (2,83 V nominal) ao GPIO34, pino somente-entrada.",
-   "voltage": "0 / 2,83 V (2,97 V max. nominal; pior caso 3,10 V)",
-   "safety": "NAO instalar antes de medir o no <= 3,30 V (ponto de parada da etapa B).",
+   "voltage": "0 / 2,83 V (pior caso 3,10 V)",
+   "safety": "So instale depois do ensaio do passo 5.",
+   "validation": "PENDING_PHYSICAL_VALIDATION"
+  },
+  {
+   "id": "W4",
+   "stage": "D",
+   "net": "5V",
+   "from": "30W",
+   "to": "P2:3W",
+   "color": "red",
+   "via": [],
+   "label": "Ponte 5 V: trilho + da P1 -> trilho + da P2",
+   "purpose": "Os trilhos da P1 e da P2 nao se ligam sozinhos.",
+   "voltage": "4,75-5,25 V",
+   "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
    "id": "W5",
-   "stage": "C",
-   "net": "3V3",
-   "from": "1A",
-   "to": "21D",
-   "color": "orange",
-   "via": [
-    [
-     1,
-     -3.0
-    ],
-    [
-     24.8,
-     -3.0
-    ],
-    [
-     24.8,
-     "D"
-    ]
-   ],
-   "label": "3V3 -> VCC do TCRT5000",
-   "purpose": "Alimenta o modulo IR em 3,3 V.",
-   "voltage": "3,25-3,35 V",
-   "safety": "NUNCA ligar o TCRT5000 em 5 V.",
+   "stage": "D",
+   "net": "GND",
+   "from": "29X",
+   "to": "P2:3X",
+   "color": "black",
+   "via": [],
+   "label": "Ponte GND: trilho - da P1 -> trilho - da P2",
+   "purpose": "Os trilhos da P1 e da P2 nao se ligam sozinhos.",
+   "voltage": "0 V",
+   "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
    "id": "W6",
-   "stage": "C",
-   "net": "3V3",
-   "from": "21E",
-   "to": "28E",
-   "color": "orange",
+   "stage": "D",
+   "net": "GND",
+   "from": "P2:12F",
+   "to": "P2:13X",
+   "color": "black",
    "via": [],
-   "label": "3V3 -> extremo do potenciometro",
-   "purpose": "Alimenta o potenciometro em 3,3 V (derivado da coluna 21).",
-   "voltage": "3,25-3,35 V",
-   "safety": "NUNCA ligar o potenciometro em 5 V.",
+   "label": "VSS (pino 1) -> trilho -",
+   "purpose": "Terra logico do LCD.",
+   "voltage": "0 V",
+   "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
    "id": "W7",
-   "stage": "C",
-   "net": "GND",
-   "from": "22C",
-   "to": "24F",
-   "color": "black",
+   "stage": "D",
+   "net": "5V",
+   "from": "P2:13F",
+   "to": "P2:15W",
+   "color": "red",
    "via": [],
-   "label": "GND do TCRT5000 -> GND do sensor",
-   "purpose": "Leva o terra do modulo IR ate a coluna 24 (GND comum do lado de cima).",
-   "voltage": "0 V",
+   "label": "VDD (pino 2) -> trilho +",
+   "purpose": "Alimenta o LCD em 5 V.",
+   "voltage": "4,75-5,25 V",
    "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
    "id": "W8",
-   "stage": "C",
-   "net": "GND",
-   "from": "30D",
-   "to": "24H",
-   "color": "black",
-   "via": [],
-   "label": "GND do potenciometro -> GND do sensor",
-   "purpose": "Leva o terra do potenciometro ate a coluna 24 (GND comum).",
-   "voltage": "0 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W9",
-   "stage": "C",
-   "net": "IR_DO",
-   "from": "23B",
-   "to": "6A",
-   "color": "blue",
-   "via": [
-    [
-     25.5,
-     "B"
-    ],
-    [
-     25.5,
-     -1.8
-    ],
-    [
-     6,
-     -1.8
-    ]
-   ],
-   "label": "DO -> GPIO35",
-   "purpose": "Saida digital do TCRT5000 (0/3,3 V) ao GPIO35, somente-entrada.",
-   "voltage": "0 / 3,3 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W10",
-   "stage": "C",
-   "net": "POT_WIPER",
-   "from": "29B",
-   "to": "3A",
-   "color": "purple",
-   "via": [
-    [
-     26.9,
-     "B"
-    ],
-    [
-     26.9,
-     -2.6
-    ],
-    [
-     3,
-     -2.6
-    ]
-   ],
-   "label": "Cursor -> GPIO36 (VP)",
-   "purpose": "Cursor do potenciometro (0-3,3 V) ao ADC1_CH0.",
-   "voltage": "0-3,3 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W11",
    "stage": "D",
    "net": "GND",
-   "from": "30E",
-   "to": "P2:12E",
-   "color": "black",
-   "via": [
-    [
-     30.6,
-     4.55
-    ],
-    [
-     41.6,
-     4.55
-    ]
-   ],
-   "label": "GND -> VSS do LCD",
-   "purpose": "Leva o terra da P1 (coluna 30, mesma tira do GND do potenciometro) ao pino 1 do LCD.",
-   "voltage": "0 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W12",
-   "stage": "D",
-   "net": "GND",
-   "from": "P2:12C",
-   "to": "P2:16C",
+   "from": "P2:16F",
+   "to": "P2:17X",
    "color": "black",
    "via": [],
-   "label": "VSS -> RW (pino 5)",
+   "label": "RW (pino 5) -> trilho -",
    "purpose": "RW permanentemente em GND: o LCD so recebe dados (nunca devolve 5 V aos GPIOs).",
    "voltage": "0 V",
    "safety": "OBRIGATORIO: RW = 0 Ω para GND antes de ligar.",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
-   "id": "W13",
+   "id": "W9",
    "stage": "D",
    "net": "GND",
-   "from": "P2:16D",
-   "to": "P2:27D",
+   "from": "P2:27F",
+   "to": "P2:29X",
    "color": "black",
    "via": [],
-   "label": "RW -> K (pino 16)",
-   "purpose": "Catodo do backlight no GND.",
+   "label": "K (pino 16) -> trilho -",
+   "purpose": "Catodo do backlight.",
    "voltage": "0 V",
    "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
-   "id": "W14",
+   "id": "W10",
    "stage": "D",
    "net": "GND",
-   "from": "P2:12D",
-   "to": "P2:10D",
+   "from": "P2:14A",
+   "to": "P2:16X",
    "color": "black",
    "via": [],
-   "label": "VSS -> coluna 10 (ponta de R4)",
-   "purpose": "Leva o GND a coluna 10 da P2, onde fica a ponta de baixo do R4 (contraste).",
+   "label": "Ponta de baixo do R4 -> trilho -",
+   "purpose": "Fecha o contraste (V0 -> R4 -> GND).",
    "voltage": "0 V",
    "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
-   "id": "W15",
+   "id": "W11",
    "stage": "D",
    "net": "5V",
-   "from": "21F",
-   "to": "P2:13E",
+   "from": "P2:26A",
+   "to": "P2:28W",
    "color": "red",
-   "via": [
-    [
-     21.35,
-     "F"
-    ],
-    [
-     21.35,
-     5.55
-    ],
-    [
-     43,
-     5.55
-    ]
-   ],
-   "label": "5V -> VDD (pino 2)",
-   "purpose": "Alimenta o LCD em 5 V (coluna 21 da P1 = 5 V).",
+   "via": [],
+   "label": "Ponta de baixo do R5 -> trilho +",
+   "purpose": "Leva 5 V ao resistor do backlight.",
    "voltage": "4,75-5,25 V",
    "safety": "",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
-   "id": "W16",
-   "stage": "D",
-   "net": "5V",
-   "from": "21I",
-   "to": "P2:29E",
-   "color": "red",
-   "via": [
-    [
-     21.55,
-     "I"
-    ],
-    [
-     21.55,
-     6.15
-    ],
-    [
-     59,
-     6.15
-    ]
-   ],
-   "label": "5V -> R5 (backlight)",
-   "purpose": "Leva 5 V a coluna 29 da P2, ponta de cima do R5.",
-   "voltage": "4,75-5,25 V",
-   "safety": "",
-   "validation": "PENDING_PHYSICAL_VALIDATION"
-  },
-  {
-   "id": "W17",
+   "id": "W12",
    "stage": "D",
    "net": "LCD_RS",
    "from": "8J",
-   "to": "P2:15E",
+   "to": "P2:15I",
    "color": "blue",
    "via": [
     [
      8,
-     12.9
+     13.0
+    ],
+    [
+     20.9,
+     13.0
+    ],
+    [
+     20.9,
+     10.4
     ],
     [
      45,
-     12.9
+     10.4
     ]
    ],
    "label": "GPIO19 -> RS (pino 4)",
@@ -585,20 +419,28 @@
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
-   "id": "W18",
+   "id": "W13",
    "stage": "D",
    "net": "LCD_E",
    "from": "9J",
-   "to": "P2:17E",
+   "to": "P2:17I",
    "color": "green",
    "via": [
     [
      9,
-     13.35
+     12.65
+    ],
+    [
+     20.7,
+     12.65
+    ],
+    [
+     20.7,
+     9.8
     ],
     [
      47,
-     13.35
+     9.8
     ]
    ],
    "label": "GPIO18 -> E (pino 6)",
@@ -608,20 +450,28 @@
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
-   "id": "W19",
+   "id": "W14",
    "stage": "D",
    "net": "LCD_D4",
    "from": "6J",
-   "to": "P2:22E",
+   "to": "P2:22I",
    "color": "white",
    "via": [
     [
      6,
-     13.8
+     12.3
+    ],
+    [
+     20.5,
+     12.3
+    ],
+    [
+     20.5,
+     9.2
     ],
     [
      52,
-     13.8
+     9.2
     ]
    ],
    "label": "GPIO21 -> D4 (pino 11)",
@@ -631,20 +481,28 @@
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
-   "id": "W20",
+   "id": "W15",
    "stage": "D",
    "net": "LCD_D5",
    "from": "3J",
-   "to": "P2:23E",
+   "to": "P2:23I",
    "color": "brown",
    "via": [
     [
      3,
-     14.25
+     11.95
+    ],
+    [
+     20.3,
+     11.95
+    ],
+    [
+     20.3,
+     8.6
     ],
     [
      53,
-     14.25
+     8.6
     ]
    ],
    "label": "GPIO22 -> D5 (pino 12)",
@@ -654,20 +512,28 @@
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
-   "id": "W21",
+   "id": "W16",
    "stage": "D",
    "net": "LCD_D6",
    "from": "2J",
-   "to": "P2:24E",
+   "to": "P2:24I",
    "color": "orange",
    "via": [
     [
      2,
-     14.7
+     11.6
+    ],
+    [
+     20.1,
+     11.6
+    ],
+    [
+     20.1,
+     8.0
     ],
     [
      54,
-     14.7
+     8.0
     ]
    ],
    "label": "GPIO23 -> D6 (pino 13)",
@@ -677,28 +543,20 @@
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
-   "id": "W22",
+   "id": "W17",
    "stage": "D",
    "net": "LCD_D7",
    "from": "11A",
-   "to": "P2:25E",
+   "to": "P2:25G",
    "color": "purple",
    "via": [
     [
      11,
-     -3.6
-    ],
-    [
-     31.2,
-     -3.6
-    ],
-    [
-     31.2,
-     15.15
+     -1.9
     ],
     [
      55,
-     15.15
+     -1.9
     ]
    ],
    "label": "GPIO27 -> D7 (pino 14)",
@@ -722,7 +580,6 @@
     "M1.GND",
     "R3.B",
     "M2.GND",
-    "P1.END_B",
     "M3.VSS",
     "M3.RW",
     "M3.K",
@@ -752,8 +609,7 @@
    "v_max": 3.35,
    "pins": [
     "U1.3V3",
-    "M2.VCC",
-    "P1.END_A"
+    "M2.VCC"
    ],
    "note": "3,3 V do regulador da ESP32."
   },
@@ -819,19 +675,6 @@
     "U1.IO35"
    ],
    "note": "Saida digital do TCRT5000.",
-   "v_max_at_gpio": 3.3
-  },
-  {
-   "name": "POT_WIPER",
-   "stage": "C",
-   "domain": "SIGNAL_3V3",
-   "v_nominal": 3.3,
-   "v_max": 3.3,
-   "pins": [
-    "P1.WIPER",
-    "U1.VP"
-   ],
-   "note": "Cursor do potenciometro.",
    "v_max_at_gpio": 3.3
   },
   {
@@ -961,8 +804,9 @@
   },
   "PIN_POT_ADC1": {
    "gpio": 36,
-   "net": "POT_WIPER",
-   "pin": "U1.VP"
+   "net": null,
+   "pin": "U1.VP",
+   "note": "Potenciometro REMOVIDO da montagem; firmware com DEFAULT_POT_ENABLED=false."
   },
   "PIN_LCD_RS": {
    "gpio": 19,
@@ -1002,7 +846,7 @@
   },
   {
    "id": "A2",
-   "text": "Meia-protoboard de 30 colunas (A-E / F-J por coluna), geometria do Fritzing 'Half breadboard v2'. Os trilhos de alimentacao NAO sao usados (podem existir ou nao)."
+   "text": "Duas meias-protoboards de 30 colunas (A-E / F-J por coluna) com trilhos + e - nos dois lados, geometria do Fritzing 'Half breadboard v2'. Usamos so os trilhos de BAIXO."
   },
   {
    "id": "A3",
@@ -1010,7 +854,7 @@
   },
   {
    "id": "A4",
-   "text": "Modulos de pinos retos 2,54 mm encaixam direto na protoboard em colunas consecutivas (HC-SR04, TCRT5000, potenciometro)."
+   "text": "HC-SR04 e TCRT5000 ficam fora da protoboard, ligados por jumpers femea-macho; o LCD encaixa direto na P2 pelo conector de 16 pinos."
   },
   {
    "id": "A5",
@@ -1030,7 +874,7 @@
   {
    "id": "C02",
    "blocks": "B",
-   "text": "Protoboards: confirmar 30 colunas e fileiras A-J em cada uma, e que a P2 esta encaixada na ponta da coluna 30 da P1 (guie-se pelo NUMERO da coluna impresso em cada placa)."
+   "text": "Protoboards: 30 colunas e fileiras A-J em cada uma; a P2 encaixada na ponta da coluna 30 da P1. Trilhos de baixo: vermelho (+) e azul (-), continuos de ponta a ponta (se a linha tiver uma falha no meio, ligue as duas metades com um jumper)."
   },
   {
    "id": "C03",
@@ -1048,14 +892,9 @@
    "text": "TCRT5000: confirmar a ordem dos 4 pinos na serigrafia (VCC/GND/DO/AO) e que e modulo com LM393 (nao capsula discreta). Editar pin_order na netlist se diferir."
   },
   {
-   "id": "C06",
-   "blocks": "C",
-   "text": "Potenciometro: confirmar 3 terminais de 2,54 mm (cursor no meio) e valor (qualquer 5-100 kΩ serve para ADC)."
-  },
-  {
    "id": "C09",
    "blocks": "B",
-   "text": "Jumpers: tipo macho-macho de ponta solida; comprimento suficiente (os fios W4, W9, W10 e W23 sao longos)."
+   "text": "Jumpers: ~17 macho-macho (5 deles longos, 15-20 cm, para o LCD) e 7 femea-macho (4 para o HC-SR04 e 3 para o TCRT5000)."
   },
   {
    "id": "C10",
@@ -1112,52 +951,53 @@
   ],
   "B": [
    {
+    "hold": false,
     "n": 1,
     "title": "Desligue tudo",
     "text": "Desconecte o cabo USB. O Estágio B inteiro é montado com a placa desenergizada.",
     "adds": [],
     "focus": [
      "U1"
-    ],
-    "hold": false
+    ]
    },
    {
+    "hold": false,
     "n": 2,
-    "title": "Identifique e meça R1, R2 e R3",
-    "text": "Multímetro em Ω, com os resistores soltos. R1 e R2: 1 kΩ (lendo a partir da faixa dourada: dourado, vermelho, preto, marrom). R3: 300 Ω (dourado, marrom, preto, laranja). Fora da faixa? Troque o resistor.",
+    "title": "5 V e GND nos trilhos de baixo",
+    "text": "Fio vermelho: 19A → trilho + (vermelho) de baixo. Fio preto: 14A → trilho − (azul) de baixo. Qualquer furo do trilho serve; use o mais perto.",
+    "adds": [
+     "W1",
+     "W2"
+    ],
+    "warn": "Os trilhos de baixo agora são 5 V (+) e GND (−). Nada de 3,3 V vai neles."
+   },
+   {
+    "hold": false,
+    "n": 3,
+    "title": "Meça R1, R2 e R3 fora do circuito",
+    "text": "Multímetro em Ω, com os resistores soltos. R1 e R2: 1 kΩ (a partir da faixa dourada: dourado, vermelho, preto, marrom). R3: 300 Ω (dourado, marrom, preto, laranja).",
     "adds": [],
     "measure": [
      "R1",
      "R2",
      "R3"
-    ],
-    "hold": false
+    ]
    },
    {
-    "n": 3,
-    "title": "Instale R1, R2 e R3 (ainda sem o sensor)",
-    "text": "R1 (1 kΩ) nos furos 23H e 27H. R2 (1 kΩ) nos furos 27F e 30F. R3 (300 Ω) nos furos 30G e 24G. A coluna 27 é o NÓ do divisor; a coluna 30 só junta R2 com R3.",
+    "hold": false,
+    "n": 4,
+    "title": "Instale o divisor (R1, R2, R3)",
+    "text": "R1 (1 kΩ): 22C e 26C. R2 (1 kΩ): 26D e 29D. R3 (300 Ω): 29A e o trilho − (azul) logo abaixo. A coluna 26 é o NÓ do divisor.",
     "adds": [
      "R1",
      "R2",
      "R3"
-    ],
-    "hold": false
-   },
-   {
-    "n": 4,
-    "title": "Ligue 5 V e GND",
-    "text": "Fio vermelho: 19A → 21H (pino 5V da ESP32 até a coluna do VCC). Fio preto: 7J → 24I (GND da ESP32 até a coluna do GND).",
-    "adds": [
-     "W1",
-     "W2"
-    ],
-    "hold": false
+    ]
    },
    {
     "n": 5,
     "title": "PARE: ensaio do divisor",
-    "text": "Sem o HC-SR04 e sem o fio verde. O jumper temporário (tracejado) leva 5 V à ponta de R1. Conecte a USB e meça entre o furo 27J (ponteira vermelha) e o furo 24J (GND, ponteira preta): esperado ≈ 2,8 V (aceitável 2,5 a 3,2 V).",
+    "text": "Sem o sensor e sem o fio verde. O jumper temporário (tracejado) leva 5 V do trilho + ao furo 22B. Conecte a USB e meça entre o furo 26A (ponteira vermelha) e o trilho − (ponteira preta): esperado ≈ 2,8 V (aceitável 2,5 a 3,2 V).",
     "adds": [],
     "temp": [
      "T1"
@@ -1171,46 +1011,38 @@
      "MK5"
     ],
     "hold": true,
-    "warn": "Mais de 3,30 V: desconecte a USB AGORA e refaça o divisor. Menos de 2,5 V: confira R2, R3 e o jumper temporário."
+    "warn": "Mais de 3,30 V: desconecte a USB AGORA (provável R3 no trilho errado) e refaça o divisor. Menos de 2,5 V: confira R2, R3 e o jumper temporário."
    },
    {
+    "hold": false,
     "n": 6,
     "title": "Registre a medição e tire o jumper",
-    "text": "Desconecte a USB e retire o jumper temporário T1.",
+    "text": "Desconecte a USB e retire o jumper temporário.",
     "adds": [],
     "focus": [
      "R1",
      "R2",
      "R3"
     ],
-    "hold": false,
     "commands": [
      "python -m terminal.bench divider --r1 1000 --r2 1300 --measured-v <valor medido>"
     ]
    },
    {
+    "hold": false,
     "n": 7,
-    "title": "Encaixe o HC-SR04",
-    "text": "Leia a serigrafia do módulo: VCC na coluna 21, depois TRIG, ECHO e GND (coluna 24). Empurre os 4 pinos retos juntos.",
+    "title": "Ligue o HC-SR04 (4 jumpers fêmea–macho)",
+    "text": "Ponta fêmea nos pinos do sensor (leia a serigrafia). VCC → trilho + de baixo; GND → trilho − de baixo; TRIG → 10J; ECHO → 22E. O sensor fica fora da placa, apontado para onde você quiser.",
     "adds": [
      "M1"
     ],
+    "warn": "VCC e GND trocados podem queimar o módulo. O ECHO vai no 22E (entrada do divisor), NUNCA direto na ESP32."
+   },
+   {
     "hold": false,
-    "warn": "VCC e GND trocados podem queimar o módulo."
-   },
-   {
     "n": 8,
-    "title": "Fio do TRIG",
-    "text": "Fio amarelo: 10J → 22I (GPIO5 → TRIG).",
-    "adds": [
-     "W3"
-    ],
-    "hold": false
-   },
-   {
-    "n": 9,
     "title": "Inspecione antes de ligar",
-    "text": "Com a USB desconectada, confira cada item no multímetro e a olho.",
+    "text": "Com a USB desconectada, confira no multímetro e a olho.",
     "adds": [],
     "focus": [
      "M1",
@@ -1218,122 +1050,96 @@
      "R2",
      "R3"
     ],
-    "hold": false,
     "checks": [
-     "Sem curto 5V↔GND nem 3V3↔GND",
-     "A coluna 23 (ECHO) NÃO tem continuidade com nenhum pino da ESP32",
+     "Sem curto entre trilho + e trilho − (não apita)",
+     "A coluna 22 (ECHO) NÃO tem continuidade com nenhum pino da ESP32",
      "Nada ligado em IO12, IO6…IO11 (SD0…CLK), TX0 ou RX0"
     ]
    },
    {
-    "n": 10,
-    "title": "Último fio: NÓ → GPIO34",
-    "text": "Fio verde: 27I → 5A. É o único fio que leva o sinal do ECHO ao ESP32, e só entra depois do ensaio.",
-    "adds": [
-     "W4"
-    ],
     "hold": false,
+    "n": 9,
+    "title": "Último fio: NÓ → GPIO34",
+    "text": "Fio verde: 26E → 5A. É o único fio que leva o sinal do ECHO ao ESP32, e só entra depois do ensaio.",
+    "adds": [
+     "W3"
+    ],
     "warn": "Não instale este fio se o ensaio do passo 5 passou de 3,30 V."
    },
    {
-    "n": 11,
+    "hold": false,
+    "n": 10,
     "title": "Ligue e valide",
     "text": "Conecte a USB e rode os comandos (com a mão a 25 cm do sensor).",
     "adds": [],
     "focus": [
      "M1",
-     "W4"
+     "W3"
     ],
-    "hold": false,
     "commands": [
-     "python -m terminal.bench stage B --serial-port COMx",
+     "python -m terminal.bench stage B --serial-port COMx --r1 1000 --r2 1300 --measured-echo-v <valor do passo 5>",
      "python -m terminal.bench inspect --serial-port COMx --duration 5 --reference-cm 25"
     ]
    }
   ],
   "C": [
    {
+    "hold": false,
     "n": 1,
     "title": "Desligue tudo",
     "text": "Desconecte a USB antes de mexer.",
     "adds": [],
     "focus": [
      "U1"
-    ],
-    "hold": false
+    ]
    },
    {
+    "hold": false,
     "n": 2,
-    "title": "TCRT5000 e alimentação 3,3 V",
-    "text": "Módulo em 21A–24A na ordem VCC, GND, DO, AO (CONFIRA a serigrafia). Laranja: 1A → 21D (3V3 → VCC). Preto: 22C → 24F (GND do módulo até a coluna do GND do sensor).",
+    "title": "Ligue o TCRT5000 (3 jumpers fêmea–macho)",
+    "text": "Ponta fêmea nos pinos do módulo (confira a serigrafia). VCC → 1A (3V3 da ESP32); GND → trilho − de baixo; DO → 6A (GPIO35). O AO fica sem fio.",
     "adds": [
-     "M2",
-     "W5",
-     "W7"
+     "M2"
     ],
-    "hold": false,
-    "warn": "NUNCA ligue o TCRT5000 em 5 V."
+    "warn": "NUNCA ligue o VCC do TCRT5000 no trilho + (5 V). Ele vai no 1A (3,3 V)."
    },
    {
+    "hold": false,
     "n": 3,
-    "title": "Potenciômetro",
-    "text": "Pinos em 28A, 29A e 30A (cursor no meio). Laranja: 21E → 28E (3,3 V). Preto: 30D → 24H (GND).",
-    "adds": [
-     "P1",
-     "W6",
-     "W8"
-    ],
-    "hold": false,
-    "warn": "NUNCA ligue o potenciômetro em 5 V."
-   },
-   {
-    "n": 4,
-    "title": "Sinais",
-    "text": "Azul: 23B → 6A (DO → IO35). Roxo: 29B → 3A (cursor → VP / GPIO36).",
-    "adds": [
-     "W9",
-     "W10"
-    ],
-    "hold": false
-   },
-   {
-    "n": 5,
     "title": "Ligue e valide",
-    "text": "Conecte a USB e rode os comandos. Aproxime o dedo do TCRT5000 e gire o potenciômetro.",
+    "text": "Conecte a USB e rode o comando. Aproxime e afaste o dedo do TCRT5000.",
     "adds": [],
     "focus": [
-     "M2",
-     "P1"
+     "M2"
     ],
-    "hold": false,
     "commands": [
-     "python -m terminal.bench stage C --serial-port COMx",
-     "python -m terminal.diag --serial-port COMx"
+     "python -m terminal.bench stage C --serial-port COMx --component ir"
     ]
    }
   ],
   "D": [
    {
+    "hold": false,
     "n": 1,
     "title": "Desligue tudo",
     "text": "Desconecte a USB antes de mexer.",
     "adds": [],
     "focus": [
      "U1"
-    ],
-    "hold": false
+    ]
    },
    {
+    "hold": false,
     "n": 2,
     "title": "Encaixe a 2ª protoboard (P2)",
-    "text": "Encaixe a segunda meia-protoboard na ponta da primeira, do lado da coluna 30. Daqui em diante, furos com 'P2:' são dessa placa (ex.: P2:12E = coluna 12, fileira E da P2).",
+    "text": "Encaixe a segunda meia-protoboard na ponta da primeira, do lado da coluna 30. Furos com 'P2:' são dessa placa (ex.: P2:12F = coluna 12, fileira F da P2).",
     "adds": [],
     "focus": [
      "BB1"
-    ],
-    "hold": false
+    ]
    },
    {
+    "hold": false,
     "n": 3,
     "title": "Confira o LCD",
     "text": "Olhe o módulo antes de encaixar.",
@@ -1341,7 +1147,6 @@
     "focus": [
      "M3"
     ],
-    "hold": false,
     "checks": [
      "Conector de 16 pinos soldado?",
      "Existe o resistor SMD R8/R9 do backlight? (se não, o R5 é obrigatório — e ele já está no desenho)",
@@ -1349,79 +1154,97 @@
     ]
    },
    {
+    "hold": false,
     "n": 4,
     "title": "Encaixe o LCD",
-    "text": "Pino 1 (VSS) em P2:12A … pino 16 (K) em P2:27A. O display fica para fora da placa, do lado da fileira A.",
+    "text": "Pino 1 (VSS) em P2:12J … pino 16 (K) em P2:27J. O display fica para fora da placa, do lado de cima.",
     "adds": [
      "M3"
-    ],
-    "hold": false
+    ]
    },
    {
+    "hold": false,
     "n": 5,
-    "title": "Terra, inclusive o RW",
-    "text": "Pretos: 30E → P2:12E (GND da P1 até o VSS); P2:12C → P2:16C (RW); P2:16D → P2:27D (K); P2:12D → P2:10D. Meça RW↔GND: 0 Ω.",
+    "title": "Pontes de 5 V e GND para a P2",
+    "text": "Os trilhos da P2 não estão ligados aos da P1. Vermelho: trilho + da P1 → trilho + da P2. Preto: trilho − da P1 → trilho − da P2 (ambos os de baixo).",
     "adds": [
-     "W11",
-     "W12",
-     "W13",
-     "W14"
+     "W4",
+     "W5"
+    ]
+   },
+   {
+    "n": 6,
+    "title": "GND do LCD (inclusive o RW)",
+    "text": "Pretos, das colunas do LCD até o trilho − (azul) da P2: P2:12F (VSS), P2:16F (RW) e P2:27F (K). Meça RW↔GND: 0 Ω.",
+    "adds": [
+     "W6",
+     "W8",
+     "W9"
     ],
     "hold": true,
     "warn": "O RW (pino 5) PRECISA estar no GND antes de ligar: protege os GPIOs de 5 V."
    },
    {
-    "n": 6,
-    "title": "Contraste, backlight e 5 V",
-    "text": "R4 (1 kΩ): P2:14B e P2:10B. R5 (300 Ω): P2:29B e P2:26B. Vermelhos: 21F → P2:13E (VDD) e 21I → P2:29E.",
+    "hold": false,
+    "n": 7,
+    "title": "5 V do LCD",
+    "text": "Vermelho: P2:13F (VDD) → trilho + (vermelho) da P2.",
+    "adds": [
+     "W7"
+    ]
+   },
+   {
+    "hold": false,
+    "n": 8,
+    "title": "Contraste e luz de fundo",
+    "text": "R4 (1 kΩ) atravessando o canal: P2:14F e P2:14E; preto P2:14A → trilho −. R5 (300 Ω) atravessando o canal: P2:26F e P2:26E; vermelho P2:26A → trilho +.",
     "adds": [
      "R4",
+     "W10",
      "R5",
-     "W15",
-     "W16"
+     "W11"
     ],
-    "hold": false,
     "warn": "O contraste pode precisar de ajuste na bancada (C07)."
    },
    {
-    "n": 7,
-    "title": "Sinais do display (1/3): RS e E",
-    "text": "8J → P2:15E (GPIO19 → RS) e 9J → P2:17E (GPIO18 → E). Os fios de sinal são longos: deixe-os folgados.",
-    "adds": [
-     "W17",
-     "W18"
-    ],
-    "hold": false
-   },
-   {
-    "n": 8,
-    "title": "Sinais do display (2/3): D4 e D5",
-    "text": "6J → P2:22E (GPIO21 → D4) e 3J → P2:23E (GPIO22 → D5).",
-    "adds": [
-     "W19",
-     "W20"
-    ],
-    "hold": false
-   },
-   {
+    "hold": false,
     "n": 9,
-    "title": "Sinais do display (3/3): D6 e D7",
-    "text": "2J → P2:24E (GPIO23 → D6) e 11A → P2:25E (GPIO27 → D7). O D7 vem da fileira de BAIXO da ESP32 (11A).",
+    "title": "Sinais do display (1/3): RS e E",
+    "text": "8J → P2:15I (GPIO19 → RS) e 9J → P2:17I (GPIO18 → E). Os fios de sinal são longos: deixe-os folgados.",
     "adds": [
-     "W21",
-     "W22"
-    ],
-    "hold": false
+     "W12",
+     "W13"
+    ]
    },
    {
+    "hold": false,
     "n": 10,
+    "title": "Sinais do display (2/3): D4 e D5",
+    "text": "6J → P2:22I (GPIO21 → D4) e 3J → P2:23I (GPIO22 → D5).",
+    "adds": [
+     "W14",
+     "W15"
+    ]
+   },
+   {
+    "hold": false,
+    "n": 11,
+    "title": "Sinais do display (3/3): D6 e D7",
+    "text": "2J → P2:24I (GPIO23 → D6) e 11A → P2:25G (GPIO27 → D7). O D7 vem da fileira de BAIXO da ESP32 (11A).",
+    "adds": [
+     "W16",
+     "W17"
+    ]
+   },
+   {
+    "hold": false,
+    "n": 12,
     "title": "Ligue e valide",
     "text": "Conecte a USB e rode o comando. Ajuste o contraste (R4) se o display mostrar só blocos ou nada.",
     "adds": [],
     "focus": [
      "M3"
     ],
-    "hold": false,
     "commands": [
      "python -m terminal.bench stage D --serial-port COMx"
     ]
@@ -1438,11 +1261,11 @@
     ],
     "hold": true,
     "checks": [
-     "Sem curto 5V↔GND (> 1 kΩ)",
+     "Sem curto entre trilho + e trilho − (> 1 kΩ)",
      "Sem curto 3V3↔GND (> 500 Ω)",
      "R1, R2, R4 = 0,95–1,05 kΩ; R3, R5 = 285–315 Ω (medidos soltos)",
      "RW do LCD com 0 Ω até o GND",
-     "TCRT5000 e potenciômetro só em 3V3",
+     "TCRT5000 só em 3V3 (1A)",
      "Nada em IO6…IO12, TX0, RX0"
     ]
    },
@@ -1467,23 +1290,18 @@
    "stage": "B",
    "net": "TEMP",
    "color": "grey",
-   "from": "21G",
-   "to": "23G",
-   "via": [
-    [
-     22,
-     6.2
-    ]
-   ],
-   "label": "jumper TEMPORARIO do ensaio (nao faz parte do circuito final)"
+   "from": "23W",
+   "to": "22B",
+   "via": [],
+   "label": "jumper TEMPORARIO do ensaio: trilho + -> entrada do divisor (nao faz parte do circuito final)"
   }
  ],
  "markers": [
   {
    "id": "MK5",
    "stage": "B",
-   "hole": "27J",
-   "text": "MEDIR AQUI (27J x GND) ~ 2,8 V",
+   "hole": "26A",
+   "text": "MEDIR AQUI (26A x trilho -) ~ 2,8 V",
    "dir": "up"
   }
  ]

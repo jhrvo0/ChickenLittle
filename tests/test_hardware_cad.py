@@ -216,13 +216,13 @@ def test_usb_side_and_pin_columns_are_consistent_with_assumed_orientation():
 # Mutacoes: o validador DEVE reprovar montagens perigosas ou erradas
 # ----------------------------------------------------------------------------
 def test_mutation_echo_wire_to_wrong_pin_is_rejected():
-    lay = _mutated(lambda r: _wire(r, "W4").update({"to": "7A"}))       # VN em vez de IO34
+    lay = _mutated(lambda r: _wire(r, "W3").update({"to": "7A"}))       # IO32 em vez de IO34
     assert "NET_OPEN" in _codes(lay, "B")
 
 
 def test_mutation_echo_directly_on_gpio34_without_divider_is_rejected():
     def mut(r):
-        r["wires"].append({"id": "W99", "stage": "B", "net": "ECHO_5V", "from": "23I", "to": "5A", "color": "red",
+        r["wires"].append({"id": "W99", "stage": "B", "net": "ECHO_5V", "from": "22D", "to": "5A", "color": "red",
                            "via": [], "label": "x", "purpose": "x", "voltage": "x", "safety": "", "validation": "x"})
     codes = _codes(_mutated(mut), "B")
     assert {"NET_EXTRA_PINS", "NET_OPEN"} & codes
@@ -235,8 +235,8 @@ def test_mutation_5v_to_flash_pin_column_is_rejected():
 
 
 def test_mutation_gpio12_touched_is_rejected():
-    lay = _mutated(lambda r: _wire(r, "W5").update({"from": "13A"}))   # coluna 13 = IO12 (MTDI)
-    assert "FORBIDDEN_PIN_TOUCHED" in _codes(lay, "C")
+    lay = _mutated(lambda r: _wire(r, "W2").update({"from": "13A"}))   # coluna 13 = IO12 (MTDI)
+    assert "FORBIDDEN_PIN_TOUCHED" in _codes(lay, "B")
 
 
 def test_mutation_old_1k_2k_divider_is_rejected():
@@ -247,13 +247,13 @@ def test_mutation_old_1k_2k_divider_is_rejected():
 
 
 def test_mutation_tcrt5000_on_5v_is_rejected():
-    lay = _mutated(lambda r: _wire(r, "W5").update({"from": "19A"}))   # 5V no VCC do TCRT5000
+    lay = _mutated(lambda r: _comp(r, "M2")["pins"].update({"VCC": "22W"}))   # VCC do TCRT5000 no trilho + (5 V)
     codes = _codes(lay, "C")
     assert "NET_OPEN" in codes or "WRONG_SUPPLY" in codes or "NET_EXTRA_PINS" in codes
 
 
 def test_mutation_double_occupied_hole_is_rejected():
-    lay = _mutated(lambda r: _wire(r, "W4").update({"from": "27F"}))   # 27F ja e perna de R2
+    lay = _mutated(lambda r: _wire(r, "W3").update({"from": "26C"}))   # 26C ja e perna de R1
     assert "HOLE_DOUBLE_OCCUPIED" in _codes(lay, "B")
 
 
@@ -264,7 +264,7 @@ def test_mutation_invalid_hole_is_rejected():
 
 def test_mutation_supply_short_is_rejected():
     def mut(r):
-        r["wires"].append({"id": "W98", "stage": "B", "net": "5V", "from": "21F", "to": "24F", "color": "red",
+        r["wires"].append({"id": "W98", "stage": "B", "net": "5V", "from": "22W", "to": "22X", "color": "red",
                            "via": [], "label": "x", "purpose": "x", "voltage": "x", "safety": "", "validation": "x"})
     assert "SUPPLY_SHORT" in _codes(_mutated(mut), "B")
 
@@ -338,12 +338,15 @@ def test_fz_part_connectors_land_on_their_holes_within_tolerance():
         g = i.find("views/breadboardView/geometry")
         x0, y0 = float(g.get("x")), float(g.get("y"))
         for c in i.findall("views/breadboardView/connectors/connector"):
-            hole = c.find("connects/connect").get("connectorId")[3:]
+            tgt = c.find("connects/connect").get("connectorId")
+            if not tgt.startswith("pin"):                     # modulo fora da placa: o conector liga num fio
+                continue
+            hole = tgt[3:]
             hx, hy = export_fz.bb_hole_px(hole)
             px, py = pin_off[mid][c.get("connectorId")]
             assert abs(x0 + px - hx) < 0.6 and abs(y0 + py - hy) < 0.6, (mid, c.get("connectorId"), hole)
             checked += 1
-    assert checked == 38 + 4
+    assert checked == 38                                     # HC-SR04 fica fora da placa (ligado por fios)
 
 
 def test_fzz_references_only_real_fritzing_core_module_ids():
@@ -382,7 +385,7 @@ def test_wokwi_diagram_nets_equal_logical_nets_except_unmodeled_tcrt5000():
             expected.add(frozenset(terms))
     assert wokwi_nets == expected
     types = {p["type"] for p in d["parts"]}
-    assert types == {"board-esp32-devkit-c-v4", "wokwi-hc-sr04", "wokwi-resistor", "wokwi-potentiometer"}
+    assert types == {"board-esp32-devkit-c-v4", "wokwi-hc-sr04", "wokwi-resistor"}           # sem potenciometro
     # ECHO bruto (5 V) nunca no mesmo no que um pino da ESP32
     echo = next(n for n in wokwi_nets if "ultra:ECHO" in n)
     assert not any(t.startswith("esp:") for t in echo)
@@ -422,10 +425,10 @@ def test_outputs_are_deterministic_and_wire_table_matches_netlist():
     b = render_scene(lay, Scene(stage="B", title="x"))[0]
     assert a == b
     rows = reports.wire_rows(lay, "B")
-    assert [r["id"] for r in rows] == ["W1", "W2", "W3", "W4"]
-    assert {(r["de_furo"], r["ate_furo"]) for r in rows} == {("19A", "21H"), ("7J", "24I"), ("10J", "22I"), ("27I", "5A")}
+    assert [r["id"] for r in rows] == ["W1", "W2", "W3"]
+    assert {(r["de_furo"], r["ate_furo"]) for r in rows} == {("19A", "21W"), ("14A", "15X"), ("26E", "5A")}
     hm = {r["furo"] for r in reports.hole_map_rows(lay, "B")}
-    assert {"27F", "27H", "27I", "30F", "30G", "24G", "5A", "5B", "19A", "19B", "21J", "23J"} <= hm
+    assert {"22C", "26C", "26D", "29D", "29A", "30X", "26E", "5A", "22E", "10J", "24W", "25X", "19A", "14A"} <= hm
 
 
 def test_stage_b_wires_do_not_reach_forbidden_pins_nor_5v_gpio():
@@ -544,15 +547,15 @@ def test_slides_html_structure_and_focus_boxes():
         assert (w >= 700 or clamped) and (abs(w / h - 1.6) < 0.05 or clamped)
     assert "ADICIONE AGORA" in page.upper() and "PONTO DE PARADA" in page
     # no master SVG, cada item adicionado carrega o slide em que aparece
-    for ident in ("W1", "W4", "M1", "R1", "T1", "MK5", "U1"):
+    for ident in ("W1", "W3", "M1", "R1", "T1", "MK5", "U1"):
         assert re.search(rf'data-(?:id|ref)="{ident}"[^>]*data-gstep="\d+"|class="marker" data-gstep="\d+"', page) or ident == "MK5"
     # os passos da etapa B aparecem na ordem do guia de bancada: W4 (no -> GPIO34) vem DEPOIS do ensaio do divisor
     titles = [s["title"] if s.get("title") else "" for s in steps]
     assert titles  # titulos vivem no html
     b = lay.raw["build_steps"]["B"]
     assert [i for i, s in enumerate(b) if s.get("hold")] == [4]
-    assert "W4" in b[9]["adds"] and "T1" in b[4]["temp"]
-    assert all(s["adds"] == [] for s in b[:2])
+    assert "W3" in b[8]["adds"] and "T1" in b[4]["temp"]
+    assert b[0]["adds"] == [] and set(b[1]["adds"]) == {"W1", "W2"}       # primeiro so os trilhos (5 V e GND)
 
 
 # ----------------------------------------------------------------------------
@@ -574,11 +577,52 @@ def test_lcd_on_second_board_has_rw_grounded_and_signals_on_firmware_gpios():
 
 
 def test_mutation_lcd_rw_not_grounded_is_rejected():
-    lay = _mutated(lambda r: r.update({"wires": [w for w in r["wires"] if w["id"] != "W12"]}))
+    lay = _mutated(lambda r: r.update({"wires": [w for w in r["wires"] if w["id"] != "W8"]}))   # tira o fio do RW
     codes = _codes(lay, "D")
     assert "NET_OPEN" in codes or "NET_PARTIAL" in codes or "NET_UNDECLARED" in codes
 
 
 def test_mutation_lcd_vdd_on_gpio_is_rejected():
-    lay = _mutated(lambda r: _wire(r, "W15").update({"from": "8J"}))   # 5 V do LCD ligado ao GPIO19
+    lay = _mutated(lambda r: _wire(r, "W7").update({"to": "8J"}))     # VDD do LCD ligado ao GPIO19 em vez do trilho +
     assert model.errors(model.validate(lay, "D"))
+
+
+# ----------------------------------------------------------------------------
+# Trilhos (+/-) e modulos fora da placa
+# ----------------------------------------------------------------------------
+def test_rails_are_per_board_and_follow_fritzing_geometry_and_colors():
+    _layout()
+    g = model.hole_group
+    assert g("3W") == g("30W") and g("3X") == g("30X") and g("3W") != g("3X")      # trilho continuo, + e - separados
+    assert g("3W") != g("P2:3W")                                                   # P1 e P2 so se ligam por fio
+    assert model.rail_sign("21W") == "+" and model.rail_sign("15X") == "-"         # base: externo vermelho (+), interno azul (-)
+    assert model.fz_hole_xy("3W") == (17.0, 180.0) and model.fz_hole_xy("3X") == (17.0, 171.0)
+    assert model.fz_hole_xy("P2:3W") == (292.41 + 17.0, 180.0)
+    with pytest.raises(model.NetlistError):
+        model.parse_hole("8W")                                                     # vao entre grupos de 5 furos
+    assert "trilho +" in model.hole_label("21W") and "vermelho" in model.hole_label("21W")
+
+
+@pytest.mark.skipif(not os.environ.get("FRITZING_PARTS_DIR"), reason="defina FRITZING_PARTS_DIR=<checkout do fritzing-parts> para comparar com o Fritzing")
+def test_rail_buses_equal_fritzing_half_breadboard():
+    root = ET.parse(Path(os.environ["FRITZING_PARTS_DIR"]) / "core" / "Half_breadboard_v2.fzp").getroot()
+    _layout()
+    for b in root.iter("bus"):
+        if not b.get("id").startswith("bus-"):
+            continue
+        holes = {m.get("connectorId")[3:] for m in b.findall("nodeMember")} - {f"31{b.get('id')[-1]}"}   # pino 31 nao e usado
+        assert len({model.hole_group(h) for h in holes}) == 1
+        assert {h for h in holes} == {f"{c}{b.get('id')[-1]}" for c in model.active().rail_cols}
+
+
+def test_offboard_modules_use_female_male_leads_and_keep_signals_safe():
+    lay = _layout()
+    for ref in ("M1", "M2"):
+        c = lay.components[ref]
+        assert c["offboard"]["leads"].keys() == c["pins"].keys()
+    assert lay.components["M2"]["pins"]["VCC"] == "1A"                             # TCRT5000 so no 3V3
+    assert model.rail_sign(lay.components["M1"]["pins"]["VCC"]) == "+"
+    pin_net = lay.pin_net_map("B")
+    assert pin_net["M1.ECHO"] == frozenset({"M1.ECHO", "R1.A"})                    # ECHO so ve o divisor
+    nets = export_fz.nets_from_fzz(export_fz.build_fz(lay, "C")[0], lay, "C")
+    assert frozenset({"M2.DO", "U1.IO35"}) in {frozenset(n) for n in nets}         # os fios dos modulos aparecem no .fzz
