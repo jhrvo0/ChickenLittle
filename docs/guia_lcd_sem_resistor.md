@@ -1,5 +1,7 @@
 # Guia do LCD 2004A com adaptador I2C — MotionPet
 
+> **Histórico (LCD).** O LCD saiu da montagem em 10/11/2026 (ilegível em 3,3 V; em 5 V exigiria conversor de nível). Montagem vigente: [bench_verified_wiring.md](bench_verified_wiring.md).
+
 **Teste isolado; montagem conjunta no [guia final](bench_assembly_guide.md) e no [roteiro visual](../hardware/guia_montagem_final.html).** O usuário relatou que o LCD funcionou; a integração continua `PENDING_PHYSICAL_VALIDATION`. Este teste usa o adaptador I2C (PCF8574) em 3V3 sem conversor, com SDA e SCL diretos à ESP32. A faixa do PCF8574 não garante a do painel LCD inteiro.
 
 ## Pinos do adaptador (identifique pela serigrafia, não pela posição)

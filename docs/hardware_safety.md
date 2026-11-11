@@ -1,5 +1,7 @@
 # Segurança elétrica — montagem atual com LCD I²C
 
+> **Aviso (10/11/2026):** o LCD saiu da montagem; as partes sobre LCD/I²C abaixo são históricas. Vale o que trata de HC-SR04 (divisor do ECHO) e TCRT5000. Montagem vigente: [bench_verified_wiring.md](bench_verified_wiring.md).
+
 O [guia de montagem final](bench_assembly_guide.md) e o [roteiro visual](../hardware/guia_montagem_final.html) descrevem o perfil atual. Os testes individuais foram relatados pelo usuário; o conjunto continua `PENDING_PHYSICAL_VALIDATION` até ser montado e observado. Nenhuma tensão neste documento foi medida automaticamente.
 
 ## Alimentação

@@ -1,5 +1,6 @@
 """Confere contatos reais dos furos, divisor, pinagem ativa e evidencias do LCD I2C."""
 import copy
+import json
 import re
 from pathlib import Path
 
@@ -72,14 +73,17 @@ def _graph(wiring):
     return find
 
 
-def _assert_topology(wiring):
+def _assert_topology(wiring, lcd=True):
     net = _graph(wiring)
     assert net("ESP32.5V") == net("HC-SR04.VCC")
-    assert net("ESP32.3V3") == net("LCD.VCC") == net("TCRT5000.VCC")
+    assert net("ESP32.3V3") == net("TCRT5000.VCC")
+    if lcd:
+        assert net("ESP32.3V3") == net("LCD.VCC")
     assert len({net("ESP32.5V"), net("ESP32.3V3"), net("GND comum")}) == 3
-    for module in ("HC-SR04", "LCD", "TCRT5000"):
+    for module in ("HC-SR04", "LCD", "TCRT5000") if lcd else ("HC-SR04", "TCRT5000"):
         assert net(f"{module}.GND") == net("GND comum") == net("ESP32.GND@J2.14")
-    for signal, gpio in (("HC-SR04.TRIG", 5), ("TCRT5000.DO", 35), ("LCD.SDA", 21), ("LCD.SCL", 22)):
+    signals = [("HC-SR04.TRIG", 5), ("TCRT5000.DO", 35)] + ([("LCD.SDA", 21), ("LCD.SCL", 22)] if lcd else [])
+    for signal, gpio in signals:
         assert net(signal) == net(f"ESP32.IO{gpio}")
         assert net(signal) not in {net("ESP32.3V3"), net("ESP32.5V"), net("GND comum")}
     assert net("HC-SR04.ECHO") == net("R1.from")
@@ -94,6 +98,19 @@ def _assert_topology(wiring):
 
 def test_final_holes_form_safe_expected_topology_and_protected_echo():
     _assert_topology(final_assembly.load_wiring())
+
+
+def test_current_bench_netlist_has_no_lcd_and_keeps_safe_topology():
+    """Montagem vigente (2026-11-10): sem LCD, mesmo divisor protegido e mesmas redes dos sensores."""
+    path = ROOT / "hardware" / "netlist" / "motionpet_atual_sem_lcd.json"
+    wiring = json.loads(path.read_text(encoding="utf-8"))
+    for wire in wiring["wires"]:
+        assert not (wire["from"] + wire["to"]).startswith("LCD") and "LCD." not in wire["from"] + wire["to"]
+        assert wire["net"] not in ("SDA", "SCL")
+    assert {w["id"] for w in wiring["wires"]} == {f"F{i}" for i in range(1, 14)}
+    assert not any(k.startswith("PIN_LCD") for k in wiring["firmware_pins"])
+    assert "diagnostics" not in wiring
+    _assert_topology(wiring, lcd=False)
 
 
 def test_ground_uses_recovered_lcd_reference_instead_of_unverified_alternative():

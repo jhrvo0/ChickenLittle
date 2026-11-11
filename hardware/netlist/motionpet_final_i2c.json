@@ -1,4 +1,5 @@
 {
+  "historico": "Perfil COM LCD (F14-F17), mantido porque hardware/final_assembly.py e o guia de montagem ainda o leem. A montagem atual da bancada, sem LCD, esta em motionpet_atual_sem_lcd.json.",
   "profile": "final_i2c_3v3_two_boards_rails",
   "revision": 4,
   "status": "PENDING_INTEGRATED_PHYSICAL_VALIDATION",

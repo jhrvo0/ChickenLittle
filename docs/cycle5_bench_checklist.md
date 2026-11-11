@@ -1,5 +1,7 @@
 # Checklist da montagem conjunta — LCD I²C
 
+> **Aviso (10/11/2026):** o LCD saiu da montagem; os itens de LCD/I²C abaixo são históricos. Montagem vigente: [bench_verified_wiring.md](bench_verified_wiring.md).
+
 Siga o [guia atual](bench_assembly_guide.md) ou o [passo a passo visual](../hardware/guia_montagem_final.html). Os três componentes já funcionaram separadamente conforme relato do usuário; os itens abaixo continuam sem confirmação para o conjunto. Status formal: `PENDING_PHYSICAL_VALIDATION`.
 
 Registro de 10/11/2026: comunicação da ESP32 isolada verificada fisicamente na COM3 após a correção da recepção USB e da consulta durante o boot. Duas capturas aprovadas, com 37 e 36 quadros de sensores, aproximadamente 14,28 Hz, zero erros JSONL e zero lacunas de sequência em ambas. Os valores de sensores desconectados não validam periféricos. O teste conjunto continua pendente.

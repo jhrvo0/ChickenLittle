@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "author": "MotionPet - observacoes parciais das fotos",
+  "author": "MotionPet - montagem atual sem LCD (2026-11-10)",
   "editor": "wokwi",
   "parts": [
     {
@@ -9,7 +9,7 @@
       "top": -105,
       "left": -220,
       "attrs": {
-        "text": "MOTIONPET - FOTOS: OBSERVACOES PARCIAIS"
+        "text": "MOTIONPET - MONTAGEM ATUAL SEM LCD (2026-11-10)"
       }
     },
     {
@@ -112,29 +112,11 @@
     },
     {
       "type": "wokwi-text",
-      "id": "lcdlabel",
-      "top": 350,
-      "left": 445,
-      "attrs": {
-        "text": "LCD 2004 I2C"
-      }
-    },
-    {
-      "type": "wokwi-lcd2004",
-      "id": "lcd",
-      "top": 385,
-      "left": 450,
-      "attrs": {
-        "pins": "i2c"
-      }
-    },
-    {
-      "type": "wokwi-text",
       "id": "observation",
       "left": 0,
       "top": 710,
       "attrs": {
-        "text": "LCD: teste 5V sem SDA/SCL; usuario viu blocos.\nNao ligar I2C direto ao ESP enquanto LCD em 5V."
+        "text": "Montagem atual: HC-SR04 (5V, ECHO por divisor) e TCRT5000 (3V3). Sem LCD e sem cabos do LCD.\nAcompanhamento pelo terminal no notebook."
       }
     }
   ],
@@ -251,18 +233,6 @@
       "p2:12t.a",
       "p1:15b.j",
       "green",
-      []
-    ],
-    [
-      "lcd:VCC",
-      "p1:bp.3",
-      "red",
-      []
-    ],
-    [
-      "lcd:GND",
-      "p2:bn.23",
-      "black",
       []
     ]
   ],
