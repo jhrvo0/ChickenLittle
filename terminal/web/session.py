@@ -5,14 +5,14 @@ from collections import deque
 from dataclasses import asdict
 import math
 from pathlib import Path
-from queue import Empty, Queue
+from queue import Empty, Full, Queue
 import threading
 import time
 from typing import Any
 
 from simulator.esp32_sim_node import SimulatedEsp32Node
 from simulator.sensors import SensorSimulator
-from terminal.app import TerminalHostClient
+from terminal.app import CommandRecord, TerminalHostClient
 from terminal.bench.assistant import list_serial_ports, query_device_diag
 from terminal.communication.protocol import (
     AppModeId, CommandType, GestureEventPayload, GestureSource, GestureType,
@@ -42,6 +42,52 @@ CONTROLS = {
 
 PET_DISPLAY_NAME = "Piu-piu"
 
+# Fila de trabalho limitada e prazo por ação: uma ação cujo pedido HTTP já estourou o tempo não
+# pode executar depois (repetir o clique duplicaria alimentação ou RESET).
+MAX_QUEUED_JOBS = 8
+ACTION_TIMEOUT_S = 3.0
+
+_COMMAND_NAMES = {
+    "FEED": "alimentar", "PLAY": "brincar", "REST": "descansar", "HEAL": "cuidar da saúde",
+    "INTERACT": "o carinho", "SAVE": "salvar", "LOAD": "carregar", "RESET": "criar novo pet",
+    "SWITCH_MODE": "trocar de modo", "TICK": "o passo de tempo",
+}
+_PLAY_ACTION_NAMES = {"MATCH_RESULT": "a recompensa do Pet Launch", "UNLOCK_UPGRADE": "a compra na loja"}
+_RECENT_COMMANDS = 8
+
+
+class _ActionTicket:
+    """Ação enfileirada. Executa no máximo uma vez e só antes do prazo."""
+
+    def __init__(self, payload: dict, timeout_s: float = ACTION_TIMEOUT_S) -> None:
+        self.payload = payload
+        self.deadline = time.monotonic() + timeout_s
+        self.done = threading.Event()
+        self.error: str | None = None
+        self._lock = threading.Lock()
+        self._state = "queued"  # queued -> running | abandoned
+
+    def claim(self) -> bool:
+        """Chamado pelo worker: `True` se a ação ainda deve executar."""
+        with self._lock:
+            if self._state != "queued":
+                return False
+            if time.monotonic() > self.deadline:
+                self._state = "abandoned"
+                self.error = "A ESP32 estava ocupada e o comando venceu sem ser enviado. Tente novamente."
+                self.done.set()
+                return False
+            self._state = "running"
+            return True
+
+    def abandon(self) -> bool:
+        """Chamado por quem espera ao estourar o prazo: `True` se a ação não executará mais."""
+        with self._lock:
+            if self._state == "queued":
+                self._state = "abandoned"
+                return True
+            return self._state == "abandoned"
+
 
 class MotionPetSession:
     """Executa o protocolo e os motores existentes sem abrir a USB no carregamento."""
@@ -49,7 +95,7 @@ class MotionPetSession:
     def __init__(self, *, allow_demo: bool = False) -> None:
         self.allow_demo = allow_demo
         self._lock = threading.RLock()
-        self._jobs: Queue = Queue()
+        self._jobs: Queue = Queue(maxsize=MAX_QUEUED_JOBS)
         self._stop = threading.Event()
         self._client: TerminalHostClient | None = None
         self._node: SimulatedEsp32Node | None = None
@@ -87,10 +133,21 @@ class MotionPetSession:
             self._status = "connecting"
             self._message = "Conectando à ESP32…"
             self._port = port
-        self._jobs.put(("connect", port, None))
+        try:
+            self._enqueue(("connect", port, None))
+        except ValueError:
+            with self._lock:
+                self._status = "disconnected"
+            raise
 
     def disconnect(self) -> None:
-        self._jobs.put(("disconnect", None, None))
+        self._enqueue(("disconnect", None, None))
+
+    def _enqueue(self, job: tuple) -> None:
+        try:
+            self._jobs.put_nowait(job)
+        except Full:
+            raise ValueError("A ESP32 está ocupada. Aguarde e tente novamente.") from None
 
     def state(self) -> dict:
         with self._lock:
@@ -114,12 +171,17 @@ class MotionPetSession:
         with self._lock:
             if not self._live_locked():
                 raise ValueError("Conecte a ESP32 e aguarde as leituras dos sensores.")
-        done, result = threading.Event(), {}
-        self._jobs.put(("action", dict(payload), (done, result)))
-        if not done.wait(3):
-            raise ValueError("A ESP32 está ocupada. Aguarde e tente novamente.")
-        if "error" in result:
-            raise ValueError(result["error"])
+        ticket = _ActionTicket(dict(payload), ACTION_TIMEOUT_S)
+        self._enqueue(("action", ticket, None))
+        if not ticket.done.wait(ACTION_TIMEOUT_S):
+            if ticket.abandon():
+                # Descartada na fila: nunca vai executar, então repetir é seguro.
+                raise ValueError("A ESP32 está ocupada. O comando foi cancelado; tente novamente.")
+            # Já está executando (o worker segura o lock só por instantes): espera o desfecho real.
+            if not ticket.done.wait(1):
+                raise ValueError("A ESP32 está ocupada. Confira o estado antes de repetir o comando.")
+        if ticket.error is not None:
+            raise ValueError(ticket.error)
         return self.state()
 
     def close(self) -> None:
@@ -175,6 +237,8 @@ class MotionPetSession:
                     raise ValueError("A porta não respondeu como uma ESP32 MotionPet.")
                 origin = "ESP32_HW"
             client = TerminalHostClient(endpoint, transport_label=origin, dispatch_gesture_events=False)
+            client.sensor_listener = self._on_sensor_frame
+            client.command_listener = self._on_command_outcome
             endpoint.write_line("START")
             endpoint.write_line("IR ON")
             client.send_command(CommandType.SWITCH_MODE, {"mode": AppModeId.MOTION_PET.value})
@@ -225,6 +289,32 @@ class MotionPetSession:
             slides = client.aux_modes[AppModeId.AIR_SLIDES]
             slides.current_slide = max(1, min(slides.total_slides, slides.current_slide + (1 if action == "slides_next" else -1)))
             slides.last_status = "Avançou" if action == "slides_next" else "Voltou"
+
+    def _on_sensor_frame(self, frame: SensorFramePayload) -> None:
+        """Roda para cada sensor_frame, em ordem (dentro de `poll_serial`, com o lock já tomado).
+
+        Uma rajada de frames não pode perder transições do IR (false→true→false é um toque).
+        """
+        self._last_frame = time.monotonic()
+        self._frames += 1
+        self._sensor_controls(frame, self._last_frame)
+        self._history.append({"distance_cm": frame.distance_cm, "valid": frame.valid_ultrasonic})
+
+    def _on_command_outcome(self, record: CommandRecord) -> None:
+        if record.command == "PLAY" and record.action in _PLAY_ACTION_NAMES:
+            name = _PLAY_ACTION_NAMES[record.action]
+        else:
+            name = _COMMAND_NAMES.get(record.command, record.command.lower())
+        if record.status == "failed":
+            self._event(f"A ESP32 recusou {name}: {record.detail}", "error")
+        elif record.status == "timeout":
+            self._event(f"A ESP32 não confirmou {name}. Confira a conexão USB.", "error")
+        elif record.command == "SAVE":
+            self._event("Nada de novo para salvar." if record.detail == "saved_unchanged" else "Pet salvo na ESP32.", "care")
+        elif record.command == "LOAD":
+            self._event("Não há save na ESP32 para carregar." if record.detail == "no_save_found" else "Save carregado da ESP32.", "care")
+        elif record.command == "RESET":
+            self._event("Novo pet criado na ESP32.", "care")
 
     def _sensor_controls(self, frame: SensorFramePayload, now: float) -> None:
         client = self._client
@@ -295,14 +385,16 @@ class MotionPetSession:
                         self._status, self._origin = "disconnected", "NONE"
                         self._message = "USB desconectada do aplicativo."
                 elif job == "action":
-                    done, result = completion
-                    try:
-                        with self._lock:
-                            self._perform(payload)
-                    except Exception as exc:
-                        result["error"] = str(exc)
-                    finally:
-                        done.set()
+                    ticket = payload
+                    # Ação vencida (o HTTP já desistiu) ou abandonada não executa.
+                    with self._lock:
+                        if ticket.claim():
+                            try:
+                                self._perform(ticket.payload)
+                            except Exception as exc:
+                                ticket.error = str(exc)
+                            finally:
+                                ticket.done.set()
                 with self._lock:
                     client = self._client
                     if client is not None:
@@ -310,15 +402,13 @@ class MotionPetSession:
                             if self._node is not None and now >= next_demo:
                                 self._node.step()
                                 next_demo = now + .07
-                            sensor_before, pet_before = client.last_sensor, client.pet_state
+                            pet_before = client.pet_state
+                            # Frames de sensor são tratados um a um por `_on_sensor_frame`.
+                            # Payload inválido é descartado dentro do cliente; só falha do
+                            # transporte (exceção de I/O) chega ao `except` abaixo.
                             client.poll_serial()
                             if client.pet_state is not pet_before:
                                 self._pet_seen = True
-                            if client.last_sensor is not None and client.last_sensor is not sensor_before:
-                                self._last_frame = time.monotonic()
-                                self._frames += 1
-                                self._sensor_controls(client.last_sensor, self._last_frame)
-                                self._history.append({"distance_cm": client.last_sensor.distance_cm, "valid": client.last_sensor.valid_ultrasonic})
                             if self._live_locked():
                                 client.update_game(dt)
                                 game = client.pet_launch_mode.game
@@ -356,7 +446,29 @@ class MotionPetSession:
             "display_lines": list(client.lcd_frame.lines) if client else [],
             "metrics": {"rx_packets": client.rx_packets if client else 0, "tx_packets": client.tx_packets if client else 0, "history": list(self._history)},
             "launch": None, "music": None, "slides": None,
+            "device_error": None, "device_errors": [],
+            "commands": {"pending": 0, "last": None, "recent": []},
+            "discarded": {"count": 0, "last": None, "age_ms": None},
         }
+        if client is not None:
+            now = time.monotonic()
+            age_of = lambda t: round((now - t) * 1000)
+            errors = [
+                {"code": e.code, "message": e.message, "ref_seq": e.ref_seq, "command": e.command, "age_ms": age_of(e.at)}
+                for e in reversed(client.device_errors)
+            ]
+            records = list(client.command_log.values())
+            recent = [
+                {"seq": r.seq, "command": r.command, "action": r.action, "status": r.status, "detail": r.detail, "age_ms": age_of(r.sent_at)}
+                for r in reversed(records[-_RECENT_COMMANDS:])
+            ]
+            state["device_error"] = errors[0] if errors else None
+            state["device_errors"] = errors
+            state["commands"] = {"pending": sum(r.status == "sent" for r in records), "last": recent[0] if recent else None, "recent": recent}
+            state["discarded"] = {
+                "count": client.discarded_messages, "last": client.last_discard,
+                "age_ms": age_of(client.last_discard_at) if client.last_discard_at is not None else None,
+            }
         if state["pet"] is not None:
             # Nome da apresentação no notebook; preserva o save e as estatísticas na ESP32.
             state["pet"]["name"] = PET_DISPLAY_NAME
@@ -370,6 +482,8 @@ class MotionPetSession:
                 "sweet_spot": g.is_in_sweet_spot(), "flight": flight, "trajectory": list(self._trajectory),
                 "result": asdict(g.last_result) if g.last_result else None,
                 "best_distance_m": g.best_distance_m, "status_message": g.status_message,
+                "best_score": g.best_score, "matches_completed": g.matches_completed,
+                "phases": [p.value for p in LaunchPhase],
                 "upgrades": [dict(asdict(u), owned=u.upgrade_id in client.pet_state.unlocked_upgrades) for u in LAUNCH_UPGRADES],
             }
             music = client.aux_modes[AppModeId.AIR_MUSIC]
