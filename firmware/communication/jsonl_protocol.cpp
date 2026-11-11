@@ -374,6 +374,14 @@ bool jsonl_serialize_error(
 }
 
 // ---------------- Parser estático zero-heap para linhas recebidas ----------------
+//
+// Duas etapas, ambas sem alocação dinâmica:
+//   1. jv_validate_line(): valida a sintaxe JSON estrita (RFC 8259) da linha inteira, com
+//      profundidade máxima fixa (JV_MAX_DEPTH) e sem lixo após o objeto raiz.
+//   2. obj_find(): como o texto já é válido, procura uma chave apenas entre os membros
+//      DIRETOS de um objeto (nunca em objetos/arrays aninhados) e acusa chave duplicada.
+
+#define JV_MAX_DEPTH 8
 
 static const char *skip_ws(const char *p) {
     while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') {
@@ -382,36 +390,218 @@ static const char *skip_ws(const char *p) {
     return p;
 }
 
-static const char *find_json_key(const char *json, const char *key) {
-    size_t klen = fw_strlen(key);
-    const char *p = json;
-    bool in_str = false;
+static bool jv_is_digit(char c) { return c >= '0' && c <= '9'; }
+
+static bool jv_is_hex(char c) {
+    return jv_is_digit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+}
+
+// `*pp` aponta para a aspa de abertura; avança para depois da aspa de fechamento.
+static bool jv_string(const char **pp) {
+    const char *p = *pp + 1;
     while (*p != '\0') {
-        if (*p == '\\' && in_str && p[1] != '\0') {
-            p += 2;
-            continue;
+        unsigned char c = (unsigned char)*p;
+        if (c == '"') {
+            *pp = p + 1;
+            return true;
         }
-        if (*p == '"') {
-            if (!in_str) {
-                // Verifica se esta chave coincide com `"key"\s*:`
-                if (fw_strncmp(p + 1, key, klen) == 0 && p[1 + klen] == '"') {
-                    const char *after = skip_ws(p + 2 + klen);
-                    if (*after == ':') {
-                        return skip_ws(after + 1);
+        if (c < 0x20U) return false;
+        if (c == '\\') {
+            ++p;
+            switch (*p) {
+                case '"': case '\\': case '/': case 'b': case 'f': case 'n': case 'r': case 't':
+                    break;
+                case 'u':
+                    for (int i = 1; i <= 4; ++i) {
+                        if (!jv_is_hex(p[i])) return false;
                     }
-                }
-                in_str = true;
-            } else {
-                in_str = false;
+                    p += 4;
+                    break;
+                default:
+                    return false;
             }
         }
         ++p;
     }
-    return NULL;
+    return false;
 }
 
-static bool extract_json_string(const char *json, const char *key, char *out_buf, size_t cap) {
-    const char *val = find_json_key(json, key);
+// number = [-] (0 | 1-9 digits) [. digits] [(e|E) [+|-] digits]
+static bool jv_number(const char **pp) {
+    const char *p = *pp;
+    if (*p == '-') ++p;
+    if (*p == '0') {
+        ++p;
+    } else if (*p >= '1' && *p <= '9') {
+        while (jv_is_digit(*p)) ++p;
+    } else {
+        return false;
+    }
+    if (*p == '.') {
+        ++p;
+        if (!jv_is_digit(*p)) return false;
+        while (jv_is_digit(*p)) ++p;
+    }
+    if (*p == 'e' || *p == 'E') {
+        ++p;
+        if (*p == '+' || *p == '-') ++p;
+        if (!jv_is_digit(*p)) return false;
+        while (jv_is_digit(*p)) ++p;
+    }
+    *pp = p;
+    return true;
+}
+
+static bool jv_value(const char **pp, int depth);
+
+static bool jv_literal(const char **pp, const char *word) {
+    size_t n = fw_strlen(word);
+    if (fw_strncmp(*pp, word, n) != 0) return false;
+    *pp += n;
+    return true;
+}
+
+static bool jv_object(const char **pp, int depth) {
+    const char *p = skip_ws(*pp + 1);
+    if (*p == '}') {
+        *pp = p + 1;
+        return true;
+    }
+    for (;;) {
+        p = skip_ws(p);
+        if (*p != '"' || !jv_string(&p)) return false;
+        p = skip_ws(p);
+        if (*p != ':') return false;
+        p = skip_ws(p + 1);
+        if (!jv_value(&p, depth + 1)) return false;
+        p = skip_ws(p);
+        if (*p == ',') {
+            ++p;
+            continue;
+        }
+        if (*p == '}') {
+            *pp = p + 1;
+            return true;
+        }
+        return false;
+    }
+}
+
+static bool jv_array(const char **pp, int depth) {
+    const char *p = skip_ws(*pp + 1);
+    if (*p == ']') {
+        *pp = p + 1;
+        return true;
+    }
+    for (;;) {
+        p = skip_ws(p);
+        if (!jv_value(&p, depth + 1)) return false;
+        p = skip_ws(p);
+        if (*p == ',') {
+            ++p;
+            continue;
+        }
+        if (*p == ']') {
+            *pp = p + 1;
+            return true;
+        }
+        return false;
+    }
+}
+
+static bool jv_value(const char **pp, int depth) {
+    if (depth > JV_MAX_DEPTH) return false;
+    switch (**pp) {
+        case '{': return jv_object(pp, depth);
+        case '[': return jv_array(pp, depth);
+        case '"': return jv_string(pp);
+        case 't': return jv_literal(pp, "true");
+        case 'f': return jv_literal(pp, "false");
+        case 'n': return jv_literal(pp, "null");
+        default:  return jv_number(pp);
+    }
+}
+
+// A linha inteira deve ser exatamente um objeto JSON válido (sem lixo depois).
+static bool jv_validate_line(const char *line) {
+    const char *p = line;
+    if (*p != '{') return false;
+    if (!jv_object(&p, 1)) return false;
+    return *skip_ws(p) == '\0';
+}
+
+// Pula um valor de um texto JÁ validado por jv_validate_line().
+static const char *jv_skip_value(const char *p) {
+    if (*p == '"') {
+        ++p;
+        while (*p != '\0' && *p != '"') {
+            if (*p == '\\' && p[1] != '\0') ++p;
+            ++p;
+        }
+        return (*p == '"') ? p + 1 : p;
+    }
+    if (*p == '{' || *p == '[') {
+        int depth = 0;
+        while (*p != '\0') {
+            if (*p == '"') {
+                p = jv_skip_value(p);
+                continue;
+            }
+            if (*p == '{' || *p == '[') ++depth;
+            else if (*p == '}' || *p == ']') --depth;
+            ++p;
+            if (depth == 0) break;
+        }
+        return p;
+    }
+    while (*p != '\0' && *p != ',' && *p != '}' && *p != ']' &&
+           *p != ' ' && *p != '\t' && *p != '\r' && *p != '\n') {
+        ++p;
+    }
+    return p;
+}
+
+// `obj` aponta para o '{' de um objeto já validado. Devolve o início do valor do membro
+// direto `key`, ou NULL se ausente. Chave repetida no mesmo objeto => NULL e *dup = true.
+static const char *obj_find(const char *obj, const char *key, bool *dup) {
+    if (dup) *dup = false;
+    if (!obj || *obj != '{') return NULL;
+    size_t klen = fw_strlen(key);
+    const char *found = NULL;
+    const char *p = skip_ws(obj + 1);
+    while (*p == '"') {
+        const char *name = p + 1;
+        const char *after = jv_skip_value(p);
+        bool match = (size_t)(after - 1 - name) == klen && fw_strncmp(name, key, klen) == 0;
+        p = skip_ws(after);
+        if (*p != ':') return NULL;
+        p = skip_ws(p + 1);
+        if (match) {
+            if (found) {
+                if (dup) *dup = true;
+                return NULL;
+            }
+            found = p;
+        }
+        p = skip_ws(jv_skip_value(p));
+        if (*p != ',') break;
+        p = skip_ws(p + 1);
+    }
+    return found;
+}
+
+// Parâmetros de comando: membro de `data` ou, na falta, de `data.payload` (formato do app).
+static const char *param_find(const char *data, const char *key) {
+    bool dup = false;
+    const char *v = obj_find(data, key, &dup);
+    if (v || dup) return v;
+    const char *payload = obj_find(data, "payload", &dup);
+    if (!payload || *payload != '{') return NULL;
+    return obj_find(payload, key, &dup);
+}
+
+// Devolve true se o valor é uma string que cabe inteira em out_buf (sem truncar).
+static bool extract_string_at(const char *val, char *out_buf, size_t cap) {
     if (!val || *val != '"' || !out_buf || cap == 0U) return false;
     ++val;
     size_t i = 0U;
@@ -419,9 +609,8 @@ static bool extract_json_string(const char *json, const char *key, char *out_buf
         if (*val == '\\' && val[1] != '\0') {
             ++val;
         }
-        if (i + 1U < cap) {
-            out_buf[i++] = *val;
-        }
+        if (i + 1U >= cap) return false;
+        out_buf[i++] = *val;
         ++val;
     }
     if (*val != '"') return false;
@@ -429,51 +618,70 @@ static bool extract_json_string(const char *json, const char *key, char *out_buf
     return true;
 }
 
-static bool extract_json_u32(const char *json, const char *key, uint32_t *out_val) {
-    const char *val = find_json_key(json, key);
-    if (!val || !out_val) return false;
-    if (*val < '0' || *val > '9') return false;
+// Inteiro sem sinal estrito: 0 | [1-9][0-9]*, sem fração/expoente, cabendo em uint32_t.
+static bool extract_u32_at(const char *val, uint32_t *out_val) {
+    if (!val || !out_val || !jv_is_digit(*val)) return false;
     uint64_t acc = 0ULL;
-    while (*val >= '0' && *val <= '9') {
+    while (jv_is_digit(*val)) {
         acc = acc * 10ULL + (uint64_t)(*val - '0');
         if (acc > 0xFFFFFFFFULL) return false;
         ++val;
     }
-    // Rejeita float para campos estritamente inteiros como v, seq, ts_ms
-    if (*val == '.') return false;
+    if (*val == '.' || *val == 'e' || *val == 'E') return false;
     *out_val = (uint32_t)acc;
     return true;
 }
 
-static bool extract_json_float(const char *json, const char *key, float *out_val) {
-    const char *val = find_json_key(json, key);
+// Número JSON completo (sinal, fração e expoente); rejeita valores fora do alcance de float.
+static bool extract_float_at(const char *val, float *out_val) {
     if (!val || !out_val) return false;
-    double sign = 1.0;
+    bool neg = false;
     if (*val == '-') {
-        sign = -1.0;
+        neg = true;
         ++val;
     }
-    if (*val < '0' || *val > '9') return false;
-    double res = 0.0;
-    while (*val >= '0' && *val <= '9') {
-        res = res * 10.0 + (double)(*val - '0');
+    if (!jv_is_digit(*val)) return false;
+    uint64_t mant = 0ULL;
+    int exp10 = 0;
+    while (jv_is_digit(*val)) {
+        if (mant < 100000000000000000ULL) mant = mant * 10ULL + (uint64_t)(*val - '0');
+        else ++exp10;
         ++val;
     }
     if (*val == '.') {
         ++val;
-        double frac = 0.1;
-        while (*val >= '0' && *val <= '9') {
-            res += (double)(*val - '0') * frac;
-            frac *= 0.1;
+        while (jv_is_digit(*val)) {
+            if (mant < 100000000000000000ULL) {
+                mant = mant * 10ULL + (uint64_t)(*val - '0');
+                --exp10;
+            }
             ++val;
         }
     }
-    *out_val = (float)(res * sign);
+    if (*val == 'e' || *val == 'E') {
+        ++val;
+        bool eneg = false;
+        if (*val == '+' || *val == '-') {
+            eneg = (*val == '-');
+            ++val;
+        }
+        int e = 0;
+        while (jv_is_digit(*val)) {
+            if (e < 1000) e = e * 10 + (*val - '0');
+            ++val;
+        }
+        exp10 += eneg ? -e : e;
+    }
+    if (exp10 > 308 || exp10 < -400) return false;
+    double res = (double)mant;
+    for (int i = 0; i < exp10; ++i) res *= 10.0;
+    for (int i = 0; i > exp10; --i) res /= 10.0;
+    if (res > 3.0e38) return false;
+    *out_val = (float)(neg ? -res : res);
     return true;
 }
 
-static bool extract_json_bool(const char *json, const char *key, bool *out_val) {
-    const char *val = find_json_key(json, key);
+static bool extract_bool_at(const char *val, bool *out_val) {
     if (!val || !out_val) return false;
     if (fw_strncmp(val, "true", 4U) == 0) {
         *out_val = true;
@@ -484,6 +692,33 @@ static bool extract_json_bool(const char *json, const char *key, bool *out_val) 
         return true;
     }
     return false;
+}
+
+// Atalhos por chave: membro direto de `obj` (envelope, `data` ou gesto) ...
+static bool obj_string(const char *obj, const char *key, char *out, size_t cap) {
+    bool dup = false;
+    return extract_string_at(obj_find(obj, key, &dup), out, cap);
+}
+static bool obj_u32(const char *obj, const char *key, uint32_t *out) {
+    bool dup = false;
+    return extract_u32_at(obj_find(obj, key, &dup), out);
+}
+static bool obj_float(const char *obj, const char *key, float *out) {
+    bool dup = false;
+    return extract_float_at(obj_find(obj, key, &dup), out);
+}
+// ... e parâmetros de comando (`data` ou `data.payload`).
+static bool param_string(const char *data, const char *key, char *out, size_t cap) {
+    return extract_string_at(param_find(data, key), out, cap);
+}
+static bool param_u32(const char *data, const char *key, uint32_t *out) {
+    return extract_u32_at(param_find(data, key), out);
+}
+static bool param_float(const char *data, const char *key, float *out) {
+    return extract_float_at(param_find(data, key), out);
+}
+static bool param_bool(const char *data, const char *key, bool *out) {
+    return extract_bool_at(param_find(data, key), out);
 }
 
 static void record_rx_seq(JsonlContext *ctx, uint32_t seq) {
@@ -497,7 +732,8 @@ static void record_rx_seq(JsonlContext *ctx, uint32_t seq) {
 // Aceita exatamente quatro linhas ASCII de 20 colunas, inclusive aspas e barras
 // invertidas escapadas conforme JSON. Não trunca quadros malformados.
 static bool parse_lcd_lines(const char *data, LCDFrameBuffer *out) {
-    const char *p = find_json_key(data, "lines");
+    bool dup = false;
+    const char *p = obj_find(data, "lines", &dup);
     if (!p || *p++ != '[') return false;
     for (unsigned row = 0; row < LCD_ROWS; ++row) {
         p = skip_ws(p);
@@ -563,15 +799,16 @@ static bool parse_plain_bench_command(const char *trimmed, JsonlRxParsed *out_p)
     }
     if (fw_strncmp(trimmed, "PERIOD ", 7U) == 0 || fw_strncmp(trimmed, "period ", 7U) == 0) {
         const char *num = skip_ws(trimmed + 7);
-        if (*num >= '0' && *num <= '9') {
-            uint32_t ms = 0UL;
-            while (*num >= '0' && *num <= '9') {
-                ms = ms * 10UL + (uint32_t)(*num - '0');
-                ++num;
+        uint32_t ms = 0UL;
+        // Somente digitos ate o fim da linha ("PERIOD 12abc" e estouro de uint32_t sao rejeitados).
+        if (extract_u32_at(num, &ms)) {
+            const char *rest = num;
+            while (jv_is_digit(*rest)) ++rest;
+            if (*rest == '\0') {
+                out_p->kind = RX_MSG_ACQ_SET_PERIOD;
+                out_p->param_u32 = ms;
+                return true;
             }
-            out_p->kind = RX_MSG_ACQ_SET_PERIOD;
-            out_p->param_u32 = ms;
-            return true;
         }
     }
     return false;
@@ -625,40 +862,27 @@ bool jsonl_parse_incoming_line(
         return false;
     }
 
-    // Verifica balanceamento básico de chaves e aspas
-    int brace_depth = 0;
-    bool in_quotes = false;
-    for (size_t i = 0U; i < len; ++i) {
-        if (clean[i] == '\\' && in_quotes && (i + 1U < len)) {
-            ++i;
-            continue;
-        }
-        if (clean[i] == '"') {
-            in_quotes = !in_quotes;
-        } else if (!in_quotes) {
-            if (clean[i] == '{') brace_depth++;
-            else if (clean[i] == '}') brace_depth--;
-            if (brace_depth < 0) break;
-        }
-    }
-    if (in_quotes || brace_depth != 0) {
+    // Sintaxe JSON estrita: virgulas/dois-pontos obrigatorios, numeros e escapes validos,
+    // profundidade limitada e nenhum lixo depois do objeto raiz.
+    if (!jv_validate_line(clean)) {
         ctx->parse_errors++;
         fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "ERR_JSON_PARSE", 23U);
-        fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Unbalanced JSON syntax", 63U);
+        fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Malformed JSON syntax", 63U);
         return false;
     }
 
     uint32_t v = 0UL, seq = 0UL, ts_ms = 0UL;
     char msg_type[32];
-    const char *data_ptr = find_json_key(clean, "data");
-    if (!extract_json_u32(clean, "v", &v) ||
-        !extract_json_u32(clean, "seq", &seq) ||
-        !extract_json_u32(clean, "ts_ms", &ts_ms) ||
-        !extract_json_string(clean, "type", msg_type, sizeof(msg_type)) ||
+    bool data_dup = false;
+    const char *data_ptr = obj_find(clean, "data", &data_dup);
+    if (!obj_u32(clean, "v", &v) ||
+        !obj_u32(clean, "seq", &seq) ||
+        !obj_u32(clean, "ts_ms", &ts_ms) ||
+        !obj_string(clean, "type", msg_type, sizeof(msg_type)) ||
         !data_ptr || *data_ptr != '{') {
         ctx->parse_errors++;
         fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "BAD_FRAME", 23U);
-        fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Missing envelope fields", 63U);
+        fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Missing or invalid envelope fields", 63U);
         return false;
     }
 
@@ -674,7 +898,7 @@ bool jsonl_parse_incoming_line(
 
     if (fw_strcmp(msg_type, "pet_command") == 0) {
         char cmd_str[32];
-        if (!extract_json_string(data_ptr, "command", cmd_str, sizeof(cmd_str))) {
+        if (!obj_string(data_ptr, "command", cmd_str, sizeof(cmd_str))) {
             ctx->parse_errors++;
             fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "ERR_UNKNOWN_CMD", 23U);
             fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Missing command string", 63U);
@@ -685,8 +909,14 @@ bool jsonl_parse_incoming_line(
         if (fw_strcmp(cmd_str, "START_COLLECTION") == 0) {
             out_parsed->kind = RX_MSG_ACQ_START;
             uint32_t p_ms = 0UL;
-            if (extract_json_u32(data_ptr, "period_ms", &p_ms) && p_ms > 0UL) {
-                out_parsed->param_u32 = p_ms;
+            if (param_find(data_ptr, "period_ms")) {
+                if (!param_u32(data_ptr, "period_ms", &p_ms)) {
+                    ctx->parse_errors++;
+                    fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "EXEC_ERR", 23U);
+                    fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Invalid period_ms", 63U);
+                    return false;
+                }
+                if (p_ms > 0UL) out_parsed->param_u32 = p_ms;
             }
             return true;
         }
@@ -696,7 +926,7 @@ bool jsonl_parse_incoming_line(
         }
         if (fw_strcmp(cmd_str, "SET_PERIOD") == 0) {
             uint32_t p_ms = 0UL;
-            if (!extract_json_u32(data_ptr, "period_ms", &p_ms) || p_ms == 0UL) {
+            if (!param_u32(data_ptr, "period_ms", &p_ms) || p_ms == 0UL) {
                 ctx->parse_errors++;
                 fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "EXEC_ERR", 23U);
                 fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Invalid period_ms", 63U);
@@ -708,7 +938,7 @@ bool jsonl_parse_incoming_line(
         }
         if (fw_strcmp(cmd_str, "SET_IR") == 0) {
             bool en = true;
-            if (!extract_json_bool(data_ptr, "enabled", &en)) {
+            if (!param_bool(data_ptr, "enabled", &en)) {
                 ctx->parse_errors++;
                 fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "EXEC_ERR", 23U);
                 fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Invalid enabled flag", 63U);
@@ -733,27 +963,33 @@ bool jsonl_parse_incoming_line(
         out_parsed->kind = RX_MSG_PET_COMMAND;
         out_parsed->pet_cmd = pcmd;
         if (pcmd == CMD_SWITCH_MODE) {
-            if (!extract_json_string(data_ptr, "mode", out_parsed->mode_arg, sizeof(out_parsed->mode_arg))) {
+            if (!param_find(data_ptr, "mode")) {
                 fw_copy_trunc(out_parsed->mode_arg, sizeof(out_parsed->mode_arg), "MOTION_PET", 19U);
+            } else if (!param_string(data_ptr, "mode", out_parsed->mode_arg, sizeof(out_parsed->mode_arg))) {
+                ctx->parse_errors++;
+                fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "EXEC_ERR", 23U);
+                fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Invalid mode", 63U);
+                return false;
             }
         }
         if (pcmd == CMD_PLAY) {
             char minigame[20] = {};
-            if (extract_json_string(data_ptr, "minigame", minigame, sizeof(minigame))) {
+            if (param_find(data_ptr, "minigame")) {
                 char action[24] = {};
-                bool ok = fw_strcmp(minigame, "PET_LAUNCH") == 0 &&
-                    extract_json_string(data_ptr, "action", action, sizeof(action));
+                bool ok = param_string(data_ptr, "minigame", minigame, sizeof(minigame)) &&
+                    fw_strcmp(minigame, "PET_LAUNCH") == 0 &&
+                    param_string(data_ptr, "action", action, sizeof(action));
                 if (ok && fw_strcmp(action, "MATCH_RESULT") == 0) {
                     out_parsed->launch.action = LAUNCH_MATCH_RESULT;
-                    ok = extract_json_float(data_ptr, "distance_m", &out_parsed->launch.distance_m) &&
+                    ok = param_float(data_ptr, "distance_m", &out_parsed->launch.distance_m) &&
                         out_parsed->launch.distance_m >= 0.0f && out_parsed->launch.distance_m <= 100000.0f &&
-                        extract_json_u32(data_ptr, "score", &out_parsed->launch.score) &&
-                        extract_json_u32(data_ptr, "coins_earned", &out_parsed->launch.coins_earned) &&
-                        extract_json_u32(data_ptr, "xp_earned", &out_parsed->launch.xp_earned);
+                        param_u32(data_ptr, "score", &out_parsed->launch.score) &&
+                        param_u32(data_ptr, "coins_earned", &out_parsed->launch.coins_earned) &&
+                        param_u32(data_ptr, "xp_earned", &out_parsed->launch.xp_earned);
                 } else if (ok && fw_strcmp(action, "UNLOCK_UPGRADE") == 0) {
                     out_parsed->launch.action = LAUNCH_UNLOCK_UPGRADE;
-                    ok = extract_json_string(data_ptr, "upgrade_id", out_parsed->launch.upgrade_id, sizeof(out_parsed->launch.upgrade_id)) &&
-                        extract_json_u32(data_ptr, "cost", &out_parsed->launch.cost);
+                    ok = param_string(data_ptr, "upgrade_id", out_parsed->launch.upgrade_id, sizeof(out_parsed->launch.upgrade_id)) &&
+                        param_u32(data_ptr, "cost", &out_parsed->launch.cost);
                 } else { ok = false; }
                 if (!ok) {
                     ctx->parse_errors++;
@@ -783,19 +1019,34 @@ bool jsonl_parse_incoming_line(
         float conf = 0.0f;
         uint32_t win_ms = 600UL;
         GestureType gt = GESTURE_NEUTRAL;
-        if (!extract_json_string(data_ptr, "gesture", g_str, sizeof(g_str)) ||
+        bool dup = false;
+        if (!obj_string(data_ptr, "gesture", g_str, sizeof(g_str)) ||
             !local_gesture_parse(g_str, &gt) ||
-            !extract_json_float(data_ptr, "confidence", &conf) ||
+            !obj_float(data_ptr, "confidence", &conf) ||
             conf < 0.0f || conf > 1.0f) {
             ctx->parse_errors++;
             fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "EXEC_ERR", 23U);
             fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Invalid gesture_event payload", 63U);
             return false;
         }
-        if (!extract_json_string(data_ptr, "source", src_str, sizeof(src_str))) {
+        // `source` e `window_ms` sao opcionais, mas se presentes precisam ser validos.
+        bool opt_ok = true;
+        if (obj_find(data_ptr, "source", &dup)) {
+            opt_ok = obj_string(data_ptr, "source", src_str, sizeof(src_str));
+        } else if (dup) {
+            opt_ok = false;
+        } else {
             fw_copy_trunc(src_str, sizeof(src_str), "sim_keyboard", 23U);
         }
-        extract_json_u32(data_ptr, "window_ms", &win_ms);
+        if (opt_ok && (obj_find(data_ptr, "window_ms", &dup) || dup)) {
+            opt_ok = obj_u32(data_ptr, "window_ms", &win_ms) && win_ms <= 0xFFFFUL;
+        }
+        if (!opt_ok) {
+            ctx->parse_errors++;
+            fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "EXEC_ERR", 23U);
+            fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Invalid gesture_event payload", 63U);
+            return false;
+        }
         out_parsed->kind = RX_MSG_GESTURE_INJECT;
         out_parsed->injected_gesture.gesture = gt;
         out_parsed->injected_gesture.confidence = conf;
