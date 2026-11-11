@@ -1,5 +1,7 @@
 # Montagem simples do MotionPet — duas protoboards e testes no guia
 
+> **Histórico (LCD).** Este guia descreve a montagem com LCD, retirado em 10/11/2026. A montagem vigente (sem LCD) está em [bench_verified_wiring.md](bench_verified_wiring.md) e em [hardware/wokwi/montagem_atual/](../hardware/wokwi/montagem_atual/README.md).
+
 **Escopo atualizado: sem LCD.** O usuário optou por ESP32, HC-SR04, TCRT5000 e terminal. Consulte [o registro atual](../hardware/wokwi/montagem_atual/README.md) e [o desenho sem LCD](../hardware/wokwi/montagem_atual/diagram_sem_lcd.json). As etapas abaixo conservam o roteiro anterior com LCD e não devem ser confundidas com essa nova configuração.
 
 **Revisão 4, 10/11/2026 — GND em 6J e diagnóstico com os fios existentes.** Abra o [guia visual](../hardware/guia_montagem_final.html). A montagem normal abaixo continua em 3,3 V para o LCD; o teste temporário em 5 V está separado e exige retirar SDA/SCL. Para habilitar os botões de teste pela USB, rode na raiz do projeto:

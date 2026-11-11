@@ -1,14 +1,29 @@
-# Ligações recuperadas dos testes reais — MotionPet
+# Ligações da bancada: MotionPet
+
+Estado atual em 2026-11-10, sem LCD. O usuário retirou o LCD e os dois cabos de alimentação dele (VCC e GND): não sobra fio do LCD. Registro por relato do usuário; nenhuma tensão foi medida (ele não tem multímetro). Fontes espelhadas: `hardware/wokwi/montagem_atual/diagram.json` e `hardware/netlist/motionpet_atual_sem_lcd.json`.
+
+## Montagem atual
+
+- ESP32 DevKit de 38 pinos na protoboard P1, USB na COM3.
+- **HC-SR04** em 5 V: VCC no trilho + da P1, alimentado por P1:1J. TRIG em GPIO5 (P1:10A). ECHO passa pelo divisor na P2 e chega ao GPIO34 por 12A -> P1:15J.
+- **Divisor do ECHO (P2):** 1 kΩ em 8C-12C, 1 kΩ em 12D-16D, 300 Ω em 16E-20E, 20A no GND. O valor nominal de cerca de 2,83 V no GPIO34 é só cálculo, não medição.
+- **TCRT5000** em 3,3 V: VCC no trilho + da P2, vindo de P1:19J; GND pelos trilhos a partir de P1:6J; DO em GPIO35 (P1:14J).
+- Os dois sensores leem juntos, sem erro (relato do usuário; exatidão da distância não medida).
+- Sem SDA/SCL: GPIO21 e GPIO22 não têm fio na bancada. A interface no notebook (`terminal.web`) substitui o LCD.
+
+## Histórico
+
+Registros anteriores (LCD e testes separados do HC-SR04); NÃO descrevem a bancada atual. O texto original de 05/11/2026 e o reteste de 10/11 seguem preservados.
 
 Registro recuperado em 10/11/2026 do histórico do projeto. Usar esta referência antes de pedir novamente um mapeamento já realizado. Ela descreve o teste anterior; não comprova que os jumpers atuais estejam nos mesmos contatos ou que as tensões atuais sejam iguais.
 
-## LCD I²C — teste de 05/11/2026
+### LCD I²C — teste de 05/11/2026
 
-### Reteste direto em 10/11/2026 após retirar todos os fios
+#### Reteste direto em 10/11/2026 após retirar todos os fios
 
 Observações relatadas pelo usuário, sem medições automáticas: com somente GND=6J e VCC=1J (5 V), SDA/SCL ausentes, a iluminação acendeu normalmente. Movendo apenas VCC para 19J (3V3), a iluminação acendeu mais fraca. Depois, com GND=6J, VCC=19J, SDA=14A e SCL=17A, apareceu texto, mas permaneceu difícil de ler mesmo após o usuário informar ajuste máximo de contraste. A legibilidade em 3V3 não está aprovada. O teste atual em 5 V validou somente a iluminação; não houve teste atual de texto em 5 V. Para operar com backpack em 5 V e ESP32, prever conversão bidirecional dos sinais I²C. Não instruir a mover apenas VCC para 1J mantendo SDA/SCL diretos.
 
-### Registro histórico de 05/11
+#### Registro histórico de 05/11
 
 ESP32 NodeMCU ESP-32S V1.1, 38 pinos, USB para a linha 1, placa ocupando linhas 1–19 da protoboard. Os furos livres usados foram A e J.
 
@@ -32,7 +47,7 @@ Evidências em 05/11, horários de Fortaleza (UTC−3):
 
 Origem: histórico local Claude do projeto, conversa `2d18fea6-8fc1-4e1b-8919-cd5f33dd3adc`, de 05/11/2026. Este arquivo resume apenas as informações de bancada pertinentes.
 
-## HC-SR04 — registros separados
+### HC-SR04 — registros separados
 
 `teste-hcsr04/audit_topologia.py` preserva a montagem declarada pelo usuário: VCC em 1J, TRIG em 10A, ECHO passando por R1 na linha 22, ponto protegido da linha 26 até 15J, R2/R3 nas linhas 26/29/30 e GND comum pela linha 30. É auditoria de topologia, não medição automática.
 

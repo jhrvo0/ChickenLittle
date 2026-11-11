@@ -2,11 +2,11 @@
 
 **Interface gráfica do notebook — Piu-piu.** Execute `.\.venv\Scripts\python.exe -m terminal.web` e abra **http://127.0.0.1:8767/**. O aplicativo local reúne pet animado, cuidados, evolução, Pet Launch com física e loja, música e slides, controlados pelos dois sensores reais. Escolha a porta USB e conecte pela interface; feche antes outros monitores da mesma porta. Veja [as instruções e controles](docs/interface_notebook.md).
 
-**Configuração escolhida em 10/11/2026: sem LCD.** ESP32, HC-SR04 e TCRT5000, com visualização pelo terminal do computador. O usuário confirmou os dois sensores respondendo juntos no painel serial; tensões e exatidão da distância não foram medidas. O [desenho sem LCD](hardware/wokwi/montagem_atual/diagram_sem_lcd.json) e o [registro da bancada](hardware/wokwi/montagem_atual/README.md) descrevem essa configuração. A retirada dos dois cabos de alimentação do LCD ainda aguarda confirmação.
+**Configuração vigente (desde 10/11/2026): sem LCD.** ESP32, HC-SR04 e TCRT5000; a visualização é a interface web no notebook. O LCD 2004 I²C saiu da montagem (ilegível em 3,3 V; em 5 V exigiria conversor de nível) e seus cabos de alimentação já foram retirados da protoboard. O usuário confirmou os dois sensores respondendo juntos no painel serial; tensões e exatidão da distância não foram medidas. Veja o [registro da bancada](hardware/wokwi/montagem_atual/README.md), o [desenho sem LCD](hardware/wokwi/montagem_atual/diagram_sem_lcd.json) e as [ligações verificadas](docs/bench_verified_wiring.md).
 
-Sistema embarcado interativo que combina **ESP32**, sensores de distância e presença, reconhecimento de gestos e uma **interface gráfica local no notebook**, sincronizados por um protocolo serial **JSON Lines v1**. O terminal ASCII e o suporte ao LCD físico permanecem disponíveis como recursos anteriores; o LCD não faz parte da configuração escolhida.
+Sistema embarcado interativo que combina **ESP32**, sensores de distância e presença, reconhecimento de gestos e uma **interface gráfica local no notebook**, sincronizados por um protocolo serial **JSON Lines v1**. O terminal ASCII e o código de LCD permanecem no repositório como recursos, mas não fazem parte da montagem. Veja [Histórico (LCD)](#histórico-lcd).
 
-**Guia anterior com LCD — revisão 4 (10/11/2026):** duas protoboards com trilhos: P1 distribui 5 V, P2 distribui 3V3 e os GNDs são unidos. LCD I²C e TCRT5000 usam somente jumpers; o divisor do ECHO fica separado na P2 e protege o GPIO34 do HC-SR04 em 5 V. Abra o [guia visual](hardware/guia_montagem_final.html) ou o [guia escrito](docs/bench_assembly_guide.md). Para os botões **Testar ESP32/LCD/TCRT5000/HC-SR04/conjunto**, rode `.\.venv\Scripts\python.exe -m terminal.bench.guide` e abra [o guia local](http://127.0.0.1:8766/). O diagnóstico de iluminação do LCD preserva F1–F4 e orienta a mudança temporária apenas de F14/F15, com SDA/SCL removidos antes de usar 5 V e retorno a 3V3 antes dos sinais. Os testes individuais foram relatados pelo usuário; a integração física continua pendente. Os desenhos de LCD paralelo em `hardware/out/` e Wokwi são históricos.
+
 
 ---
 
@@ -17,12 +17,12 @@ Sistema embarcado interativo que combina **ESP32**, sensores de distância e pre
 | **Motor de Estado do Pet (`terminal/pet/` & `firmware/pet/`)** | **Implementado e Testado (Python + C++)** | Paridade 1:1 verificada entre `PetEngine` (Python) e `pet_state.cpp` (C++), integrado a moedas, recordes, loja de melhorias e persistência NVS/JSON. |
 | **Protocolo Serial JSON Lines v1 (`terminal/communication/` & `firmware/communication/`)** | **Implementado e Testado (Python + C++)** | Envelopes versionados (`v=1`) zero-heap no ESP32 (`sensor_frame`, `gesture_event`, `pet_state`, `lcd_frame`, `ack`, `error`) + comandos de bancada (`DIAG`, `START`, `STOP`, `PERIOD`, `IR`). |
 | **Simulador ESP32 + Sensores (`simulator/`)** | **Implementado e Testado** | Simulação determinística 1D do HC-SR04, TCRT5000, potenciômetro, replay `.jsonl`/`.csv`, comandos `DIAG` (`origin=SIMULATOR`) e classificador intercambiável. |
-| **Espelho LCD 20×4 & Terminal ASCII (`terminal/renderer/` & `firmware/display/`)** | **Implementado e Testado (Python + C++)** | Renderização diferencial anti-flicker, modo compacto (60 cols) e 6 estados LCD 20×4 dedicados ao Pet Launch. |
+| **Renderers: Terminal ASCII e espelho LCD 20×4 (`terminal/renderer/` & `firmware/display/`)** | **Implementado e Testado (Python + C++), LCD fora da montagem** | Renderização diferencial anti-flicker, modo compacto (60 cols); o código de LCD é mantido como recurso, sem LCD físico. |
 | **Infraestrutura de Machine Learning (`ml/` & `firmware/gestures/`)** | **Pronta p/ Coleta Real (`AWAITING_REAL_DATA`)** | Coleta guiada multi-participante, filtro causal, 11 features, seleção multicritério embarcada, guarda anti-sintético (`ml.real_pipeline`) e TinyML C++ estático (`mlp_compact`). |
 | **Minijogo `Pet Launch` (`terminal/games/`)** | **Jogável Ponta a Ponta (Ciclo 4/5)** | Loop arcade completo de 10 etapas, física 2D de timestep fixo (`0.02s`), loja de melhorias e validador E2E gestual (`terminal.bench e2e`). |
 | **Assistente de Bancada & Painel Diag (`terminal/bench/` & `terminal/diag/`)** | **Implementados e Testados (Ciclo 5)** | Validação incremental Etapas A–D com verificações elétricas informadas pelo operador, `DIAG`, inspeção de telemetria e painel ASCII. Para a netlist atual, passe explicitamente `--r1 1000 --r2 1300`. |
-| **Firmware C++/FreeRTOS (`firmware/`)** | **Compilado (`0.5.0-cycle5`, `esp32dev`)** | 5 tasks FreeRTOS em `APP_CPU_NUM`; build de 10/11/2026: RAM 7,5%, flash 24,5%. ECHO em GPIO34 e LCD I²C em GPIO21/22; validação física conjunta pendente. |
-| **Validação Física no Hardware Real** | **`PENDING_PHYSICAL_VALIDATION`** | Funcionamento individual de HC-SR04, TCRT5000 e LCD relatado pelo usuário; falta verificar a montagem conjunta e registrar as medições (`docs/cycle5_bench_checklist.md`). |
+| **Firmware C++/FreeRTOS (`firmware/`)** | **Compilado (`0.5.0-cycle5`, `esp32dev`)** | 5 tasks FreeRTOS em `APP_CPU_NUM`; build de 10/11/2026: RAM 7,5%, flash 24,5%. ECHO em GPIO34, TCRT5000 em GPIO35, TRIG em GPIO5; o código de LCD I²C (GPIO21/22) segue no firmware, sem LCD ligado. |
+| **Validação Física no Hardware Real** | **`PENDING_PHYSICAL_VALIDATION`** | HC-SR04 e TCRT5000 leem juntos sem erro (relato do usuário, sem medições de tensão nem de precisão); registrar medições em `docs/cycle5_bench_checklist.md`. |
 
 ---
 
@@ -102,7 +102,7 @@ Abra **http://127.0.0.1:8767/** e conecte a ESP32 pela porta listada. O pet apar
 ```
 
 ### 2. Modo Interativo em Tempo Real no Terminal (MotionPet & Pet Launch)
-Abre o painel ASCII animado com renderização diferencial anti-flicker e espelho do LCD 20×4:
+Abre o painel ASCII animado com renderização diferencial anti-flicker (inclui o espelho do LCD 20×4 em modo de software; a interface web é o caminho principal):
 
 ```powershell
 # Iniciar direto no minijogo Pet Launch (ou omitir --mode para abrir no Tamagotchi)
@@ -149,7 +149,7 @@ Opções úteis de linha de comando:
 
 ### 4. Integração Física de Bancada, Diagnóstico e Dataset Real (Ciclo 5)
 
-> **Segurança e honestidade experimental:** o assistente não energiza a montagem nem grava firmware. A montagem atual usa `R1 = 1 kΩ` e `R2 + R3 = 1,3 kΩ` no divisor do ECHO para `GPIO34`; verifique o divisor antes de conectar o GPIO e nunca aceite mais de `3,30 V` no nó. Alimente TCRT5000 e backpack LCD I²C em `3,3 V`, com GND comum. Use somente os quatro pinos do backpack; não adicione fio de RW. O potenciômetro de entrada foi removido e está desativado. Veja [segurança elétrica](docs/hardware_safety.md).
+> **Segurança e honestidade experimental:** o assistente não energiza a montagem nem grava firmware. A montagem atual usa `R1 = 1 kΩ` e `R2 + R3 = 1,3 kΩ` no divisor do ECHO para `GPIO34`; verifique o divisor antes de conectar o GPIO e nunca aceite mais de `3,30 V` no nó. Alimente o TCRT5000 em `3,3 V`, com GND comum. O potenciômetro de entrada foi removido e está desativado. Veja [segurança elétrica](docs/hardware_safety.md).
 
 Nos comandos abaixo, substitua `COM3` e `<tensao_medida>` pelos dados reais; o assistente não mede as tensões.
 
@@ -164,9 +164,7 @@ Nos comandos abaixo, substitua `COM3` e `<tensao_medida>` pelos dados reais; o a
 .\.venv\Scripts\python.exe -m terminal.bench stage A --serial-port COM3
 .\.venv\Scripts\python.exe -m terminal.bench stage B --serial-port COM3 --r1 1000 --r2 1300 --measured-echo-v <tensao_medida> --reference-cm 25
 .\.venv\Scripts\python.exe -m terminal.bench stage C --serial-port COM3 --component ir --vcc-measured-v <tensao_medida>
-.\.venv\Scripts\python.exe -m terminal.bench stage D --serial-port COM3 --lcd-vdd-v <tensao_medida>
-# Depois de conferir VCC=3V3, os quatro fios e a imagem no LCD fisico:
-.\.venv\Scripts\python.exe -m terminal.bench stage D --serial-port COM3 --lcd-vdd-v <tensao_medida> --i2c-wiring-confirmed --visual-confirmed
+# (A Etapa D valida o LCD, que está fora da montagem: não se aplica.)
 
 # C. Painel ASCII de diagnóstico em tempo real (indica explicitamente HARDWARE REAL vs SIMULADOR)
 .\.venv\Scripts\python.exe -m terminal.diag --serial-port COM3
@@ -179,7 +177,7 @@ Nos comandos abaixo, substitua `COM3` e `<tensao_medida>` pelos dados reais; o a
 # E. Treino multicritério com dados 100% reais, exportação C++ com paridade e rebuild do firmware
 .\.venv\Scripts\python.exe -m ml.real_pipeline --raw-dir data/raw/real --models-dir data/models/real --reports-dir data/reports --export-header firmware/gestures/tinyml_model.h --verify-firmware-build
 
-# F. Validação ponta a ponta do Pet Launch (gestos -> serial -> jogo -> LCD -> persistência)
+# F. Validação ponta a ponta do Pet Launch (gestos -> serial -> jogo -> persistência)
 .\.venv\Scripts\python.exe -m terminal.bench e2e --serial-port COM3
 ```
 
@@ -233,3 +231,14 @@ guia HTML navegável, SVG/PNG da protoboard e do esquemático, `.fzz` do Fritzin
 - Decisões, descobertas e limites: `docs/cad_decisions.md`. MCPs avaliados e estado real: `hardware/mcp/README.md`.
 - Regenerar: `python -m hardware.build [--png]` · Testar: `python -m pytest tests/test_hardware_cad.py`.
 - **Status inalterado: `PENDING_PHYSICAL_VALIDATION`** — nenhuma validação física foi feita; confirmações pendentes C01–C09 na netlist.
+
+---
+
+## Histórico (LCD)
+
+Até 10/11/2026 a montagem previa um LCD 2004 I²C. Ele foi retirado: ilegível em 3,3 V e, em 5 V, precisaria de conversor de nível. A interface web o substitui. O que sobrou como legado:
+
+- Guias com LCD (roteiro anterior, revisão 4): [guia escrito](docs/bench_assembly_guide.md), [guia visual](hardware/guia_montagem_final.html) e [guia sem resistor](docs/guia_lcd_sem_resistor.md). Cada um avisa no topo que é histórico.
+- Projetos de bancada [`teste-lcd/`](teste-lcd/README.md) e [`teste-i2c-scan/`](teste-i2c-scan/README.md): fora da montagem, mantidos como recurso.
+- Desenhos de LCD paralelo em `hardware/out/` e no Wokwi são históricos; o netlist e o `diagram.json` ainda carregam o LCD.
+- Código de LCD no firmware e em `terminal/renderer/` continua existindo e testado.
