@@ -59,10 +59,12 @@ class TerminalHostClient:
         endpoint: SerialEndpoint,
         transport_label: str = "VIRTUAL_SERIAL_JSONL_V1",
         compact_mode: bool = False,
+        dispatch_gesture_events: bool = True,
     ) -> None:
         self.endpoint = endpoint
         self.transport_label = transport_label
         self.compact_mode = compact_mode
+        self.dispatch_gesture_events = dispatch_gesture_events
         self.codec = ProtocolCodec()
         self.terminal_renderer = TerminalAsciiRenderer()
         self._fallback_lcd = Lcd20x4Renderer()
@@ -79,6 +81,7 @@ class TerminalHostClient:
         self.rx_packets = 0
         self.frame_idx = 0
         self._return_to_pet_lcd_ttl = 0
+        self._last_launch_lcd_sent_at: float | None = None
 
         self.active_mode: AppModeId = AppModeId.MOTION_PET
         self._launch_mode = PetLaunchMode(animated_flight=True)
@@ -132,6 +135,10 @@ class TerminalHostClient:
             self._sync_launch_lcd()
 
         self.send_command(CommandType.SWITCH_MODE, {"mode": self.active_mode.value})
+        if target_mode == AppModeId.PET_LAUNCH:
+            self._send_launch_lcd(force=True)
+        else:
+            self._last_launch_lcd_sent_at = None
         return self.active_mode
 
     def cycle_mode(self) -> AppModeId:
@@ -157,6 +164,15 @@ class TerminalHostClient:
         for cmd_payload in self._launch_mode.pop_pending_pet_commands():
             self.send_command(CommandType.PLAY, cmd_payload)
 
+    def _send_launch_lcd(self, *, force: bool = False) -> None:
+        """Envia o quadro do jogo e renova o prazo de exibição no dispositivo."""
+        now = time.monotonic()
+        if not force and self._last_launch_lcd_sent_at is not None and now - self._last_launch_lcd_sent_at < 0.2:
+            return
+        self.endpoint.write_line(self.codec.encode(MessageType.LCD_FRAME, self.lcd_frame.to_dict()))
+        self.tx_packets += 1
+        self._last_launch_lcd_sent_at = now
+
     def update_game(self, dt_s: float) -> None:
         """Avança a simulação temporal do minijogo ativo (desacoplada do FPS do terminal)."""
         if self.active_mode == AppModeId.PET_LAUNCH:
@@ -164,6 +180,7 @@ class TerminalHostClient:
             self._launch_mode.update(dt_s)
             self._flush_launch_commands()
             self._sync_launch_lcd()
+            self._send_launch_lcd()
 
     def poll_serial(self) -> int:
         """Consome todas as mensagens pendentes vindas do dispositivo serial."""
@@ -193,6 +210,8 @@ class TerminalHostClient:
                         self._sync_launch_lcd()
             elif env.type == MessageType.GESTURE_EVENT:
                 self.last_gesture = GestureEventPayload.from_dict(env.data)
+                if not self.dispatch_gesture_events:
+                    continue
                 if self.active_mode == AppModeId.PET_LAUNCH:
                     self._launch_mode.bind_pet_state(self.pet_state)
                     self._launch_mode.on_gesture_event(

@@ -19,6 +19,7 @@ biblioteca nativa de host (`cl.exe` freestanding DLL / `g++` shared lib) e valid
 from __future__ import annotations
 
 import ctypes
+import json
 import os
 import shutil
 import subprocess
@@ -327,6 +328,16 @@ FW_EXPORT bool fw_jsonl_parse_line(
     return ok;
 }
 
+FW_EXPORT bool fw_jsonl_parse_lcd(const char *line, char *out) {
+    JsonlRxParsed parsed{};
+    if (!jsonl_parse_incoming_line(&g_test_jsonl, line, &parsed) || parsed.kind != RX_MSG_LCD_FRAME) return false;
+    for (unsigned row = 0; row < LCD_ROWS; ++row)
+        for (unsigned col = 0; col < LCD_COLS; ++col)
+            out[row * LCD_COLS + col] = parsed.lcd_frame.lines[row][col];
+    out[LCD_ROWS * LCD_COLS] = '\0';
+    return true;
+}
+
 // ============================================================================
 // 3. Ponte para `gesture_classifier.cpp` + `tinyml_model.h`
 // ============================================================================
@@ -420,6 +431,17 @@ FW_EXPORT bool fw_pet_command(const char *cmd_name) {
     return pet_apply_command(&g_test_pet, cmd);
 }
 
+FW_EXPORT bool fw_pet_launch_command(const char *line) {
+    JsonlRxParsed p{};
+    if (!jsonl_parse_incoming_line(&g_test_jsonl, line, &p) || p.kind != RX_MSG_PET_COMMAND) return false;
+    if (p.launch.action == LAUNCH_MATCH_RESULT)
+        return pet_apply_launch_match(&g_test_pet, p.launch.distance_m, p.launch.score,
+                                      p.launch.coins_earned, p.launch.xp_earned);
+    if (p.launch.action == LAUNCH_UNLOCK_UPGRADE)
+        return pet_unlock_launch_upgrade(&g_test_pet, p.launch.upgrade_id, p.launch.cost);
+    return false;
+}
+
 FW_EXPORT bool fw_pet_gesture_event(const char *gesture_name, float conf, float min_conf) {
     GestureEvent ev{};
     ev.gesture = gesture_type_from_string(gesture_name);
@@ -432,6 +454,19 @@ FW_EXPORT bool fw_pet_gesture_event(const char *gesture_name, float conf, float 
 
 FW_EXPORT bool fw_pet_to_jsonl(uint32_t ts_ms, char *out_buf, uint32_t cap) {
     return jsonl_serialize_pet_state(&g_test_jsonl, out_buf, (size_t)cap, ts_ms, &g_test_pet);
+}
+
+FW_EXPORT bool fw_pet_full_to_jsonl(char *out_buf, uint32_t cap) {
+    PetStateSnapshot p{};
+    pet_init(&p, "A\\\"long\\\"name", PERSONALITY_CURIOUS);
+    p.coins = 4294967295UL;
+    p.best_launch_score = 4294967295UL;
+    p.total_launches = 4294967295UL;
+    p.best_launch_distance_m = 100000.0f;
+    p.launch_upgrades = 7U;
+    p.xp = 4294967295UL;
+    p.age_ticks = 4294967295UL;
+    return jsonl_serialize_pet_state(&g_test_jsonl, out_buf, cap, 4294967295UL, &p);
 }
 
 FW_EXPORT bool fw_pet_to_lcd_jsonl(
@@ -503,6 +538,17 @@ FW_EXPORT int32_t fw_nvs_load_into_current_pet(void) {
         g_test_pet = loaded;
     }
     return (int32_t)st;
+}
+
+FW_EXPORT void fw_nvs_make_legacy_save(void) {
+    PetNvsBlobV1 old{};
+    old.magic = PET_NVS_MAGIC;
+    old.schema_version = 1U;
+    old.generation = 7U;
+    const uint8_t *src = (const uint8_t *)&g_test_pet;
+    for (size_t i = 0; i < sizeof(old.snapshot); ++i) old.snapshot[i] = src[i];
+    old.crc32 = pet_crc32_compute((const uint8_t *)&old, offsetof(PetNvsBlobV1, crc32));
+    mock_nvs_write(&old, sizeof(old));
 }
 
 FW_EXPORT void fw_nvs_corrupt_byte(uint32_t byte_offset, uint8_t xor_mask) {
@@ -807,6 +853,8 @@ def _configure_bridge_signatures(lib: ctypes.CDLL) -> None:
         ctypes.c_uint32,
     ]
     lib.fw_jsonl_parse_line.restype = ctypes.c_bool
+    lib.fw_jsonl_parse_lcd.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+    lib.fw_jsonl_parse_lcd.restype = ctypes.c_bool
 
     lib.fw_gesture_model_name.argtypes = []
     lib.fw_gesture_model_name.restype = ctypes.c_char_p
@@ -849,11 +897,16 @@ def _configure_bridge_signatures(lib: ctypes.CDLL) -> None:
     lib.fw_pet_command.argtypes = [ctypes.c_char_p]
     lib.fw_pet_command.restype = ctypes.c_bool
 
+    lib.fw_pet_launch_command.argtypes = [ctypes.c_char_p]
+    lib.fw_pet_launch_command.restype = ctypes.c_bool
+
     lib.fw_pet_gesture_event.argtypes = [ctypes.c_char_p, ctypes.c_float, ctypes.c_float]
     lib.fw_pet_gesture_event.restype = ctypes.c_bool
 
     lib.fw_pet_to_jsonl.argtypes = [ctypes.c_uint32, ctypes.c_char_p, ctypes.c_uint32]
     lib.fw_pet_to_jsonl.restype = ctypes.c_bool
+    lib.fw_pet_full_to_jsonl.argtypes = [ctypes.c_char_p, ctypes.c_uint32]
+    lib.fw_pet_full_to_jsonl.restype = ctypes.c_bool
 
     lib.fw_pet_to_lcd_jsonl.argtypes = [
         ctypes.c_uint32,
@@ -922,8 +975,8 @@ def fw_lib() -> Iterator[ctypes.CDLL]:
 
 
 def _cpp_pet_snapshot_as_payload(lib: ctypes.CDLL, codec: ProtocolCodec) -> PetState:
-    buf = ctypes.create_string_buffer(512)
-    assert lib.fw_pet_to_jsonl(1000, buf, 512)
+    buf = ctypes.create_string_buffer(1024)
+    assert lib.fw_pet_to_jsonl(1000, buf, len(buf))
     env = codec.decode(buf.value.decode("utf-8"))
     assert env.type == MessageType.PET_STATE
     return PetState.from_dict(env.data)
@@ -1020,6 +1073,26 @@ def test_sensors_driver_hal_monotonic_timestamps_ir_and_adc1(fw_lib: ctypes.CDLL
 # ============================================================================
 # 2. Formação de `sensor_frame` / JSON Lines v1 e Integração com `SerialSessionRecorder`
 # ============================================================================
+def test_lcd_input_parser_preserves_escaped_ascii_and_rejects_bad_frames(fw_lib: ctypes.CDLL) -> None:
+    lines = ['A "quote" and \\'.ljust(20), 'B' * 20, 'C' * 20, 'D' * 20]
+    codec = ProtocolCodec()
+    out = ctypes.create_string_buffer(81)
+    valid = codec.encode(MessageType.LCD_FRAME, {"lines": lines}).encode("ascii")
+    assert fw_lib.fw_jsonl_parse_lcd(valid, out)
+    assert out.value.decode("ascii") == ''.join(lines)
+    for bad in (lines[:3], [lines[0][:-1], *lines[1:]], [lines[0], *lines[1:3], 'é' * 20]):
+        raw = json.dumps({"v": 1, "seq": 12, "type": "lcd_frame", "ts_ms": 0, "data": {"lines": bad}})
+        assert not fw_lib.fw_jsonl_parse_lcd(raw.encode("ascii"), out)
+
+
+def test_complete_pet_state_fits_firmware_serial_buffer(fw_lib: ctypes.CDLL) -> None:
+    buf = ctypes.create_string_buffer(1024)
+    assert fw_lib.fw_pet_full_to_jsonl(buf, len(buf))
+    data = json.loads(buf.value)
+    assert data["data"]["coins"] == 4294967295
+    assert len(data["data"]["unlocked_upgrades"]) == 3
+
+
 def test_jsonl_envelopes_decode_cleanly_in_python_protocol_codec(fw_lib: ctypes.CDLL) -> None:
     fw_lib.fw_jsonl_reset()
     codec = ProtocolCodec()
@@ -1547,6 +1620,54 @@ def test_pet_engine_shared_sequence_parity_python_vs_cpp(fw_lib: ctypes.CDLL) ->
 # ============================================================================
 # 6. Persistência NVS Antidesgaste + Recuperação de Corrupção (`pet_persistence.cpp`)
 # ============================================================================
+def test_launch_commands_update_and_persist_real_firmware_state(fw_lib: ctypes.CDLL) -> None:
+    codec = ProtocolCodec()
+    fw_lib.fw_jsonl_reset()
+    fw_lib.fw_nvs_reset(30_000)
+    fw_lib.fw_pet_init(b"Launch", 0)
+
+    def send(payload: dict) -> bool:
+        line = codec.encode(MessageType.PET_COMMAND, PetCommandPayload(CommandType.PLAY, payload).to_dict())
+        return fw_lib.fw_pet_launch_command(line.encode())
+
+    result = {"minigame": "PET_LAUNCH", "action": "MATCH_RESULT", "distance_m": 64.5,
+              "score": 980, "coins_earned": 18, "xp_earned": 25, "bounces": 2}
+    assert send(result)
+    state = _cpp_pet_snapshot_as_payload(fw_lib, codec)
+    assert (state.coins, state.best_launch_distance_m, state.best_launch_score, state.total_launches) == (18, 64.5, 980, 1)
+    assert state.xp == 25
+    assert state.energy == pytest.approx(77.0)
+    purchase = {"minigame": "PET_LAUNCH", "action": "UNLOCK_UPGRADE", "upgrade_id": "SLINGSHOT_PRO", "cost": 15}
+    assert not send({**purchase, "cost": 0})
+    assert send(purchase)
+    assert not send(purchase)
+    assert not send({**result, "coins_earned": -1})
+    saved = _cpp_pet_snapshot_as_payload(fw_lib, codec)
+    assert saved.coins == 3 and saved.unlocked_upgrades == ["SLINGSHOT_PRO"]
+    assert fw_lib.fw_nvs_save_current_pet(1_000, True) == 0
+    fw_lib.fw_pet_init(b"Reset", 0)
+    assert fw_lib.fw_nvs_load_into_current_pet() == 0
+    assert _cpp_pet_snapshot_as_payload(fw_lib, codec) == saved
+
+
+def test_legacy_nvs_save_migrates_without_losing_pet(fw_lib: ctypes.CDLL) -> None:
+    codec = ProtocolCodec()
+    fw_lib.fw_jsonl_reset()
+    fw_lib.fw_nvs_reset(30_000)
+    fw_lib.fw_pet_init(b"Legacy", 0)
+    assert fw_lib.fw_pet_command(b"FEED")
+    original = _cpp_pet_snapshot_as_payload(fw_lib, codec)
+    fw_lib.fw_nvs_make_legacy_save()
+    fw_lib.fw_pet_init(b"Reset", 0)
+    assert fw_lib.fw_nvs_load_into_current_pet() == 0
+    assert _cpp_pet_snapshot_as_payload(fw_lib, codec) == original
+    # First auto-save rewrites the migrated blob, even if the pet has not changed.
+    assert fw_lib.fw_nvs_save_current_pet(1_000, False) == 0
+    fw_lib.fw_pet_init(b"Reset", 0)
+    assert fw_lib.fw_nvs_load_into_current_pet() == 0
+    assert _cpp_pet_snapshot_as_payload(fw_lib, codec) == original
+
+
 def test_nvs_persistence_roundtrip_wear_protection_and_corruption_recovery(fw_lib: ctypes.CDLL) -> None:
     codec = ProtocolCodec()
     fw_lib.fw_jsonl_reset()

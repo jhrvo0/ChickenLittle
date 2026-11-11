@@ -84,14 +84,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_stg.add_argument("--r2", type=float, default=PREFERRED_ECHO_R2_OHM, help="[Etapa B] R2 em Ohms.")
     p_stg.add_argument("--measured-echo-v", type=float, default=None, help="[Etapa B] Tensao medida no divisor (V).")
     p_stg.add_argument("--reference-cm", type=float, default=None, help="[Etapa B] Distancia medida na regua (cm).")
-    p_stg.add_argument("--component", choices=["ir", "pot", "both"], default="both", help="[Etapa C] Periferico.")
+    p_stg.add_argument("--component", choices=["ir", "pot", "both"], default="ir", help="[Etapa C] Periferico (padrao: ir).")
     p_stg.add_argument("--vcc-measured-v", type=float, default=None, help="[Etapa C] Tensao medida no pino 3V3 (V).")
     p_stg.add_argument(
         "--rw-not-grounded",
         action="store_true",
-        help="[Etapa D] Indica que RW ainda NAO foi aterrado (aciona bloqueio de seguranca).",
+        help="[Etapa D, paralelo historico] Indica RW nao aterrado; nao se aplica ao backpack I2C.",
     )
-    p_stg.add_argument("--lcd-vdd-v", type=float, default=None, help="[Etapa D] Tensao medida no VDD do LCD (V).")
+    p_stg.add_argument("--rw-confirmed", action="store_true", help="[Etapa D, paralelo historico] Confirma continuidade RW-GND medida pelo operador.")
+    p_stg.add_argument("--visual-confirmed", action="store_true", help="[Etapa D] Confirma que o operador comparou o LCD fisico com o quadro serial.")
+    p_stg.add_argument("--lcd-vdd-v", type=float, default=None, help="[Etapa D] Tensao medida no VCC do backpack (perfil I2C: 3V3).")
+    p_stg.add_argument("--lcd-interface", choices=["i2c", "parallel"], default="i2c", help="[Etapa D] I2C atual ou paralelo historico.")
+    p_stg.add_argument("--i2c-wiring-confirmed", action="store_true", help="[Etapa D] Operador conferiu VCC=3V3, GND, SDA=21 e SCL=22.")
     p_stg.add_argument("--log-path", default=str(DEFAULT_BENCH_LOG_PATH), help="Arquivo de log JSON.")
 
     # 8. e2e
@@ -264,6 +268,11 @@ def main(argv: list[str] | None = None) -> int:
                 log_path=args.log_path,
             )
         elif sid == "C":
+            if not args.simulate:
+                if args.component in ("ir", "both"):
+                    print("Durante a leitura, aproxime e afaste um objeto do TCRT5000 para observar a transicao.", flush=True)
+                if args.component in ("pot", "both"):
+                    print("Durante a leitura, gire o potenciometro; o ADC esta desativado no firmware padrao.", flush=True)
             res_s = run_stage_c(
                 serial_port=args.serial_port,
                 simulate=args.simulate,
@@ -279,20 +288,21 @@ def main(argv: list[str] | None = None) -> int:
                 baudrate=args.baudrate,
                 rw_grounded=(not args.rw_not_grounded),
                 lcd_vdd_v=args.lcd_vdd_v,
+                rw_confirmed=args.rw_confirmed,
+                visual_confirmed=args.visual_confirmed,
                 log_path=args.log_path,
+                lcd_interface=args.lcd_interface,
+                i2c_wiring_confirmed=args.i2c_wiring_confirmed,
             )
 
         print(f"=== VALIDACAO INCREMENTAL - ETAPA {res_s.stage} [{res_s.validation_origin}] ===")
         print(res_s.summary)
-        if sid == "D" and "reference_lcd_20x4" in res_s.details:
-            print("\nComparacao Quadro LCD 20x4 (Esquerda = Referencia Simulador | Direita = Dispositivo):")
-            print("  +--------------------+    +--------------------+")
-            for ref_ln, dev_ln in zip(
-                res_s.details["reference_lcd_20x4"],
-                res_s.details["device_lcd_20x4"],
-            ):
-                print(f"  |{ref_ln:<20}|    |{dev_ln:<20}|")
-            print("  +--------------------+    +--------------------+")
+        if sid == "D" and res_s.details.get("device_lcd_20x4"):
+            print("\nQuadro LCD recebido pela serial (compare com o display fisico):")
+            print("  +--------------------+")
+            for dev_ln in res_s.details["device_lcd_20x4"]:
+                print(f"  |{dev_ln:<20}|")
+            print("  +--------------------+")
         for prob in res_s.problems:
             print(f"  [!] {prob}")
         if res_s.next_manual_action:
@@ -313,15 +323,21 @@ def main(argv: list[str] | None = None) -> int:
         print(f"=== TESTE PONTA A PONTA PET LAUNCH [{rep_e2e.validation_origin}] ===")
         print(f"Classificador: {rep_e2e.classifier_kind} | Status geral: {'APROVADO' if rep_e2e.all_passed else 'PENDENTE/FALHOU'}")
         for k, ok in rep_e2e.checks.items():
-            print(f"  [{'OK' if ok else 'FALHA'}] {k}")
+            status = 'PENDENTE' if ok is None else ('OK' if ok else 'FALHA')
+            print(f"  [{status}] {k}")
+        coins = rep_e2e.coins_after_match if rep_e2e.coins_after_match is not None else 'nao verificado'
+        xp = rep_e2e.xp_after_match if rep_e2e.xp_after_match is not None else 'nao verificado'
         print(
             f"Partidas: {rep_e2e.matches_completed} | Melhor dist: {rep_e2e.best_distance_m:.2f} m | "
-            f"Moedas: {rep_e2e.coins_after_match} | XP: {rep_e2e.xp_after_match}"
+            f"Moedas: {coins} | XP: {xp}"
         )
-        print(
-            f"Latencia E2E: media={rep_e2e.mean_e2e_latency_ms:.3f} ms | "
-            f"p95={rep_e2e.p95_e2e_latency_ms:.3f} ms | Relatorio: {Path(args.report_path)}"
-        )
+        print("Latencia sensor-resposta: nao medida")
+        if rep_e2e.mean_processing_ms is not None:
+            print(
+                f"Tempo de processamento ({rep_e2e.processing_time_scope}): "
+                f"media={rep_e2e.mean_processing_ms:.3f} ms | p95={rep_e2e.p95_processing_ms:.3f} ms"
+            )
+        print(f"Relatorio: {Path(args.report_path)}")
         return 0 if rep_e2e.all_passed else 1
 
     return 2

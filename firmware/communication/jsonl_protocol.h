@@ -28,6 +28,17 @@ typedef struct {
     bool has_rx_seq;            ///< Indica se já recebeu ao menos um quadro numerado
 } JsonlContext;
 
+typedef enum { LAUNCH_NONE = 0, LAUNCH_MATCH_RESULT, LAUNCH_UNLOCK_UPGRADE } LaunchAction;
+typedef struct {
+    LaunchAction action;
+    float distance_m;
+    uint32_t score;
+    uint32_t coins_earned;
+    uint32_t xp_earned;
+    uint32_t cost;
+    char upgrade_id[20];
+} LaunchCommand;
+
 /**
  * @brief Tipos de mensagem ou controle recebidos pela porta serial (Host -> ESP32).
  */
@@ -39,7 +50,8 @@ typedef enum {
     RX_MSG_ACQ_STOP,            ///< Pausar transmissão de `sensor_frame`
     RX_MSG_ACQ_SET_PERIOD,      ///< Ajustar período de amostragem em ms (ex: 60..80 ms)
     RX_MSG_ACQ_SET_IR,          ///< Habilitar/desabilitar leitura do TCRT5000
-    RX_MSG_DIAG_REQUEST         ///< Solicitar resumo de telemetria FreeRTOS em envelope `ack`
+    RX_MSG_DIAG_REQUEST,        ///< Solicitar resumo de telemetria FreeRTOS em envelope `ack`
+    RX_MSG_LCD_FRAME            ///< Quadro ASCII 20x4 do jogo no host
 } JsonlRxKind;
 
 /**
@@ -50,7 +62,9 @@ typedef struct {
     uint32_t seq;
     PetCommandType pet_cmd;
     char mode_arg[20];
+    LaunchCommand launch;
     GestureEvent injected_gesture;
+    LCDFrameBuffer lcd_frame;
     uint32_t param_u32;
     bool param_bool;
     char error_code[24];

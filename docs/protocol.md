@@ -35,6 +35,8 @@ Transmite a leitura bruta e pré-filtrada dos sensores físicos ou simulados.
   - `ir_detected` (*boolean*): `true` quando o sensor óptico reflexivo TCRT5000 detecta proximidade imediata ($< 2\text{ cm}$).
   - `pot_norm` (*number*): Valor do potenciômetro normalizado de $0.0$ a $1.0$ (mapeado de 12 bits: $0$ a $4095$ no ADC1).
   - `valid_ultrasonic` (*boolean*): `true` se o pulso de eco foi lido dentro da janela de tempo válida (115 µs a 25 ms).
+  - `echo_duration_us` (*integer*, opcional): duração bruta do pulso ECHO, em microssegundos, quando o firmware a disponibiliza. Um pulso pode ser não zero e ainda assim ser inválido. Zero agrupa situações como ECHO preso em nível alto, ausência de subida ou ausência de descida; não distingue essas causas.
+  - `acquire_duration_us` (*integer*, opcional): tempo total da aquisição dos sensores desta amostra, em microssegundos. Esses dois campos são diagnósticos digitais: **não medem tensão** nem comprovam a fiação. Clientes e simuladores anteriores podem omiti-los; os clientes não devem depender de sua presença.
 
 ```json
 {
@@ -101,6 +103,8 @@ Comandos manuais ou gerados por interação do usuário no terminal para alterar
     - `"TICK"`: Forçar avanço de um ciclo temporal de simulação.
   - `payload` (*object*): Parâmetros adicionais opcionais (ex: `{"mode": "air_music"}`).
 
+Para Pet Launch, `PLAY` com `payload.minigame = "PET_LAUNCH"` aceita `action = "MATCH_RESULT"` com `distance_m`, `score`, `coins_earned` e `xp_earned`, ou `action = "UNLOCK_UPGRADE"` com `upgrade_id` e `cost`. O ESP32 valida e aplica o resultado ou a compra; compras inválidas, repetidas ou sem saldo são rejeitadas. O estado publicado inclui moedas, recordes, total de lançamentos e melhorias. O recebimento do comando não substitui a confirmação de persistência após reinicialização física.
+
 ```json
 {
   "v": 1,
@@ -162,8 +166,10 @@ Snapshot completo e determinístico do estado do Pet. É a carga útil enviada p
 
 ---
 
-### 2.5 `lcd_frame` (ESP32 $\rightarrow$ Host / Mirror Display)
+### 2.5 `lcd_frame` (ESP32 $\leftrightarrow$ Host / Mirror Display)
 Representação exata das 4 linhas do display LCD 2004A. Usado para que o simulador ou o terminal espelhem em tela os 80 caracteres presentes no LCD físico.
+- Durante `PET_LAUNCH`, o host também envia este quadro ao ESP32, até 5 vezes por segundo. O ESP32 o usa enquanto o modo estiver ativo; se os quadros pararem por 2 segundos ou o modo mudar, volta à tela local do pet. A confirmação visual do LCD físico continua necessária.
+- As quatro linhas devem ter exatamente 20 caracteres ASCII imprimíveis. Quadros inválidos são rejeitados. O envio ao dispositivo não comprova, por si só, que o display recebeu ou exibiu o conteúdo.
 - **Campos de `data`**:
   - `lines` (*array of strings*): Exatamente 4 strings com 20 caracteres cada. Caracteres faltantes devem ser preenchidos com espaços em branco (`' '`).
 

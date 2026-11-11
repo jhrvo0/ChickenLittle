@@ -2,7 +2,8 @@ name: 'MotionPet - ESP32 + HC-SR04 emitindo sensor_frame (JSON Lines v1)'
 version: 1
 author: 'MotionPet'
 # ESTE CENARIO NAO FOI EXECUTADO no ambiente de build (wokwi-cli indisponivel). Executar com:
-#   WOKWI_CLI_TOKEN=<seu token> wokwi-cli hardware/wokwi --scenario hardware/wokwi/scenarios/hcsr04.test.yaml
+#   wokwi-cli hardware/wokwi --scenario scenarios/hcsr04.test.yaml
+# Verifica apenas que existem quadros validos apos cada ajuste; NAO confere o valor de distancia.
 steps:
   - wait-serial: 'sensor_frame'
   - set-control:

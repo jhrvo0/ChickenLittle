@@ -165,6 +165,12 @@ bool jsonl_serialize_sensor_frame(
     jw_puts(&w, ",\"valid_ultrasonic\":");
     jw_put_bool(&w, frame->valid_ultrasonic && frame->distance_cm >= 0.0f);
 
+    // Dados brutos de diagnostico da mesma amostra; nao alteram a captura.
+    jw_puts(&w, ",\"echo_duration_us\":");
+    jw_put_u32(&w, frame->echo_duration_us);
+    jw_puts(&w, ",\"acquire_duration_us\":");
+    jw_put_u32(&w, frame->acquire_duration_us);
+
     return jw_finish_envelope(&w, ctx);
 }
 
@@ -253,6 +259,21 @@ bool jsonl_serialize_pet_state(
     jw_puts(&w, ",\"heal\":");
     jw_put_u32(&w, (uint32_t)state->care_counters.heal);
     jw_putc(&w, '}');
+
+    jw_puts(&w, ",\"coins\":");
+    jw_put_u32(&w, state->coins);
+    jw_puts(&w, ",\"best_launch_distance_m\":");
+    jw_put_fixed(&w, state->best_launch_distance_m, 2U);
+    jw_puts(&w, ",\"best_launch_score\":");
+    jw_put_u32(&w, state->best_launch_score);
+    jw_puts(&w, ",\"total_launches\":");
+    jw_put_u32(&w, state->total_launches);
+    jw_puts(&w, ",\"unlocked_upgrades\":[");
+    bool comma = false;
+    if (state->launch_upgrades & 1U) { jw_put_escaped_str(&w, "SLINGSHOT_PRO"); comma = true; }
+    if (state->launch_upgrades & 2U) { if (comma) jw_putc(&w, ','); jw_put_escaped_str(&w, "AERO_CAPE"); comma = true; }
+    if (state->launch_upgrades & 4U) { if (comma) jw_putc(&w, ','); jw_put_escaped_str(&w, "SPRING_BOOTS"); }
+    jw_putc(&w, ']');
 
     return jw_finish_envelope(&w, ctx);
 }
@@ -473,11 +494,38 @@ static void record_rx_seq(JsonlContext *ctx, uint32_t seq) {
     ctx->has_rx_seq = true;
 }
 
+// Aceita exatamente quatro linhas ASCII de 20 colunas, inclusive aspas e barras
+// invertidas escapadas conforme JSON. Não trunca quadros malformados.
+static bool parse_lcd_lines(const char *data, LCDFrameBuffer *out) {
+    const char *p = find_json_key(data, "lines");
+    if (!p || *p++ != '[') return false;
+    for (unsigned row = 0; row < LCD_ROWS; ++row) {
+        p = skip_ws(p);
+        if (*p++ != '"') return false;
+        unsigned col = 0;
+        while (*p && *p != '"') {
+            unsigned char ch = (unsigned char)*p++;
+            if (ch == '\\') {
+                ch = (unsigned char)*p++;
+                if (ch != '"' && ch != '\\' && ch != '/') return false;
+            }
+            if (ch < 0x20U || ch > 0x7eU || col >= LCD_COLS) return false;
+            out->lines[row][col++] = (char)ch;
+        }
+        if (*p++ != '"' || col != LCD_COLS) return false;
+        out->lines[row][LCD_COLS] = '\0';
+        p = skip_ws(p);
+        if (*p++ != (row + 1U == LCD_ROWS ? ']' : ',')) return false;
+    }
+    return true;
+}
+
 static void clear_parsed(JsonlRxParsed *p) {
     p->kind = RX_MSG_INVALID;
     p->seq = 0UL;
     p->pet_cmd = CMD_TICK;
     p->mode_arg[0] = '\0';
+    p->launch = LaunchCommand{};
     p->injected_gesture.gesture = GESTURE_NEUTRAL;
     p->injected_gesture.confidence = 0.0f;
     p->injected_gesture.source = GESTURE_SOURCE_SIM_KEYBOARD;
@@ -689,6 +737,43 @@ bool jsonl_parse_incoming_line(
                 fw_copy_trunc(out_parsed->mode_arg, sizeof(out_parsed->mode_arg), "MOTION_PET", 19U);
             }
         }
+        if (pcmd == CMD_PLAY) {
+            char minigame[20] = {};
+            if (extract_json_string(data_ptr, "minigame", minigame, sizeof(minigame))) {
+                char action[24] = {};
+                bool ok = fw_strcmp(minigame, "PET_LAUNCH") == 0 &&
+                    extract_json_string(data_ptr, "action", action, sizeof(action));
+                if (ok && fw_strcmp(action, "MATCH_RESULT") == 0) {
+                    out_parsed->launch.action = LAUNCH_MATCH_RESULT;
+                    ok = extract_json_float(data_ptr, "distance_m", &out_parsed->launch.distance_m) &&
+                        out_parsed->launch.distance_m >= 0.0f && out_parsed->launch.distance_m <= 100000.0f &&
+                        extract_json_u32(data_ptr, "score", &out_parsed->launch.score) &&
+                        extract_json_u32(data_ptr, "coins_earned", &out_parsed->launch.coins_earned) &&
+                        extract_json_u32(data_ptr, "xp_earned", &out_parsed->launch.xp_earned);
+                } else if (ok && fw_strcmp(action, "UNLOCK_UPGRADE") == 0) {
+                    out_parsed->launch.action = LAUNCH_UNLOCK_UPGRADE;
+                    ok = extract_json_string(data_ptr, "upgrade_id", out_parsed->launch.upgrade_id, sizeof(out_parsed->launch.upgrade_id)) &&
+                        extract_json_u32(data_ptr, "cost", &out_parsed->launch.cost);
+                } else { ok = false; }
+                if (!ok) {
+                    ctx->parse_errors++;
+                    fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "EXEC_ERR", 23U);
+                    fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Invalid Pet Launch payload", 63U);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    if (fw_strcmp(msg_type, "lcd_frame") == 0) {
+        if (!parse_lcd_lines(data_ptr, &out_parsed->lcd_frame)) {
+            ctx->parse_errors++;
+            fw_copy_trunc(out_parsed->error_code, sizeof(out_parsed->error_code), "BAD_FRAME", 23U);
+            fw_copy_trunc(out_parsed->error_msg, sizeof(out_parsed->error_msg), "Invalid LCD frame", 63U);
+            return false;
+        }
+        out_parsed->kind = RX_MSG_LCD_FRAME;
         return true;
     }
 

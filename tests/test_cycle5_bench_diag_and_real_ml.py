@@ -76,8 +76,8 @@ def test_canonical_pinout_reconciliation_and_docs_consistency() -> None:
     assert by_signal[("HC-SR04", "TRIG")].gpio_number == 5
     assert by_signal[("TCRT5000", "DO")].gpio_number == 35
     assert by_signal[("Potenciometro", "WIPER (cursor)")].gpio_number == 36
-    assert by_signal[("LCD 2004A V1.1", "RW (pino 5)")].gpio_number is None
-    assert "GND" in by_signal[("LCD 2004A V1.1", "RW (pino 5)")].esp32_pin
+    assert by_signal[("LCD 2004 I2C", "SDA")].gpio_number == 21
+    assert by_signal[("LCD 2004 I2C", "SCL")].gpio_number == 22
 
     pinout_h = (REPO_ROOT / "firmware" / "main" / "pinout_config.h").read_text(encoding="utf-8")
     assert "#define PIN_HCSR04_ECHO       34" in pinout_h
@@ -235,11 +235,11 @@ def test_bench_assistant_dependencies_telemetry_and_incremental_stages(tmp_path:
     assert res_c_pot.passed is True
 
     # Etapa D bloqueia se RW não estiver aterrado em GND
-    res_d_unsafe = run_stage_d(simulate=True, rw_grounded=False, log_path=log_file)
+    res_d_unsafe = run_stage_d(simulate=True, lcd_interface="parallel", rw_grounded=False, log_path=log_file)
     assert res_d_unsafe.passed is False
     assert res_d_unsafe.halted_for_electrical_safety is True
 
-    res_d_ok = run_stage_d(simulate=True, rw_grounded=True, lcd_vdd_v=5.00, log_path=log_file)
+    res_d_ok = run_stage_d(simulate=True, lcd_vdd_v=3.30, log_path=log_file)
     assert res_d_ok.passed is True
     assert len(res_d_ok.details["device_lcd_20x4"]) == 4
 

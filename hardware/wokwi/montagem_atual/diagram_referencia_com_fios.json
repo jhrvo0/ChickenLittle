@@ -1,0 +1,339 @@
+{
+  "version": 1,
+  "author": "MotionPet - referencia pretendida",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-text",
+      "id": "title",
+      "top": -105,
+      "left": -220,
+      "attrs": {
+        "text": "MOTIONPET - BASE PRETENDIDA (nao e foto)"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "espnote",
+      "top": -65,
+      "left": -220,
+      "attrs": {
+        "text": "ESP32 38 pinos aproximado; separado da P1"
+      }
+    },
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": -185,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "p1label",
+      "top": 0,
+      "left": 5,
+      "attrs": {
+        "text": "P1 | lado J embaixo | USB real para coluna 1"
+      }
+    },
+    {
+      "type": "wokwi-breadboard-half",
+      "id": "p1",
+      "top": 40,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "hc",
+      "top": -30,
+      "left": 405,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "sensorlabel",
+      "top": 150,
+      "left": 445,
+      "attrs": {
+        "text": "Marcador TCRT (LDR): VCC GND DO; AO livre"
+      }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "tcrt_marcador",
+      "top": 200,
+      "left": 480,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "p2label",
+      "top": 320,
+      "left": 5,
+      "attrs": {
+        "text": "P2 | lado J embaixo | divisor: R1 1k / R2 1k / R3 300"
+      }
+    },
+    {
+      "type": "wokwi-breadboard-half",
+      "id": "p2",
+      "top": 360,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 610,
+      "left": 0,
+      "attrs": {
+        "value": "1000"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 640,
+      "left": 0,
+      "attrs": {
+        "value": "1000"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": 670,
+      "left": 0,
+      "attrs": {
+        "value": "300"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "resnote",
+      "top": 715,
+      "left": 0,
+      "attrs": {
+        "text": "Terminais dos resistores ligados aos furos por linhas cinza"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lcdlabel",
+      "top": 350,
+      "left": 445,
+      "attrs": {
+        "text": "LCD 2004 I2C - alimentacao pretendida 3V3"
+      }
+    },
+    {
+      "type": "wokwi-lcd2004",
+      "id": "lcd",
+      "top": 385,
+      "left": 450,
+      "attrs": {
+        "pins": "i2c"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "railnote",
+      "top": 775,
+      "left": 0,
+      "attrs": {
+        "text": "P1 + 5V | P2 + 3V3 | GND comum | positivos separados"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp:5V",
+      "p1:1b.i",
+      "",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "p1:6b.i",
+      "",
+      []
+    ],
+    [
+      "esp:3V3",
+      "p1:19b.i",
+      "",
+      []
+    ],
+    [
+      "esp:35",
+      "p1:14b.i",
+      "",
+      []
+    ],
+    [
+      "esp:34",
+      "p1:15b.i",
+      "",
+      []
+    ],
+    [
+      "esp:5",
+      "p1:10t.b",
+      "",
+      []
+    ],
+    [
+      "esp:21",
+      "p1:14t.b",
+      "",
+      []
+    ],
+    [
+      "esp:22",
+      "p1:17t.b",
+      "",
+      []
+    ],
+    [
+      "p1:1b.j",
+      "p1:bp.1",
+      "red",
+      []
+    ],
+    [
+      "p1:6b.j",
+      "p1:bn.1",
+      "black",
+      []
+    ],
+    [
+      "p1:19b.j",
+      "p2:bp.1",
+      "purple",
+      []
+    ],
+    [
+      "p1:bn.2",
+      "p2:bn.1",
+      "black",
+      []
+    ],
+    [
+      "hc:VCC",
+      "p1:bp.2",
+      "red",
+      []
+    ],
+    [
+      "hc:GND",
+      "p1:bn.3",
+      "black",
+      []
+    ],
+    [
+      "hc:TRIG",
+      "p1:10t.a",
+      "gold",
+      []
+    ],
+    [
+      "hc:ECHO",
+      "p2:8t.a",
+      "orange",
+      []
+    ],
+    [
+      "p2:12t.a",
+      "p1:15b.j",
+      "green",
+      []
+    ],
+    [
+      "p2:20t.a",
+      "p2:bn.4",
+      "black",
+      []
+    ],
+    [
+      "tcrt_marcador:VCC",
+      "p2:bp.2",
+      "green",
+      []
+    ],
+    [
+      "tcrt_marcador:GND",
+      "p2:bn.2",
+      "blue",
+      []
+    ],
+    [
+      "tcrt_marcador:DO",
+      "p1:14b.j",
+      "orange",
+      []
+    ],
+    [
+      "lcd:VCC",
+      "p2:bp.3",
+      "purple",
+      []
+    ],
+    [
+      "lcd:GND",
+      "p2:bn.3",
+      "black",
+      []
+    ],
+    [
+      "lcd:SDA",
+      "p1:14t.a",
+      "blue",
+      []
+    ],
+    [
+      "lcd:SCL",
+      "p1:17t.a",
+      "yellow",
+      []
+    ],
+    [
+      "r1:1",
+      "p2:8t.c",
+      "gray",
+      []
+    ],
+    [
+      "r1:2",
+      "p2:12t.c",
+      "gray",
+      []
+    ],
+    [
+      "r2:1",
+      "p2:12t.d",
+      "gray",
+      []
+    ],
+    [
+      "r2:2",
+      "p2:16t.d",
+      "gray",
+      []
+    ],
+    [
+      "r3:1",
+      "p2:16t.e",
+      "gray",
+      []
+    ],
+    [
+      "r3:2",
+      "p2:20t.e",
+      "gray",
+      []
+    ]
+  ],
+  "dependencies": {}
+}

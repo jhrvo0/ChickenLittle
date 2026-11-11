@@ -1058,7 +1058,7 @@
 <rect x="105.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
 <text x="110.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >SD3</text>
 <rect x="85.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
-<text x="90.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#ff8d8d" text-anchor="middle" font-weight="normal" >CMD</text>
+<text x="90.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >GND</text>
 <rect x="65.5" y="197.5" width="9" height="9" fill="#d9b24a" stroke="#8a6d1b" stroke-width="0.8"/>
 <text x="70.0" y="219.0" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="7.2" fill="#c9d6e2" text-anchor="middle" font-weight="normal" >5V</text>
 <g class="badge" data-pin="U1.5V"><rect x="57.0" y="211.0" width="26.0" height="13" rx="3" fill="#e0312f" stroke="#fff" stroke-width="1"/><text x="70.0" y="220.6" font-family="DejaVu Sans, Verdana, Arial, sans-serif" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold" >5V</text></g>

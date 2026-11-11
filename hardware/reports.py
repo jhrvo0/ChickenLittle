@@ -99,7 +99,7 @@ def to_csv(rows: list[dict]) -> str:
     if not rows:
         return ""
     buf = io.StringIO()
-    wr = csv.DictWriter(buf, fieldnames=list(rows[0].keys()))
+    wr = csv.DictWriter(buf, fieldnames=list(rows[0].keys()), lineterminator="\n")
     wr.writeheader()
     wr.writerows(rows)
     return buf.getvalue()
@@ -120,7 +120,9 @@ def nets_md(lay: Layout, stage: str) -> str:
     for net, pins in lay.logical_nets(stage):
         if len(pins) < 2:
             continue
-        out.append(f"- **{net['name']}** — dominio `{net['domain']}`, nominal {net['v_nominal']} V (max {net['v_max']} V): "
+        voltage = ("tensao nao medida" if net["v_nominal"] is None or net["v_max"] is None
+                   else f"nominal {net['v_nominal']} V (max {net['v_max']} V)")
+        out.append(f"- **{net['name']}** — dominio `{net['domain']}`, {voltage}: "
                    + ", ".join(f"`{p}`" for p in sorted(pins)) + (f". {net['note']}" if net.get("note") else ""))
     return "\n".join(out) + "\n"
 
@@ -128,7 +130,7 @@ def nets_md(lay: Layout, stage: str) -> str:
 def stage_markdown(lay: Layout, stage: str) -> str:
     st = lay.raw["stages"][stage]
     issues = model.validate(lay, stage)
-    md = [f"# Estagio {stage} — {st['title']}", "", f"> {st['goal']}", "",
+    md = [f"# Estagio {stage} — {st['title']}", "", "> **CAD paralelo histórico.** Para a montagem atual com LCD I²C, use [o guia final](../guia_montagem_final.html). D/E antigos não se aplicam ao backpack.", "", f"> {st['goal']}", "",
           "> Status: `PENDING_PHYSICAL_VALIDATION`. Este documento e GERADO de `hardware/netlist/motionpet.netlist.json`.", "",
           "## Redes eletricas", "", nets_md(lay, stage), "## Componentes e furos", "",
           md_table(component_rows(lay, stage)), "## Fios (fio a fio)", "", md_table(wire_rows(lay, stage),

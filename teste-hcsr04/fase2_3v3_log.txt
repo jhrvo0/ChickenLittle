@@ -1,0 +1,14 @@
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=50 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=20 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=50 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=20 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=50 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=20 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=50 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=20 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=50 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 142 min= 142 max= 142 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms

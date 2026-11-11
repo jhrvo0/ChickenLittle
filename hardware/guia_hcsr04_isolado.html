@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ESP32 + HC-SR04 — bancada isolada</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#17243a;background:#edf2f6;line-height:1.45}
+*{box-sizing:border-box}body{margin:0}.top{background:#17243a;color:#fff;padding:16px 22px}.top p{margin:3px 0 0;color:#c4d3e3;font-size:14px}.brand{font-size:20px;font-weight:800}
+.wrap{max-width:1500px;margin:0 auto;padding:16px;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:16px}
+.visual,.card{background:#fff;border:1px solid #d6e0ea;border-radius:16px;box-shadow:0 5px 22px #17243a0c}.visual{padding:12px;align-self:start}.visual svg{display:block;width:100%;height:auto}.caption{font-size:13px;color:#546579;margin:6px 8px 3px}
+.card{padding:22px;align-self:start}.small{font-weight:800;color:#1b66a0;text-transform:uppercase;letter-spacing:.05em;font-size:13px}.card h1{font-size:25px;line-height:1.2;margin:5px 0 14px}.instruction{font-size:18px;line-height:1.5}.instruction p{margin:0 0 12px}.instruction strong{color:#0e547e}.instruction ul{padding-left:22px;margin:8px 0}.instruction li{margin:7px 0}
+.warn{border-radius:10px;background:#fff4dc;border:1px solid #f1d08c;padding:10px 12px;margin:15px 0;color:#6b4611;font-size:15px}.pill{display:inline-block;background:#e7f2ff;color:#075988;border-radius:7px;padding:1px 7px;font-weight:800;white-space:nowrap}.actions{display:flex;gap:10px;align-items:center;margin-top:18px}.actions button{border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:750;cursor:pointer}.back{background:#e8edf2;color:#26384b}.next{background:#1266a0;color:white}.actions button:disabled{opacity:.42;cursor:default}.count{margin-left:auto;color:#566a7d;font-size:14px}.progress{height:5px;background:#cbd9e4}.progress span{height:100%;display:block;background:#25a7df;transition:width .2s}
+.hole{fill:#4b5563}.hole-label{fill:#34445a;font-size:13px;font-weight:750}.number{fill:#324558;font-size:12px;font-weight:700;text-anchor:middle}.board-label{fill:#e4f3ff;font-size:15px;font-weight:750}.wire{fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}.component{transition:opacity .2s}.component.old{opacity:.55}.component.active{opacity:1}.target{fill:none;stroke:#f50072;stroke-width:4}.point-label{font-size:14px;font-weight:850;fill:#ab0050}.legend{font-size:13px;fill:#405367}.sensor-label{font-size:14px;fill:#1b2f43;font-weight:750}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}.visual{order:2}.card{order:1}.instruction{font-size:17px}.top{padding:12px 16px}}@media(max-width:450px){.actions button{padding:10px 13px}.count{font-size:12px}.card{padding:16px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">ESP32 + HC-SR04</div><p>Montagem isolada · sem TCRT5000, sem LCD e sem usar os trilhos</p></header>
+<div class="progress"><span id="bar"></span></div>
+<main class="wrap">
+  <section class="visual" aria-label="Desenho da montagem">
+    <svg id="diagram" viewBox="0 0 1280 590" role="img" aria-label="Protoboard, ESP32 e sensor ultrassônico">
+      <rect x="38" y="64" width="920" height="430" rx="24" fill="#f7f5ec" stroke="#a5adb7" stroke-width="3"/>
+      <rect x="50" y="270" width="896" height="36" rx="7" fill="#e0ded4" stroke="#bbc1c7"/>
+      <text x="455" y="294" text-anchor="middle" class="legend">canal central</text>
+      <g id="grid"></g>
+      <g data-from="1" class="component" aria-label="ESP32">
+        <rect x="76" y="132" width="557" height="272" rx="15" fill="#223348" stroke="#13202e" stroke-width="3"/>
+        <rect x="39" y="224" width="38" height="68" rx="6" fill="#788695" stroke="#435160" stroke-width="3"/>
+        <text x="53" y="216" text-anchor="middle" class="legend">USB</text>
+        <text x="355" y="224" text-anchor="middle" class="board-label">ESP32 NODEMCU ESP-32S</text>
+        <text x="355" y="252" text-anchor="middle" class="board-label">USB voltada para a linha 1</text>
+        <text x="355" y="280" text-anchor="middle" fill="#bcd3e4" font-size="13">Encaixada entre as linhas 1 e 19</text>
+        <g id="pins"></g>
+      </g>
+      <g data-from="3" class="component" aria-label="R1 1k entre 22C e 26C">
+        <path d="M 709 360 L 743 360 M 787 360 L 825 360" stroke="#5f6871" stroke-width="4"/>
+        <rect x="743" y="348" width="44" height="24" rx="10" fill="#e1c58b" stroke="#8d7045"/><path d="M 752 350 v20 M 761 350 v20 M 770 350 v20 M 780 350 v20" stroke="#6c3e24" stroke-width="4"/>
+        <text x="766" y="343" text-anchor="middle" class="legend">R1 · 1 kΩ</text>
+      </g>
+      <g data-from="4" class="component" aria-label="R2 1k entre 26D e 29D">
+        <path d="M 825 330 L 844 330 M 886 330 L 912 330" stroke="#5f6871" stroke-width="4"/>
+        <rect x="844" y="318" width="42" height="24" rx="10" fill="#e1c58b" stroke="#8d7045"/><path d="M 852 320 v20 M 860 320 v20 M 868 320 v20 M 877 320 v20" stroke="#6c3e24" stroke-width="4"/>
+        <text x="865" y="314" text-anchor="middle" class="legend">R2 · 1 kΩ</text>
+      </g>
+      <g data-from="5" class="component" aria-label="R3 300 ohms entre 29A e 30E">
+        <path d="M 912 420 L 918 398 M 935 359 L 941 300" stroke="#5f6871" stroke-width="4"/>
+        <rect x="906" y="368" width="46" height="22" rx="10" fill="#e1c58b" stroke="#8d7045" transform="rotate(-66 929 379)"/>
+        <text x="976" y="418" class="legend">R3 · 300 Ω</text>
+      </g>
+      <g data-from="6" class="component" aria-label="Fio de GND da linha 30 para linha 13">
+        <path d="M 941 390 C 941 515 448 520 448 420" class="wire" stroke="#72513b"/>
+      </g>
+      <g data-from="7" class="component" aria-label="HC-SR04 fora da protoboard">
+        <rect x="1020" y="182" width="228" height="235" rx="15" fill="#ecf6fd" stroke="#2b86ac" stroke-width="3"/>
+        <text x="1135" y="208" text-anchor="middle" class="sensor-label">HC-SR04</text>
+        <circle cx="1082" cy="250" r="30" fill="#485f6b" stroke="#8e9da2" stroke-width="5"/><circle cx="1185" cy="250" r="30" fill="#485f6b" stroke="#8e9da2" stroke-width="5"/>
+        <text x="1034" y="312" class="sensor-label">VCC</text><text x="1034" y="341" class="sensor-label">GND</text><text x="1034" y="370" class="sensor-label">TRIG</text><text x="1034" y="399" class="sensor-label">ECHO</text>
+      </g>
+      <g data-from="7" class="component" aria-label="VCC do sensor ao 5V"><path d="M 1020 307 C 975 78 190 32 100 120" class="wire" stroke="#d64b42"/></g>
+      <g data-from="8" class="component" aria-label="GND do sensor ao GND"><path d="M 1020 336 C 962 96 209 60 129 120" class="wire" stroke="#5a6674"/></g>
+      <g data-from="9" class="component" aria-label="TRIG do sensor a P5"><path d="M 1020 365 C 1000 565 430 566 361 420" class="wire" stroke="#e39921"/></g>
+      <g data-from="10" class="component" aria-label="ECHO do sensor à linha 22"><path d="M 1020 394 C 994 502 771 498 709 300" class="wire" stroke="#3279cf"/></g>
+      <g data-from="11" class="component" aria-label="Nó da linha 26 ao P34"><path d="M 825 300 C 870 32 555 27 506 120" class="wire" stroke="#9965aa"/></g>
+      <g id="targets"></g>
+    </svg>
+    <p class="caption">Desenho orientativo: as cores dos fios podem ser diferentes das suas. Siga o nome do pino e o furo indicado.</p>
+  </section>
+  <section class="card" aria-live="polite">
+    <div class="small" id="step-label"></div><h1 id="step-title"></h1><div class="instruction" id="step-body"></div><div class="warn" id="step-note"></div>
+    <div class="actions"><button class="back" id="back" type="button">← Voltar</button><button class="next" id="next" type="button">Próximo →</button><span class="count" id="count"></span></div>
+  </section>
+</main>
+<script id="guide-data" type="application/json">
+[
+ {"title":"Vamos testar só o ultrassom","body":"<p>Use a ESP32, o HC-SR04, uma protoboard e os três resistores. O TCRT5000 e o LCD ficam desconectados.</p><p>Separe <strong>4 fios fêmea–macho</strong> para o sensor e <strong>2 fios macho–macho</strong> para a protoboard.</p>","note":"Tire a USB antes de mudar qualquer fio. A montagem e as tensões reais ainda não foram validadas.","targets":[]},
+ {"title":"Coloque a ESP32 na protoboard","body":"<p>Com a USB desligada, encaixe a ESP32 atravessando o canal, com a <strong>USB para o lado da linha 1</strong>. Ela ocupa as linhas 1 até 19.</p><p>No desenho, a lateral de cima fica no I e a de baixo no B; os furos J e A ficam livres.</p>","note":"Antes de continuar, confira na sua placa: 5V e GND ficam perto da USB. Se a posição ou a inscrição diferir do desenho, pare e confira.","targets":["1J","2J","10A","15J"]},
+ {"title":"Separe os resistores","body":"<p>Precisamos de <strong>dois resistores de 1 kΩ</strong> e <strong>um de 300 Ω</strong>.</p><ul><li>1 kΩ: marrom, preto, vermelho e dourado.</li><li>300 Ω: laranja, preto, marrom e dourado.</li></ul><p>Leia a partir da ponta oposta à faixa dourada.</p>","note":"Resistor não tem lado positivo ou negativo. Se não conseguir distinguir as faixas, não adivinhe.","targets":[]},
+ {"title":"R1: da linha 22 até a 26","body":"<p>Pegue um resistor de <strong>1 kΩ</strong>. Encaixe uma perna em <span class=\"pill\">22C</span> e a outra em <span class=\"pill\">26C</span>.</p><p>Veja os dois furos destacados em rosa no desenho.</p>","note":"As pernas devem entrar nos furos; o resistor não tem direção certa.","targets":["22C","26C"]},
+ {"title":"R2: da linha 26 até a 29","body":"<p>Pegue o outro resistor de <strong>1 kΩ</strong>. Encaixe uma perna em <span class=\"pill\">26D</span> e a outra em <span class=\"pill\">29D</span>.</p><p>Na linha 26, as pernas de R1 e R2 ficam conectadas por dentro da protoboard.</p>","note":"Não deixe pernas metálicas de linhas diferentes se encostarem fora dos furos.","targets":["26D","29D"]},
+ {"title":"R3: da linha 29 até a 30","body":"<p>Pegue o resistor de <strong>300 Ω</strong>. Encaixe uma perna em <span class=\"pill\">29A</span> e a outra em <span class=\"pill\">30E</span>.</p><p>Dobre as pernas com cuidado para chegar aos furos.</p>","note":"A linha 29 junta R2 com R3. Confira que as pernas de linhas diferentes não se tocam por fora.","targets":["29A","30E"]},
+ {"title":"Ligue a linha 30 ao GND","body":"<p>Use um fio macho–macho: uma ponta em <span class=\"pill\">30B</span> e a outra em <span class=\"pill\">13A</span>.</p><p>No desenho, 13A é a linha do pino <strong>GND</strong> da ESP32.</p>","note":"Confira a inscrição GND da sua placa antes de usar essa linha. Não conecte nada aos trilhos.","targets":["30B","13A"]},
+ {"title":"VCC do sensor ao 5V","body":"<p>No HC-SR04, encontre o pino escrito <strong>VCC</strong>. Ligue nele a ponta fêmea de um fio; encaixe a ponta macho em <span class=\"pill\">1J</span>.</p><p>No desenho, 1J fica na linha do pino <strong>5V</strong>, perto da USB.</p>","note":"Confirme as inscrições VCC no sensor e 5V na placa. Não use só a cor do fio para identificar os pinos.","targets":["1J"]},
+ {"title":"GND do sensor ao GND","body":"<p>Ligue um fio entre o pino <strong>GND</strong> do HC-SR04 e <span class=\"pill\">2J</span>.</p><p>Na placa fotografada, o GND fica ao lado do 5V; a outra conexão GND da linha 13 pertence à mesma placa.</p>","note":"Confira a etiqueta GND. A ponta do sensor fica em GND, não em ECHO.","targets":["2J"]},
+ {"title":"TRIG do sensor ao P5","body":"<p>Ligue um fio entre o pino <strong>TRIG</strong> do HC-SR04 e <span class=\"pill\">10A</span>.</p><p>Essa é a linha do pino <strong>P5</strong> da ESP32 no desenho.</p>","note":"Confira a inscrição TRIG no sensor. No seu conjunto há dois fios vermelhos: a palavra no pino identifica o certo.","targets":["10A"]},
+ {"title":"ECHO do sensor à linha 22","body":"<p>Ligue um fio entre o pino <strong>ECHO</strong> do HC-SR04 e <span class=\"pill\">22E</span>.</p><p>Na linha 22 do lado A–E, esse fio encontra a primeira perna de R1, que está em 22C.</p>","note":"O ECHO vai para o resistor, nunca diretamente a um pino da ESP32.","targets":["22E","22C"]},
+ {"title":"Linha 26 ao P34","body":"<p>Use o segundo fio macho–macho: uma ponta em <span class=\"pill\">26E</span> e a outra em <span class=\"pill\">15J</span>, na linha do pino <strong>P34</strong>.</p><p>A linha 26 é o nó entre R1 e R2.</p>","note":"Só conecte esse fio depois de conferir o divisor completo, o GND e a inscrição P34 da sua placa. A tensão ainda não foi medida.","targets":["26E","15J"]},
+ {"title":"Confira antes de ligar","body":"<ul><li>VCC → 5V; GND → GND; TRIG → P5.</li><li>ECHO → linha 22 → R1 → linha 26 → P34.</li><li>R2 liga 26 a 29; R3 liga 29 a 30; a linha 30 vai ao GND.</li><li>Cada perna entrou em um furo e não encosta em outra por fora.</li></ul>","note":"A conferência visual não prova os contatos nem a tensão elétrica. Se algo estiver diferente, mantenha a USB desligada e confira antes de ligar.","targets":[]},
+ {"title":"Teste com a ESP32","body":"<p>Depois da conferência, conecte a USB. Coloque um livro ou caixa de frente para os dois círculos do HC-SR04, a aproximadamente um palmo.</p><p>Avise no chat que está pronto para verificar a leitura pela serial.</p>","note":"Uma leitura de distância verifica a resposta do software e do sensor; ela não comprova a tensão nem valida eletricamente a montagem.","targets":[]}
+]
+</script>
+<script>
+(()=>{
+ const steps=JSON.parse(document.getElementById('guide-data').textContent),NS='http://www.w3.org/2000/svg';
+ const grid=document.getElementById('grid'),pins=document.getElementById('pins'),targets=document.getElementById('targets');
+ const rows={J:120,I:150,H:180,G:210,F:240,E:300,D:330,C:360,B:390,A:420};
+ function make(tag,attrs,parent,text){const n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;parent.appendChild(n);return n}
+ const x=n=>100+(n-1)*29;
+ for(let n=1;n<=30;n++){make('text',{x:x(n),y:92,class:'number'},grid,String(n));make('text',{x:x(n),y:466,class:'number'},grid,String(n));for(const y of Object.values(rows))make('circle',{cx:x(n),cy:y,r:4.5,class:'hole'},grid)}
+ for(const [row,y] of Object.entries(rows)){make('text',{x:60,y:y+4,class:'hole-label'},grid,row);make('text',{x:950,y:y+4,class:'hole-label'},grid,row)}
+ for(let n=1;n<=19;n++)for(const row of ['I','B'])make('circle',{cx:x(n),cy:rows[row],r:6,fill:'#b8c3cb',stroke:'#526577','stroke-width':2},pins);
+ let i=0;const $=id=>document.getElementById(id);
+ function update(){const s=steps[i];$('step-label').textContent='Passo '+(i+1)+' de '+steps.length;$('step-title').textContent=s.title;$('step-body').innerHTML=s.body;$('step-note').textContent=s.note;$('count').textContent=(i+1)+' / '+steps.length;$('bar').style.width=((i+1)/steps.length*100)+'%';$('back').disabled=i===0;$('next').disabled=i===steps.length-1;
+  document.querySelectorAll('.component').forEach(e=>{const n=Number(e.dataset.from);e.style.display=n<=i?'':'none';e.classList.toggle('active',n===i);e.classList.toggle('old',n<i)});
+  targets.replaceChildren();for(const id of s.targets){const m=/^(\d+)([A-J])$/.exec(id);if(!m)continue;const px=x(Number(m[1])),py=rows[m[2]];make('circle',{cx:px,cy:py,r:10,class:'target'},targets);make('text',{x:px+12,y:py-9,class:'point-label'},targets,id)}
+ }
+ $('back').addEventListener('click',()=>{i=Math.max(0,i-1);update()});$('next').addEventListener('click',()=>{i=Math.min(steps.length-1,i+1);update()});
+ document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')$('next').click();else if(e.key==='ArrowLeft')$('back').click()});update();
+})();
+</script>
+</body>
+</html>
