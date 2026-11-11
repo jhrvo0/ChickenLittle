@@ -243,6 +243,7 @@ Representação exata das 4 linhas do display LCD 2004A. Usado para que o simula
   1. A linha defeituosa é imediatamente descartada.
   2. Um contador de erros de frame é incrementado para diagnóstico.
   3. O parser permanece sincronizado para a próxima linha válida sem travar a thread de leitura.
+- O parser do firmware (`jsonl_protocol.cpp`, sem alocação dinâmica) valida a linha inteira como JSON estrito (RFC 8259, profundidade máxima 8, sem lixo após o objeto) e rejeita com `ERR_JSON_PARSE` vírgulas/dois-pontos faltando ou sobrando, escapes inválidos e números malformados. Os campos do envelope (`v`, `seq`, `type`, `ts_ms`, `data`) só valem como membros diretos do objeto raiz; chave repetida no mesmo objeto invalida o campo. Campos inteiros (`v`, `seq`, `ts_ms`, `period_ms`, `score` etc.) aceitam só inteiros sem sinal, sem fração, expoente ou sufixo (`1e2`, `12abc`, `1.5`, `-1` e zeros à esquerda são rejeitados) e que caibam em 32 bits. Parâmetros de `pet_command` são lidos de `data` ou, na falta, de `data.payload`; strings maiores que o buffer de destino são rejeitadas, não truncadas.
 
 ### 3.3 Abstração Transparente de Transporte
 O mesmo motor de parsing opera sobre duas implementações intercambiáveis de transporte:
