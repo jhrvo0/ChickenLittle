@@ -297,6 +297,33 @@ class PetLaunchGame:
         self.best_distance_m = max(self.best_distance_m, pet_state.best_launch_distance_m)
         self.best_score = max(self.best_score, pet_state.best_launch_score)
 
+    def set_records_from_pet(self, pet_state: PetState) -> None:
+        """Atribui (não usa max) os recordes do pet autoritativo, sem mexer na partida."""
+        self.best_distance_m = float(pet_state.best_launch_distance_m)
+        self.best_score = int(pet_state.best_launch_score)
+        self.matches_completed = int(pet_state.total_launches)
+
+    def reset_progress(self, pet_state: PetState) -> None:
+        """Reinicia partida e recordes a partir do pet autoritativo (LOAD/RESET confirmados).
+
+        `sync_records_from_pet` só sobe recordes (max); aqui o valor é atribuído, para que
+        um save com recordes menores (ou um pet novo) realmente reduza os locais.
+        """
+        self.set_records_from_pet(pet_state)
+        self.last_result = None
+        self.charge_norm = 0.0
+        self._launching_timer_s = 0.0
+        self._active_sweet_spot = False
+        self._active_modifiers = LaunchModifiers()
+        self._pending_pet_commands.clear()
+        self.physics.state = LaunchPhysicsState()
+        self._synced_phys_event_idx = 0
+        self._manual_angle_override = False
+        self.phase = LaunchPhase.MENU
+        self.pet_reaction = "Pronto para voar!"
+        self.status_message = "Menu Pet Launch: [APPROACH/ENTER] Jogar | [U/7/8/9] Loja"
+        self._log_event("PET_RELOADED")
+
     def on_sensor_frame(self, frame: SensorFramePayload) -> None:
         aim = self.input_adapter.calibrate_from_sensor(frame)
         self.charge_step_norm = aim.charge_step_norm
@@ -707,6 +734,19 @@ class PetLaunchMode(BaseAppMode):
     def bind_pet_state(self, state: PetState) -> None:
         self._pet_snapshot = state
         self.game.sync_records_from_pet(state)
+        self._sync_mirror_fields()
+
+    def reload_from_pet(self, state: PetState) -> None:
+        """Descarta recordes e partida locais após LOAD/RESET confirmados pela ESP32."""
+        self._pet_snapshot = state
+        self.game.reset_progress(state)
+        self._sync_mirror_fields()
+        self.last_result = None
+
+    def resync_records_from_pet(self, state: PetState) -> None:
+        """Reatribui só os recordes (pet_state que chega depois do ACK de LOAD/RESET)."""
+        self._pet_snapshot = state
+        self.game.set_records_from_pet(state)
         self._sync_mirror_fields()
 
     def on_enter_mode(self, state: PetState) -> None:

@@ -6,15 +6,19 @@ import argparse
 import os
 import sys
 import time
+from collections import OrderedDict, deque
+from dataclasses import dataclass
 from pathlib import Path
-from typing import TextIO
+from typing import Any, Callable, TextIO
 
 from ml.classifiers import BaseGestureClassifier, create_gesture_classifier
 from simulator.esp32_sim_node import SimulatedEsp32Node
 from simulator.sensors import DatasetReplaySource, SensorSimulator, SensorSource
 from terminal.communication.protocol import (
+    AckPayload,
     AppModeId,
     CommandType,
+    ErrorPayload,
     GestureEventPayload,
     GestureSource,
     GestureType,
@@ -22,6 +26,7 @@ from terminal.communication.protocol import (
     MessageType,
     PetCommandPayload,
     ProtocolCodec,
+    ProtocolEnvelope,
     ProtocolError,
     SensorFramePayload,
 )
@@ -51,6 +56,41 @@ _MODE_ROTATION: tuple[AppModeId, ...] = (
 )
 
 
+# Falhas de conteúdo de uma mensagem (envelope válido, payload inválido). Nunca indicam falha do
+# transporte: a mensagem é descartada e registrada, e a conexão continua.
+_PAYLOAD_ERRORS = (ProtocolError, ValueError, TypeError, KeyError, AttributeError, OverflowError)
+
+COMMAND_ACK_TIMEOUT_S = 5.0
+_MAX_TRACKED_COMMANDS = 32
+_MAX_DEVICE_ERRORS = 5
+# ACK "ok" do firmware que NÃO muda o pet (não houve save para recarregar).
+_ACK_WITHOUT_STATE_CHANGE = frozenset({"no_save_found"})
+
+
+@dataclass
+class CommandRecord:
+    """Comando enviado à ESP32 e o que se sabe do seu resultado (correlação seq ↔ ACK/ERROR)."""
+
+    seq: int
+    command: str
+    action: str | None
+    sent_at: float
+    status: str = "sent"  # sent | confirmed | failed | timeout
+    detail: str | None = None
+    resolved_at: float | None = None
+
+
+@dataclass
+class DeviceError:
+    """Erro reportado pela ESP32 (mensagem `error`)."""
+
+    code: str
+    message: str
+    ref_seq: int | None
+    command: str | None
+    at: float
+
+
 class TerminalHostClient:
     """Cliente de terminal conectado ao ESP32 (físico ou simulado) via protocolo JSON Lines v1."""
 
@@ -77,6 +117,18 @@ class TerminalHostClient:
         self.classifier_summary: str = ""
         self.last_error: str | None = None
 
+        # Mensagens com envelope válido mas payload inválido: descartadas, contadas e registradas.
+        self.discarded_messages = 0
+        self.last_discard: str | None = None
+        self.last_discard_at: float | None = None
+        # Erros reportados pela ESP32 e correlação comando ↔ ACK/ERROR.
+        self.device_errors: deque[DeviceError] = deque(maxlen=_MAX_DEVICE_ERRORS)
+        self.command_log: OrderedDict[int, CommandRecord] = OrderedDict()
+        self.command_listener: Callable[[CommandRecord], None] | None = None
+        # Chamado para CADA sensor_frame, na ordem em que chegaram (inclusive em rajadas).
+        self.sensor_listener: Callable[[SensorFramePayload], None] | None = None
+        self._records_resync_pending = False
+
         self.tx_packets = 0
         self.rx_packets = 0
         self.frame_idx = 0
@@ -97,9 +149,11 @@ class TerminalHostClient:
 
     def send_command(self, command: CommandType, payload: dict[str, object] | None = None) -> None:
         msg = PetCommandPayload(command=command, payload=dict(payload or {}))
+        seq = self.codec.next_seq
         line = self.codec.encode(MessageType.PET_COMMAND, msg.to_dict())
         self.endpoint.write_line(line)
         self.tx_packets += 1
+        self._track_command(seq, command, msg.payload)
 
         if command == CommandType.SAVE:
             self.save_status = "SALVO EM DISCO"
@@ -188,49 +242,169 @@ class TerminalHostClient:
         for raw_line in self.endpoint.read_all_lines():
             self.rx_packets += 1
             processed += 1
+            # Valida a mensagem inteira (envelope + payload) antes de aplicar qualquer efeito: uma
+            # mensagem ruim é descartada e registrada; só falha do transporte sobe como exceção.
             try:
                 env = self.codec.decode(raw_line)
-            except ProtocolError as exc:
-                self.last_error = str(exc)
+                payload = self._parse_payload(env)
+            except _PAYLOAD_ERRORS as exc:
+                self._record_discard(exc)
                 continue
+            self._apply_message(env, payload)
 
-            if env.type == MessageType.PET_STATE:
-                self.pet_state = PetState.from_dict(env.data)
-                self._launch_mode.bind_pet_state(self.pet_state)
-                if self.active_mode == AppModeId.PET_LAUNCH:
-                    self._sync_launch_lcd()
-            elif env.type == MessageType.LCD_FRAME:
-                if self.active_mode != AppModeId.PET_LAUNCH and self._return_to_pet_lcd_ttl <= 0:
-                    self.lcd_frame = LcdFramePayload.from_dict(env.data)
-            elif env.type == MessageType.SENSOR_FRAME:
-                self.last_sensor = SensorFramePayload.from_dict(env.data)
-                if self.active_mode in self.aux_modes:
-                    self.aux_modes[self.active_mode].on_sensor_frame(self.last_sensor)
-                    if self.active_mode == AppModeId.PET_LAUNCH:
-                        self._sync_launch_lcd()
-            elif env.type == MessageType.GESTURE_EVENT:
-                self.last_gesture = GestureEventPayload.from_dict(env.data)
-                if not self.dispatch_gesture_events:
-                    continue
-                if self.active_mode == AppModeId.PET_LAUNCH:
-                    self._launch_mode.bind_pet_state(self.pet_state)
-                    self._launch_mode.on_gesture_event(
-                        self.last_gesture,
-                        seq_id=env.seq,
-                        ts_ms=env.ts_ms,
-                    )
-                    self._flush_launch_commands()
-                    self._sync_launch_lcd()
-                elif self.active_mode in self.aux_modes:
-                    mode_obj = self.aux_modes[self.active_mode]
-                    if isinstance(mode_obj, AirSlidesMode):
-                        mode_obj.on_gesture_event(self.last_gesture, ts_ms=env.ts_ms)
-                    else:
-                        mode_obj.on_gesture_event(self.last_gesture)
-            elif env.type == MessageType.ERROR:
-                self.last_error = f"{env.data.get('code')}: {env.data.get('message')}"
-
+        self._expire_commands()
         return processed
+
+    def _parse_payload(self, env: ProtocolEnvelope) -> Any:
+        """Converte `env.data` no tipo do payload; levanta `_PAYLOAD_ERRORS` se for inválido."""
+        mtype = env.type
+        if mtype == MessageType.PET_STATE:
+            return PetState.from_dict(env.data)
+        if mtype == MessageType.LCD_FRAME:
+            return LcdFramePayload.from_dict(env.data)
+        if mtype == MessageType.SENSOR_FRAME:
+            return SensorFramePayload.from_dict(env.data)
+        if mtype == MessageType.GESTURE_EVENT:
+            return GestureEventPayload.from_dict(env.data)
+        if mtype == MessageType.ACK:
+            return AckPayload.from_dict(env.data)
+        if mtype == MessageType.ERROR:
+            try:
+                return ErrorPayload.from_dict(env.data)
+            except ProtocolError:
+                # Um erro do dispositivo mal formatado ainda precisa aparecer para o usuário.
+                return ErrorPayload(
+                    code=str(env.data.get("code", "ERROR")),
+                    message=str(env.data.get("message", "")),
+                )
+        return None
+
+    def _record_discard(self, exc: Exception) -> None:
+        text = str(exc) if isinstance(exc, ProtocolError) else f"Payload inválido: {type(exc).__name__}: {exc}"
+        self.discarded_messages += 1
+        self.last_discard = text
+        self.last_discard_at = time.monotonic()
+        self.last_error = text
+
+    def _track_command(self, seq: int, command: CommandType, payload: dict[str, Any]) -> None:
+        action = payload.get("action")
+        self.command_log[seq] = CommandRecord(
+            seq=seq,
+            command=command.value,
+            action=str(action) if action is not None else None,
+            sent_at=time.monotonic(),
+        )
+        while len(self.command_log) > _MAX_TRACKED_COMMANDS:
+            resolved = next((s for s, r in self.command_log.items() if r.status != "sent"), None)
+            if resolved is not None:
+                del self.command_log[resolved]
+                continue
+            # Tudo pendente: o mais antigo sai, mas como timeout explícito (nunca some calado).
+            _, oldest = self.command_log.popitem(last=False)
+            oldest.status = "timeout"
+            oldest.detail = "sem confirmação da ESP32 (fila de comandos cheia)"
+            oldest.resolved_at = time.monotonic()
+            if self.command_listener is not None:
+                self.command_listener(oldest)
+
+    def _resolve_command(self, seq: int | None, status: str, detail: str | None) -> CommandRecord | None:
+        record = self.command_log.get(seq) if seq is not None else None
+        # Um ACK tardio ainda promove um "timeout" a "confirmed"; resultados finais não mudam.
+        if record is None or record.status not in ("sent", "timeout"):
+            return None
+        record.status = status
+        record.detail = detail
+        record.resolved_at = time.monotonic()
+        if self.command_listener is not None:
+            self.command_listener(record)
+        return record
+
+    def _expire_commands(self) -> None:
+        now = time.monotonic()
+        for record in list(self.command_log.values()):
+            if record.status == "sent" and now - record.sent_at > COMMAND_ACK_TIMEOUT_S:
+                record.status = "timeout"
+                record.detail = "sem confirmação da ESP32"
+                record.resolved_at = now
+                if self.command_listener is not None:
+                    self.command_listener(record)
+
+    def _on_ack(self, ack: AckPayload) -> None:
+        record = self._resolve_command(ack.ack_seq, "confirmed", ack.status)
+        if record is None:
+            return
+        if (
+            record.command in (CommandType.LOAD.value, CommandType.RESET.value)
+            and ack.status not in _ACK_WITHOUT_STATE_CHANGE
+        ):
+            # LOAD/RESET trocam o pet inteiro: os recordes locais do jogo têm de acompanhar (e
+            # podem diminuir). O pet_state novo pode chegar depois do ACK, então reaplica nele.
+            self._records_resync_pending = True
+            self._launch_mode.reload_from_pet(self.pet_state)
+            if self.active_mode == AppModeId.PET_LAUNCH:
+                self._sync_launch_lcd()
+
+    def _on_device_error(self, err: ErrorPayload) -> None:
+        self.last_error = f"{err.code}: {err.message}"
+        record = self.command_log.get(err.ref_seq) if err.ref_seq is not None else None
+        self.device_errors.append(
+            DeviceError(
+                code=err.code,
+                message=err.message,
+                ref_seq=err.ref_seq,
+                command=record.command if record is not None else None,
+                at=time.monotonic(),
+            )
+        )
+        self._resolve_command(err.ref_seq, "failed", f"{err.code}: {err.message}")
+
+    def _apply_message(self, env: ProtocolEnvelope, payload: Any) -> None:
+        if env.type == MessageType.PET_STATE:
+            self.pet_state = payload
+            if self._records_resync_pending:
+                self._records_resync_pending = False
+                # A partida já foi reiniciada no ACK; aqui só os recordes acompanham o pet novo.
+                self._launch_mode.resync_records_from_pet(self.pet_state)
+            else:
+                self._launch_mode.bind_pet_state(self.pet_state)
+            if self.active_mode == AppModeId.PET_LAUNCH:
+                self._sync_launch_lcd()
+        elif env.type == MessageType.LCD_FRAME:
+            if self.active_mode != AppModeId.PET_LAUNCH and self._return_to_pet_lcd_ttl <= 0:
+                self.lcd_frame = payload
+        elif env.type == MessageType.SENSOR_FRAME:
+            self.last_sensor = payload
+            if self.active_mode in self.aux_modes:
+                self.aux_modes[self.active_mode].on_sensor_frame(payload)
+                if self.active_mode == AppModeId.PET_LAUNCH:
+                    self._sync_launch_lcd()
+            if self.sensor_listener is not None:
+                self.sensor_listener(payload)
+        elif env.type == MessageType.ACK:
+            self._on_ack(payload)
+        elif env.type == MessageType.ERROR:
+            self._on_device_error(payload)
+        elif env.type == MessageType.GESTURE_EVENT:
+            self.last_gesture = payload
+            if self.dispatch_gesture_events:
+                self._dispatch_gesture(env)
+
+    def _dispatch_gesture(self, env: ProtocolEnvelope) -> None:
+        if self.active_mode == AppModeId.PET_LAUNCH:
+            self._launch_mode.bind_pet_state(self.pet_state)
+            self._launch_mode.on_gesture_event(
+                self.last_gesture,
+                seq_id=env.seq,
+                ts_ms=env.ts_ms,
+            )
+            self._flush_launch_commands()
+            self._sync_launch_lcd()
+        elif self.active_mode in self.aux_modes:
+            mode_obj = self.aux_modes[self.active_mode]
+            if isinstance(mode_obj, AirSlidesMode):
+                mode_obj.on_gesture_event(self.last_gesture, ts_ms=env.ts_ms)
+            else:
+                mode_obj.on_gesture_event(self.last_gesture)
 
     def handle_keypress(
         self,

@@ -77,8 +77,8 @@ class SensorFramePayload:
     def __post_init__(self) -> None:
         if not (0.0 <= self.pot_norm <= 1.0):
             raise ProtocolError(f"pot_norm fora do intervalo [0.0, 1.0]: {self.pot_norm}")
-        if self.distance_cm is not None and self.distance_cm < 0.0:
-            raise ProtocolError(f"distance_cm negativo inválido: {self.distance_cm}")
+        if self.distance_cm is not None and not (0.0 <= self.distance_cm < float("inf")):
+            raise ProtocolError(f"distance_cm negativo inválido (ou não finito): {self.distance_cm}")
 
     def to_dict(self) -> dict[str, Any]:
         return {
