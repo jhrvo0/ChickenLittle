@@ -1,0 +1,17 @@
+ADC34 media= 241 min= 210 max= 269 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 241 min= 231 max= 268 mV | nivel_ocioso=0 | trig=20 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 242 min= 231 max= 258 mV | nivel_ocioso=0 | trig=50 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 242 min= 194 max= 318 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 241 min= 215 max= 269 mV | nivel_ocioso=0 | trig=20 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 240 min= 217 max= 285 mV | nivel_ocioso=0 | trig=50 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 241 min= 221 max= 257 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 239 min= 222 max= 258 mV | nivel_ocioso=0 | trig=20 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 238 min= 211 max= 264 mV | nivel_ocioso=0 | trig=50 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 241 min= 215 max= 258 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 241 min= 198 max= 260 mV | nivel_ocioso=0 | trig=20 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 244 min= 211 max= 334 mV | nivel_ocioso=0 | trig=50 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 245 min= 230 max= 313 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 244 min= 233 max= 278 mV | nivel_ocioso=0 | trig=20 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 241 min= 226 max= 258 mV | nivel_ocioso=0 | trig=50 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 241 min= 222 max= 268 mV | nivel_ocioso=0 | trig=10 us | ECHO: nenhum pulso em 70 ms
+ADC34 media= 240 min= 218 max= 273 mV | nivel_ocioso=0 | trig=20 us | ECHO: nenhum pulso em 70 ms

@@ -12,6 +12,7 @@ from __future__ import annotations
 import io
 import xml.etree.ElementTree as ET
 import zipfile
+from pathlib import Path
 from dataclasses import dataclass
 
 from . import fz_parts, model
@@ -284,7 +285,7 @@ def build_fz(lay: Layout, stage: str) -> tuple[bytes, dict[str, bytes], dict]:
 
 def write_fzz(lay: Layout, stage: str, path: str) -> dict:
     xml, extra, meta = build_fz(lay, stage)
-    base = path.rsplit("/", 1)[-1][:-1]            # nome.fzz -> nome.fz
+    base = Path(path).with_suffix(".fz").name      # nome.fzz -> nome.fz, tambem no Windows
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
         info = zipfile.ZipInfo(base, date_time=(2026, 10, 29, 0, 0, 0))   # reprodutivel
         info.compress_type = zipfile.ZIP_DEFLATED

@@ -2,6 +2,8 @@
 
 Este documento descreve a arquitetura multitarefa FreeRTOS efetivamente implementada em `firmware/main/main.cpp` para o `ESP-WROOM-32` (`ESP-IDF v4.4.7` / `framework-arduinoespressif32 @ 2.0.17`).
 
+Montagem atual: [guia integrado I²C](../../docs/bench_assembly_guide.md). `main.cpp` seleciona o HAL PCF8574; GPIO21=SDA e GPIO22=SCL, backpack em 3V3 sem conversor. O modo de quatro bits existe entre o expansor e o HD44780, não como seis fios da ESP32 ao LCD.
+
 ---
 
 ## 1. Topologia de 5 Tarefas Independentes em `APP_CPU_NUM`
@@ -14,7 +16,7 @@ Para evitar contenção de cache multicore sem benefício mensurável e manter s
 | **`TaskGestureInfer`** | `3` (Média-Alta) | `4096 B` | Bloqueio em `g_q_sensor_infer` (`portMAX_DELAY`) | Filtro causal (`tinyml_filter_step`), buffer circular (`W=10`), extração das 11 features canônicas, inferência TinyML (`tinyml_infer_proba`) e estabilizador temporal com cooldown. |
 | **`TaskPetDomain`** | `2` (Média) | `4096 B` | `1000 ms` (`1 Hz`) + bloqueio em `g_q_cmd_pet` | Máquina de estados autoritativa do Pet (`pet_tick`, comandos, gestos, evolução) e persistência NVS com CRC32, skip sem mudança e throttle de `30 s`. |
 | **`TaskSerialComm`** | `2` (Média) | `4096 B` | Varredura cooperativa (`5 ms`) | Único proprietário da `UART0` (`115200 baud`). Fluxo 100% puro JSON Lines v1 (`CORE_DEBUG_LEVEL=0`), parser Rx tolerante a falhas e telemetria `DIAG`. |
-| **`TaskLcdDisplay`** | `1` (Baixa) | `3072 B` | `vTaskDelayUntil` (`200 ms` / `5 Hz`) | Formatação 20×4 (`lcd_format_pet_frame`), animações não-bloqueantes de 2 quadros e atualização diferencial (dirty shadow buffer) em modo paralelo de 4 bits. |
+| **`TaskLcdDisplay`** | `1` (Baixa) | `3072 B` | `vTaskDelayUntil` (`200 ms` / `5 Hz`) | Formatação 20×4 (`lcd_format_pet_frame`), animações e atualização diferencial via HAL I²C PCF8574 a 100 kHz. |
 
 ---
 

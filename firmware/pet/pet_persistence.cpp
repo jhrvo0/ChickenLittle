@@ -30,6 +30,36 @@ static bool esp32_nvs_write_blob(const void *data, size_t len) {
 }
 #endif // ARDUINO
 
+// The original v1 layout is frozen here; the prefix check prevents a future edit
+// to PetStateSnapshot from silently corrupting the migration.
+typedef struct {
+    char name[PET_NAME_MAX_LEN];
+    float hunger, happiness, energy, health;
+    uint32_t xp;
+    uint16_t level;
+    PetStage stage;
+    PetMood mood;
+    PetPersonality personality;
+    PetAnimation animation;
+    uint16_t animation_ttl_ticks;
+    bool is_sleeping;
+    uint32_t age_ticks;
+    char last_action[PET_ACTION_MAX_LEN];
+    PetCareCounters care_counters;
+} PetStateSnapshotV1;
+static_assert(sizeof(PetStateSnapshotV1) == offsetof(PetStateSnapshot, coins),
+              "Legacy NVS snapshot prefix layout changed");
+
+// Keep the v1 blob layout for non-destructive migration of existing NVS saves.
+typedef struct {
+    uint32_t magic;
+    uint16_t schema_version;
+    uint16_t reserved;
+    uint32_t generation;
+    uint8_t snapshot[offsetof(PetStateSnapshot, coins)];
+    uint32_t crc32;
+} PetNvsBlobV1;
+
 uint32_t pet_crc32_compute(const uint8_t *data, size_t len) {
     uint32_t crc = 0xFFFFFFFFUL;
     for (size_t i = 0U; i < len; ++i) {
@@ -60,6 +90,9 @@ static bool snapshots_equal(const PetStateSnapshot *a, const PetStateSnapshot *b
     if (a->care_counters.rest != b->care_counters.rest) return false;
     if (a->care_counters.interact != b->care_counters.interact) return false;
     if (a->care_counters.heal != b->care_counters.heal) return false;
+    if (a->coins != b->coins || a->best_launch_distance_m != b->best_launch_distance_m ||
+        a->best_launch_score != b->best_launch_score || a->total_launches != b->total_launches ||
+        a->launch_upgrades != b->launch_upgrades) return false;
     return true;
 }
 
@@ -68,6 +101,8 @@ static bool sanitize_loaded_snapshot(PetStateSnapshot *s) {
     if ((int)s->mood < (int)MOOD_ECSTATIC || (int)s->mood > (int)MOOD_SLEEPING) return false;
     if ((int)s->personality < (int)PERSONALITY_CURIOUS || (int)s->personality > (int)PERSONALITY_ZEN) return false;
     if ((int)s->animation < (int)ANIM_IDLE || (int)s->animation > (int)ANIM_SICK) return false;
+    if (!(s->best_launch_distance_m >= 0.0f && s->best_launch_distance_m <= 100000.0f) ||
+        (s->launch_upgrades & ~7U) != 0U) return false;
 
     s->name[PET_NAME_MAX_LEN - 1U] = '\0';
     if (s->name[0] == '\0') {
@@ -170,7 +205,27 @@ PetNvsStatus pet_persistence_load(
 
     PetNvsBlob blob{};
     if (!ctx->backend.read_blob(&blob, sizeof(PetNvsBlob))) {
-        return PET_NVS_ERR_NOT_FOUND;
+        PetNvsBlobV1 old{};
+        if (!ctx->backend.read_blob(&old, sizeof(old))) return PET_NVS_ERR_NOT_FOUND;
+        if (old.magic != PET_NVS_MAGIC || old.schema_version != 1U ||
+            pet_crc32_compute((const uint8_t *)&old, offsetof(PetNvsBlobV1, crc32)) != old.crc32) {
+            ctx->corruption_recoveries++;
+            pet_init(out_state, "Pip", PERSONALITY_CURIOUS);
+            return PET_NVS_ERR_CORRUPT_CRC;
+        }
+        PetStateSnapshot candidate{};
+        uint8_t *bytes = (uint8_t *)&candidate;
+        for (size_t i = 0; i < sizeof(old.snapshot); ++i) bytes[i] = old.snapshot[i];
+        if (!sanitize_loaded_snapshot(&candidate)) {
+            ctx->corruption_recoveries++;
+            pet_init(out_state, "Pip", PERSONALITY_CURIOUS);
+            return PET_NVS_ERR_CORRUPT_CRC;
+        }
+        *out_state = candidate;
+        // Do not establish a saved baseline: the next auto-save upgrades the record to v2.
+        ctx->has_saved_baseline = false;
+        ctx->save_generation = old.generation;
+        return PET_NVS_OK;
     }
 
     if (blob.magic != PET_NVS_MAGIC) {

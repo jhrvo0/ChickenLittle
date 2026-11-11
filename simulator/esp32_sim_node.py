@@ -63,6 +63,8 @@ class SimulatedEsp32Node:
         self.active_mode: AppModeId = AppModeId.MOTION_PET
         self.last_sensor: SensorFramePayload | None = None
         self.last_lcd: LcdFramePayload = self.lcd_renderer.render(self.engine.state, 0)
+        self._host_lcd: LcdFramePayload | None = None
+        self._host_lcd_received_ms = 0
         self.save_status: str = "PRONTO"
 
         # Métricas de diagnóstico e controle de aquisição compatíveis com o firmware C++
@@ -115,6 +117,7 @@ class SimulatedEsp32Node:
         if not self.collection_active:
             self._last_ts_ms += self.sample_period_ms
             state_dirty = self._process_incoming_serial(self._last_ts_ms)
+            state_dirty = self._expire_host_lcd(self._last_ts_ms) or state_dirty
             if state_dirty:
                 self._publish_state_and_lcd(ts_ms=self._last_ts_ms)
             return
@@ -136,6 +139,7 @@ class SimulatedEsp32Node:
 
         # 1. Processa comandos e gestos injetados pelo host via serial
         state_dirty = self._process_incoming_serial(ts_ms)
+        state_dirty = self._expire_host_lcd(ts_ms) or state_dirty
 
         # 2. Publica telemetria de sensores
         self.endpoint.write_line(
@@ -292,6 +296,10 @@ class SimulatedEsp32Node:
                     self.endpoint.write_line(
                         self.codec.encode(MessageType.ACK, ack.to_dict(), ts_ms=ts_ms)
                     )
+                elif env.type == MessageType.LCD_FRAME and self.active_mode == AppModeId.PET_LAUNCH:
+                    self._host_lcd = LcdFramePayload.from_dict(env.data)
+                    self._host_lcd_received_ms = ts_ms
+                    dirty = True
             except (ProtocolError, PersistenceError) as exc:
                 err = ErrorPayload(code="EXEC_ERR", message=str(exc), ref_seq=env.seq)
                 self.endpoint.write_line(
@@ -322,6 +330,8 @@ class SimulatedEsp32Node:
                 self.active_mode = AppModeId(target)
             except ValueError:
                 self.active_mode = AppModeId.MOTION_PET
+            if self.active_mode != AppModeId.PET_LAUNCH:
+                self._host_lcd = None
             self.engine.state.last_action = f"M:{self.active_mode.value[:10]}"
             return True
 
@@ -337,20 +347,30 @@ class SimulatedEsp32Node:
                 )
                 return True
             if action == "UNLOCK_UPGRADE":
-                self.engine.unlock_launch_upgrade(
-                    upgrade_id=str(cmd_payload.payload.get("upgrade_id", "")),
-                    cost=int(cmd_payload.payload.get("cost", 0)),
-                )
+                from terminal.games.pet_launch import UPGRADE_BY_ID
+
+                upgrade_id = str(cmd_payload.payload.get("upgrade_id", ""))
+                cost = cmd_payload.payload.get("cost")
+                spec = UPGRADE_BY_ID.get(upgrade_id)
+                if spec is None or type(cost) is not int or cost != spec.cost_coins:
+                    raise ProtocolError("Melhoria ou preço inválido")
+                applied, _ = self.engine.unlock_launch_upgrade(upgrade_id=upgrade_id, cost=cost)
+                if not applied:
+                    raise ProtocolError("Compra rejeitada")
                 return True
 
         self.engine.apply_command(cmd)
         return True
 
+    def _expire_host_lcd(self, ts_ms: int) -> bool:
+        if self._host_lcd is not None and ts_ms - self._host_lcd_received_ms >= 2000:
+            self._host_lcd = None
+            return True
+        return False
+
     def _publish_state_and_lcd(self, ts_ms: int) -> None:
-        self.last_lcd = self.lcd_renderer.render(
-            self.engine.state,
-            frame_idx=self._step_counter,
-            sensor=self.last_sensor,
+        self.last_lcd = self._host_lcd or self.lcd_renderer.render(
+            self.engine.state, frame_idx=self._step_counter, sensor=self.last_sensor
         )
         self.lcd_frames_rendered += 1
         self.endpoint.write_line(

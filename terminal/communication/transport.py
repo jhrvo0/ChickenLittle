@@ -111,6 +111,7 @@ class PySerialEndpoint:
 
         try:
             self._ser: Any = serial.Serial(port=port, baudrate=baudrate, timeout=timeout)
+            self._rx_buffer = bytearray()
         except Exception as exc:
             raise HardwareNotConnectedError(
                 f"Não foi possível abrir a porta serial '{port}' ({baudrate} bps): {exc}"
@@ -129,11 +130,20 @@ class PySerialEndpoint:
     def read_line(self) -> str | None:
         if not self.is_open:
             raise TransportClosedError("Porta serial física está fechada")
-        if self._ser.in_waiting <= 0:
+        # USB/UART entrega blocos de bytes, nao mensagens. readline() com timeout
+        # pode retornar metade de um JSON; guarde o fragmento ate receber '\n'.
+        if b"\n" not in self._rx_buffer:
+            available = self._ser.in_waiting
+            if available > 0:
+                self._rx_buffer.extend(self._ser.read(min(available, 4096)))
+        end = self._rx_buffer.find(b"\n")
+        if end < 0:
+            if len(self._rx_buffer) > 65536:
+                self._rx_buffer.clear()
+                raise RuntimeError("Entrada serial excedeu 64 KiB sem fim de linha; confira baudrate e firmware.")
             return None
-        raw = self._ser.readline()
-        if not raw:
-            return None
+        raw = bytes(self._rx_buffer[:end + 1])
+        del self._rx_buffer[:end + 1]
         return raw.decode("utf-8", errors="replace")
 
     def read_all_lines(self) -> list[str]:
@@ -148,3 +158,4 @@ class PySerialEndpoint:
     def close(self) -> None:
         if self._ser and self._ser.is_open:
             self._ser.close()
+        self._rx_buffer.clear()

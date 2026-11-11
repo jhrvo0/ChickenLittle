@@ -1,0 +1,61 @@
+{
+  "profile": "final_i2c_3v3_two_boards_rails",
+  "revision": 4,
+  "status": "PENDING_INTEGRATED_PHYSICAL_VALIDATION",
+  "individual_tests": "HC-SR04 e TCRT5000 funcionaram separados conforme usuario. Historico do LCD de 05/11 recuperado: scanner 0x27 e texto em 3V3 com GND6J/VCC19J/SDA14A/SCL17A; depois houve alteracao para 5V, distinta do perfil atual.",
+  "board_profile": "esp32_devkit_38pin",
+  "bench_reference": "docs/bench_verified_wiring.md: LCD em 05/11/2026 usou GND=6J, VCC=19J, SDA=14A, SCL=17A; scanner 0x27 e texto confirmado pelo usuario em 3V3.",
+  "avoid_unverified_holes": ["P1:2J"],
+  "diagnostics": {
+    "lcd_backlight_5v": {
+      "title": "Teste temporario de iluminacao: LCD em 5 V sem SDA/SCL",
+      "keep_power_wires": ["F1", "F2", "F3", "F4"],
+      "disconnect_wires": ["F16", "F17"],
+      "move_ends": [
+        {"id": "F14", "to": "Trilho +5V P1", "to_hole": "P1:+3", "net": "5V"},
+        {"id": "F15", "to": "Trilho GND P1", "to_hole": "P1:-4", "net": "GND"}
+      ],
+      "diagram_wires": ["F1", "F2", "F3", "F4", "F14", "F15"],
+      "usb_off_for_changes": true,
+      "i2c_test_allowed": false,
+      "note": "Mudar so as pontas macho de F14/F15 nos trilhos. Remover os cabos F16/F17 por inteiro antes de usar 5 V. Os demais fios/resistores ja montados ficam no lugar. P1:+3/P1:-4 devem estar livres, sem jumper temporario de ensaio. Voltar F14 a P2:+3 e F15 a P2:-3 antes de recolocar F16/F17."
+    }
+  },
+  "placement": "P1: ESP32 com USB para a linha 1; J2 em I, J3 em B, A/J livres. P2: divisor com espaco livre; modulos ligados por cabos. Furos da ESP32 somente se a serigrafia coincidir.",
+  "rail_contacts": "Em cada placa use apenas o par lateral mais proximo da fileira J. +1..+5 e -1..-5 sao os cinco furos do PRIMEIRO grupo de cinco de cada trilho, contados a partir do lado da linha 1. Esses nomes sao do guia, nao numeros impressos. O par da outra lateral fica sem fios.",
+  "breadboards": [
+    {"id": "P1", "positive_rail_v": 5.0, "negative_rail": "GND", "rail_group": "first_five_near_line_1"},
+    {"id": "P2", "positive_rail_v": 3.3, "negative_rail": "GND", "rail_group": "first_five_near_line_1"}
+  ],
+  "firmware_pins": {
+    "PIN_HCSR04_TRIG": 5,
+    "PIN_HCSR04_ECHO": 34,
+    "PIN_TCRT5000_DO": 35,
+    "PIN_LCD_SDA": 21,
+    "PIN_LCD_SCL": 22
+  },
+  "resistors": [
+    {"id": "R1", "ohms": 1000, "from_hole": "P2:8C", "to_hole": "P2:12C"},
+    {"id": "R2", "ohms": 1000, "from_hole": "P2:12D", "to_hole": "P2:16D"},
+    {"id": "R3", "ohms": 300, "from_hole": "P2:16E", "to_hole": "P2:20E"}
+  ],
+  "wires": [
+    {"id": "F1", "from": "ESP32.5V", "from_hole": "P1:1J", "to": "Trilho +5V P1", "to_hole": "P1:+1", "net": "5V"},
+    {"id": "F2", "from": "ESP32.GND@J2.14", "from_hole": "P1:6J", "to": "Trilho GND P1", "to_hole": "P1:-1", "net": "GND"},
+    {"id": "F3", "from": "ESP32.3V3", "from_hole": "P1:19J", "to": "Trilho +3V3 P2", "to_hole": "P2:+1", "net": "3V3"},
+    {"id": "F4", "from": "Trilho GND P1", "from_hole": "P1:-2", "to": "Trilho GND P2", "to_hole": "P2:-1", "net": "GND"},
+    {"id": "F5", "from": "HC-SR04.VCC", "from_hole": null, "to": "Trilho +5V P1", "to_hole": "P1:+2", "net": "5V"},
+    {"id": "F6", "from": "HC-SR04.GND", "from_hole": null, "to": "Trilho GND P1", "to_hole": "P1:-3", "net": "GND"},
+    {"id": "F7", "from": "HC-SR04.TRIG", "from_hole": null, "to": "ESP32.IO5", "to_hole": "P1:10A", "net": "TRIG"},
+    {"id": "F8", "from": "HC-SR04.ECHO", "from_hole": null, "to": "Entrada R1", "to_hole": "P2:8A", "net": "ECHO_5V"},
+    {"id": "F9", "from": "No protegido", "from_hole": "P2:12A", "to": "ESP32.IO34", "to_hole": "P1:15J", "net": "ECHO_3V3"},
+    {"id": "F10", "from": "Base R3", "from_hole": "P2:20A", "to": "Trilho GND P2", "to_hole": "P2:-4", "net": "GND"},
+    {"id": "F11", "from": "TCRT5000.VCC", "from_hole": null, "to": "Trilho +3V3 P2", "to_hole": "P2:+2", "net": "3V3"},
+    {"id": "F12", "from": "TCRT5000.GND", "from_hole": null, "to": "Trilho GND P2", "to_hole": "P2:-2", "net": "GND"},
+    {"id": "F13", "from": "TCRT5000.DO", "from_hole": null, "to": "ESP32.IO35", "to_hole": "P1:14J", "net": "IR"},
+    {"id": "F14", "from": "LCD.VCC", "from_hole": null, "to": "Trilho +3V3 P2", "to_hole": "P2:+3", "net": "3V3"},
+    {"id": "F15", "from": "LCD.GND", "from_hole": null, "to": "Trilho GND P2", "to_hole": "P2:-3", "net": "GND"},
+    {"id": "F16", "from": "LCD.SDA", "from_hole": null, "to": "ESP32.IO21", "to_hole": "P1:14A", "net": "SDA"},
+    {"id": "F17", "from": "LCD.SCL", "from_hole": null, "to": "ESP32.IO22", "to_hole": "P1:17A", "net": "SCL"}
+  ]
+}

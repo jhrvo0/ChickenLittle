@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 #define PET_NVS_MAGIC          0x4D504554UL  // "MPET"
-#define PET_NVS_SCHEMA_VERSION 1U
+#define PET_NVS_SCHEMA_VERSION 2U
 #define PET_NVS_MIN_AUTO_INTERVAL_MS 30000UL // Limite de gravação automática (30 s) contra desgaste da Flash
 
 typedef enum {

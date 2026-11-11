@@ -6,15 +6,16 @@
   "status": "PENDING_PHYSICAL_VALIDATION",
   "firmware_version": "0.5.0-cycle5",
   "pinout_status": "CANONICAL_GPIO34_PENDING_PHYSICAL_VALIDATION",
-  "pinout_source": "firmware/main/pinout_config.h",
-  "source_of_truth": "Este arquivo e a UNICA fonte de verdade da montagem eletronica. Diagramas, .fzz, Wokwi e guia sao GERADOS dele (python -m hardware.build).",
+  "pinout_source": "hardware/netlist/archive/pinout_parallel.h",
+  "source_of_truth": "CAD PARALELO HISTORICO: este arquivo gera os antigos diagramas, .fzz e Wokwi. Montagem atual I2C em motionpet_final_i2c.json e ../guia_montagem_final.html; nao usar os estagios D/E antigos para o backpack.",
+  "bench_observation": "Em 29/10/2026, ESP32 isolada detectada na COM3: firmware atualizado, serial e telemetria verificados. Estado do pet e quadros LCD foram verificados pela serial. A montagem, os pinos da placa real, as tensoes e os perifericos ainda nao foram validados fisicamente.",
   "language": "pt-BR"
  },
  "breadboard": {
   "profile": "bb400x2",
   "rail_split": null,
   "rails_used": true,
-  "orientation": "Duas meias-protoboards (30 colunas, A-J) encaixadas pela ponta. P1 = placa da ESP32 (furos sem prefixo, ex.: 22C). P2 = segunda placa, encostada na coluna 30 da P1 (furos com prefixo, ex.: P2:12F). Fileira J no topo e A embaixo. Trilhos: so os de BAIXO sao usados (vermelho + = 5 V, azul - = GND); em qualquer furo do trilho da no mesmo. A P2 recebe 5 V e GND por dois fios-ponte vindos dos trilhos da P1."
+  "orientation": "Duas meias-protoboards (30 colunas, A-J) encaixadas pela ponta. P1 = placa da ESP32 (furos sem prefixo, ex.: 22C). P2 = segunda placa, encostada na coluna 30 da P1 (furos com prefixo, ex.: P2:12F). Fileira J no topo e A embaixo. Trilhos: so os de BAIXO sao usados (vermelho + = 5 V, azul - = GND). O seccionamento fisico dos trilhos nao foi confirmado; use o mesmo segmento de cada alimentacao. A P2 recebe 5 V e GND por dois fios-ponte vindos dos trilhos da P1."
  },
  "stage_order": [
   "A",
@@ -69,7 +70,7 @@
     "note": "USB-C na ponta da coluna 1 (para fora da placa). Como na DevKitC, 5V e CLK ficam junto da USB (coluna 1) e o 3V3/GND do pino 1 ficam na coluna 19. Lado J2 (3V3...5V) na fileira I (acesso pela J); lado J3 (GND...CLK) na fileira B (acesso pela A)."
    },
    "status": "ASSUMED_PENDING_PHYSICAL_CONFIRMATION",
-   "note": "Perfil de 38 pinos assumido (0,9 pol entre fileiras => 1 furo livre acessivel de cada lado). Pino 1 de cada lado na coluna 1; a USB-C sai um pouco para fora da borda esquerda da protoboard. Confirmar contagem de pinos, distancia entre fileiras e serigrafia."
+   "note": "Perfil de 38 pinos assumido (0,9 pol entre fileiras => 1 furo livre acessivel de cada lado). A USB sai para fora da borda da coluna 1; 5V e CLK ficam junto da USB, 3V3 e GND ficam na coluna 19. Confirmar contagem de pinos, distancia entre fileiras e serigrafia."
   },
   {
    "ref": "M1",
@@ -90,9 +91,9 @@
     ],
     "leads": {
      "VCC": "red",
-     "TRIG": "yellow",
-     "ECHO": "orange",
-     "GND": "black"
+     "TRIG": "red",
+     "ECHO": "blue",
+     "GND": "white"
     }
    },
    "note": "Fica FORA da protoboard, ligado por 4 jumpers femea-macho (a ponta femea no pino do sensor). Assim voce aponta o sensor para onde quiser."
@@ -202,7 +203,7 @@
    ],
    "role": "lcd_contrast",
    "status": "ADJUST_ON_BENCH",
-   "note": "1 kΩ atravessando o canal na coluna 14 da P2: liga o V0 ao GND (via o fio W10). Se aparecerem só blocos pretos, troque por 1 kΩ + 1 kΩ; se a tela ficar vazia, use 300 Ω (C07)."
+   "note": "1 kΩ atravessando o canal na coluna 14 da P2: liga o V0 ao GND (via o fio W10). Esta ligacao aproxima V0 de GND; nao gera uma tensao fixa de contraste. Se o contraste for inadequado, usar um potenciometro entre VDD e GND com cursor em V0 e conferir o LCD real (C07)."
   },
   {
    "ref": "R5",
@@ -282,7 +283,7 @@
    "label": "No do divisor -> GPIO34",
    "purpose": "Leva o ECHO ja reduzido (2,83 V nominal) ao GPIO34, pino somente-entrada.",
    "voltage": "0 / 2,83 V (pior caso 3,10 V)",
-   "safety": "So instale depois do ensaio do passo 5.",
+   "safety": "Confira o divisor completo, o GND e a serigrafia IO34 antes de instalar; a tensao real nao foi medida.",
    "validation": "PENDING_PHYSICAL_VALIDATION"
   },
   {
@@ -585,6 +586,7 @@
    "v_max": 0.0,
    "pins": [
     "U1.GND@J2.14",
+    "U1.GND@J2.18",
     "U1.GND@J3.1",
     "U1.GND@J3.7",
     "M1.GND",
@@ -595,7 +597,7 @@
     "M3.K",
     "R4.B"
    ],
-   "note": "Terra comum. Os 3 pinos GND da placa sao ligados entre si pela propria PCB da ESP32."
+   "note": "Terra comum. A serigrafia da placa fotografada mostra 4 pinos GND; sua continuidade interna e uma hipotese a verificar fisicamente."
   },
   {
    "name": "5V",
@@ -653,7 +655,7 @@
    "stage": "B",
    "domain": "SIGNAL_3V3",
    "v_nominal": 2.83,
-   "v_max": 2.97,
+   "v_max": 3.10,
    "pins": [
     "R1.B",
     "R2.A",
@@ -691,13 +693,13 @@
    "name": "LCD_V0",
    "stage": "D",
    "domain": "ANALOG_LOW",
-   "v_nominal": 0.4,
-   "v_max": 0.8,
+   "v_nominal": null,
+   "v_max": null,
    "pins": [
     "M3.V0",
     "R4.A"
    ],
-   "note": "Contraste do LCD (ajuste na bancada: C07)."
+   "note": "V0 ligado a GND por R4; tensao e contraste reais dependem do modulo (C07)."
   },
   {
    "name": "LCD_A",
@@ -852,7 +854,7 @@
  "assumptions": [
   {
    "id": "A1",
-   "text": "Placa ESP32 de 38 pinos (19+19), pinagem tipo DevKitC V4/NodeMCU-32S, 0,9 pol entre fileiras, USB-C numa extremidade."
+   "text": "Placa fotografada: NODEMCU ESP-32S V1.1, 38 pinos (19+19), USB-C. A posicao de GND junto a 5V vem da serigrafia; a distancia entre fileiras permanece por confirmar. Outras placas de 38 pinos podem ter pinagem diferente."
   },
   {
    "id": "A2",
@@ -872,7 +874,7 @@
   },
   {
    "id": "A6",
-   "text": "O pino GND@J2.14, os GND@J3.1/J3.7 e o AGND estao ligados na PCB da ESP32 (verificar com multimetro)."
+   "text": "Os pinos GND@J2.14/J2.18 e GND@J3.1/J3.7 sao tratados como ligados na PCB; a continuidade interna ainda precisa de confirmacao fisica."
   }
  ],
  "confirmations": [
@@ -884,7 +886,7 @@
   {
    "id": "C02",
    "blocks": "B",
-   "text": "Protoboards: 30 colunas e fileiras A-J em cada uma; a P2 encaixada na ponta da coluna 30 da P1. Trilhos de baixo: vermelho (+) e azul (-), continuos de ponta a ponta (se a linha tiver uma falha no meio, ligue as duas metades com um jumper)."
+   "text": "Protoboards: 30 colunas e fileiras A-J em cada uma; a P2 encaixada na ponta da coluna 30 da P1. Trilhos de baixo: vermelho (+) e azul (-). O seccionamento fisico nao foi confirmado; use o mesmo segmento de cada alimentacao."
   },
   {
    "id": "C03",
@@ -914,7 +916,7 @@
   {
    "id": "C07",
    "blocks": "D",
-   "text": "LCD: o contraste (V0) usa R4 = 1 kΩ para o GND. Se aparecerem so blocos, aumente (1 kΩ + 1 kΩ em serie); se a tela ficar vazia, diminua (300 Ω)."
+   "text": "LCD: R4 = 1 kΩ liga V0 ao GND e nao gera 0,4-0,8 V. Se necessario, ajustar contraste com potenciometro entre VDD e GND, cursor em V0; confirmar o modulo na bancada."
   }
  ],
  "build_steps": {
@@ -938,7 +940,7 @@
    {
     "n": 2,
     "title": "Encaixe a ESP32 atravessando o canal",
-    "text": "Cabo USB DESCONECTADO. USB-C virada para a esquerda, saindo um pouco para fora da protoboard. O pino 3V3 vai no furo 1B e o GND (lado de cima) no furo 1I: pino 1 de cada lado na coluna 1. Empurre por igual dos dois lados.",
+    "text": "Cabo USB DESCONECTADO. Se a serigrafia e as dimensões coincidirem com o desenho, encaixe a placa com USB para a esquerda: no perfil ilustrado, 5V fica em 1I e CLK em 1B; 3V3 fica em 19I e GND em 19B. Não prossiga se a placa real for diferente; empurre por igual dos dois lados.",
     "adds": [
      "U1"
     ],
@@ -964,7 +966,7 @@
     "hold": false,
     "n": 1,
     "title": "Desligue tudo",
-    "text": "Desconecte o cabo USB. O Estágio B inteiro é montado com a placa desenergizada.",
+    "text": "Desconecte o cabo USB antes de mexer em qualquer fio. Se a montagem já está na protoboard, use os próximos passos para conferi-la; não precisa desmontar tudo.",
     "adds": [],
     "focus": [
      "U1"
@@ -974,30 +976,26 @@
     "hold": false,
     "n": 2,
     "title": "5 V e GND nos trilhos de baixo",
-    "text": "Fio vermelho: 1J (pino 5V, junto da USB) → trilho + (vermelho) de baixo; ele passa por cima da ponta da ESP32. Fio preto: 13A (GND) → trilho − (azul) de baixo. Qualquer furo do trilho serve.",
+    "text": "Confira pelas etiquetas da ESP32: 5V vai ao trilho + vermelho e GND vai ao trilho − azul. No desenho assumido: 1J → + e 13A → −. Use o mesmo trecho de trilho; se ele for dividido, não suponha que os dois lados estejam ligados.",
     "adds": [
      "W1",
      "W2"
     ],
-    "warn": "Os trilhos de baixo agora são 5 V (+) e GND (−). Nada de 3,3 V vai neles."
+    "warn": "Confirme as etiquetas reais 5V e GND da sua placa antes de usar os furos do desenho. Se os trilhos forem divididos, ligue no mesmo trecho da alimentação."
    },
    {
     "hold": false,
     "n": 3,
-    "title": "Meça R1, R2 e R3 fora do circuito",
-    "text": "Multímetro em Ω, com os resistores soltos. R1 e R2: 1 kΩ (a partir da faixa dourada: dourado, vermelho, preto, marrom). R3: 300 Ω (dourado, marrom, preto, laranja).",
+    "title": "Identifique os 3 resistores",
+    "text": "Separe dois de 1 kΩ (marrom, preto, vermelho, dourado) e um de 300 Ω (laranja, preto, marrom, dourado). Leia a partir do lado oposto à faixa dourada. Se não conseguir distinguir as cores, não adivinhe.",
     "adds": [],
-    "measure": [
-     "R1",
-     "R2",
-     "R3"
-    ]
+    "focus": ["R1", "R2", "R3"]
    },
    {
     "hold": false,
     "n": 4,
     "title": "Instale o divisor (R1, R2, R3)",
-    "text": "R1 (1 kΩ): 22C e 26C. R2 (1 kΩ): 26D e 29D. R3 (300 Ω): 29A e o trilho − (azul) logo abaixo. A coluna 26 é o NÓ do divisor.",
+    "text": "Todos no lado A–E: R1 (1 kΩ) em 22C e 26C; R2 (1 kΩ) em 26D e 29D; R3 (300 Ω) em 29A e no trilho − azul de GND. A linha 26 é o NÓ do divisor.",
     "adds": [
      "R1",
      "R2",
@@ -1006,53 +1004,44 @@
    },
    {
     "n": 5,
-    "title": "PARE: ensaio do divisor",
-    "text": "Sem o sensor e sem o fio verde. O jumper temporário (tracejado) leva 5 V do trilho + ao furo 22B. Conecte a USB e meça entre o furo 26A (ponteira vermelha) e o trilho − (ponteira preta): esperado ≈ 2,8 V (aceitável 2,5 a 3,2 V).",
-    "adds": [],
-    "temp": [
-     "T1"
-    ],
-    "marker": "MK5",
-    "focus": [
-     "R1",
-     "R2",
-     "R3",
-     "T1",
-     "MK5"
-    ],
-    "hold": true,
-    "warn": "Mais de 3,30 V: desconecte a USB AGORA (provável R3 no trilho errado) e refaça o divisor. Menos de 2,5 V: confira R2, R3 e o jumper temporário."
-   },
-   {
-    "hold": false,
-    "n": 6,
-    "title": "Registre a medição e tire o jumper",
-    "text": "Desconecte a USB e retire o jumper temporário.",
+    "title": "PARE: confira o divisor",
+    "text": "Ainda com a USB desligada, confira as linhas 22, 26 e 29. Na linha 26 devem estar uma perna de R1 e uma de R2; na linha 29, uma perna de R2 e uma de R3. As pernas metálicas não devem se tocar fora dos furos.",
     "adds": [],
     "focus": [
      "R1",
      "R2",
      "R3"
     ],
-    "commands": [
-     "python -m terminal.bench divider --r1 1000 --r2 1300 --measured-v <valor medido>"
+    "hold": true,
+    "warn": "A inspeção visual não confirma contatos nem tensões. Sem medição, a segurança elétrica permanece não verificada. ECHO nunca vai direto a um GPIO."
+   },
+   {
+    "hold": false,
+    "n": 6,
+    "title": "Identifique os fios do sensor",
+    "text": "Veja as palavras impressas no HC-SR04 e siga cada fio pelo seu comprimento. Nas suas fotos: ECHO é azul, GND é branco e há dois vermelhos, um no VCC e outro no TRIG. Diferencie os vermelhos pela etiqueta, não pela cor.",
+    "adds": [],
+    "focus": [
+     "R1",
+     "R2",
+     "R3"
     ]
    },
    {
     "hold": false,
     "n": 7,
     "title": "Ligue o HC-SR04 (4 jumpers fêmea–macho)",
-    "text": "Ponta fêmea nos pinos do sensor (leia a serigrafia). VCC → trilho + de baixo; GND → trilho − de baixo; TRIG → 10A; ECHO → 22E. O sensor fica fora da placa, apontado para onde você quiser.",
+    "text": "Com USB desligada: VCC (vermelho) → trilho + ligado ao 5V; GND (branco) → trilho − ligado ao GND; TRIG (outro vermelho) → 10A, se esse furo corresponder ao IO5; ECHO (azul) → 22E, na mesma linha de R1. Confirme as etiquetas do sensor e da ESP32.",
     "adds": [
      "M1"
     ],
-    "warn": "VCC e GND trocados podem queimar o módulo. O ECHO vai no 22E (entrada do divisor), NUNCA direto na ESP32."
+    "warn": "Os dois vermelhos têm funções diferentes: siga as etiquetas VCC e TRIG. ECHO azul vai na entrada do resistor, NUNCA direto ao IO5 ou IO34."
    },
    {
     "hold": false,
     "n": 8,
     "title": "Inspecione antes de ligar",
-    "text": "Com a USB desconectada, confira no multímetro e a olho.",
+    "text": "Com a USB desligada, siga cada um dos quatro fios do sensor até a outra ponta. A linha 22 do lado A–E deve juntar o ECHO azul e R1. Furos F–J do outro lado do canal NÃO estão na mesma conexão.",
     "adds": [],
     "focus": [
      "M1",
@@ -1061,34 +1050,34 @@
      "R3"
     ],
     "checks": [
-     "Sem curto entre trilho + e trilho − (não apita)",
-     "A coluna 22 (ECHO) NÃO tem continuidade com nenhum pino da ESP32",
-     "Nada ligado em IO12, IO6…IO11 (SD0…CLK), TX0 ou RX0"
-    ]
+     "VCC vermelho no trilho + de 5V; GND branco no trilho − de GND",
+     "TRIG vermelho no IO5; ECHO azul na linha 22, junto de R1",
+     "Pernas de resistores sem se encostar fora dos furos"
+    ],
+    "warn": "A cor azul do fio ECHO não significa que ele vai ao trilho azul de GND. A inspeção visual não prova o funcionamento nem a tensão."
    },
    {
     "hold": false,
     "n": 9,
     "title": "Último fio: NÓ → GPIO34",
-    "text": "Fio verde: 26E → 15J (pino IO34, fileira de cima). É o único fio que leva o sinal do ECHO ao ESP32, e só entra depois do ensaio.",
+    "text": "Com a USB desligada, confira o fio que sai da linha 26E (nó de R1 e R2) e chega ao IO34. No desenho, o destino é 15J; use esse furo somente se a etiqueta da sua ESP32 confirmar IO34 nessa coluna.",
     "adds": [
      "W3"
     ],
-    "warn": "Não instale este fio se o ensaio do passo 5 passou de 3,30 V."
+    "warn": "O ECHO deve passar pelo divisor completo até o GND. Não conecte o fio ao IO34 se os resistores, o GND ou a pinagem estiverem incertos; a tensão real continua não medida."
    },
    {
     "hold": false,
     "n": 10,
     "title": "Ligue e valide",
-    "text": "Conecte a USB e rode os comandos (com a mão a 25 cm do sensor).",
+    "text": "Após conferir toda a fiação, conecte a USB e coloque a mão a cerca de um palmo do sensor. Rode a inspeção abaixo. Leituras de distância indicam resposta do sensor, mas não validam a tensão elétrica. Não informe uma tensão inventada à ferramenta de bancada.",
     "adds": [],
     "focus": [
      "M1",
      "W3"
     ],
     "commands": [
-     "python -m terminal.bench stage B --serial-port COMx --r1 1000 --r2 1300 --measured-echo-v <valor do passo 5>",
-     "python -m terminal.bench inspect --serial-port COMx --duration 5 --reference-cm 25"
+     "python -m terminal.bench inspect --serial-port COM3 --duration 5"
     ]
    }
   ],
@@ -1117,13 +1106,13 @@
     "hold": false,
     "n": 3,
     "title": "Ligue e valide",
-    "text": "Conecte a USB e rode o comando. Aproxime e afaste o dedo do TCRT5000.",
+    "text": "Conecte a USB, meça a alimentação do módulo e substitua [tensão medida] pelo valor numérico em volts. Durante a captura de 8 segundos, aproxime e afaste um objeto do TCRT5000.",
     "adds": [],
     "focus": [
      "M2"
     ],
     "commands": [
-     "python -m terminal.bench stage C --serial-port COMx --component ir"
+     "python -m terminal.bench stage C --serial-port COMx --component ir --vcc-measured-v [tensão medida]"
     ]
    }
   ],
@@ -1250,13 +1239,14 @@
     "hold": false,
     "n": 12,
     "title": "Ligue e valide",
-    "text": "Conecte a USB e rode o comando. Ajuste o contraste (R4) se o display mostrar só blocos ou nada.",
+    "text": "Com USB desconectada, meça a continuidade RW–GND. Conecte a USB, meça VDD e rode primeiro sem confirmações para ver o quadro serial; compare-o visualmente com o LCD. Depois, somente se as verificações forem positivas, rode novamente com as confirmações. Substitua [tensão medida] pelo valor numérico em volts. Se houver apenas blocos ou nada, confira fiação e contraste.",
     "adds": [],
     "focus": [
      "M3"
     ],
     "commands": [
-     "python -m terminal.bench stage D --serial-port COMx"
+     "python -m terminal.bench stage D --serial-port COMx --lcd-vdd-v [tensão medida]",
+     "python -m terminal.bench stage D --serial-port COMx --lcd-vdd-v [tensão medida] --rw-confirmed --visual-confirmed"
     ]
    }
   ],
@@ -1282,7 +1272,7 @@
    {
     "n": 2,
     "title": "Teste ponta a ponta",
-    "text": "Tudo montado: rode o teste completo.",
+    "text": "Após validar a montagem, rode o teste. A captura informa observações; persistência, latência sensor–resposta e comparação física do LCD permanecem pendentes até serem verificadas separadamente.",
     "adds": [],
     "focus": [
      "BB1"

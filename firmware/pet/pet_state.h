@@ -106,7 +106,16 @@ typedef struct {
     uint32_t age_ticks;             ///< Contador de ciclos biológicos vividos
     char last_action[PET_ACTION_MAX_LEN]; ///< Última ação registrada (ex: "READY", "FED")
     PetCareCounters care_counters;  ///< Histórico acumulado por tipo de cuidado
+    uint32_t coins;
+    float best_launch_distance_m;
+    uint32_t best_launch_score;
+    uint32_t total_launches;
+    uint8_t launch_upgrades;       ///< Bits: SLINGSHOT_PRO, AERO_CAPE, SPRING_BOOTS
 } PetStateSnapshot;
+
+bool pet_apply_launch_match(PetStateSnapshot *pet, float distance_m, uint32_t score,
+                            uint32_t coins, uint32_t xp);
+bool pet_unlock_launch_upgrade(PetStateSnapshot *pet, const char *upgrade_id, uint32_t cost);
 
 /**
  * @brief Inicializa o estado padrão do pet (Ovo novo).

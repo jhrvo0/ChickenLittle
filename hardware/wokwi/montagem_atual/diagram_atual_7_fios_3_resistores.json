@@ -1,0 +1,222 @@
+{
+  "version": 1,
+  "author": "MotionPet - observacoes parciais das fotos",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-text",
+      "id": "title",
+      "top": -105,
+      "left": -220,
+      "attrs": {
+        "text": "MOTIONPET - FOTOS: OBSERVACOES PARCIAIS"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "espnote",
+      "top": -65,
+      "left": -220,
+      "attrs": {
+        "text": "ESP32 38 pinos aproximado - separado da P1"
+      }
+    },
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": -185,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "p1label",
+      "top": 0,
+      "left": 5,
+      "attrs": {
+        "text": "P1: marrom em 19J; 6J ligado ao primeiro negativo"
+      }
+    },
+    {
+      "type": "wokwi-breadboard-half",
+      "id": "p1",
+      "top": 40,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "hc",
+      "top": -30,
+      "left": 405,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "sensorlabel",
+      "top": 150,
+      "left": 445,
+      "attrs": {
+        "text": "Marcador TCRT (LDR): verde VCC / azul GND / laranja DO"
+      }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "tcrt_marcador",
+      "top": 200,
+      "left": 480,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "p2label",
+      "top": 320,
+      "left": 5,
+      "attrs": {
+        "text": "P2 lado 30 | R1 8C-12C | R2 12D-16D | R3 16E-20E"
+      }
+    },
+    {
+      "type": "wokwi-breadboard-half",
+      "id": "p2",
+      "top": 360,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 610,
+      "left": 0,
+      "attrs": {
+        "value": "1000"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 640,
+      "left": 0,
+      "attrs": {
+        "value": "1000"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": 670,
+      "left": 0,
+      "attrs": {
+        "value": "300"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lcdlabel",
+      "top": 350,
+      "left": 445,
+      "attrs": {
+        "text": "LCD 2004 I2C"
+      }
+    },
+    {
+      "type": "wokwi-lcd2004",
+      "id": "lcd",
+      "top": 385,
+      "left": 450,
+      "attrs": {
+        "pins": "i2c"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "observation",
+      "left": 0,
+      "top": 710,
+      "attrs": {
+        "text": "Divisor: 20A ao quarto negativo P2 confirmado.\nFios pretos: cores fisicas nao confirmadas."
+      }
+    }
+  ],
+  "connections": [
+    [
+      "tcrt_marcador:VCC",
+      "p2:bp.25",
+      "green",
+      []
+    ],
+    [
+      "p1:19b.j",
+      "p2:bp.24",
+      "brown",
+      []
+    ],
+    [
+      "p1:bn.2",
+      "p2:bn.25",
+      "black",
+      []
+    ],
+    [
+      "tcrt_marcador:GND",
+      "p1:bn.3",
+      "blue",
+      []
+    ],
+    [
+      "p1:6b.j",
+      "p1:bn.1",
+      "black",
+      []
+    ],
+    [
+      "tcrt_marcador:DO",
+      "p1:14b.j",
+      "orange",
+      []
+    ],
+    [
+      "r1:1",
+      "p2:8t.c",
+      "",
+      []
+    ],
+    [
+      "r1:2",
+      "p2:12t.c",
+      "",
+      []
+    ],
+    [
+      "r2:1",
+      "p2:12t.d",
+      "",
+      []
+    ],
+    [
+      "r2:2",
+      "p2:16t.d",
+      "",
+      []
+    ],
+    [
+      "r3:1",
+      "p2:16t.e",
+      "",
+      []
+    ],
+    [
+      "r3:2",
+      "p2:20t.e",
+      "",
+      []
+    ],
+    [
+      "p2:20t.a",
+      "p2:bn.22",
+      "black",
+      []
+    ]
+  ],
+  "dependencies": {}
+}

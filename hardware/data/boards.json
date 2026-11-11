@@ -1,8 +1,8 @@
 {
-  "_comment": "Perfis de placa ESP32. A serigrafia da placa fisica real SEMPRE prevalece. Pinagem 38 pinos: ESP32-DevKitC V4 / NodeMCU-32S (J2 = esquerda, J3 = direita com a USB para cima). Pinagem 30 pinos: DOIT ESP32 DevKit V1.",
+  "_comment": "Perfis de placa ESP32. A serigrafia da placa fisica real SEMPRE prevalece. Perfil de 38 pinos alinhado a NODEMCU ESP-32S V1.1 fotografada; outras placas de 38 pinos podem ter pinagem diferente. Perfil de 30 pinos: DOIT ESP32 DevKit V1.",
   "profiles": {
     "esp32_devkit_38pin": {
-      "title": "ESP32 DevKit 38 pinos (estilo DevKitC V4 / NodeMCU-32S), ESP-WROOM-32",
+      "title": "NODEMCU ESP-32S V1.1 fotografada, 38 pinos",
       "status": "ASSUMED_PENDING_PHYSICAL_CONFIRMATION",
       "pins_per_side": 19,
       "pin_pitch_in": 0.1,
@@ -29,7 +29,7 @@
           ["IO13", 13, "gpio", "GPIO13"],
           ["SD2", 9, "flash_forbidden", "GPIO9: SPI Flash, NAO conectar"],
           ["SD3", 10, "flash_forbidden", "GPIO10: SPI Flash, NAO conectar"],
-          ["CMD", 11, "flash_forbidden", "GPIO11: SPI Flash, NAO conectar"],
+          ["GND", null, "ground", "GND junto do 5V na NODEMCU ESP-32S V1.1 fotografada; nao presumir em outras variantes"],
           ["5V", null, "power_5v", "Entrada/saida 5 V (VBUS/VIN)"]
         ],
         "J3": [

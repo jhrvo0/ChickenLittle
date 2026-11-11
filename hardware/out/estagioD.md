@@ -1,20 +1,22 @@
 # Estagio D — LCD 2004A
 
+> **CAD paralelo histórico.** Para a montagem atual com LCD I²C, use [o guia final](../guia_montagem_final.html). D/E antigos não se aplicam ao backpack.
+
 > Display 20x4 na 2a protoboard (P2), modo 4 bits, RW no GND, sinais de 3,3 V.
 
 > Status: `PENDING_PHYSICAL_VALIDATION`. Este documento e GERADO de `hardware/netlist/motionpet.netlist.json`.
 
 ## Redes eletricas
 
-- **GND** — dominio `GND`, nominal 0.0 V (max 0.0 V): `M1.GND`, `M2.GND`, `M3.K`, `M3.RW`, `M3.VSS`, `R3.B`, `R4.B`, `U1.GND@J2.14`, `U1.GND@J3.1`, `U1.GND@J3.7`. Terra comum. Os 3 pinos GND da placa sao ligados entre si pela propria PCB da ESP32.
+- **GND** — dominio `GND`, nominal 0.0 V (max 0.0 V): `M1.GND`, `M2.GND`, `M3.K`, `M3.RW`, `M3.VSS`, `R3.B`, `R4.B`, `U1.GND@J2.14`, `U1.GND@J2.18`, `U1.GND@J3.1`, `U1.GND@J3.7`. Terra comum. A serigrafia da placa fotografada mostra 4 pinos GND; sua continuidade interna e uma hipotese a verificar fisicamente.
 - **5V** — dominio `5V`, nominal 5.0 V (max 5.25 V): `M1.VCC`, `M3.VDD`, `R5.A`, `U1.5V`. 5 V vindos da USB (pino 5V da ESP32).
 - **3V3** — dominio `3V3`, nominal 3.3 V (max 3.35 V): `M2.VCC`, `U1.3V3`. 3,3 V do regulador da ESP32.
 - **TRIG** — dominio `SIGNAL_3V3`, nominal 3.3 V (max 3.3 V): `M1.TRIG`, `U1.IO5`. GPIO5 -> TRIG.
 - **ECHO_5V** — dominio `SIGNAL_5V`, nominal 5.0 V (max 5.25 V): `M1.ECHO`, `R1.A`. ECHO bruto do HC-SR04 (pulsos de ~5 V). NUNCA pode tocar um GPIO.
-- **ECHO_NODE** — dominio `SIGNAL_3V3`, nominal 2.83 V (max 2.97 V): `R1.B`, `R2.A`, `U1.IO34`. No do divisor: R1 = 1 kΩ em cima; R2 (1 kΩ) + R3 (300 Ω) em serie embaixo = 1,3 kΩ. 2,83 V nominal @ 5,00 V (pior caso 3,10 V).
+- **ECHO_NODE** — dominio `SIGNAL_3V3`, nominal 2.83 V (max 3.1 V): `R1.B`, `R2.A`, `U1.IO34`. No do divisor: R1 = 1 kΩ em cima; R2 (1 kΩ) + R3 (300 Ω) em serie embaixo = 1,3 kΩ. 2,83 V nominal @ 5,00 V (pior caso 3,10 V).
 - **DIV_MID** — dominio `SIGNAL_3V3`, nominal 0.65 V (max 0.69 V): `R2.B`, `R3.A`. Junção entre R2 e R3 (coluna 30). Só liga os dois resistores; não vai a nenhum pino.
 - **IR_DO** — dominio `SIGNAL_3V3`, nominal 3.3 V (max 3.3 V): `M2.DO`, `U1.IO35`. Saida digital do TCRT5000.
-- **LCD_V0** — dominio `ANALOG_LOW`, nominal 0.4 V (max 0.8 V): `M3.V0`, `R4.A`. Contraste do LCD (ajuste na bancada: C07).
+- **LCD_V0** — dominio `ANALOG_LOW`, tensao nao medida: `M3.V0`, `R4.A`. V0 ligado a GND por R4; tensao e contraste reais dependem do modulo (C07).
 - **LCD_A** — dominio `POWER_5V_LED`, nominal 5.0 V (max 5.25 V): `M3.A`, `R5.B`. Anodo do backlight (via R5).
 - **LCD_RS** — dominio `SIGNAL_3V3`, nominal 3.3 V (max 3.3 V): `M3.RS`, `U1.IO19`. GPIO19 -> RS.
 - **LCD_E** — dominio `SIGNAL_3V3`, nominal 3.3 V (max 3.3 V): `M3.E`, `U1.IO18`. GPIO18 -> E.
@@ -32,6 +34,7 @@
 | U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO35 (GPIO35) | 14I | IR_DO | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
 | U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO27 (GPIO27) | 9I | LCD_D7 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
 | U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 6I | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
+| U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 2I | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
 | U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | 5V | 1I | 5V | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
 | U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | GND | 19B | GND | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
 | U1 | ESP32 DevKit (ESP-WROOM-32, USB-C) | IO23 (GPIO23) | 18B | LCD_D6 | ASSUMED_PENDING_PHYSICAL_CONFIRMATION |
@@ -81,7 +84,7 @@
 |---|---|---|---|---|---|---|---|
 | W1 | vermelho | 1J | 3W | 5V | 4,75-5,25 V | 5V da ESP32 (1J, junto da USB) -> trilho + (vermelho) de baixo | So o HC-SR04 e o LCD usam 5 V. NUNCA ligue o TCRT5000 no trilho +. |
 | W2 | preto | 13A | 15X | GND | 0 V | GND da ESP32 -> trilho - (azul) de baixo |  |
-| W3 | verde | 26E | 15J | ECHO_NODE | 0 / 2,83 V (pior caso 3,10 V) | No do divisor -> GPIO34 | So instale depois do ensaio do passo 5. |
+| W3 | verde | 26E | 15J | ECHO_NODE | 0 / 2,83 V (pior caso 3,10 V) | No do divisor -> GPIO34 | Confira o divisor completo, o GND e a serigrafia IO34 antes de instalar; a tensao real nao foi medida. |
 | W4 | vermelho | 30W | P2:3W | 5V | 4,75-5,25 V | Ponte 5 V: trilho + da P1 -> trilho + da P2 |  |
 | W5 | preto | 29X | P2:3X | GND | 0 V | Ponte GND: trilho - da P1 -> trilho - da P2 |  |
 | W6 | preto | P2:12F | P2:13X | GND | 0 V | VSS (pino 1) -> trilho - |  |
@@ -103,6 +106,7 @@
 |---|---|---|---|---|
 | 1I | 1 | I | U1 ESP32 DevKit: pino 5V [J2.19] | 5V |
 | 1J | 1 | J | fio W1 (vermelho), ponta inicial |  |
+| 2I | 2 | I | U1 ESP32 DevKit: pino GND [J2.18] | GND |
 | 3W | 3 | W | fio W1 (vermelho), ponta final |  |
 | 6I | 6 | I | U1 ESP32 DevKit: pino GND [J2.14] | GND |
 | 6J | 6 | J | M2 TCRT5000 (modulo LM393): pino GND | GND |

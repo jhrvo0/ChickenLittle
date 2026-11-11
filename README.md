@@ -1,6 +1,12 @@
 # MotionPet
 
-Sistema embarcado interativo que combina **ESP32**, **TinyML** (reconhecimento de gestos em séries temporais 1D), um **LCD físico 20×4** e uma **interface rica em ASCII no terminal do notebook**, sincronizados por um protocolo serial **JSON Lines v1**.
+**Interface gráfica do notebook — Piu-piu.** Execute `.\.venv\Scripts\python.exe -m terminal.web` e abra **http://127.0.0.1:8767/**. O aplicativo local reúne pet animado, cuidados, evolução, Pet Launch com física e loja, música e slides, controlados pelos dois sensores reais. Escolha a porta USB e conecte pela interface; feche antes outros monitores da mesma porta. Veja [as instruções e controles](docs/interface_notebook.md).
+
+**Configuração escolhida em 10/11/2026: sem LCD.** ESP32, HC-SR04 e TCRT5000, com visualização pelo terminal do computador. O usuário confirmou os dois sensores respondendo juntos no painel serial; tensões e exatidão da distância não foram medidas. O [desenho sem LCD](hardware/wokwi/montagem_atual/diagram_sem_lcd.json) e o [registro da bancada](hardware/wokwi/montagem_atual/README.md) descrevem essa configuração. A retirada dos dois cabos de alimentação do LCD ainda aguarda confirmação.
+
+Sistema embarcado interativo que combina **ESP32**, sensores de distância e presença, reconhecimento de gestos e uma **interface gráfica local no notebook**, sincronizados por um protocolo serial **JSON Lines v1**. O terminal ASCII e o suporte ao LCD físico permanecem disponíveis como recursos anteriores; o LCD não faz parte da configuração escolhida.
+
+**Guia anterior com LCD — revisão 4 (10/11/2026):** duas protoboards com trilhos: P1 distribui 5 V, P2 distribui 3V3 e os GNDs são unidos. LCD I²C e TCRT5000 usam somente jumpers; o divisor do ECHO fica separado na P2 e protege o GPIO34 do HC-SR04 em 5 V. Abra o [guia visual](hardware/guia_montagem_final.html) ou o [guia escrito](docs/bench_assembly_guide.md). Para os botões **Testar ESP32/LCD/TCRT5000/HC-SR04/conjunto**, rode `.\.venv\Scripts\python.exe -m terminal.bench.guide` e abra [o guia local](http://127.0.0.1:8766/). O diagnóstico de iluminação do LCD preserva F1–F4 e orienta a mudança temporária apenas de F14/F15, com SDA/SCL removidos antes de usar 5 V e retorno a 3V3 antes dos sinais. Os testes individuais foram relatados pelo usuário; a integração física continua pendente. Os desenhos de LCD paralelo em `hardware/out/` e Wokwi são históricos.
 
 ---
 
@@ -14,9 +20,9 @@ Sistema embarcado interativo que combina **ESP32**, **TinyML** (reconhecimento d
 | **Espelho LCD 20×4 & Terminal ASCII (`terminal/renderer/` & `firmware/display/`)** | **Implementado e Testado (Python + C++)** | Renderização diferencial anti-flicker, modo compacto (60 cols) e 6 estados LCD 20×4 dedicados ao Pet Launch. |
 | **Infraestrutura de Machine Learning (`ml/` & `firmware/gestures/`)** | **Pronta p/ Coleta Real (`AWAITING_REAL_DATA`)** | Coleta guiada multi-participante, filtro causal, 11 features, seleção multicritério embarcada, guarda anti-sintético (`ml.real_pipeline`) e TinyML C++ estático (`mlp_compact`). |
 | **Minijogo `Pet Launch` (`terminal/games/`)** | **Jogável Ponta a Ponta (Ciclo 4/5)** | Loop arcade completo de 10 etapas, física 2D de timestep fixo (`0.02s`), loja de melhorias e validador E2E gestual (`terminal.bench e2e`). |
-| **Assistente de Bancada & Painel Diag (`terminal/bench/` & `terminal/diag/`)** | **Implementados e Testados (Ciclo 5)** | Validação incremental Etapas A–D com bloqueios elétricos (`<= 3,30 V`, `2,2 kΩ / 3,3 kΩ`), `DIAG`, inspeção de telemetria e painel ASCII de séries temporais em tempo real. |
-| **Firmware C++/FreeRTOS (`firmware/`)** | **Compilado (`0.5.0-cycle5`, `esp32dev`)** | 5 tasks FreeRTOS em `APP_CPU_NUM` (`RAM: 7.2%`, `Flash: 23.3%`). Pinout canônico reconciliado em `GPIO34` (`CANONICAL_GPIO34_PENDING_PHYSICAL_VALIDATION`). |
-| **Validação Física no Hardware Real** | **`PENDING_PHYSICAL_VALIDATION`** | Aguardando conexão física do ESP32 + sensores na bancada (seguir `docs/cycle5_bench_checklist.md`). |
+| **Assistente de Bancada & Painel Diag (`terminal/bench/` & `terminal/diag/`)** | **Implementados e Testados (Ciclo 5)** | Validação incremental Etapas A–D com verificações elétricas informadas pelo operador, `DIAG`, inspeção de telemetria e painel ASCII. Para a netlist atual, passe explicitamente `--r1 1000 --r2 1300`. |
+| **Firmware C++/FreeRTOS (`firmware/`)** | **Compilado (`0.5.0-cycle5`, `esp32dev`)** | 5 tasks FreeRTOS em `APP_CPU_NUM`; build de 10/11/2026: RAM 7,5%, flash 24,5%. ECHO em GPIO34 e LCD I²C em GPIO21/22; validação física conjunta pendente. |
+| **Validação Física no Hardware Real** | **`PENDING_PHYSICAL_VALIDATION`** | Funcionamento individual de HC-SR04, TCRT5000 e LCD relatado pelo usuário; falta verificar a montagem conjunta e registrar as medições (`docs/cycle5_bench_checklist.md`). |
 
 ---
 
@@ -58,6 +64,8 @@ Sistema embarcado interativo que combina **ESP32**, **TinyML** (reconhecimento d
 
 ## Instalação e Configuração (Windows ARM64 / PowerShell)
 
+O firmware atual lê saves NVS anteriores e os converte para o formato v2 no próximo salvamento. Depois dessa conversão, um firmware antigo não consegue ler o save v2; antes de testar em uma placa com dados importantes, preserve um backup compatível com seu procedimento de bancada.
+
 O runtime principal do Ciclo 1 utiliza apenas a biblioteca padrão do Python (`>= 3.11`), evitando dependências binárias pesadas no Windows ARM64. O `pytest` é utilizado para a suíte de testes automatizados.
 
 ```powershell
@@ -74,6 +82,14 @@ O runtime principal do Ciclo 1 utiliza apenas a biblioteca padrão do Python (`>
 ---
 
 ## Como Executar
+
+### Interface gráfica local
+
+```powershell
+.\.venv\Scripts\python.exe -m terminal.web
+```
+
+Abra **http://127.0.0.1:8767/** e conecte a ESP32 pela porta listada. O pet aparece como **Piu-piu**, preservando o progresso da placa. Não é necessário instalar dependências de frontend nem usar serviços externos. Para disponibilizar uma demonstração explicitamente identificada, use `--demo` e escolha a porta DEMO. As instruções completas estão em [interface_notebook.md](docs/interface_notebook.md).
 
 ### 1. Demonstrações Executáveis Automatizadas (Sem Hardware)
 
@@ -133,20 +149,24 @@ Opções úteis de linha de comando:
 
 ### 4. Integração Física de Bancada, Diagnóstico e Dataset Real (Ciclo 5)
 
-> **Regra de Segurança e Honestidade Experimental:** O assistente de bancada **nunca** energiza a montagem nem grava firmware automaticamente. Não aceite `3,5 V` como seguro no `ECHO`: utilize preferencialmente **`R1 = 2,2 kΩ` + `R2 = 3,3 kΩ`** (`3,00 V` @ `5,0 V`; `<= 3,30 V`) no pino canônico **`GPIO34`**, aterre `LCD RW` em `GND` e alimente `TCRT5000`/potenciômetro em `3,3 V`.
+> **Segurança e honestidade experimental:** o assistente não energiza a montagem nem grava firmware. A montagem atual usa `R1 = 1 kΩ` e `R2 + R3 = 1,3 kΩ` no divisor do ECHO para `GPIO34`; verifique o divisor antes de conectar o GPIO e nunca aceite mais de `3,30 V` no nó. Alimente TCRT5000 e backpack LCD I²C em `3,3 V`, com GND comum. Use somente os quatro pinos do backpack; não adicione fio de RW. O potenciômetro de entrada foi removido e está desativado. Veja [segurança elétrica](docs/hardware_safety.md).
+
+Nos comandos abaixo, substitua `COM3` e `<tensao_medida>` pelos dados reais; o assistente não mede as tensões.
 
 ```powershell
 # A. Verificar dependências, portas COM, checklist de segurança e divisor resistivo (<= 3,30 V)
 .\.venv\Scripts\python.exe -m terminal.bench check-deps
 .\.venv\Scripts\python.exe -m terminal.bench ports
 .\.venv\Scripts\python.exe -m terminal.bench checklist
-.\.venv\Scripts\python.exe -m terminal.bench divider --r1 2200 --r2 3300 --measured-v 3.00
+.\.venv\Scripts\python.exe -m terminal.bench divider --r1 1000 --r2 1300 --measured-v <tensao_medida>
 
 # B. Validação incremental guiada (adicione --simulate para testar antes de conectar o ESP32 em COMx)
 .\.venv\Scripts\python.exe -m terminal.bench stage A --serial-port COM3
-.\.venv\Scripts\python.exe -m terminal.bench stage B --serial-port COM3 --r1 2200 --r2 3300 --measured-echo-v 3.00 --reference-cm 25
-.\.venv\Scripts\python.exe -m terminal.bench stage C --serial-port COM3 --component both --vcc-measured-v 3.30
-.\.venv\Scripts\python.exe -m terminal.bench stage D --serial-port COM3 --lcd-vdd-v 5.00
+.\.venv\Scripts\python.exe -m terminal.bench stage B --serial-port COM3 --r1 1000 --r2 1300 --measured-echo-v <tensao_medida> --reference-cm 25
+.\.venv\Scripts\python.exe -m terminal.bench stage C --serial-port COM3 --component ir --vcc-measured-v <tensao_medida>
+.\.venv\Scripts\python.exe -m terminal.bench stage D --serial-port COM3 --lcd-vdd-v <tensao_medida>
+# Depois de conferir VCC=3V3, os quatro fios e a imagem no LCD fisico:
+.\.venv\Scripts\python.exe -m terminal.bench stage D --serial-port COM3 --lcd-vdd-v <tensao_medida> --i2c-wiring-confirmed --visual-confirmed
 
 # C. Painel ASCII de diagnóstico em tempo real (indica explicitamente HARDWARE REAL vs SIMULADOR)
 .\.venv\Scripts\python.exe -m terminal.diag --serial-port COM3

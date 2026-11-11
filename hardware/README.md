@@ -1,5 +1,11 @@
 # hardware/ — representacao eletronica canonica do MotionPet
 
+**Configuração escolhida em 10/11/2026: sem LCD.** Use [o desenho sem LCD](wokwi/montagem_atual/diagram_sem_lcd.json) e [o registro da bancada](wokwi/montagem_atual/README.md). A retirada física dos dois cabos do LCD aguarda confirmação. Os guias I²C abaixo registram a montagem anterior com LCD.
+
+**Guia anterior com LCD: [guia final I²C](guia_montagem_final.html), [roteiro escrito](../docs/bench_assembly_guide.md) e `netlist/motionpet_final_i2c.json`.** Regenere com `.\.venv\Scripts\python.exe -m hardware.final_assembly`. O texto abaixo documenta o **CAD paralelo histórico**; seus estágios D/E, desenhos `.fzz`/SVG e Wokwi não representam o LCD com backpack atual. `python -m hardware.build` continua reproduzindo esse CAD histórico, identificado por avisos. O pinout de referência dele foi preservado em `netlist/archive/pinout_parallel.h`.
+
+A revisão 4 usa as **duas protoboards e seus trilhos**, com GND da ESP32 em **6J**, recuperado do teste LCD de 05/11 ([registro](../docs/bench_verified_wiring.md)), com +5V na P1, +3V3 na P2 e negativos unidos. Somente o primeiro grupo de cinco furos de um par lateral por placa é usado. LCD e IR vêm primeiro, sem resistores externos; o HC-SR04 recebe o divisor na P2. O diagnóstico de iluminação mantém F1–F4, remove SDA/SCL e move apenas as pontas de alimentação do LCD para contatos livres dos trilhos da P1; o guia também mostra a restauração de 3V3 antes de reconectar os sinais. Para testes após cada instalação, rode `.\.venv\Scripts\python.exe -m terminal.bench.guide` e abra [127.0.0.1:8766](http://127.0.0.1:8766/).
+
 > **Status oficial: `PENDING_PHYSICAL_VALIDATION`.** Nada aqui foi medido numa bancada. Tudo e consistencia de SOFTWARE
 > (netlist ⇄ firmware ⇄ protoboard ⇄ CAD). Ciclo 5 permanece aberto; nenhum Ciclo 6 foi iniciado.
 
@@ -7,7 +13,7 @@
 ```
 firmware/main/pinout_config.h ─► netlist canonica (JSON) ─► modelo fisico da protoboard ─► diagramas / .fzz / Wokwi / guia ─► validacao cruzada
 ```
-A **unica fonte de verdade** e `hardware/netlist/motionpet.netlist.json` (componentes, furos, fios, redes, tensoes, cores, estados de validacao,
+A fonte do **CAD paralelo historico** e `hardware/netlist/motionpet.netlist.json` (componentes, furos, fios, redes, tensoes, cores, estados de validacao,
 observacoes de seguranca, confirmacoes pendentes). Nada e desenhado a mao: `python -m hardware.build` gera tudo a partir dele.
 
 ## Como ver o Estagio B (prioridade)

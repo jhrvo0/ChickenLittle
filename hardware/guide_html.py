@@ -113,7 +113,7 @@ def hole_ctx(lay: Layout, hole: str, placed: set[str]) -> str:
     """O que esta (ou ficara) na mesma tira da protoboard, para o iniciante achar o furo."""
     if model.rail_sign(hole):
         net = "5 V" if model.rail_sign(hole) == "+" else "GND"
-        return f"{net} · qualquer furo desse trilho serve (use o mais perto)"
+        return f"{net} · use o mesmo segmento do trilho; confira se não há divisão no meio"
     grp = model.hole_group(hole)
     occ = lay.occupied_holes(model.STAGE_ORDER[-1])
     now, later = [], []
@@ -134,13 +134,17 @@ def hole_ctx(lay: Layout, hole: str, placed: set[str]) -> str:
             (now if ref in placed else later).append(phrase)
     if now:
         b, _ = model.board_of(model.parse_hole(hole)[0])
-        return ("coluna " if b == 1 else f"coluna (P{b}) ") + " e ".join(dict.fromkeys(now))
+        num, row = model.parse_hole(hole)
+        _, local = model.board_of(num)
+        side = "A–E" if row in "ABCDE" else "F–J"
+        board = "" if b == 1 else f" da P{b}"
+        return f"mesma linha {local}{board}, lado {side}: " + " e ".join(dict.fromkeys(now))
     col = model.parse_hole(hole)[0]
     b, local = model.board_of(col)
     col = local if b == 1 else f"{local} da P{b}"
     if later:
-        return f"coluna {col}: onde ficará o pino {later[0].split('pino ')[-1] if 'pino' in later[0] else later[0]} (entra depois)"
-    return f"coluna {col} (livre)"
+        return f"linha {col}: onde ficará o pino {later[0].split('pino ')[-1] if 'pino' in later[0] else later[0]} (entra depois)"
+    return f"linha {col} (livre)"
 
 
 def _res_svg(bands: list[str]) -> str:
@@ -179,15 +183,16 @@ def _card_wire(lay: Layout, w: dict, placed: set[str], temp: bool = False) -> st
     saf = f'<div class="m" style="color:var(--bad)">⚠ {_h(w["safety"])}</div>' if w.get("safety") else ""
     label = _h(w.get("label", ""))
     return (f'<div class="card" style="border-left-color:{colr}"><div class="t"><span class="swatch" style="background:{colr}"></span>'
-            f'{"jumper TEMPORÁRIO" if temp else "Fio " + w["id"]} · {cname}</div><div class="m">{label}</div>'
+            f'{"jumper TEMPORÁRIO" if temp else "Fio " + w["id"]} · {cname} no desenho</div><div class="m">{label}</div>'
+            '<div class="m">A cor do seu fio pode ser outra; identifique pelas pontas.</div>'
             f'<div>Ponta 1: <span class="hole">{_h(model.hole_label(a))}</span> <span class="m">{_h(hole_ctx(lay, a, placed))}</span></div>'
             f'<div>Ponta 2: <span class="hole">{_h(model.hole_label(b))}</span> <span class="m">{_h(hole_ctx(lay, b, placed))}</span></div>{saf}</div>')
 
 
 def _card_comp(lay: Layout, c: dict) -> str:
     if c["type"] == "esp32":
-        return ('<div class="card"><div class="t">ESP32 DevKit</div><div class="m">Atravessando o canal central: pino 1 de cada lado na coluna '
-                f'<b>{c["placement"]["col0"]}</b> a 19; USB-C para a <b>esquerda</b>, para fora da placa. Fileira I (de cima) = lado 3V3…5V, com o <b>5V na coluna 1</b>; fileira B (de baixo) = lado GND…CLK, com o <b>CLK na coluna 1</b>. '
+        return ('<div class="card"><div class="t">ESP32 DevKit · perfil assumido</div><div class="m">Atravessando o canal central, das colunas '
+                f'<b>{c["placement"]["col0"]}</b> a 19; USB para a <b>esquerda</b>, para fora da placa. Fileira I (de cima): <b>5V na coluna 1 e 3V3 na 19</b>; fileira B (de baixo): <b>CLK na coluna 1 e GND na 19</b>. '
                 'Só as fileiras <b>A</b> e <b>J</b> ficam livres.</div></div>')
     note = f'<div class="m">{_h(c["note"])}</div>' if c.get("note") else ""
     if c.get("offboard"):
@@ -200,7 +205,7 @@ def _card_comp(lay: Layout, c: dict) -> str:
         nc = f'<div class="m">Sem fio: {", ".join(unused)}.</div>' if unused else ""
         return (f'<div class="card"><div class="t">{c["ref"]} · {_h(c["label"])}</div>'
                 '<div class="m">Fora da protoboard: um jumper <b>fêmea–macho</b> por pino (fêmea no pino do módulo, macho no furo). '
-                'Num trilho, qualquer furo serve.</div>'
+                'No trilho, use o mesmo segmento ligado à alimentação: o trilho pode ser dividido.</div>'
                 f'<table class="p"><tr><th>Pino</th><th>Fio</th><th>Vai em</th></tr>{rows}</table>{nc}{note}</div>')
     rows = "".join(f'<tr><td><b>{n}</b></td><td><span class="hole">{_h(model.hole_label(h))}</span></td></tr>' for n, h in c["pins"].items()
                    if not (c["type"] == "lcd2004a" and n in ("D0", "D1", "D2", "D3")))
@@ -240,7 +245,8 @@ def build_slides(lay: Layout):
             step_of[s["marker"]] = idx
             until_of[s["marker"]] = idx
     scene = Scene(stage=model.STAGE_ORDER[-1], bare=True, show_tags=True, tag_scale=1.4, highlight_new=False, step_of=step_of, until_of=until_of,
-                  temp_wires=[dict(t) for t in temp.values()], markers=[dict(m) for m in markers.values()])
+                  temp_wires=[dict(t) for t in temp.values() if t["id"] in step_of],
+                  markers=[dict(m) for m in markers.values() if m["id"] in step_of])
     return slides, index, step_of, until_of, scene, temp, markers
 
 
@@ -263,7 +269,7 @@ def _focus_rect(boxes: list[tuple[float, float, float, float]], full: tuple[floa
 
 MATERIALS = [
     ("ESP32 DevKit (ESP-WROOM-32, USB-C)", "1", "Conte os pinos e meça a distância entre as fileiras (confirmação C01)."),
-    ("Meia-protoboard 30 colunas (A–J × 1–30) com trilhos + e −", "2", "Encaixadas pela ponta: P1 (ESP32) e P2 (LCD). Só os trilhos de BAIXO são usados: vermelho (+) = 5 V, azul (−) = GND."),
+    ("Meia-protoboard 30 linhas (A–J × 1–30) com trilhos + e −", "1 + 1", "Para o HC-SR04, use P1; P2 só é necessária para o LCD. Trilho +: 5 V. Trilho −: GND. Confira se cada trilho é contínuo."),
     ("Cabo USB de DADOS", "1", "Cabo só de carga não cria a porta COM."),
     ("HC-SR04", "1", "Estágio B, fora da placa."),
     ("Módulo TCRT5000 (LM393, 4 pinos)", "1", "Estágio C, fora da placa."),
@@ -272,7 +278,7 @@ MATERIALS = [
     ("Resistor 300 Ω (dourado, marrom, preto, laranja — lendo da faixa dourada)", "2", "R3 do divisor; R5 do backlight do LCD."),
     ("Jumpers macho–macho", "~17", "Os 6 sinais do LCD (W12–W17) e o W3 são os longos (15–20 cm); o resto é curto."),
     ("Jumpers fêmea–macho", "7", "4 para o HC-SR04 e 3 para o TCRT5000."),
-    ("Multímetro", "1", "Resistência, continuidade e tensão DC."),
+    ("Multímetro e instrumento para pulsos", "se disponíveis", "Permitem verificar ligações e tensão; sem medições, a segurança elétrica permanece pendente."),
 ]
 
 
@@ -293,10 +299,12 @@ def build_guide(lay: Layout, figs=None) -> str:
             conf = "".join(f"<li><b>{c['id']}</b> — {_h(c['text'])}</li>" for c in lay.raw["confirmations"] if c["blocks"] in ("B",))
             d["html"] = (f'<div class="kicker">{_h(proj["name"])} · Ciclo {proj["cycle"]} · firmware {_h(proj["firmware_version"])}</div>'
                          '<h1 style="font-size:40px">Montagem em protoboard, passo a passo</h1>'
-                         '<p class="big">Cada slide mostra <b>o que adicionar</b> e <b>onde encaixar</b>. A protoboard vai crescendo na tela; '
-                         'o item novo pisca em rosa. Use as setas do teclado (← →) ou os botões.</p>'
-                         '<div class="warn">Status oficial: PENDING_PHYSICAL_VALIDATION — nada aqui foi medido numa bancada. '
-                         'Monte com a USB DESCONECTADA, meça com o multímetro e só então energize. A serigrafia da SUA placa sempre prevalece sobre o desenho.</div>'
+                         '<p class="big">Para continuar sua montagem, clique em <b>B · HC-SR04 ★</b> no topo. Cada passo mostra o que conferir e onde conectar.</p>'
+                         '<div class="card"><div class="t">No seu sensor: siga as letras, não só as cores</div>'
+                         '<div class="m">ECHO = azul · GND = branco · TRIG e VCC = dois fios vermelhos. Confira cada inscrição no sensor.</div></div>'
+                         f'<div class="sec">O que já foi verificado</div><p class="m">{_h(proj.get("bench_observation", ""))}</p>'
+                         '<div class="warn">Status: PENDING_PHYSICAL_VALIDATION — a montagem e os periféricos ainda não foram validados. '
+                         'Desconecte a USB para montar. Confira a serigrafia e as medidas antes de seguir o desenho; meça o pico real do ECHO antes de conectar o GPIO34.</div>'
                          '<div class="sec">Confirme antes (bloqueiam o Estágio B)</div><ul class="checks">' + conf + '</ul>'
                          f'<p class="m">Dica: tecla <b>A</b> mostra a protoboard inteira; <b>F</b> tela cheia. Estágio B (★) é a prioridade.</p>')
         elif kind == "materials":
@@ -356,7 +364,7 @@ def build_guide(lay: Layout, figs=None) -> str:
     payload = json.dumps(out_slides, ensure_ascii=False).replace("</", "<\\/")
     return ("<!doctype html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
             f"<title>MotionPet — montagem em slides</title><style>{CSS}</style></head><body>"
-            f'<div class="stagewrap"><div class="top"><span class="brand">MotionPet</span><div class="chips">{chips}</div></div><div class="prog"><i id="bar"></i></div></div>'
+            f'<div class="stagewrap"><div style="padding:10px;background:#fff0cc;color:#643d00;font-weight:700">CAD paralelo histórico — D/E não correspondem ao LCD I²C atual. <a href="../guia_montagem_final.html">Abrir montagem final I²C</a></div><div class="top"><span class="brand">MotionPet · histórico</span><div class="chips">{chips}</div></div><div class="prog"><i id="bar"></i></div></div>'
             f'<main><div id="figbox"><div class="figtools"><button onclick="showAll=!showAll;apply(true)">ver tudo (A)</button></div>{svg}</div>'
             '<div class="panel" id="panel"></div></main>'
             '<div class="nav"><button class="sec2" id="prev" onclick="go(k-1)">◀ Voltar</button><button id="next" onclick="go(k+1)">Avançar ▶</button>'

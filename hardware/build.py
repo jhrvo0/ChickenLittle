@@ -50,20 +50,20 @@ def build(out_dir: Path, png: bool = False, wokwi_dir: Path | None = None) -> di
         results[st] = {"errors": len(model.errors(issues)), "warnings": sum(i.level == "WARN" for i in issues)}
         if model.errors(issues):
             raise SystemExit(f"Estagio {st}: validacao falhou: " + "; ".join(map(str, model.errors(issues))))
-        title = f"MotionPet - Estagio {st} - {lay.raw['stages'][st]['title']}"
+        title = f"MotionPet - CAD paralelo historico - Estagio {st} - {lay.raw['stages'][st]['title']}"
         svg, _ = render_scene(lay, Scene(stage=st, title=title, subtitle=lay.raw["stages"][st]["goal"]))
         p = out_dir / f"protoboard_estagio{st}.svg"
-        p.write_text(svg, encoding="utf-8"); files.append(p)
+        p.write_text(svg, encoding="utf-8", newline="\n"); files.append(p)
         p = out_dir / f"esquematico_estagio{st}.svg"
-        p.write_text(render_schematic(lay, st, f"MotionPet - Esquematico eletrico - Estagio {st}"), encoding="utf-8"); files.append(p)
+        p.write_text(render_schematic(lay, st, f"MotionPet - CAD paralelo historico - Estagio {st}"), encoding="utf-8", newline="\n"); files.append(p)
         p = out_dir / f"MotionPet_estagio{st}.fzz"
         export_fz.write_fzz(lay, st, str(p)); files.append(p)
         p = out_dir / f"fios_estagio{st}.csv"
-        p.write_text(reports.to_csv(reports.wire_rows(lay, st)), encoding="utf-8"); files.append(p)
+        p.write_text(reports.to_csv(reports.wire_rows(lay, st)), encoding="utf-8", newline="\n"); files.append(p)
         p = out_dir / f"furos_estagio{st}.csv"
-        p.write_text(reports.to_csv(reports.hole_map_rows(lay, st)), encoding="utf-8"); files.append(p)
+        p.write_text(reports.to_csv(reports.hole_map_rows(lay, st)), encoding="utf-8", newline="\n"); files.append(p)
         p = out_dir / f"estagio{st}.md"
-        p.write_text(reports.stage_markdown(lay, st), encoding="utf-8"); files.append(p)
+        p.write_text(reports.stage_markdown(lay, st), encoding="utf-8", newline="\n"); files.append(p)
     # pecas genericas (importaveis no Fritzing: Arquivo > Importar) + .fzp soltos para o indice do MCP
     import zipfile
     from . import fz_parts
@@ -81,13 +81,13 @@ def build(out_dir: Path, png: bool = False, wokwi_dir: Path | None = None) -> di
         files.append(zf)
     ts, _ = render_scene(lay, divider_test_scene(lay))
     p = out_dir / "protoboard_estagioB_passo5_ensaio_divisor.svg"
-    p.write_text(ts, encoding="utf-8"); files.append(p)
+    p.write_text(ts, encoding="utf-8", newline="\n"); files.append(p)
     figs = {"B": [("Passo 5 — ensaio estatico do divisor (configuracao exata do teste)", ts)]}
     p = out_dir / "guia_montagem.html"
-    p.write_text(guide_html.build_guide(lay, figs), encoding="utf-8"); files.append(p)
+    p.write_text(guide_html.build_guide(lay, figs), encoding="utf-8", newline="\n"); files.append(p)
     p = out_dir / "netlist_resumo.md"
-    p.write_text("# Netlist canonica (resumo gerado)\n\n" + "\n".join(
-        f"## Estagio {st}\n\n" + reports.nets_md(lay, st) for st in model.STAGE_ORDER), encoding="utf-8"); files.append(p)
+    p.write_text("# CAD paralelo historico (resumo gerado)\n\nPara a montagem atual com LCD I2C, use [o guia final](../guia_montagem_final.html).\n\n" + "\n".join(
+        f"## Estagio {st}\n\n" + reports.nets_md(lay, st) for st in model.STAGE_ORDER), encoding="utf-8", newline="\n"); files.append(p)
     wk = wokwi_dir or (ROOT / "wokwi")
     for name in export_wokwi.write_all(lay, wk):
         files.append(wk / name)
@@ -100,9 +100,9 @@ def build(out_dir: Path, png: bool = False, wokwi_dir: Path | None = None) -> di
     def key(f: Path) -> str:
         if f.parent == out_dir:
             return f.name
-        return "parts/" + f.name if f.parent.name == "parts" else "wokwi/" + str(f.relative_to(wk))
+        return "parts/" + f.name if f.parent.name == "parts" else "wokwi/" + f.relative_to(wk).as_posix()
     manifest = {"validation": results, "files": {key(f): sha(f) for f in sorted(set(files)) if f.suffix != ".png"}}
-    (out_dir / "MANIFEST.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False), encoding="utf-8")
+    (out_dir / "MANIFEST.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")
     return manifest
 
 

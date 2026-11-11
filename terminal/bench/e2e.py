@@ -19,6 +19,7 @@ from terminal.communication.protocol import (
     CommandType,
     GestureEventPayload,
     GestureType,
+    LcdFramePayload,
     MessageType,
     PetCommandPayload,
     ProtocolCodec,
@@ -46,19 +47,25 @@ class E2EValidationReport:
     generated_at_iso: str
     validation_origin: str  # "PHYSICAL_ESP32" | "SIMULATION"
     classifier_kind: str
-    checks: dict[str, bool]
+    # None significa que o critério não foi verificado, não que tenha falhado.
+    checks: dict[str, bool | None]
     all_passed: bool
     matches_completed: int
     best_distance_m: float
-    coins_after_match: int
-    xp_after_match: int
-    mean_e2e_latency_ms: float
-    p95_e2e_latency_ms: float
-    duplicate_events_blocked: bool
-    involuntary_noise_rejected: bool
-    lcd_terminal_synced: bool
-    persistence_verified: bool
+    coins_after_match: int | None
+    xp_after_match: int | None
+    mean_e2e_latency_ms: float | None
+    p95_e2e_latency_ms: float | None
+    duplicate_events_blocked: bool | None
+    involuntary_noise_rejected: bool | None
+    lcd_terminal_synced: bool | None
+    persistence_verified: bool | None
     problems: tuple[str, ...]
+    # Estes tempos medem apenas processamento local, não a latência sensor-resposta.
+    mean_processing_ms: float | None = None
+    p95_processing_ms: float | None = None
+    processing_time_scope: str | None = None
+    observations: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -95,6 +102,8 @@ def run_pet_launch_e2e_validation(
             report_path=report_path,
             now_iso=now_iso,
         )
+    if not simulate:
+        raise ValueError("Informe uma porta serial para executar a validação física.")
 
     codec = ProtocolCodec()
     lcd_renderer = Lcd20x4Renderer()
@@ -309,13 +318,16 @@ def run_pet_launch_e2e_validation(
         best_distance_m=round(reloaded.best_launch_distance_m if persistence_ok else 0.0, 2),
         coins_after_match=int(reloaded.coins if persistence_ok else 0),
         xp_after_match=int(reloaded.xp if persistence_ok else 0),
-        mean_e2e_latency_ms=mean_lat,
-        p95_e2e_latency_ms=p95_lat,
+        mean_e2e_latency_ms=None,
+        p95_e2e_latency_ms=None,
         duplicate_events_blocked=dedup_ok,
         involuntary_noise_rejected=involuntary_rejected,
         lcd_terminal_synced=lcd_terminal_synced,
         persistence_verified=persistence_ok,
         problems=problems,
+        mean_processing_ms=mean_lat if latencies_ms else None,
+        p95_processing_ms=p95_lat if latencies_ms else None,
+        processing_time_scope="passo do simulador e processamento local do evento no host",
     )
     _save_e2e_report(rep, report_path)
     return rep
@@ -379,18 +391,21 @@ def _run_physical_serial_e2e(
     finally:
         ep.close()
 
+    # A presença de um evento ou quadro não demonstra o efeito correspondente.
+    # Persistência exigiria salvar, reiniciar e reler; LCD exige comparação visual
+    # com o display físico; rejeição/cooldown exigem estímulos de referência.
     checks = {
-        "hold_charging_force": ("HOLD" in seen_gestures),
-        "approach_select_confirm_and_launch": ("APPROACH" in seen_gestures),
-        "retreat_canceling": ("RETREAT" in seen_gestures),
-        "involuntary_movement_rejection": True,
-        "cooldown_and_duplicate_prevention": (duplicates_seen == 0),
-        "lcd_and_terminal_sync": lcd_seen,
-        "complete_match_loop": (game.matches_completed >= 1),
-        "progress_persistence": (game.matches_completed >= 1),
+        "hold_charging_force": None,
+        "approach_select_confirm_and_launch": None,
+        "retreat_canceling": None,
+        "involuntary_movement_rejection": None,
+        "cooldown_and_duplicate_prevention": None,
+        "lcd_and_terminal_sync": None,
+        "complete_match_loop": None,
+        "progress_persistence": None,
     }
     problems = tuple(
-        f"Pendente/falhou na sessao fisica ({serial_port}): {k}"
+        f"Nao verificado na sessao fisica ({serial_port}): {k}"
         for k, ok in checks.items()
         if not ok
     )
@@ -405,15 +420,24 @@ def _run_physical_serial_e2e(
         all_passed=all(checks.values()),
         matches_completed=game.matches_completed,
         best_distance_m=round(game.best_distance_m, 2),
-        coins_after_match=int(pet_state.coins),
-        xp_after_match=int(pet_state.xp),
-        mean_e2e_latency_ms=mean_lat,
-        p95_e2e_latency_ms=p95_lat,
-        duplicate_events_blocked=(duplicates_seen == 0),
-        involuntary_noise_rejected=True,
-        lcd_terminal_synced=lcd_seen,
-        persistence_verified=(game.matches_completed >= 1),
+        # O estado local padrão não prova os valores persistidos no ESP32.
+        coins_after_match=None,
+        xp_after_match=None,
+        mean_e2e_latency_ms=None,
+        p95_e2e_latency_ms=None,
+        duplicate_events_blocked=None,
+        involuntary_noise_rejected=None,
+        lcd_terminal_synced=None,
+        persistence_verified=None,
         problems=problems,
+        mean_processing_ms=mean_lat if latencies_ms else None,
+        p95_processing_ms=p95_lat if latencies_ms else None,
+        processing_time_scope="decodificacao e processamento do evento no host apos recepcao serial",
+        observations={
+            "gestures_received": sorted(seen_gestures),
+            "events_same_gesture_within_350ms": duplicates_seen,
+            "valid_lcd_frame_received": lcd_seen,
+        },
     )
     _save_e2e_report(rep, report_path)
     return rep

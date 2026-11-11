@@ -40,8 +40,6 @@ from terminal.communication.transport import (
     SerialEndpoint,
     create_virtual_serial_pair,
 )
-from terminal.pet.state import PetState
-from terminal.renderer.lcd20x4 import Lcd20x4Renderer
 
 DEFAULT_BENCH_LOG_PATH = Path("data/reports/bench_validation_log.json")
 
@@ -361,8 +359,14 @@ def query_device_diag(
     t0 = time.perf_counter()
     endpoint.write_line("DIAG")
     deadline = time.monotonic() + timeout_sec
+    next_request = time.monotonic() + 0.5
 
     while time.monotonic() <= deadline:
+        # Abrir a USB pode reiniciar a ESP32 e perder o primeiro comando durante
+        # o boot. Reenvie a consulta idempotente dentro do mesmo prazo limitado.
+        if time.monotonic() >= next_request:
+            endpoint.write_line("DIAG")
+            next_request = time.monotonic() + 0.5
         if step_callback is not None:
             step_callback()
         lines = endpoint.read_all_lines()
@@ -641,12 +645,12 @@ def format_safety_and_wiring_checklist() -> str:
             "",
             "2. REGRAS CRITICAS DE SEGURANCA ELETRICA (LEIA ANTES DE LIGAR O CABO USB!):",
             "  [ ] REGRA 1 (DIVISOR ECHO <= 3,30 V): O ESP32 NAO tolera 5 V e 3,5 V NAO E SEGURO!",
-            "      Monte R1 = 2,2 kOhm (entre ECHO e o no) + R2 = 3,3 kOhm (entre o no e GND).",
-            "      Meca o no com multimetro ANTES de ligar ao GPIO34: esperado ~3,00 V (max <= 3,30 V).",
-            "  [ ] REGRA 2 (LCD RW FIXO EM GND): Ligue o pino 5 (RW) do LCD 2004A direto ao GND.",
-            "      Confirme continuidade 0 Ohm entre pino 5 do LCD e GND (impede retorno de 5 V).",
-            "  [ ] REGRA 3 (TCRT5000 E POTENCIOMETRO EM 3,3 V): Alimente AMBOS estritamente no pino",
-            "      3V3 do ESP32 (NUNCA em 5V/VIN), protegendo GPIO35, GPIO39 e GPIO36 (ADC1).",
+            "      Monte R1 = 1 kOhm (ECHO -> no) e R2 = 1 kOhm + 300 Ohm em serie (no -> GND).",
+            "      Meça o divisor estatico antes do GPIO34: ~2,83 V com entrada de 5 V. Isso nao mede o pico real.",
+            "  [ ] REGRA 2 (LCD I2C): VCC=3V3, GND comum, SDA=GPIO21, SCL=GPIO22.",
+            "      Sem conversor, nunca alimente o backpack em 5 V. Use so os 4 pinos do adaptador.",
+            "  [ ] REGRA 3 (TCRT5000 EM 3,3 V): Alimente pelo 3V3 do ESP32, NUNCA em 5V/VIN.",
+            "      O potenciometro de entrada nao faz parte da montagem atual.",
             "  [ ] REGRA 4 (TERRA COMUM): Interligue todos os GNDs em um unico barramento comum.",
             "  [ ] REGRA 5 (TESTE ANTI-CURTO): Com o USB desconectado, meca resistencia entre 5V-GND",
             "      e entre 3V3-GND; nenhum deles pode apitar curto-circuito (0 Ohm).",
@@ -766,7 +770,7 @@ def run_stage_a(
         details={"diag": diag.to_dict(), "telemetry": stream.to_dict()},
         problems=tuple(problems_list),
         next_manual_action=(
-            "Desconectar o USB antes de montar o HC-SR04 e o divisor 2,2k/3,3k da Etapa B."
+            "Desconectar o USB antes de montar o HC-SR04 e o divisor 1k/(1k+300 Ohm) da Etapa B."
             if passed
             else "Corrigir comunicacao serial/firmware antes de conectar qualquer periferico."
         ),
@@ -807,7 +811,7 @@ def run_stage_b(
             details={"divider": divider.to_dict()},
             problems=divider.reasons,
             next_manual_action=(
-                "NUNCA conecte o ECHO ao GPIO34! Substitua por R1=2,2 kOhm e R2=3,3 kOhm e "
+                "NUNCA conecte o ECHO ao GPIO34! Confira R1=1 kOhm e R2=1 kOhm + 300 Ohm em serie e "
                 "confirme tensao <= 3,30 V no multimetro."
             ),
         )
@@ -893,7 +897,7 @@ def run_stage_b(
         details={"divider": divider.to_dict(), "diag": diag.to_dict(), "telemetry": stream.to_dict()},
         problems=tuple(probs),
         next_manual_action=(
-            "HC-SR04 validado! Desconecte o USB antes de adicionar TCRT5000/Potenciometro (3,3 V) na Etapa C."
+            "HC-SR04 validado! Desconecte o USB antes de adicionar o TCRT5000 (3,3 V) na Etapa C."
             if passed
             else "Revisar fiação TRIG=GPIO5, divisor ECHO->GPIO34 e alimentacao 5 V do HC-SR04."
         ),
@@ -906,7 +910,7 @@ def run_stage_c(
     serial_port: str | None = None,
     simulate: bool = False,
     baudrate: int = 115200,
-    component: str = "both",  # "ir" | "pot" | "both"
+    component: str = "ir",  # "ir" | "pot" | "both"; potenciometro desativado na montagem atual
     vcc_measured_v: float | None = None,
     log_path: str | Path = DEFAULT_BENCH_LOG_PATH,
 ) -> StageValidationResult:
@@ -916,7 +920,7 @@ def run_stage_c(
     if comp not in ("ir", "pot", "both"):
         raise ValueError("Parametro 'component' invalido na Etapa C (use 'ir', 'pot' ou 'both').")
 
-    if vcc_measured_v is not None and (vcc_measured_v > 3.45 or vcc_measured_v < 3.05):
+    if vcc_measured_v is not None and (not math.isfinite(vcc_measured_v) or vcc_measured_v > 3.45 or vcc_measured_v < 3.05):
         msg = (
             f"BLOQUEIO ELETRICO NA ETAPA C: Tensao de alimentacao medida ({vcc_measured_v:.2f} V) "
             "fora da faixa segura de 3,3 V (3,05..3,45 V)! TCRT5000 e potenciometro NUNCA "
@@ -948,6 +952,16 @@ def run_stage_c(
         record_bench_log_entry("STAGE_C", "PHYSICAL_ESP32", False, res.to_dict(), res.problems, log_path)
         return res
 
+    if not simulate and vcc_measured_v is None:
+        msg = "Medicao da alimentacao 3V3 ausente: informe --vcc-measured-v antes da validacao fisica."
+        res = StageValidationResult(
+            stage=f"C({comp.upper()})", validation_origin="PHYSICAL_ESP32", passed=False,
+            halted_for_electrical_safety=True, summary=msg, problems=(msg,),
+            next_manual_action="Medir a alimentacao do modulo com multimetro e informar o valor medido.",
+        )
+        record_bench_log_entry("STAGE_C", "PHYSICAL_ESP32", False, res.to_dict(), res.problems, log_path)
+        return res
+
     ep, step_cb, actual_origin, cleanup = _open_bench_session(serial_port, simulate, baudrate)
     try:
         # Se estiver validando apenas o potenciômetro primeiro, desativa IR temporariamente
@@ -961,7 +975,7 @@ def run_stage_c(
 
         stream = inspect_telemetry_stream(
             ep,
-            duration_sec=2.5,
+            duration_sec=2.5 if simulate else 8.0,
             expected_period_ms=70,
             validation_origin=actual_origin,
             step_callback=step_cb,
@@ -974,6 +988,12 @@ def run_stage_c(
     if comp in ("pot", "both"):
         if stream.pot_min is None or stream.pot_max is None or not (0.0 <= stream.pot_min <= 1.0 and 0.0 <= stream.pot_max <= 1.0):
             probs.append("Leituras 'pot_norm' ausentes ou fora do intervalo normalizado [0.0, 1.0].")
+        elif not simulate and (stream.pot_span is None or stream.pot_span < 0.10):
+            probs.append("Nao houve variacao suficiente do potenciometro. Gire-o durante a captura; o firmware atual deixa esse canal desativado por padrao.")
+    if not simulate and comp in ("ir", "both") and (
+        stream.ir_true_count == 0 or stream.ir_false_count == 0 or stream.ir_transitions == 0
+    ):
+        probs.append("IR sem transicao observada: aproxime e afaste um objeto durante a captura e confira o sinal DO.")
     if comp == "pot" and stream.ir_true_count > 0:
         probs.append("Canal IR permaneceu ativo durante teste isolado do potenciometro ('IR OFF').")
 
@@ -992,9 +1012,9 @@ def run_stage_c(
         details={"component": comp, "telemetry": stream.to_dict()},
         problems=tuple(probs),
         next_manual_action=(
-            "Perifericos 3,3 V validados! Prossiga para o LCD 2004A (RW=GND) na Etapa D."
+            "Telemetria do componente respondeu durante a captura. Prossiga para a verificacao manual do LCD na Etapa D."
             if passed
-            else "Verificar alimentacao 3V3, DO=GPIO35 e cursor do potenciometro em GPIO36."
+            else "Confira 3V3 e DO=GPIO35; estimule o IR durante a captura. Se usar potenciometro, habilite seu canal e gire-o."
         ),
     )
     record_bench_log_entry("STAGE_C", actual_origin, passed, res.to_dict(), res.problems, log_path)
@@ -1007,11 +1027,17 @@ def run_stage_d(
     baudrate: int = 115200,
     rw_grounded: bool = True,
     lcd_vdd_v: float | None = None,
+    rw_confirmed: bool = False,
+    visual_confirmed: bool = False,
     log_path: str | Path = DEFAULT_BENCH_LOG_PATH,
+    lcd_interface: str = "i2c",
+    i2c_wiring_confirmed: bool = False,
 ) -> StageValidationResult:
-    """Etapa D — LCD 2004A 20×4: segurança RW=GND, alimentação e comparação visual com simulador."""
+    """Etapa D: quadro serial observado e confirmações físicas fornecidas pelo operador."""
     origin_tag = "SIMULATION" if simulate else "PHYSICAL_ESP32"
-    if not rw_grounded:
+    if lcd_interface not in ("i2c", "parallel"):
+        raise ValueError("lcd_interface deve ser i2c ou parallel")
+    if lcd_interface == "parallel" and not rw_grounded:
         msg = (
             "BLOQUEIO ELETRICO NA ETAPA D: O pino 5 (RW) do LCD 2004A NAO esta aterrado em GND! "
             "Risco critico de injecao de 5 V nos barramentos GPIO21, 22, 23 e 27."
@@ -1028,10 +1054,12 @@ def run_stage_d(
         record_bench_log_entry("STAGE_D", origin_tag, False, res.to_dict(), res.problems, log_path)
         return res
 
-    if lcd_vdd_v is not None and (lcd_vdd_v < 4.10 or lcd_vdd_v > 5.35):
+    vmin, vmax = (3.0, 3.35) if lcd_interface == "i2c" else (4.75, 5.25)
+    if lcd_vdd_v is not None and (not math.isfinite(lcd_vdd_v) or not vmin <= lcd_vdd_v <= vmax):
         msg = (
-            f"BLOQUEIO ELETRICO NA ETAPA D: VDD do LCD fora da faixa operacional ({lcd_vdd_v:.2f} V; "
-            "esperado 4,75..5,25 V direto ou ~4,3 V com diodo 1N4148 de contingencia)."
+            f"BLOQUEIO ELETRICO NA ETAPA D: VDD informado fora da faixa de verificacao "
+            f"do perfil {lcd_interface} ({lcd_vdd_v:.2f} V; {vmin:.2f}..{vmax:.2f} V). "
+            "No perfil I2C direto, VCC deve vir do 3V3, nunca de 5 V."
         )
         res = StageValidationResult(
             stage="D",
@@ -1040,7 +1068,7 @@ def run_stage_d(
             halted_for_electrical_safety=True,
             summary=msg,
             problems=(msg,),
-            next_manual_action="Revisar alimentacao de 5 V (pino 2 VDD) e GND (pino 1 VSS) do LCD.",
+            next_manual_action="Revisar VCC e GND conforme o perfil do LCD e o guia de montagem atual.",
         )
         record_bench_log_entry("STAGE_D", origin_tag, False, res.to_dict(), res.problems, log_path)
         return res
@@ -1054,13 +1082,10 @@ def run_stage_d(
             halted_for_electrical_safety=False,
             summary=msg,
             problems=(msg,),
-            next_manual_action="Conectar LCD com RW=GND e executar Etapa D com --serial-port COMx.",
+            next_manual_action="Conectar LCD conforme o guia atual e executar Etapa D com --serial-port COMx.",
         )
         record_bench_log_entry("STAGE_D", "PHYSICAL_ESP32", False, res.to_dict(), res.problems, log_path)
         return res
-
-    ref_renderer = Lcd20x4Renderer()
-    ref_frame = ref_renderer.render(PetState(), frame_idx=0)
 
     ep, step_cb, actual_origin, cleanup = _open_bench_session(serial_port, simulate, baudrate)
     try:
@@ -1077,19 +1102,29 @@ def run_stage_d(
         cleanup()
 
     probs = list(stream.problems)
-    if diag.lcd_frames <= 0 and stream.lcd_frames_count <= 0:
-        probs.append("Dispositivo nao reportou renderizacao ativa de quadros 20x4 do LCD.")
-
-    device_lines = stream.last_lcd_lines if stream.last_lcd_lines else tuple(ref_frame.lines)
-    geometry_ok = len(device_lines) == 4 and all(len(ln) == 20 for ln in device_lines)
-    if not geometry_ok:
+    device_lines = stream.last_lcd_lines
+    geometry_ok = stream.lcd_frames_count > 0 and len(device_lines) == 4 and all(len(ln) == 20 for ln in device_lines)
+    if stream.lcd_frames_count <= 0:
+        probs.append("Nenhum quadro LCD foi recebido pela serial; o contador de renderizacao nao comprova o conteudo.")
+    elif not geometry_ok:
         probs.append("Geometria de quadro LCD invalida (esperadas exatas 4 linhas x 20 colunas).")
+
+    if not simulate:
+        if lcd_interface == "parallel" and not rw_confirmed:
+            probs.append("Continuidade de RW ate GND nao confirmada pelo operador.")
+        if lcd_interface == "i2c" and not i2c_wiring_confirmed:
+            probs.append("VCC=3V3, GND comum, SDA=21 e SCL=22 nao confirmados pelo operador.")
+        if lcd_vdd_v is None:
+            probs.append("Tensao VDD do LCD nao informada pelo operador.")
+        if not visual_confirmed:
+            probs.append("Comparacao visual do LCD fisico com o quadro serial nao confirmada pelo operador.")
 
     passed = len(probs) == 0 and geometry_ok
     summary = (
         f"Etapa D ({actual_origin}) {'APROVADA' if passed else 'REPROVADA'}: "
-        f"RW=GND confirmado, lcd_f={diag.lcd_frames}, geometria_20x4={geometry_ok}. "
-        "Compare visualmente as 4 linhas fisicas do LCD com o espelho de referencia."
+        f"lcd_f={diag.lcd_frames}, quadro_serial_20x4={geometry_ok}. "
+        + ("Confirmacoes eletricas e visuais sao informadas pelo operador."
+           if not simulate else "Simulacao nao verifica o LCD fisico.")
     )
     res = StageValidationResult(
         stage="D",
@@ -1099,14 +1134,20 @@ def run_stage_d(
         summary=summary,
         details={
             "diag": diag.to_dict(),
-            "reference_lcd_20x4": list(ref_frame.lines),
+            "lcd_interface": lcd_interface,
             "device_lcd_20x4": list(device_lines),
+            "rw_confirmed_by_operator": bool(rw_confirmed) if not simulate and lcd_interface == "parallel" else None,
+            "i2c_wiring_confirmed_by_operator": bool(i2c_wiring_confirmed) if not simulate and lcd_interface == "i2c" else None,
+            "lcd_vdd_v_reported": lcd_vdd_v if not simulate else None,
+            "visual_confirmed_by_operator": bool(visual_confirmed) if not simulate else None,
         },
         problems=tuple(probs),
         next_manual_action=(
-            "Bancada completa (Etapas A-D) verificada! Inicie a coleta real guiada com 'python -m ml.collection'."
-            if passed
-            else "Ajustar contraste V0 (1k..2,2k p/ GND), backlight (100-220 Ohm) ou diodo 1N4148 em VDD."
+            "Etapa D simulada; realize as verificacoes fisicas antes de prosseguir."
+            if passed and simulate else
+            "Etapa D concluida conforme os dados e confirmacoes fornecidos pelo operador."
+            if passed else
+            "Confira VCC, GND, sinais e o quadro recebido; compare-o com o LCD fisico e informe as confirmacoes."
         ),
     )
     record_bench_log_entry("STAGE_D", actual_origin, passed, res.to_dict(), res.problems, log_path)

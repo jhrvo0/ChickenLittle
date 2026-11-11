@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "author": "MotionPet - base vazia para montar",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-text",
+      "id": "title",
+      "top": -105,
+      "left": -220,
+      "attrs": {
+        "text": "MOTIONPET - BASE PARA MONTAR"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "espnote",
+      "top": -65,
+      "left": -220,
+      "attrs": {
+        "text": "ESP32 38 pinos aproximado - separado da P1"
+      }
+    },
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": -185,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "p1label",
+      "top": 0,
+      "left": 5,
+      "attrs": {
+        "text": "P1 - lado J embaixo"
+      }
+    },
+    {
+      "type": "wokwi-breadboard-half",
+      "id": "p1",
+      "top": 40,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "hc",
+      "top": -30,
+      "left": 405,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "sensorlabel",
+      "top": 150,
+      "left": 445,
+      "attrs": {
+        "text": "Marcador TCRT: modulo LDR, nao sensor real"
+      }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "tcrt_marcador",
+      "top": 200,
+      "left": 480,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "p2label",
+      "top": 320,
+      "left": 5,
+      "attrs": {
+        "text": "P2 - lado J embaixo"
+      }
+    },
+    {
+      "type": "wokwi-breadboard-half",
+      "id": "p2",
+      "top": 360,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 610,
+      "left": 0,
+      "attrs": {
+        "value": "1000"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 640,
+      "left": 0,
+      "attrs": {
+        "value": "1000"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": 670,
+      "left": 0,
+      "attrs": {
+        "value": "300"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lcdlabel",
+      "top": 350,
+      "left": 445,
+      "attrs": {
+        "text": "LCD 2004 I2C"
+      }
+    },
+    {
+      "type": "wokwi-lcd2004",
+      "id": "lcd",
+      "top": 385,
+      "left": 450,
+      "attrs": {
+        "pins": "i2c"
+      }
+    }
+  ],
+  "connections": [],
+  "dependencies": {}
+}

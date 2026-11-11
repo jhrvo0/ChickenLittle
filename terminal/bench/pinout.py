@@ -11,8 +11,9 @@ ESP32_GPIO_MAX_SAFE_V = 3.30
 ESP32_GPIO_RECOMMENDED_CEILING_V = 3.20
 ESP32_GPIO_MIN_RELIABLE_VIH_V = 2.50
 
-PREFERRED_ECHO_R1_OHM = 2200.0
-PREFERRED_ECHO_R2_OHM = 3300.0
+# Montagem atual: R1=1k; R2 equivale a 1k + 300 ohms em série.
+PREFERRED_ECHO_R1_OHM = 1000.0
+PREFERRED_ECHO_R2_OHM = 1300.0
 
 FORBIDDEN_SPI_FLASH_GPIOS: tuple[int, ...] = (6, 7, 8, 9, 10, 11)
 SENSITIVE_STRAPPING_GPIOS: tuple[int, ...] = (0, 2, 12, 15)
@@ -50,8 +51,8 @@ CANONICAL_PINOUT_TABLE: tuple[CanonicalPinAssignment, ...] = (
         direction="INPUT-ONLY (GPI)",
         supply_domain="Sensor VCC = 5 V -> Divisor <= 3.30 V",
         electrical_conditioning=(
-            "OBRIGATORIO divisor resistivo R1=2.2 kOhm (ECHO->No) + R2=3.3 kOhm (No->GND) "
-            "[3.00 V @ 5.0 V; 3.15 V @ 5.25 V]. PROIBIDO >= 3.31 V (3.5 V NAO e aceito!)."
+            "Divisor da montagem: R1=1 kOhm (ECHO->No), R2=1 kOhm + 300 Ohm "
+            "em serie (No->GND). Medir o no antes de conectar GPIO34; nao exceder 3.30 V."
         ),
     ),
     CanonicalPinAssignment(
@@ -70,7 +71,7 @@ CANONICAL_PINOUT_TABLE: tuple[CanonicalPinAssignment, ...] = (
         gpio_number=39,
         direction="INPUT-ONLY (ADC1)",
         supply_domain="Modulo VCC = 3.3 V ESTRITO",
-        electrical_conditioning="Analogico 0..3.3 V em ADC1 (desativado por padrao no firmware)",
+        electrical_conditioning="Analogico 0..3.3 V em ADC1 (desativado; deixar AO desconectado)",
     ),
     CanonicalPinAssignment(
         peripheral="Potenciometro",
@@ -79,54 +80,37 @@ CANONICAL_PINOUT_TABLE: tuple[CanonicalPinAssignment, ...] = (
         gpio_number=36,
         direction="INPUT-ONLY (ADC1)",
         supply_domain="Extremos em 3.3 V e GND",
-        electrical_conditioning="Varredura 0.00..3.30 V estritamente em 3V3 (NUNCA ligar em 5 V)",
+        electrical_conditioning="Desativado no firmware; fora da montagem atual",
     ),
     CanonicalPinAssignment(
-        peripheral="LCD 2004A V1.1",
-        signal="RS (pino 4)",
-        esp32_pin="GPIO19",
-        gpio_number=19,
-        direction="OUTPUT (3.3 V)",
-        supply_domain="LCD VDD = 5 V",
-        electrical_conditioning="Escrita unidirecional 3.3 V -> HD44780",
-    ),
-    CanonicalPinAssignment(
-        peripheral="LCD 2004A V1.1",
-        signal="RW (pino 5)",
-        esp32_pin="GND FIXO (NENHUM GPIO)",
-        gpio_number=None,
-        direction="HARDWIRED GND",
-        supply_domain="GND comum (0 Ohm)",
-        electrical_conditioning="OBRIGATORIO aterrar em GND para bloquear retorno de 5 V em D4..D7",
-    ),
-    CanonicalPinAssignment(
-        peripheral="LCD 2004A V1.1",
-        signal="E (pino 6)",
-        esp32_pin="GPIO18",
-        gpio_number=18,
-        direction="OUTPUT (3.3 V)",
-        supply_domain="LCD VDD = 5 V",
-        electrical_conditioning="Pulso Enable unidirecional 3.3 V",
-    ),
-    CanonicalPinAssignment(
-        peripheral="LCD 2004A V1.1",
-        signal="D4..D7 (pinos 11..14)",
-        esp32_pin="GPIO21, GPIO22, GPIO23, GPIO27",
+        peripheral="LCD 2004 I2C",
+        signal="SDA",
+        esp32_pin="GPIO21",
         gpio_number=21,
-        direction="OUTPUT 4-bit (3.3 V)",
-        supply_domain="LCD VDD = 5 V",
-        electrical_conditioning="Barramento 4 bits somente-escrita (seguro com RW=GND)",
+        direction="I2C (bidirecional)",
+        supply_domain="Backpack VCC = 3.3 V (sem conversor)",
+        electrical_conditioning="Pull-ups em 3V3; 5 V apenas com conversor I2C bidirecional",
+    ),
+    CanonicalPinAssignment(
+        peripheral="LCD 2004 I2C",
+        signal="SCL",
+        esp32_pin="GPIO22",
+        gpio_number=22,
+        direction="I2C clock",
+        supply_domain="Backpack VCC = 3.3 V (sem conversor)",
+        electrical_conditioning="RW controlado pelo PCF8574; usar apenas os 4 pinos do backpack",
     ),
 )
 
-ALL_ASSIGNED_GPIOS: tuple[int, ...] = (5, 34, 35, 39, 36, 19, 18, 21, 22, 23, 27)
+ALL_ASSIGNED_GPIOS: tuple[int, ...] = (5, 34, 35, 39, 36, 21, 22)
 
 PINOUT_RECONCILIATION_NOTE = (
     "Reconciliacao Ciclo 5: `PIN_HCSR04_ECHO` e CANONICAMENTE `GPIO34` "
     "(GPI somente-entrada, conforme `firmware/main/pinout_config.h`, `docs/hardware_safety.md` e "
     "`docs/bench_assembly_guide.md`), corrigindo a mencao textual isolada a `GPIO32` no resumo "
     "do Ciclo 4. Zero conflito com SPI Flash (GPIO6..11), strapping (GPIO0/2/12/15), UART0 (GPIO1/3), "
-    "ADC1 ou LCD 2004A."
+    "ADC1 ou LCD I2C (SDA=21, SCL=22). O LCD paralelo de 16 pinos e historico; "
+    "siga docs/bench_assembly_guide.md e hardware/guia_montagem_final.html."
 )
 
 
@@ -197,7 +181,7 @@ def evaluate_echo_divider(
         reasons.append(
             f"TENSAO PERIGOSA CALCULADA: Vout_nom={vout_nom:.2f} V, Vout_max={vout_max:.2f} V "
             f"(limite estrito <= {ESP32_GPIO_MAX_SAFE_V:.2f} V; 3.5 V NAO e aceito!). "
-            "Prefira R1=2.2 kOhm e R2=3.3 kOhm (3.00 V @ 5.00 V, 3.15 V @ 5.25 V)."
+            "Confira o divisor da montagem: R1=1 kOhm e R2=1 kOhm + 300 Ohm em serie."
         )
 
     if vout_nom < ESP32_GPIO_MIN_RELIABLE_VIH_V:

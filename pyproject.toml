@@ -30,9 +30,13 @@ ml = [
 
 [project.scripts]
 motionpet = "terminal.app:main"
+motionpet-web = "terminal.web.server:main"
 
 [tool.setuptools.packages.find]
 include = ["terminal*", "simulator*", "ml*"]
+
+[tool.setuptools.package-data]
+"terminal.web" = ["static/*.html", "static/*.css", "static/*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

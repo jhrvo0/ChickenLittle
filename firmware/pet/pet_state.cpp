@@ -282,6 +282,11 @@ void pet_init(PetStateSnapshot *pet, const char *name, PetPersonality personalit
     pet->age_ticks = 0UL;
     fw_copy_trunc(pet->last_action, sizeof(pet->last_action), "READY", 20U);
     pet->care_counters = PetCareCounters{0U, 0U, 0U, 0U, 0U};
+    pet->coins = 0U;
+    pet->best_launch_distance_m = 0.0f;
+    pet->best_launch_score = 0U;
+    pet->total_launches = 0U;
+    pet->launch_upgrades = 0U;
 
     clamp_all_stats(pet);
     refresh_derived_fields(pet, false);
@@ -465,6 +470,59 @@ bool pet_apply_command_tagged(PetStateSnapshot *pet, PetCommandType cmd, const c
 
 bool pet_apply_command(PetStateSnapshot *pet, PetCommandType cmd) {
     return pet_apply_command_tagged(pet, cmd, NULL);
+}
+
+bool pet_apply_launch_match(PetStateSnapshot *pet, float distance_m, uint32_t score,
+                            uint32_t coins, uint32_t xp) {
+    if (!pet || pet->is_sleeping || pet->mood == MOOD_SICK || pet->energy < 10.0f ||
+        !(distance_m >= 0.0f && distance_m <= 100000.0f) ||
+        coins > UINT32_MAX - pet->coins || xp > UINT32_MAX - pet->xp ||
+        pet->total_launches == UINT32_MAX) return false;
+    // Python stores and compares records at centi-meter precision.
+    distance_m = fw_clamp_2dp(distance_m, 0.0f, 100000.0f);
+    bool record = distance_m > pet->best_launch_distance_m || score > pet->best_launch_score;
+    if (distance_m > pet->best_launch_distance_m) pet->best_launch_distance_m = distance_m;
+    if (score > pet->best_launch_score) pet->best_launch_score = score;
+    pet->total_launches++;
+    pet->coins += coins;
+    pet->energy -= 8.0f;
+    pet->hunger += 4.0f;
+    pet->happiness += record ? 22.0f : 14.0f;
+    pet->care_counters.play++;
+    bool evolved = grant_xp(pet, xp);
+    trigger_animation(pet, ANIM_PLAYING);
+    FwJsonWriter action;
+    jw_init(&action, pet->last_action, 21U);
+    jw_puts(&action, record ? "REC! " : "LAUNCH ");
+    uint32_t tenths = (uint32_t)fw_round_nonneg(distance_m * 10.0f);
+    jw_put_u32(&action, tenths / 10U);
+    jw_putc(&action, '.');
+    jw_putc(&action, (char)('0' + tenths % 10U));
+    jw_putc(&action, 'm');
+    clamp_all_stats(pet);
+    refresh_derived_fields(pet, evolved);
+    return true;
+}
+
+bool pet_unlock_launch_upgrade(PetStateSnapshot *pet, const char *upgrade_id, uint32_t cost) {
+    if (!pet || !upgrade_id) return false;
+    uint8_t bit = 0U;
+    uint32_t expected_cost = 0U;
+    if (fw_strcmp(upgrade_id, "SLINGSHOT_PRO") == 0) { bit = 1U; expected_cost = 15U; }
+    else if (fw_strcmp(upgrade_id, "AERO_CAPE") == 0) { bit = 2U; expected_cost = 25U; }
+    else if (fw_strcmp(upgrade_id, "SPRING_BOOTS") == 0) { bit = 4U; expected_cost = 35U; }
+    if (!bit || cost != expected_cost || (pet->launch_upgrades & bit) || pet->coins < cost) return false;
+    pet->coins -= cost;
+    pet->launch_upgrades |= bit;
+    pet->happiness += 6.0f;
+    trigger_animation(pet, ANIM_PLAYING);
+    FwJsonWriter action;
+    jw_init(&action, pet->last_action, 21U);
+    jw_puts(&action, "UPG:");
+    jw_puts(&action, upgrade_id);
+    clamp_all_stats(pet);
+    refresh_derived_fields(pet, false);
+    return true;
 }
 
 bool pet_apply_gesture_event(PetStateSnapshot *pet, const GestureEvent *event, float min_confidence) {

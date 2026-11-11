@@ -15,7 +15,7 @@ import pytest
 from hardware import model
 
 REPO = Path(__file__).resolve().parents[1]
-PINOUT_H = REPO / "firmware" / "main" / "pinout_config.h"
+PINOUT_H = REPO / "hardware" / "netlist" / "archive" / "pinout_parallel.h"
 
 
 def _layout() -> model.Layout:
@@ -167,7 +167,7 @@ def _header_defines() -> dict[str, int]:
     return {m.group(1): int(m.group(2)) for m in re.finditer(r"#define\s+(PIN_\w+)\s+(-?\d+)", text)}
 
 
-def test_netlist_pins_equal_firmware_pinout_header():
+def test_historical_netlist_preserves_archived_parallel_pinout():
     lay = _layout()
     defines = _header_defines()
     fw_map = lay.raw["firmware_pin_map"]
@@ -184,10 +184,10 @@ def test_netlist_pins_equal_firmware_pinout_header():
             assert spec["net"] in {n["name"] for n in lay.raw["deferred_nets"]}
 
 
-def test_netlist_gpios_match_cycle5_canonical_table():
+def test_historical_netlist_gpios_remain_free_of_forbidden_pins():
     from terminal.bench import pinout as p
     used = {spec["gpio"] for spec in _layout().raw["firmware_pin_map"].values()}
-    assert used == set(p.ALL_ASSIGNED_GPIOS)
+    assert used == set(_header_defines().values())
     assert not used & set(p.FORBIDDEN_SPI_FLASH_GPIOS)
     assert not used & set(p.RESERVED_UART0_GPIOS)
     assert 12 not in used                                             # MTDI proibido
@@ -547,14 +547,15 @@ def test_slides_html_structure_and_focus_boxes():
         assert (w >= 700 or clamped) and (abs(w / h - 1.6) < 0.05 or clamped)
     assert "ADICIONE AGORA" in page.upper() and "PONTO DE PARADA" in page
     # no master SVG, cada item adicionado carrega o slide em que aparece
-    for ident in ("W1", "W3", "M1", "R1", "T1", "MK5", "U1"):
+    for ident in ("W1", "W3", "M1", "R1", "U1"):
         assert re.search(rf'data-(?:id|ref)="{ident}"[^>]*data-gstep="\d+"|class="marker" data-gstep="\d+"', page) or ident == "MK5"
     # os passos da etapa B aparecem na ordem do guia de bancada: W4 (no -> GPIO34) vem DEPOIS do ensaio do divisor
     titles = [s["title"] if s.get("title") else "" for s in steps]
     assert titles  # titulos vivem no html
     b = lay.raw["build_steps"]["B"]
     assert [i for i, s in enumerate(b) if s.get("hold")] == [4]
-    assert "W3" in b[8]["adds"] and "T1" in b[4]["temp"]
+    assert "W3" in b[8]["adds"] and not b[4].get("temp")
+    assert 'data-id="T1"' not in page and 'data-id="MK5"' not in page
     assert b[0]["adds"] == [] and set(b[1]["adds"]) == {"W1", "W2"}       # primeiro so os trilhos (5 V e GND)
 
 
@@ -635,3 +636,14 @@ def test_esp32_pinout_follows_devkitc_5v_and_clk_next_to_usb():
     assert lay.esp32()["placement"]["usb"] == "left"
     assert hole["5V"] == "1I" and hole["CLK"] == "1B"                 # coluna 1 = ponta da USB
     assert hole["3V3"] == "19I" and hole["IO34"] == "15I" and hole["IO5"] == "10B"
+
+
+def test_photographed_nodemcu_has_ground_next_to_5v():
+    """O verso fotografado diz GND, nao CMD, no segundo pino a partir da USB."""
+    lay = _layout()
+    pin = lay.board.resolve("GND@J2.18")
+    assert pin.kind == "ground" and pin.gpio is None
+    assert lay.esp32_pin_hole(pin) == "2I"
+    assert lay.esp32_pin_hole(lay.board.resolve("5V")) == "1I"
+    assert "U1.GND@J2.18" in lay.pin_net_map("B")["M1.GND"]
+    assert export_wokwi.wokwi_terminal(lay, "U1.GND@J2.18") == "esp:GND.1"

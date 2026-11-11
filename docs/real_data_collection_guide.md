@@ -16,7 +16,7 @@
 
 1. **Comissionamento Físico Aprovado (`Etapas A -> B -> C`)**:
    - Seguir integralmente [hardware_safety.md](file:///c:/Users/joaoh/Downloads/ChickenLittle/docs/hardware_safety.md) e [cycle5_bench_checklist.md](file:///c:/Users/joaoh/Downloads/ChickenLittle/docs/cycle5_bench_checklist.md):
-     - **`HC-SR04 ECHO -> Divisor Canônico 2,2 kΩ / 3,3 kΩ -> GPIO34`**, medido previamente com multímetro/osciloscópio garantindo **`<= 3,30 V`** (`3,00 V` @ `5,00 V`; **`3,5 V` é proibido!**).
+     - **`HC-SR04 ECHO -> divisor 1 kΩ / (1 kΩ + 300 Ω) -> GPIO34`**, conforme a netlist atual, após ensaio e medição do pico com instrumento adequado garantindo **`<= 3,30 V`**. Consulte [segurança elétrica](hardware_safety.md).
      - **`TCRT5000`** (`DO -> GPIO35`) e **`Potenciômetro`** (`GPIO36`) alimentados estritamente em **`3,3 V` (`3V3`)** e **barramento `GND` comum**.
 2. **Verificação de Dependências e Saúde Metrológica na Bancada**:
    ```powershell

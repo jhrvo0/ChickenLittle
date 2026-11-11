@@ -1,5 +1,9 @@
 # Arquitetura do Sistema MotionPet
 
+**Interface ativa no notebook (10/11/2026):** `terminal.web` serve HTML/CSS/JS em 127.0.0.1:8767. Uma única sessão Python mantém a USB e reaproveita `TerminalHostClient`, o estado do pet e o motor do Pet Launch. Os controles gráficos usam diretamente distância e transições do IR, sem potenciômetro. Os comandos de cuidado e recompensas voltam à ESP32; o progresso existente é preservado. O nome de apresentação é Piu-piu. Música é sintetizada no navegador após ação do usuário, e slides são uma apresentação interna. A configuração física escolhida exclui LCD. [Operação e limites](interface_notebook.md).
+
+O restante deste documento conserva a arquitetura dos ciclos anteriores, incluindo o LCD opcional e o terminal ASCII.
+
 O **MotionPet** é um sistema embarcado interativo que combina um pet virtual inteligente, controle por gestos no ar via sensores físicos e duas interfaces sincronizadas em tempo real: um display LCD de caracteres local (20x4) operado diretamente pelo microcontrolador e uma interface de terminal ASCII rica no computador hospedeiro.
 
 ---
@@ -56,7 +60,7 @@ O estado do pet é estritamente sincronizado entre duas interfaces:
 
 ### ADR-01: Adoção do PlatformIO com C++ / FreeRTOS no ESP-WROOM-32
 
-- **Contexto**: O projeto necessita de controle preciso de amostragem de sensores (ultrassom com temporização de ecos em microssegundos), atualização de display LCD paralelo e protocolo serial bidirecional sem bloqueios mútuos.
+- **Contexto**: O projeto necessita de controle preciso de amostragem de sensores (ultrassom com temporização de ecos em microssegundos), atualização de display LCD e protocolo serial bidirecional sem bloqueios mútuos. A montagem atual usa backpack I²C PCF8574; veja o [guia final](bench_assembly_guide.md).
 - **Decisão**: Utilizar o ecossistema **PlatformIO** com framework Arduino/FreeRTOS para o microcontrolador ESP-WROOM-32.
 - **Justificativa**:
   1. O PlatformIO Core (v6.2.0) já se encontra instalado no ambiente do desenvolvedor, permitindo compilação e gerenciamento reproduzível de dependências sem depender de IDEs gráficas pesadas.

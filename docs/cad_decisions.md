@@ -1,3 +1,15 @@
+# Atualização de montagem — 10/11/2026
+
+**Revisão 4 — diagnóstico sem refazer a montagem:** o teste opcional de iluminação preserva F1–F4 e os demais componentes já instalados. Com USB fora, remove F16/F17 antes de alimentar o LCD em 5 V; move somente F14 de P2:+3 para P1:+3 e F15 de P2:−3 para P1:−4, contatos livres na montagem normal. A volta devolve a alimentação à P2/3V3 antes de recolocar SDA/SCL. O guia bloqueia captura e navegação durante esse diagnóstico e mantém o aviso após recarregar até a restauração ser declarada. Esse teste não valida texto nem autoriza SDA/SCL diretos com VCC de 5 V. A netlist, o desenho e as tabelas do diagnóstico são derivados da mesma origem que a montagem normal.
+
+**Revisão 3 — recuperar a evidência antes de repetir o mapeamento:** histórico local de 05/11 confirmou os furos do teste LCD: GND6J, VCC19J (3V3), SDA14A e SCL17A; scanner 0x27 e texto confirmado pelo usuário. O resumo com origem e limites está em [bench_verified_wiring.md](bench_verified_wiring.md). A montagem atual passa a alimentar o GND por 6J, não por 2J. A alternativa 2J não foi validada por esse teste e não deve substituir o ponto conhecido. Isso não comprova a causa da falha de 10/11. Consultar esse registro antes de pedir novamente foto/mapeamento da mesma placa.
+
+**Revisão 2:** prioridade para montagem simples, uso das duas protoboards e teste após cada componente. P1 usa um par lateral +5V/GND e P2 um par +3V3/GND, com uma ponte entre negativos. Usar só o primeiro grupo de cinco furos de cada trilho evita depender de continuidade até outras regiões; conferir esse grupo fisicamente. LCD e TCRT5000 usam apenas jumpers e são testados primeiro. Os três resistores disponíveis ficam exclusivamente no divisor de ECHO na região central da P2. A opção sem resistores externos para o ultrassom exige conversão de nível apropriada; não presumir alimentação de 3V3 para o HC-SR04 padrão. Botões do guia usam `terminal.bench.guide`, serviço local sem simulação exposta e sem gravação automática, com distinção entre serial observada e declarações do operador.
+
+O CAD descrito abaixo é o registro **paralelo histórico**. Para a montagem física atual com backpack PCF8574, siga [o guia final I²C](bench_assembly_guide.md) e [o roteiro visual](../hardware/guia_montagem_final.html). A netlist atual por furos é `hardware/netlist/motionpet_final_i2c.json`; o antigo mapa de pinos foi preservado em `hardware/netlist/archive/pinout_parallel.h`. Os testes individuais foram relatados pelo usuário; a integração está pendente. As observações de ferramentas e medições abaixo se referem à geração original, não aos checks atuais.
+
+---
+
 # Decisoes tecnicas — representacao eletronica (CAD) do MotionPet
 
 Data: 2026-10-29 · Escopo: Estagio B (prioridade) + A, C, D (LCD na P2) e E · Status: `PENDING_PHYSICAL_VALIDATION` (Ciclo 5 permanece aberto; nenhum Ciclo 6 iniciado).
@@ -20,17 +32,17 @@ Data: 2026-10-29 · Escopo: Estagio B (prioridade) + A, C, D (LCD na P2) e E · 
 
 ## 2. Descobertas que merecem sua atencao
 1. **Divisor com os resistores que o usuario tem (1 kΩ e 300 Ω, ±5 %)**: R1 = 1 kΩ em cima; R2 (1 kΩ) + R3 (300 Ω) em serie embaixo = 1,3 kΩ. Nominal 2,83 V @ 5,00 V; pior caso **3,096 V** (folga de 204 mV ao teto de 3,30 V) e minimo **2,567 V** (92 mV acima de VIH = 2,475 V); corrente pedida ao ECHO ≈ 2,2 mA. O par 2,2 kΩ / 3,3 kΩ original (3,00 V; pior caso 3,275 V) continua aceito pelo validador, mas **nao** e o que ha na bancada. Os resistores nao servem diretamente como R1/R2: 1 kΩ/300 Ω da 1,15 V (leitura falha) e 300 Ω/1 kΩ da 3,85 V (queima o GPIO34) — ha testes para isso.
-2. **LCD V0 (`hardware_safety.md` §3.3)**: um resistor sozinho de V0 a GND nao gera "0,4–0,8 V": sem fonte, V0 ≈ 0 V (contraste maximo). Para 0,4–0,8 V use divisor 5 V/GND (ex.: 4,7 kΩ + 680 Ω ≈ 0,63 V) ou V0 direto ao GND. **Nao alterei a doc**; a netlist mantem R3 como `DESIGN_ISSUE_FLAGGED` (confirmacao C07).
+2. **LCD V0**: um resistor sozinho de V0 a GND nao gera "0,4–0,8 V". O desenho usa R4 de 1 kΩ para GND; se necessario, ajustar com potenciometro entre VDD e GND, com cursor em V0. O contraste e a compatibilidade do modulo real continuam pendentes (C07). Veja `hardware_safety.md`.
 3. **Placa de 30 pinos / 1,0 pol (25,4 mm)**: numa protoboard unica so um lado fica acessivel; o Estagio B precisa dos dois lados (IO34 e 5V de um lado, IO5 do outro). Nesse caso este leiaute **nao serve** — sera preciso a variante com jumpers femea–macho ou duas protoboards.
 4. A doc cita `firmware/pinout_config.h`; o arquivo real e **`firmware/main/pinout_config.h`**.
 5. GPIO5 (TRIG) e pino de strapping: uso como saida e aceitavel; o validador registra `STRAPPING_PIN_NOTED` (info).
-6. Os 3 pinos GND da placa sao tratados como ligados internamente (hipotese A6; confirmar com multimetro).
+6. As fotos da NODEMCU ESP-32S V1.1 mostram **quatro** pinos GND; o segundo a partir da USB no lado do 5V e GND, nao CMD. O modelo trata os quatro como ligados internamente (hipotese A6, sem medicao fisica).
 7. Corrente: a USB alimenta HC-SR04 + backlight do LCD (C08).
 
 ## 3. O que NAO foi feito / limites
 - **Nenhuma validacao fisica.** Wokwi nao substitui multimetro e nao valida o divisor.
 - **Build do firmware (PlatformIO) nao reexecutado**: o registro do PlatformIO (`api.registry.platformio.org`) esta bloqueado no ambiente de geracao. Nenhum arquivo de firmware foi alterado; os 271 testes originais foram executados (Python 3.13.16, Linux aarch64 — nao no Windows).
-- **`wokwi-cli`**: download e execucao negados pelo sistema de permissoes; `lint` e o cenario de teste **nao foram executados**.
+- **`wokwi-cli`**: lint executado com sucesso na versao 0.29.1 em 2026-10-29; houve aviso informativo de que `board-esp32-devkit-c-v4` nao e documentado. O cenario de teste **nao foi executado**, pois nao havia token configurado.
 - **MCP de Fritzing**: instalacao/execucao negadas; **nenhuma chamada MCP foi testada**.
 - **`.fzz` nao aberto no Fritzing** (nao ha Fritzing na maquina de geracao). Verificado: ZIP/XML validos, conexoes reciprocas, redes reextraidas do XML = netlist (A–C), conectores sobre os furos (≤ 0,6 px), `moduleId` reais do Fritzing. A peca da ESP32 e **generica** (nao e o modelo da sua placa).
 - Estagio C e **provisorio** (ordem de pinos do TCRT5000 nao confirmada; 6 fios, 4 deles longos). Estagio D: contraste (R4) e backlight (R5) a ajustar na bancada; fios de sinal do LCD com 15–20 cm.

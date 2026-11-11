@@ -13,10 +13,12 @@
  *    conflito com strapping/ADC/LCD; corrige mencao textual divergente a GPIO32 no resumo do Ciclo 4).
  * 2. O pino ECHO do HC-SR04 (5 V TTL) NUNCA deve ser ligado direto ao GPIO34 nem exceder 3.30 V.
  *    3.50 V NAO e aceito como tensao segura para GPIO de 3.3 V!
- *    Utilize divisor com margem abaixo de 3.3 V: preferencialmente R1=2.2 kOhm (ECHO->No) e
- *    R2=3.3 kOhm (No->GND), resultando em Vout=3.00 V @ 5.00 V e Vout_max=3.15 V @ 5.25 V.
- * 3. O pino RW (pino 5) do LCD 2004A DEVE ser aterrado permanentemente no GND (modo somente-escrita).
- * 4. O TCRT5000 e o potenciometro devem ser alimentados exclusivamente em 3.3 V (pino 3V3), NUNCA em 5 V.
+ *    A montagem atual usa R1=1 kOhm (ECHO->No) e R2=1 kOhm + R3=300 Ohm em serie
+ *    (No->GND): Vout nominal 2.83 V @ 5.00 V; calculo com tolerancia de 5%: maximo 3.10 V.
+ *    O divisor 2.2 kOhm / 3.3 kOhm e uma alternativa; medir antes de conectar ao GPIO34.
+ * 3. LCD com backpack I2C PCF8574: SDA=GPIO21, SCL=GPIO22, VCC=3V3 sem conversor.
+ *    RW e controlado pelo bit P1 do backpack, mantido em zero pelo HAL. Nao adicionar fio ao pino 5.
+ * 4. O TCRT5000 usa 3.3 V (pino 3V3). O potenciometro de entrada esta desativado e fora da montagem.
  * 5. Pinos reservados de SPI Flash (GPIO6..GPIO11) e strapping critico (GPIO12/MTDI, GPIO0) NAO sao usados.
  * 6. Todas as leituras analogicas residem exclusivamente no bloco ADC1 (GPIO36=POT, GPIO39=IR_AO opcional).
  */
@@ -45,13 +47,10 @@
 #define PIN_POT_ADC1          36   // Entrada GPI / ADC1_CH0 (VP)
 #define DEFAULT_POT_ENABLED   false  // potenciometro removido da montagem (bancada 2026-10-29); GPIO36 nao e lido
 
-// LCD 2004A V1.1 (HD44780 em modo paralelo de 4 bits; pino 5 RW conectado direto ao GND!)
-#define PIN_LCD_RS            19
-#define PIN_LCD_EN            18
-#define PIN_LCD_D4            21
-#define PIN_LCD_D5            22
-#define PIN_LCD_D6            23
-#define PIN_LCD_D7            27
+// LCD 2004A com backpack PCF8574. Pull-ups do I2C em 3V3, nunca em 5 V direto ao ESP32.
+// O layout paralelo antigo foi preservado em hardware/netlist/archive/pinout_parallel.h.
+#define PIN_LCD_SDA           21
+#define PIN_LCD_SCL           22
 
 // Temporizacoes operacionais (em milissegundos)
 #define DEFAULT_SENSOR_PERIOD_MS   70UL   // Faixa inicial recomendada: 60..80 ms (~14.3 Hz)

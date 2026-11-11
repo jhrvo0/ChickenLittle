@@ -1,0 +1,5 @@
+data,config,ref_cm,tentativas,validas,falhas,taxa_validas_pct,mediana_cm,media_cm,desvio_cm,min_cm,max_cm,erro_cm,erro_pct,encerrou_por_tempo
+2026-11-05T10:44:28,"VCC 3V3, ECHO direto ao GPIO34, sem divisor",10,30,30,0,100.0,15.15,15.64,1.4,14.1,20.6,5.15,51.5,False
+2026-11-05T10:44:50,"VCC 3V3, ECHO direto ao GPIO34, sem divisor",25,30,29,1,96.7,18.7,20.43,7.56,17.8,59.4,-6.3,-25.2,False
+2026-11-05T10:45:11,"VCC 3V3, ECHO direto ao GPIO34, sem divisor",50,30,30,0,100.0,56.0,56.03,3.62,47.8,65.0,6.0,12.0,False
+2026-11-05T10:45:41,"VCC 3V3, ECHO direto ao GPIO34, sem divisor",100,30,0,30,0.0,,,,,,,,False

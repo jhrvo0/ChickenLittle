@@ -29,6 +29,8 @@
 #include "pet/pet_state.h"
 #include "pet/pet_persistence.h"
 #include "display/lcd2004_driver.h"
+#include "display/lcd2004_i2c_hal.h"
+#include "display/lcd2004_anim.h"
 #include "communication/jsonl_protocol.h"
 
 // Mensagens internas estáticas trocadas entre TaskSerialComm e TaskPetDomain (zero heap)
@@ -36,6 +38,7 @@ typedef struct {
     PetCommandType cmd;
     uint32_t seq;
     char mode_arg[20];
+    LaunchCommand launch;
 } PetCmdQueueItem;
 
 typedef struct {
@@ -56,6 +59,9 @@ static FirmwareRuntimeMetrics g_metrics;
 // Estado compartilhado protegido por g_state_mutex
 static PetStateSnapshot g_shared_pet_state;
 static LCDFrameBuffer g_shared_lcd_frame;
+static LCDFrameBuffer g_host_lcd_frame;
+static uint32_t g_host_lcd_received_ms = 0UL;
+static bool g_has_host_lcd = false;
 static SensorRawFrame g_latest_sensor_frame;
 static bool g_has_latest_sensor = false;
 static bool g_pet_state_tx_pending = false;
@@ -290,8 +296,6 @@ static void publish_pet_snapshot(const PetStateSnapshot *pet, bool notify_serial
     uint32_t hwm = (uint32_t)uxTaskGetStackHighWaterMark(NULL);
     if (xSemaphoreTake(g_state_mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
         g_shared_pet_state = *pet;
-        const SensorRawFrame *s_ptr = g_has_latest_sensor ? &g_latest_sensor_frame : NULL;
-        lcd_format_pet_frame(pet, pet->age_ticks, s_ptr, &g_shared_lcd_frame);
         if (notify_serial_tx) {
             g_pet_state_tx_pending = true;
         }
@@ -323,8 +327,9 @@ static void TaskPetDomain(void *param) {
         local_pet = restored_pet;
     }
 
-    publish_pet_snapshot(&local_pet, false);
+    publish_pet_snapshot(&local_pet, true);
     uint32_t next_bio_tick_ms = now_monotonic_ms() + PET_TICK_PERIOD_MS;
+    bool launch_active = false;
 
     for (;;) {
         uint32_t now_ms = now_monotonic_ms();
@@ -372,13 +377,32 @@ static void TaskPetDomain(void *param) {
                 if (is_supported_mode_name(target_mode)) {
                     if (xSemaphoreTake(g_state_mutex, pdMS_TO_TICKS(5)) == pdTRUE) {
                         fw_strncpy(g_active_mode, target_mode, sizeof(g_active_mode));
+                        if (fw_strcmp(target_mode, "PET_LAUNCH") != 0) g_has_host_lcd = false;
+                        launch_active = fw_strcmp(target_mode, "PET_LAUNCH") == 0;
                         xSemaphoreGive(g_state_mutex);
+                        state_changed = true;
+                        should_notify_serial = true;
+                        enqueue_pet_reply(cmd_item.seq, false, "", "mode_switched");
+                    } else {
+                        enqueue_pet_reply(cmd_item.seq, true, "EXEC_ERR", "Mode update busy");
                     }
-                    state_changed = true;
-                    should_notify_serial = true;
-                    enqueue_pet_reply(cmd_item.seq, false, "", "mode_switched");
                 } else {
                     enqueue_pet_reply(cmd_item.seq, true, "INVALID_MODE", "Unsupported system mode");
+                }
+            } else if (cmd_item.launch.action != LAUNCH_NONE) {
+                bool applied = false;
+                if (cmd_item.launch.action == LAUNCH_MATCH_RESULT) {
+                    applied = pet_apply_launch_match(&local_pet, cmd_item.launch.distance_m,
+                        cmd_item.launch.score, cmd_item.launch.coins_earned, cmd_item.launch.xp_earned);
+                } else if (cmd_item.launch.action == LAUNCH_UNLOCK_UPGRADE) {
+                    applied = pet_unlock_launch_upgrade(&local_pet, cmd_item.launch.upgrade_id, cmd_item.launch.cost);
+                }
+                if (applied) {
+                    state_changed = true;
+                    should_notify_serial = true;
+                    enqueue_pet_reply(cmd_item.seq, false, "", "applied");
+                } else {
+                    enqueue_pet_reply(cmd_item.seq, true, "EXEC_ERR", "Pet Launch command rejected");
                 }
             } else {
                 (void)pet_apply_command(&local_pet, cmd_item.cmd);
@@ -391,7 +415,7 @@ static void TaskPetDomain(void *param) {
         // 2. Drena eventos gestuais classificados pelo TinyML ou injetados
         GestureEvent gev{};
         while (xQueueReceive(g_q_gesture_pet, &gev, 0) == pdTRUE) {
-            if (pet_apply_gesture_event(&local_pet, &gev, 0.55f)) {
+            if (!launch_active && pet_apply_gesture_event(&local_pet, &gev, 0.55f)) {
                 state_changed = true;
                 should_notify_serial = true;
             }
@@ -400,8 +424,9 @@ static void TaskPetDomain(void *param) {
         // 3. Ciclo biológico determinístico de 1 Hz + auto-save antidesgaste (30 s)
         now_ms = now_monotonic_ms();
         if (now_ms >= next_bio_tick_ms) {
-            pet_tick(&local_pet);
+            if (!launch_active) pet_tick(&local_pet);
             state_changed = true;
+            should_notify_serial = true;
             next_bio_tick_ms = now_ms + PET_TICK_PERIOD_MS;
 
             // Gravação automática limitada a intervalos >= 30 s e apenas quando houve mudança real
@@ -442,6 +467,7 @@ static void handle_serial_rx_line(const char *rx_line, char *tx_buf, size_t tx_c
         item.cmd = parsed.pet_cmd;
         item.seq = parsed.seq;
         fw_strncpy(item.mode_arg, parsed.mode_arg, sizeof(item.mode_arg));
+        item.launch = parsed.launch;
         if (xQueueSend(g_q_cmd_pet, &item, pdMS_TO_TICKS(10)) != pdTRUE) {
             if (jsonl_serialize_error_ex(
                     &g_jsonl_ctx, tx_buf, tx_cap, ts,
@@ -456,6 +482,17 @@ static void handle_serial_rx_line(const char *rx_line, char *tx_buf, size_t tx_c
         (void)xQueueSend(g_q_gesture_pet, &parsed.injected_gesture, 0);
         if (jsonl_serialize_ack(&g_jsonl_ctx, tx_buf, tx_cap, ts, parsed.seq, "gesture_accepted")) {
             Serial.print(tx_buf);
+        }
+        return;
+    }
+
+    if (parsed.kind == RX_MSG_LCD_FRAME) {
+        if (xSemaphoreTake(g_state_mutex, pdMS_TO_TICKS(5)) == pdTRUE) {
+            // SWITCH_MODE segue por outra fila: o quadro pode chegar primeiro.
+            g_host_lcd_frame = parsed.lcd_frame;
+            g_host_lcd_received_ms = ts;
+            g_has_host_lcd = true;
+            xSemaphoreGive(g_state_mutex);
         }
         return;
     }
@@ -506,7 +543,8 @@ static void handle_serial_rx_line(const char *rx_line, char *tx_buf, size_t tx_c
 static void TaskSerialComm(void *param) {
     (void)param;
     static char rx_buf[JSONL_LINE_BUFFER_SIZE];
-    static char tx_buf[JSONL_LINE_BUFFER_SIZE];
+    // O snapshot com progresso do jogo é maior que os comandos recebidos.
+    static char tx_buf[1024];
     size_t rx_pos = 0U;
     bool rx_overflowing = false;
 
@@ -617,11 +655,16 @@ static void TaskLcdDisplay(void *param) {
         PetStateSnapshot pet_snap{};
         SensorRawFrame sensor_snap{};
         bool has_sensor = false;
+        bool show_host_frame = false;
+        LCDFrameBuffer host_frame{};
 
         if (xSemaphoreTake(g_state_mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
             pet_snap = g_shared_pet_state;
             sensor_snap = g_latest_sensor_frame;
             has_sensor = g_has_latest_sensor;
+            show_host_frame = g_has_host_lcd && fw_strcmp(g_active_mode, "PET_LAUNCH") == 0 &&
+                (uint32_t)(now_monotonic_ms() - g_host_lcd_received_ms) < 2000UL;
+            if (show_host_frame) host_frame = g_host_lcd_frame;
             xSemaphoreGive(g_state_mutex);
         }
 
@@ -630,7 +673,8 @@ static void TaskLcdDisplay(void *param) {
         anim_phase++;
 
         LCDFrameBuffer frame_buf{};
-        lcd_format_pet_frame(&pet_snap, visual_frame_idx, has_sensor ? &sensor_snap : NULL, &frame_buf);
+        if (show_host_frame) frame_buf = host_frame;
+        else lcd_format_pet_frame(&pet_snap, visual_frame_idx, has_sensor ? &sensor_snap : NULL, &frame_buf);
         lcd_ctx_render_frame(&g_lcd_drv, &frame_buf);
 
         uint32_t hwm = (uint32_t)uxTaskGetStackHighWaterMark(NULL);
@@ -672,16 +716,12 @@ void setup(void) {
     gesture_classifier_ctx_init(&g_gesture_ctx, NULL);
     pet_persistence_init(&g_pet_nvs, NULL, PET_NVS_MIN_AUTO_INTERVAL_MS);
 
-    // 3. Inicializa driver paralelo de 4 bits do LCD 2004A (RW aterrado permanentemente no GND)
+    // 3. Inicializa driver do LCD 2004A pelo adaptador I2C PCF8574 (SDA=GPIO21, SCL=GPIO22)
     LCDPinConfig lcd_cfg{};
-    lcd_cfg.pin_rs = PIN_LCD_RS;
-    lcd_cfg.pin_en = PIN_LCD_EN;
-    lcd_cfg.pin_d4 = PIN_LCD_D4;
-    lcd_cfg.pin_d5 = PIN_LCD_D5;
-    lcd_cfg.pin_d6 = PIN_LCD_D6;
-    lcd_cfg.pin_d7 = PIN_LCD_D7;
-    lcd_ctx_init(&g_lcd_drv, &lcd_cfg, NULL);
+    lcd_i2c_fill_pin_config(&lcd_cfg);
+    lcd_ctx_init(&g_lcd_drv, &lcd_cfg, &g_lcd_i2c_hal_ops);
     lcd_ctx_load_default_glyphs(&g_lcd_drv);
+    lcd_play_boot_animation(&g_lcd_drv);
 
     // 4. Inicializa estado inicial compartilhado antes da partida das tasks
     pet_init(&g_shared_pet_state, "Bitinho", PERSONALITY_CURIOUS);

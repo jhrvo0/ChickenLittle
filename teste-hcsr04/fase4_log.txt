@@ -1,0 +1,5 @@
+estado: ADC34=149 mV ECHO=0
+estado: ADC34=150 mV ECHO=0
+estado: ADC34=149 mV ECHO=0
+estado: ADC34=149 mV ECHO=0
+estado: ADC34=147 mV ECHO=0

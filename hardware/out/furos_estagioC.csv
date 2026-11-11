@@ -1,6 +1,7 @@
 furo,coluna,fileira,ocupante,rede
 1I,1,I,U1 ESP32 DevKit: pino 5V [J2.19],5V
 1J,1,J,"fio W1 (vermelho), ponta inicial",
+2I,2,I,U1 ESP32 DevKit: pino GND [J2.18],GND
 3W,3,W,"fio W1 (vermelho), ponta final",
 6I,6,I,U1 ESP32 DevKit: pino GND [J2.14],GND
 6J,6,J,M2 TCRT5000 (modulo LM393): pino GND,GND
