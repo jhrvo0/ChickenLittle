@@ -46,4 +46,5 @@ As fontes e o checkpoint são documentos de trabalho do grupo; o material do che
 - [Arquitetura MotionPet](architecture.md) e [interface anterior](interface_notebook.md): domínio e interface legados.
 - [Guia de montagem por etapas](bench_assembly_guide.md), [decisões de CAD](cad_decisions.md) e [guia de LCD](guia_lcd_sem_resistor.md): registros anteriores; não substituem as ligações vigentes.
 - [Projetos de bancada](../teste-hcsr04/), [LCD](../teste-lcd/) e [varredura I²C](../teste-i2c-scan/): ensaios específicos e registros históricos.
+- [Relatório final (PDF)](Projeto_Embarcados_Grupo5.pdf): artigo no formato SBC, com o `.docx` editável ao lado.
 - [Base SBC](relatorio_sbc_base.md): material de trabalho anterior; não é o relatório final e não substitui a revisão e autoria do grupo.
