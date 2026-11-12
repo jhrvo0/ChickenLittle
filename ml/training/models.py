@@ -30,6 +30,7 @@ class TrainingConfig:
     mlp_hidden_layers: tuple[int, ...] = (16, 8)
     mlp_max_iter: int = 1200
     mlp_alpha: float = 1e-3
+    include_learned_baseline: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
@@ -139,7 +140,7 @@ class RuleBaselineModel(BaseEstimator, ClassifierMixin):
 def build_candidate_models(config: TrainingConfig | None = None) -> dict[str, Any]:
     """Instancia os 4 modelos comparativos do pipeline de ML."""
     cfg = config or TrainingConfig()
-    return {
+    candidates = {
         "rule_baseline": RuleBaselineModel(class_names=cfg.class_names),
         "decision_tree": DecisionTreeClassifier(
             max_depth=cfg.dt_max_depth,
@@ -170,3 +171,9 @@ def build_candidate_models(config: TrainingConfig | None = None) -> dict[str, An
             ]
         ),
     }
+    if cfg.include_learned_baseline:
+        candidates["decision_stump_baseline"] = DecisionTreeClassifier(
+            max_depth=1, min_samples_leaf=cfg.dt_min_samples_leaf,
+            class_weight="balanced", random_state=cfg.seed,
+        )
+    return candidates

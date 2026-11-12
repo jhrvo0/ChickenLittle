@@ -1,0 +1,19 @@
+{
+  "software_only": true,
+  "physical_validation": "pending",
+  "source_file": "data/experiments/phase-c/delivery-stack/raw/demo/mqtt_demo_p01_42_6160d119.jsonl",
+  "source_sha256": "3ace4ffd73600b8fcf1dda2701a2dfb85f81ab1511b70f55ffc0900da6ff7574",
+  "source_scope": "Envelope reconstituido do JSONL persistido na Fase C; nao e captura de pacote desta rodada.",
+  "records": 191,
+  "persist_first": {
+    "status": "persisted",
+    "cohort": "demo",
+    "samples": 191,
+    "dataset_sha256": "85a580624dff0bc805eb429c259f7ded4da687687f9f6c89e96267307afb9338"
+  },
+  "persist_retry": {
+    "status": "duplicate",
+    "cohort": "demo",
+    "dataset_sha256": "85a580624dff0bc805eb429c259f7ded4da687687f9f6c89e96267307afb9338"
+  }
+}

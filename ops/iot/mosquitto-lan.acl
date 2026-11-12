@@ -1,0 +1,16 @@
+# Uma conta por dispositivo; username igual ao device_id da MAC.
+# Pattern aplica a todos: cada conta só escreve no próprio tópico samples.
+pattern write motionlab/v1/devices/%u/samples
+
+user motionlab_ingest
+topic read motionlab/v1/devices/+/samples
+topic read motionlab/v1/sessions/real
+topic read motionlab/v1/sessions/demo
+topic read motionlab/v1/sessions/synthetic
+topic write motionlab/v1/receipts/+
+
+# Simulador pode continuar publicando sessões completas, sem acesso a sessões real.
+user motionlab_simulator
+topic write motionlab/v1/sessions/demo
+topic write motionlab/v1/sessions/synthetic
+topic read motionlab/v1/receipts/+

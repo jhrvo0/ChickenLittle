@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1260" viewBox="0 0 1500 1260">
+<title>Figura 3 Arquitetura atual do MotionLab</title>
+<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8" fill="#374151"/></marker></defs>
+<rect width="1500" height="1260" fill="white"/>
+<text x="40" y="55" font-family="Arial, sans-serif" font-size="38" font-weight="700" fill="#172033" text-anchor="start">Figura 3  Arquitetura atual do MotionLab</text>
+<text x="40" y="94" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">Três estados explícitos: USB existente • MQTT integrado em software • rede da ESP32 pendente</text>
+<rect x="25" y="125" width="1450" height="265" rx="12" fill="#f5f9fd" stroke="#8faecb" stroke-width="2"/>
+<text x="45" y="165" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#172033" text-anchor="start">A  USB EXISTENTE</text>
+<text x="410" y="165" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="start">Firmware implementado; bancada relatada anteriormente; sem ensaio físico nesta rodada</text>
+<rect x="45" y="200" width="180" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="135.0" y="233" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">HC-SR04</text>
+<text x="135.0" y="261" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">+ TCRT5000</text>
+<rect x="260" y="200" width="215" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="367.5" y="233" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">ESP32</text>
+<text x="367.5" y="261" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">FreeRTOS</text>
+<text x="367.5" y="289" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">TinyML sintético</text>
+<rect x="515" y="200" width="190" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="610.0" y="233" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">USB serial</text>
+<text x="610.0" y="261" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">JSON Lines v1</text>
+<rect x="745" y="200" width="300" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="895.0" y="233" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Backend Python</text>
+<text x="895.0" y="261" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">sessão + MotionEngine</text>
+<rect x="1090" y="200" width="360" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="1270.0" y="233" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Dashboard MotionLab</text>
+<text x="1270.0" y="261" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">api/live e api/lab</text>
+<polyline points="225,253 260,253" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="475,253 515,253" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="705,253 745,253" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1045,253 1090,253" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="45" y="347" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">DEMO da UI: simulador → serial virtual → mesmo backend. Esse fluxo ao vivo não usa MQTT.</text>
+<rect x="25" y="420" width="1450" height="525" rx="12" fill="#f8faf7" stroke="#94a993" stroke-width="2"/>
+<text x="45" y="460" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#172033" text-anchor="start">B  MQTT DE SOFTWARE</text>
+<text x="450" y="460" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="start">Fase C: sessões sintéticas persistidas e processadas; stack não reiniciada nesta rodada</text>
+<rect x="45" y="495" width="250" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="170.0" y="528" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Publisher sintético</text>
+<text x="170.0" y="556" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">sessões completas</text>
+<rect x="360" y="495" width="240" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="480.0" y="528" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Mosquitto</text>
+<text x="480.0" y="556" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">MQTT QoS 1</text>
+<rect x="665" y="495" width="300" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="815.0" y="528" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Consumidor Python</text>
+<text x="815.0" y="556" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">validação + deduplicação</text>
+<rect x="1030" y="495" width="415" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="1237.5" y="528" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Persistência JSONL</text>
+<text x="1237.5" y="556" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">sessões por origem</text>
+<polyline points="295,548 360,548" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="600,548 665,548" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="965,548 1030,548" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="800,601 800,640 485,640 485,601" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="815" y="644" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="start">Recibo de persistência → publisher</text>
+<polyline points="1238,601 1238,670 155,670 155,740" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="380" y="700" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="start">Preparação e treino em lote</text>
+<polyline points="1420,601 1420,705 1090,705 1090,740" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="1090" y="695" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#172033" text-anchor="middle">Novas sessões → inferência</text>
+<rect x="45" y="740" width="220" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="155.0" y="773" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Airflow</text>
+<text x="155.0" y="801" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">4 tarefas em lote</text>
+<rect x="335" y="740" width="240" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="455.0" y="773" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Experimento</text>
+<text x="455.0" y="801" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">MLflow: rastreio</text>
+<text x="455.0" y="829" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">treino no host</text>
+<rect x="650" y="740" width="260" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="780.0" y="773" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Publicação explícita</text>
+<text x="780.0" y="801" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">modelo + hashes</text>
+<rect x="980" y="740" width="220" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="1090.0" y="773" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">API + worker</text>
+<text x="1090.0" y="801" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">modelo publicado</text>
+<rect x="1235" y="740" width="210" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2"/>
+<text x="1340.0" y="773" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Dashboard</text>
+<text x="1340.0" y="801" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">proxy api/ml/*</text>
+<polyline points="265,793 335,793" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="575,793 650,793" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="910,793 980,793" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1200,793 1235,793" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="45" y="894" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#172033" text-anchor="start">Verificado agora: HTTP das quatro rotas /api/ml/* • entrada DEMO • treino sintético • físico pendente</text>
+<rect x="25" y="980" width="1450" height="195" rx="12" fill="#fffaf1" stroke="#bb8d3f" stroke-width="2" stroke-dasharray="10 7"/>
+<text x="45" y="1020" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#172033" text-anchor="start">C  ESP32 POR WI-FI / MQTT</text>
+<rect x="45" y="1040" width="220" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2" stroke-dasharray="10 7"/>
+<text x="155.0" y="1073" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">ESP32</text>
+<text x="155.0" y="1101" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">MQTT ausente</text>
+<text x="155.0" y="1129" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">no firmware</text>
+<rect x="495" y="1040" width="285" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2" stroke-dasharray="10 7"/>
+<text x="637.5" y="1073" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Wi-Fi da LAN</text>
+<text x="637.5" y="1101" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">implementação</text>
+<text x="637.5" y="1129" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">suspensa</text>
+<rect x="1040" y="1040" width="405" height="106" rx="12" fill="white" stroke="#c6ccd6" stroke-width="2" stroke-dasharray="10 7"/>
+<text x="1242.5" y="1073" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172033" text-anchor="middle">Broker no notebook</text>
+<text x="1242.5" y="1101" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="middle">acesso LAN ainda pendente</text>
+<polyline points="265,1093 495,1093" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="11 8"/>
+<polyline points="780,1093 1040,1093" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="11 8"/>
+<text x="40" y="1215" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#172033" text-anchor="start">O broker atual é publicado em 127.0.0.1:1883. Esse endereço não é alcançável pela ESP32 na rede local.</text>
+<text x="40" y="1250" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#172033" text-anchor="start">Fontes: firmware/main/main.cpp • ml/mqtt_ingestion.py • ops/mlops/compose.yaml • evidências Fase C e HTTP</text>
+</svg>

@@ -127,6 +127,10 @@ class TerminalHostClient:
         self.command_listener: Callable[[CommandRecord], None] | None = None
         # Chamado para CADA sensor_frame, na ordem em que chegaram (inclusive em rajadas).
         self.sensor_listener: Callable[[SensorFramePayload], None] | None = None
+        # Variantes com o carimbo de tempo do dispositivo (`ts_ms` do envelope), usadas pelo MotionLab:
+        # o host recebe frames em rajadas, então o tempo de chegada não serve para velocidade.
+        self.frame_listener: Callable[[SensorFramePayload, int], None] | None = None
+        self.gesture_listener: Callable[[GestureEventPayload, int], None] | None = None
         self._records_resync_pending = False
 
         self.tx_packets = 0
@@ -380,12 +384,16 @@ class TerminalHostClient:
                     self._sync_launch_lcd()
             if self.sensor_listener is not None:
                 self.sensor_listener(payload)
+            if self.frame_listener is not None:
+                self.frame_listener(payload, env.ts_ms)
         elif env.type == MessageType.ACK:
             self._on_ack(payload)
         elif env.type == MessageType.ERROR:
             self._on_device_error(payload)
         elif env.type == MessageType.GESTURE_EVENT:
             self.last_gesture = payload
+            if self.gesture_listener is not None:
+                self.gesture_listener(payload, env.ts_ms)
             if self.dispatch_gesture_events:
                 self._dispatch_gesture(env)
 

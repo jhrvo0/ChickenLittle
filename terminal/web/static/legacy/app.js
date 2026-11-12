@@ -39,4 +39,6 @@
   $('volume').addEventListener('change',()=>action('volume',{value:Number($('volume').value)}));
   document.addEventListener('visibilitychange',()=>{if(document.hidden)silence();else renderMusic(state?.music)});
   syncDisabled();loadPorts();poll();
+  // Experiência legada: liga as regras automáticas sensor→pet no servidor (MotionLab é o padrão).
+  api('/api/experience',{value:'legacy'}).catch(()=>{});
 })();

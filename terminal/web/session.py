@@ -20,6 +20,8 @@ from terminal.communication.protocol import (
 )
 from terminal.communication.transport import PySerialEndpoint, create_virtual_serial_pair
 from terminal.games.pet_launch import LAUNCH_UPGRADES, LaunchPhase
+from terminal.motionlab.dataset import evaluate_real_sessions, list_sessions, load_synthetic_report
+from terminal.motionlab.engine import MotionEngine
 from terminal.pet.state import PetState
 
 SLIDES = [
@@ -92,8 +94,12 @@ class _ActionTicket:
 class MotionPetSession:
     """Executa o protocolo e os motores existentes sem abrir a USB no carregamento."""
 
-    def __init__(self, *, allow_demo: bool = False) -> None:
+    def __init__(self, *, allow_demo: bool = False, engine: MotionEngine | None = None) -> None:
         self.allow_demo = allow_demo
+        # MotionLab é a experiência principal; o pet e o Pet Launch ficam em /legacy/. As regras
+        # automáticas sensor→pet (`_sensor_controls`) só valem com a experiência legada ativa.
+        self.engine = engine or MotionEngine()
+        self._experience = "lab"
         self._lock = threading.RLock()
         self._jobs: Queue = Queue(maxsize=MAX_QUEUED_JOBS)
         self._stop = threading.Event()
@@ -184,6 +190,103 @@ class MotionPetSession:
             raise ValueError(ticket.error)
         return self.state()
 
+    # ------------------------------------------------------------------ MotionLab
+    def set_experience(self, value: str) -> None:
+        if value not in ("lab", "legacy"):
+            raise ValueError("Experiência inválida.")
+        with self._lock:
+            self._experience = value
+            self._last_ir = None
+            self._zone = None
+            if value == "legacy":
+                # Na tela do pet nenhum gesto aciona ações do MotionLab.
+                self.engine.armed = False
+                self.engine.external_enabled = False
+
+    def live(self, since_frame: int = 0, since_event: int = 0) -> dict:
+        with self._lock:
+            data = self.engine.live(since_frame, since_event)
+            data["connection"] = self._connection_locked()
+            return data
+
+    def lab_state(self) -> dict:
+        with self._lock:
+            data = self.engine.snapshot()
+            data["connection"] = self._connection_locked()
+            data["experience"] = self._experience
+            data["sessions"] = list_sessions(self.engine.recorder.data_root)
+            return data
+
+    def lab(self, payload: dict) -> dict:
+        """Comandos do MotionLab. Não passam pela USB: executam na hora, sob o lock da sessão."""
+        if not isinstance(payload, dict):
+            raise ValueError("Comando inválido.")
+        cmd = payload.get("cmd")
+        if cmd == "evaluate":
+            # Fora do lock: só lê arquivos e modelos (somente leitura); não trava a leitura serial.
+            return {"evaluation": {
+                "real": evaluate_real_sessions(self.engine.recognizers, self.engine.recorder.data_root),
+                "synthetic": load_synthetic_report(),
+            }}
+        engine = self.engine
+        with self._lock:
+            if cmd == "module":
+                engine.set_module(payload.get("module"))
+            elif cmd == "arm":
+                value = payload.get("value")
+                if not isinstance(value, bool):
+                    raise ValueError("Valor inválido.")
+                if value and not self._live_locked():
+                    raise ValueError("Conecte a ESP32 e aguarde as leituras antes de ativar os gestos.")
+                engine.set_armed(value)
+            elif cmd == "external":
+                value = payload.get("value")
+                if not isinstance(value, bool):
+                    raise ValueError("Valor inválido.")
+                engine.set_external(value)
+            elif cmd == "settings":
+                engine.update_settings(payload.get("changes"))
+            elif cmd == "profile_save":
+                engine.store.upsert_profile(payload.get("profile"))
+            elif cmd == "profile_delete":
+                engine.store.delete_profile(payload.get("id"))
+            elif cmd == "profile_reset":
+                engine.store.reset_profile(payload.get("id"))
+            elif cmd == "profile_activate":
+                engine.store.activate(payload.get("context"), payload.get("id"))
+            elif cmd == "test_action":
+                # Teste manual: ação interna funciona sem placa; externa exige a chave "Ações no sistema".
+                engine.test_action(payload.get("action"))
+            elif cmd == "record_start":
+                if not self._live_locked():
+                    raise ValueError("Conecte a ESP32 e aguarde as leituras antes de gravar.")
+                engine.recorder.start(payload.get("participant"), self._origin, repeats=payload.get("repeats", 3))
+            elif cmd == "record_stop":
+                engine.recorder.abort("Gravação interrompida pelo usuário (nada foi salvo).")
+            else:
+                raise ValueError("Comando do MotionLab desconhecido.")
+        return self.lab_state()
+
+    # Roteiro da demonstração do servidor (simulador): sem ele a mão sintética fica parada longe
+    # do sensor e nenhum reconhecedor tem o que classificar. Tudo continua rotulado como DEMO.
+    _DEMO_SCRIPT = (GestureType.NEUTRAL, GestureType.APPROACH, GestureType.HOLD, GestureType.HOLD,
+                    GestureType.RETREAT, GestureType.NEUTRAL, GestureType.NEUTRAL)
+
+    def _demo_choreography(self) -> None:
+        source = getattr(self._node, "sensor_source", None)
+        if source is None or not hasattr(source, "queue_gesture_profile") or getattr(source, "_trajectory", None):
+            return
+        self._demo_step = (getattr(self, "_demo_step", -1) + 1) % len(self._DEMO_SCRIPT)
+        source.queue_gesture_profile(self._DEMO_SCRIPT[self._demo_step])
+
+    def _connection_locked(self) -> dict:
+        age = round((time.monotonic() - self._last_frame) * 1000) if self._last_frame is not None else None
+        message = self._message
+        if self._status == "connected" and (age is None or age > 2000):
+            message = "Aguardando leituras dos sensores…" if age is None else "Sem leituras recentes. Confira a USB."
+        return {"status": self._status, "port": self._port, "origin": self._origin, "message": message,
+                "frames": self._frames, "age_ms": age, "live": self._live_locked()}
+
     def close(self) -> None:
         self._stop.set()
         self._thread.join(timeout=9)
@@ -207,6 +310,7 @@ class MotionPetSession:
         self._frames = 0
         self._history.clear()
         self._trajectory.clear()
+        self.engine.reset("NONE")
 
     def _open(self, port: str) -> None:
         with self._lock:
@@ -238,6 +342,8 @@ class MotionPetSession:
                 origin = "ESP32_HW"
             client = TerminalHostClient(endpoint, transport_label=origin, dispatch_gesture_events=False)
             client.sensor_listener = self._on_sensor_frame
+            client.frame_listener = self.engine.on_frame
+            client.gesture_listener = self.engine.on_device_gesture
             client.command_listener = self._on_command_outcome
             endpoint.write_line("START")
             endpoint.write_line("IR ON")
@@ -246,6 +352,7 @@ class MotionPetSession:
                 self._client = client
                 self._node = node
                 self._origin = origin
+                self.engine.reset(origin)
                 self._status = "connected"
                 self._message = "Demonstração local — sem sensores físicos." if node else "ESP32 conectada pela USB."
                 self._event(self._message, "connection")
@@ -297,7 +404,8 @@ class MotionPetSession:
         """
         self._last_frame = time.monotonic()
         self._frames += 1
-        self._sensor_controls(frame, self._last_frame)
+        if self._experience == "legacy":
+            self._sensor_controls(frame, self._last_frame)
         self._history.append({"distance_cm": frame.distance_cm, "valid": frame.valid_ultrasonic})
 
     def _on_command_outcome(self, record: CommandRecord) -> None:
@@ -400,6 +508,8 @@ class MotionPetSession:
                     if client is not None:
                         try:
                             if self._node is not None and now >= next_demo:
+                                if self._experience == "lab":
+                                    self._demo_choreography()
                                 self._node.step()
                                 next_demo = now + .07
                             pet_before = client.pet_state
@@ -436,6 +546,7 @@ class MotionPetSession:
             message = "Aguardando leituras dos sensores…" if age is None else "Sem leituras recentes. Confira a USB."
         state = {
             "pet_name": PET_DISPLAY_NAME,
+            "experience": self._experience,
             "connection": {"status": connected_status, "port": self._port, "origin": self._origin, "message": message, "frames": self._frames, "age_ms": age},
             "mode": client.active_mode.value if client else "MOTION_PET",
             "pet": client.pet_state.to_dict() if client and self._pet_seen else None,

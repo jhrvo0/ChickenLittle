@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "cohort": "demo",
+  "experiment_id": "20261111T200245_b7c2e150",
+  "dataset_sha256": "9951827210f1f27a06157c8a0d3c31bf76e33f76943aa7ed09259c1bf0e514eb",
+  "model_relpath": "demo/20261111T200245_b7c2e150/models/best_model.joblib",
+  "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218",
+  "physical_validation": "pending"
+}

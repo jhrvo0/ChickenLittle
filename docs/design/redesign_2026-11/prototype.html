@@ -1,0 +1,1464 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MotionPet · protótipo do redesign 2026-11</title>
+<!--
+  PROTÓTIPO ESTÁTICO (dados falsos). Não fala com /api nem com a porta serial.
+  Referência visual para aplicar em terminal/web/static/{index.html,app.css,app.js}.
+  Tudo que é só do protótipo está marcado com "PROTO" (painel de simulação, régua
+  que segue o mouse, lâmpada do IR clicável, tecla C). Ver design_spec.md.
+
+  Parâmetros pelo hash (para capturas): #view=pet|launch|music|slides|device
+  &phase=MENU|SELECT_PET|PREP|CHARGING|LAUNCHING|FLIGHT|RESULT &conn=off|connecting|live|demo|lag|stale|error
+  &palco=1 &theme=dark &sim=0 &auto=0 &d=23 &ir=1 &charge=0.88 &mood=HUNGRY &stage=EGG|CHICK|CYBER_ROOSTER
+  &audio=1 &muted=1 &slide=3 &record=1 &fp=0.55 &blocked=1
+-->
+<style>
+/* ============================================================
+   1. TOKENS
+   ============================================================ */
+:root{
+  color-scheme:light;
+  /* superfícies e tinta */
+  --bg:#FFF5DB;            /* casca: fundo da página */
+  --surface:#FFFDF5;       /* papel: cartões */
+  --ink:#1D1710;           /* texto principal, contornos */
+  --ink-2:#5C4F3A;         /* texto secundário */
+  --line:#1D1710;          /* contorno de cartão e botão */
+  /* marca */
+  --yolk:#FFC72C; --yolk-deep:#F2A900; --yolk-soft:#FFE9A6;
+  --on-yolk:#1D1710; --on-yolk-2:#4A3F2E;
+  /* cenário */
+  --sky:#BDE4F7; --sky-2:#E3F4FC; --cloud:#FFFFFF;
+  --grass:#3FA35B; --grass-2:#2E7D46; --hill:#8FD19E; --on-grass:#1D1710; --wood:#8A5A2B;
+  /* significado: azul = ultrassom/mão, coral = infravermelho/cartão */
+  --ultra:#1857B8; --ultra-soft:#D6E6FF;
+  --ir:#C2261D;    --ir-soft:#FFDAD4;
+  --ok:#1B6B3A;    --ok-soft:#CDEFD8;
+  --warn:#8A5300;  --warn-soft:#FFE3B0;
+  --focus:#1857B8;
+  /* console (trilho lateral + HUD): sempre escuro, nos dois temas */
+  --console:#1D1710; --console-2:#2B2318; --console-line:#8A7858;
+  --console-ink:#FFF5DB; --console-ink-2:#D9CBA8;
+  --ultra-glow:#7DB7FF; --ir-glow:#FF5240; --ir-glow-text:#FF6B5A; --ok-glow:#6FDB95; --warn-glow:#FFB84D;
+  /* tipografia: só fontes do sistema */
+  --f-display:"Bahnschrift","DIN Alternate","Roboto Condensed","Arial Narrow","Segoe UI",system-ui,sans-serif;
+  --f-text:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:"Cascadia Mono","Cascadia Code",Consolas,"Courier New",monospace;
+  --t-mega:4.5rem; --t-xxl:3rem; --t-xl:1.75rem; --t-lg:1.375rem; --t-md:1.125rem; --t-base:1rem; --t-sm:.875rem;
+  /* espaço, raio, contorno, sombra */
+  --s-1:.25rem; --s-2:.5rem; --s-3:.75rem; --s-4:1rem; --s-5:1.5rem; --s-6:2rem;
+  --r-sm:.375rem; --r-md:.75rem; --r-lg:1.125rem; --r-pill:999px;
+  --bw:.125rem; --press:.25rem;
+  --shadow-hard:0 var(--press) 0 var(--line);
+  --shadow-float:0 .75rem 2rem rgba(29,23,16,.24);
+  /* layout */
+  --rail-w:6.5rem; --hud-h:8rem; --panel-w:20rem;
+  --tick:150ms;            /* igual ao intervalo do poll: transições lineares deste tamanho */
+}
+:root[data-theme=dark]{
+  color-scheme:dark;
+  --bg:#17120C; --surface:#241D14; --ink:#FFF5DB; --ink-2:#D9CBA8; --line:#8A7858;
+  --yolk-soft:#4A3A10;
+  --sky:#1F3550; --sky-2:#2A4466; --cloud:#3B5778;
+  --grass:#2E7D46; --grass-2:#1F5A32; --hill:#3C6B4A; --on-grass:#FFF5DB; --wood:#B98A55;
+  --ultra:#7DB7FF; --ultra-soft:#16305A;
+  --ir:#FF8B7D;    --ir-soft:#4A1A15;
+  --ok:#6FDB95;    --ok-soft:#123D24;
+  --warn:#FFB84D;  --warn-soft:#4A3208;
+  --focus:#FFC72C;
+  --console:#0E0B07; --console-2:#1D1710;
+  --shadow-hard:0 var(--press) 0 #000;
+  --shadow-float:0 .75rem 2rem rgba(0,0,0,.5);
+}
+
+/* ============================================================
+   2. BASE
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+/* 16 px em 1366x768, ~22 px em 1920x1080; nunca abaixo de 14 px */
+html{font-size:clamp(14px,min(1.171vw,2.083vh),24px)}
+body{margin:0;height:100dvh;overflow:hidden;background:var(--bg);color:var(--ink);font:400 var(--t-base)/1.4 var(--f-text);-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ol,ul{margin:0;padding:0}
+ol,ul{list-style:none}
+button,select,input{font:inherit;color:inherit}
+svg{display:block}
+.icon{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.svg-defs{position:absolute;width:0;height:0;overflow:hidden}
+.display{font-family:var(--f-display);font-stretch:88%;font-weight:700;font-variant-numeric:tabular-nums}
+.label{font:700 var(--t-sm)/1.2 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.silk{font:400 var(--t-sm)/1.2 var(--f-mono);letter-spacing:.02em}
+kbd{display:inline-grid;place-items:center;min-width:1.6rem;height:1.5rem;padding:0 .35rem;border:var(--bw) solid currentColor;border-radius:var(--r-sm);font:700 var(--t-sm)/1 var(--f-mono);opacity:.85}
+:focus-visible{outline:.1875rem solid var(--focus);outline-offset:.125rem;border-radius:var(--r-sm)}
+.rail :focus-visible,.hud :focus-visible{outline-color:var(--yolk)}
+[hidden]{display:none!important}
+
+/* ============================================================
+   3. ESTRUTURA: trilho | conteúdo / HUD
+   ============================================================ */
+.app{display:grid;grid-template-columns:var(--rail-w) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;height:100dvh}
+.rail{grid-area:1/1;display:flex;flex-direction:column;gap:.3rem;padding:.6rem .5rem;background:var(--console);color:var(--console-ink);min-height:0;overflow:hidden}
+.main{grid-area:1/2;position:relative;display:grid;grid-template-rows:auto minmax(0,1fr);gap:.75rem;padding:.875rem 1rem;min-width:0;min-height:0}
+.hud{grid-area:2/1/3/3}
+
+/* ---- trilho ---- */
+.brand{display:grid;justify-items:center;gap:.15rem;padding:.1rem 0 .45rem;color:var(--console-ink);text-decoration:none;font:700 var(--t-sm)/1 var(--f-display);letter-spacing:.04em}
+.brand svg{width:2.5rem;height:2.5rem}
+.brand b{color:var(--yolk)}
+.nav,.rail-btn{position:relative;display:grid;justify-items:center;gap:.2rem;width:100%;padding:.5rem .2rem .45rem;border:var(--bw) solid transparent;border-radius:var(--r-md);background:transparent;color:var(--console-ink-2);font:700 var(--t-sm)/1.1 var(--f-display);letter-spacing:.02em;cursor:pointer}
+.nav .icon{width:1.75rem;height:1.75rem}
+.nav:hover,.rail-btn:hover{background:var(--console-2);color:var(--console-ink)}
+.nav.active{background:var(--yolk);color:var(--on-yolk);border-color:var(--yolk)}
+.nav kbd,.rail-btn kbd{position:absolute;top:.25rem;right:.25rem;min-width:1.15rem;height:1.15rem;padding:0;border-width:.09rem;font-size:.75rem;opacity:.7}
+.rail-btn kbd{position:static}
+.rail-foot{margin-top:auto;display:grid;gap:.3rem}
+.rail-btn{grid-auto-flow:column;justify-content:center;align-items:center;gap:.35rem;padding:.45rem .2rem;border-color:var(--console-line)}
+.rail-btn .icon{width:1.25rem;height:1.25rem}
+.rail-btn--stage{background:var(--console-2);border-color:var(--yolk);color:var(--yolk)}
+.rail-btn--proto{border-style:dashed;color:var(--console-ink-2)}
+
+/* ============================================================
+   4. FAIXA DE INSTRUÇÃO ("o que fazer agora")
+   ============================================================ */
+.coach{display:flex;align-items:center;gap:.875rem;min-height:4.6rem;padding:.6rem 1rem;border:var(--bw) solid var(--line);border-radius:var(--r-lg);background:var(--yolk);color:var(--on-yolk);box-shadow:var(--shadow-hard)}
+.coach-badge{display:grid;place-items:center;flex:none;width:3rem;height:3rem;border-radius:50%;background:var(--on-yolk);color:var(--yolk);font:700 1.75rem/1 var(--f-display)}
+.coach-badge .icon{width:1.6rem;height:1.6rem}
+.coach-text{min-width:0;flex:1}
+.coach-title{font:700 var(--t-xl)/1.1 var(--f-display);font-stretch:88%;letter-spacing:.005em;text-wrap:balance}
+.coach-sub{margin-top:.2rem;font-size:var(--t-base);line-height:1.3;color:var(--on-yolk-2)}
+.coach[data-tone=ok]{background:var(--ok-glow)} .coach[data-tone=ok] .coach-sub{color:var(--on-yolk)}
+.coach[data-tone=warn]{background:var(--warn-soft);color:var(--ink)} .coach[data-tone=warn] .coach-sub{color:var(--ink-2)}
+.coach[data-tone=warn] .coach-badge{background:var(--warn);color:var(--warn-soft)}
+.coach[data-tone=danger]{background:var(--ir-soft);color:var(--ink)} .coach[data-tone=danger] .coach-sub{color:var(--ink-2)}
+.coach[data-tone=danger] .coach-badge{background:var(--ir);color:var(--ir-soft)}
+
+/* etapas numeradas do Pet Launch */
+.stepper{display:none;flex:none;align-items:center;gap:.3rem}
+body[data-view=launch] .stepper{display:flex}
+.step{display:flex;align-items:center;gap:.35rem;padding:.25rem .6rem .25rem .25rem;border:var(--bw) solid var(--on-yolk);border-radius:var(--r-pill);font:700 var(--t-sm)/1 var(--f-display);letter-spacing:.03em;color:var(--on-yolk);background:transparent}
+.step i{display:grid;place-items:center;width:1.5rem;height:1.5rem;border-radius:50%;border:var(--bw) solid var(--on-yolk);font-style:normal}
+.step[data-state=done]{background:rgba(29,23,16,.12)} .step[data-state=done] i{background:var(--on-yolk);color:var(--yolk)}
+.step[data-state=now]{background:var(--on-yolk);color:var(--yolk)} .step[data-state=now] i{background:var(--yolk);color:var(--on-yolk);border-color:var(--yolk)}
+.step[data-state=todo]{border-style:dashed}
+.coach[data-tone=warn] .stepper,.coach[data-tone=danger] .stepper{display:none}
+
+/* ============================================================
+   5. PEÇAS COMUNS: telas, cartões, botões, chips, medidores
+   ============================================================ */
+.view{display:none;min-height:0;min-width:0;gap:.875rem;grid-template-columns:minmax(0,1fr) var(--panel-w)}
+.view.active{display:grid}
+.scene{position:relative;min-height:0;min-width:0;overflow:hidden;border:var(--bw) solid var(--line);border-radius:var(--r-lg);background:linear-gradient(180deg,var(--sky) 0%,var(--sky-2) 78%);box-shadow:var(--shadow-hard)}
+.panel{display:flex;flex-direction:column;gap:.75rem;min-height:0;overflow:auto;padding-bottom:var(--press);scrollbar-width:thin}
+.card{border:var(--bw) solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:.8rem .9rem;box-shadow:var(--shadow-hard)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.6rem}
+.card-title{font:700 var(--t-lg)/1.1 var(--f-display);font-stretch:88%}
+.muted{color:var(--ink-2)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;min-height:2.75rem;padding:.45rem .9rem;border:var(--bw) solid var(--line);border-radius:var(--r-md);background:var(--surface);color:var(--ink);font:700 var(--t-md)/1.05 var(--f-display);letter-spacing:.01em;box-shadow:var(--shadow-hard);cursor:pointer;transition:transform .06s,box-shadow .06s,background .12s;text-align:left}
+.btn:hover{background:var(--yolk-soft)}
+.btn:active{transform:translateY(var(--press));box-shadow:0 0 0 var(--line)}
+.btn--primary{background:var(--yolk);color:var(--on-yolk)} .btn--primary:hover{background:var(--yolk-deep)}
+.btn--block{display:flex;width:100%}
+.btn--sm{min-height:2.25rem;padding:.3rem .7rem;font-size:var(--t-base)}
+.btn:disabled{background:transparent;color:var(--ink-2);border-style:dashed;box-shadow:none;transform:none;cursor:not-allowed}
+.btn small{display:block;font:400 var(--t-sm)/1.15 var(--f-text);letter-spacing:0;color:var(--ink-2)}
+.btn--primary small{color:var(--on-yolk-2)}
+.btn .grow{flex:1}
+
+.chip{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .7rem;border:var(--bw) solid var(--line);border-radius:var(--r-pill);background:var(--surface);color:var(--ink);font:700 var(--t-base)/1.1 var(--f-display);letter-spacing:.02em;white-space:nowrap}
+.chip .icon{width:1.15rem;height:1.15rem}
+.chip--yolk{background:var(--yolk);color:var(--on-yolk)}
+.chip--ok{background:var(--ok-soft);color:var(--ink)} .chip--warn{background:var(--warn-soft);color:var(--ink)}
+.chip--hand{background:var(--ultra-soft);color:var(--ink)} .chip--hand .icon{color:var(--ultra)}
+.chip--card{background:var(--ir-soft);color:var(--ink)} .chip--card .icon{color:var(--ir)}
+.scene-chips{position:absolute;top:.75rem;left:.75rem;right:.75rem;display:flex;gap:.5rem;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:3}
+.scene-chips>div{display:flex;gap:.5rem;flex-wrap:wrap}
+
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:.6rem .9rem}
+.meter-head{display:flex;justify-content:space-between;align-items:baseline;font-weight:600}
+.meter-head strong{font:700 var(--t-lg)/1 var(--f-display);font-variant-numeric:tabular-nums}
+.track{height:.8rem;margin-top:.25rem;border:var(--bw) solid var(--line);border-radius:var(--r-pill);background:var(--bg);overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--grass);border-right:var(--bw) solid var(--line);transition:width .4s}
+.meter[data-level=mid] .track i{background:var(--yolk)}
+.meter[data-level=low] .track i{background:var(--ir)}
+.meter[data-level=low] strong{color:var(--ir)}
+.meter-note{display:block;min-height:1.1em;font-size:var(--t-sm);color:var(--ir);font-weight:600}
+
+/* aviso flutuante (último evento) */
+.toast{position:absolute;left:1.75rem;bottom:1.75rem;z-index:6;max-width:min(30rem,60%);padding:.5rem .9rem;border:var(--bw) solid var(--line);border-radius:var(--r-md);background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow-float);opacity:0;transform:translateY(.5rem);transition:opacity .25s,transform .25s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+.toast[data-kind=error]{background:var(--ir-soft)}
+
+/* ============================================================
+   6. MEU PET
+   ============================================================ */
+#view-pet{--panel-w:22rem}
+.sun{position:absolute;top:11%;right:9%;width:5.5rem;height:5.5rem;border-radius:50%;background:var(--yolk);border:var(--bw) solid var(--line);box-shadow:0 0 0 .9rem rgba(255,199,44,.28)}
+:root[data-theme=dark] .sun{background:#F3E9C9;box-shadow:0 0 0 .9rem rgba(243,233,201,.14)}
+.cloud{position:absolute;height:2rem;border-radius:var(--r-pill);background:var(--cloud);border:var(--bw) solid var(--line);opacity:.95}
+.cloud::before{content:"";position:absolute;left:22%;top:-58%;width:44%;height:130%;border-radius:50%;background:inherit;border:inherit;border-bottom:0;clip-path:inset(0 0 42% 0)}
+.cloud.c1{top:18%;left:9%;width:7rem;animation:drift 38s linear infinite alternate}
+.cloud.c2{top:33%;right:24%;width:5rem;animation:drift 52s linear infinite alternate-reverse}
+.hill{position:absolute;left:-12%;right:-12%;bottom:-46%;height:74%;border-radius:50%;background:var(--grass);border:var(--bw) solid var(--line)}
+.hill.back{left:28%;right:-30%;bottom:-36%;background:var(--hill)}
+.pet-sprite{position:absolute;left:50%;bottom:19%;width:min(15rem,36%);transform:translateX(-50%);z-index:2}
+.pet-sprite svg{width:100%;height:auto;animation:bob 3.2s ease-in-out infinite;transform-origin:50% 90%}
+.pet-sprite[data-motion=EATING] svg,.pet-sprite[data-motion=PLAYING] svg{animation:hop .5s ease-in-out infinite}
+.pet-sprite[data-motion=PETTING] svg{animation:wiggle .45s ease-in-out infinite}
+.pet-sprite[data-motion=SLEEPING] svg{animation:breathe 4s ease-in-out infinite;filter:saturate(.7)}
+.bubble{position:absolute;left:calc(50% + 5.5rem);top:20%;z-index:3;max-width:15rem;padding:.55rem .9rem;border:var(--bw) solid var(--line);border-radius:var(--r-lg) var(--r-lg) var(--r-lg) .2rem;background:var(--surface);font:700 var(--t-lg)/1.15 var(--f-display);font-stretch:88%;box-shadow:var(--shadow-hard)}
+.fx{position:absolute;left:50%;bottom:52%;z-index:4;pointer-events:none}
+.fx span{position:absolute;left:0;bottom:0;padding:.2rem .6rem;border:var(--bw) solid var(--line);border-radius:var(--r-pill);background:var(--yolk);color:var(--on-yolk);font:700 var(--t-md)/1 var(--f-display);white-space:nowrap;animation:floatup 1.5s ease-out forwards}
+.evo{position:absolute;left:50%;bottom:.8rem;z-index:3;transform:translateX(-50%);display:flex;align-items:center;gap:.4rem;padding:.35rem .6rem;border:var(--bw) solid var(--line);border-radius:var(--r-pill);background:var(--surface);box-shadow:var(--shadow-hard)}
+.evo-node{display:flex;align-items:center;gap:.3rem;padding:.15rem .55rem .15rem .2rem;border-radius:var(--r-pill);font:700 var(--t-sm)/1 var(--f-display);letter-spacing:.03em;color:var(--ink-2)}
+.evo-node svg{width:1.6rem;height:1.7rem;opacity:.55}
+.evo-node[data-state=done]{color:var(--ink)} .evo-node[data-state=done] svg{opacity:1}
+.evo-node[data-state=now]{background:var(--yolk);color:var(--on-yolk)} .evo-node[data-state=now] svg{opacity:1}
+.evo-sep{width:1.4rem;height:var(--bw);background:var(--line)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.actions .btn{justify-content:flex-start;min-height:3.1rem;padding:.35rem .7rem}
+.save-row{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-top:.65rem;padding-top:.65rem;border-top:var(--bw) dashed var(--line)}
+
+/* ============================================================
+   7. PET LAUNCH
+   ============================================================ */
+.scene--launch{--ground:17%}
+.ground{position:absolute;left:0;right:0;bottom:0;height:var(--ground);background:linear-gradient(180deg,var(--grass) 0 2.4rem,var(--grass-2) 2.4rem);border-top:var(--bw) solid var(--line);z-index:1}
+.ground-ruler{position:absolute;inset:0}
+.ground-ruler span{position:absolute;top:0;transform:translateX(-50%);padding-top:.75rem;font:700 var(--t-base)/1 var(--f-display);color:var(--on-grass);white-space:nowrap}
+.ground-ruler span::before{content:"";position:absolute;left:50%;top:0;width:var(--bw);height:.6rem;background:var(--on-grass)}
+.trail{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.trail polyline{fill:none;stroke:var(--ink);stroke-width:4;stroke-dasharray:2 10;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.flag{position:absolute;bottom:var(--ground);z-index:2;width:var(--bw);height:4.2rem;background:var(--line);transition:left .4s}
+.flag span{position:absolute;left:0;top:0;padding:.15rem .5rem;border:var(--bw) solid var(--line);border-left:0;border-radius:0 var(--r-sm) var(--r-sm) 0;background:var(--yolk);color:var(--on-yolk);font:700 var(--t-sm)/1.15 var(--f-display);letter-spacing:.04em;white-space:nowrap}
+.flag b{display:block;font-size:var(--t-md);letter-spacing:0}
+.protractor{position:absolute;left:calc(10% - 1.5625rem);bottom:calc(var(--ground) - 1.5625rem);width:15.625rem;height:14.6875rem;z-index:2;overflow:visible;transition:opacity .2s}
+.protractor .band{fill:none;stroke:var(--yolk);stroke-width:20}
+.protractor .rim{fill:none;stroke:var(--line);stroke-width:2}
+.protractor .tick{stroke:var(--line);stroke-width:2}
+.protractor text{font:700 15px var(--f-display);fill:var(--ink)}
+.protractor .needle{stroke:var(--line);stroke-width:5;stroke-linecap:round;transition:transform var(--tick) linear;transform-origin:25px 210px;transform-box:view-box}
+.protractor .post{stroke:var(--wood);stroke-width:8;stroke-linecap:round}
+.flyer{position:absolute;left:10%;bottom:var(--ground);width:5.6rem;z-index:3;transform:translate(-50%,13%);transition:left var(--tick) linear,bottom var(--tick) linear}
+.flyer svg{width:100%;height:auto}
+.scene--launch[data-phase=FLIGHT] .flyer svg{animation:tumble 1.1s linear infinite}
+.scene--launch[data-phase=CHARGING] .flyer svg{animation:shake .18s linear infinite}
+.scene--launch[data-phase=FLIGHT] .protractor,.scene--launch[data-phase=RESULT] .protractor,.scene--launch[data-phase=LAUNCHING] .protractor{opacity:0}
+.overlay{position:absolute;z-index:4;display:none}
+.scene--launch[data-phase=MENU] .overlay--menu,
+.scene--launch[data-phase=SELECT_PET] .overlay--pilot,
+.scene--launch[data-phase=PREP] .overlay--aim,
+.scene--launch[data-phase=CHARGING] .overlay--aim,
+.scene--launch[data-phase=CHARGING] .overlay--charge,
+.scene--launch[data-phase=PREP] .overlay--help,
+.scene--launch[data-phase=LAUNCHING] .overlay--flight,
+.scene--launch[data-phase=FLIGHT] .overlay--flight,
+.scene--launch[data-phase=RESULT] .overlay--result{display:block}
+.overlay--menu,.overlay--pilot{right:4%;top:17%;width:min(27rem,54%)}
+.overlay .card{box-shadow:var(--shadow-hard)}
+.menu-title{font:700 var(--t-xxl)/.95 var(--f-display);font-stretch:82%;letter-spacing:.01em}
+.menu-steps{display:grid;gap:.4rem;margin:.7rem 0}
+.menu-steps li{display:flex;align-items:center;gap:.55rem;font-weight:600;font-size:var(--t-md)}
+.menu-steps i{display:grid;place-items:center;flex:none;width:1.75rem;height:1.75rem;border-radius:50%;background:var(--ink);color:var(--surface);font:700 var(--t-base)/1 var(--f-display);font-style:normal}
+.cta{display:flex;align-items:center;gap:.5rem;margin-top:.6rem;padding:.5rem .7rem;border:var(--bw) dashed var(--line);border-radius:var(--r-md);background:var(--ir-soft);font:700 var(--t-md)/1.15 var(--f-display)}
+.cta .icon{color:var(--ir)}
+.pilot{display:grid;grid-template-columns:6rem 1fr;gap:.8rem;align-items:center}
+.pilot svg{width:100%;height:auto}
+.overlay--aim{left:calc(10% + 15rem);bottom:calc(var(--ground) + 2.6rem)}
+.big-read{font:700 5.5rem/.9 var(--f-display);font-stretch:82%;font-variant-numeric:tabular-nums;color:var(--ink)}
+.scene--launch[data-phase=CHARGING] .overlay--aim .big-read{font-size:3rem}
+.scene--launch[data-phase=CHARGING] .overlay--aim{bottom:calc(var(--ground) + 1rem)}
+.overlay--help{right:3.5%;top:19%;width:17rem}
+.help-row{display:flex;align-items:center;gap:.55rem;padding:.3rem 0;font-weight:600}
+.help-row b{font:700 var(--t-lg)/1 var(--f-display);min-width:3rem;text-align:right;margin-left:auto}
+.overlay--charge{left:44%;right:4%;top:19%}
+.power-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:.5rem}
+.power{position:relative;height:3.6rem;border:var(--bw) solid var(--line);border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-hard)}
+.power i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:calc(var(--r-md) - var(--bw)) 0 0 calc(var(--r-md) - var(--bw));background:repeating-linear-gradient(115deg,var(--yolk) 0 .9rem,var(--yolk-deep) .9rem 1.8rem);border-right:var(--bw) solid var(--line);transition:width var(--tick) linear}
+.power .sweet{position:absolute;left:80%;width:15%;top:calc(-1 * var(--bw));bottom:calc(-1 * var(--bw));border:var(--bw) solid var(--line);background:rgba(63,163,91,.45);z-index:1}
+.power .sweet b{position:absolute;left:50%;bottom:calc(100% + .3rem);transform:translateX(-50%);padding:.15rem .5rem;border:var(--bw) solid var(--line);border-radius:var(--r-sm);background:var(--ok-glow);color:var(--on-yolk);font:700 var(--t-sm)/1 var(--f-display);letter-spacing:.05em;white-space:nowrap}
+.power.is-sweet{box-shadow:var(--shadow-hard),0 0 0 .4rem rgba(111,219,149,.7)}
+.power.is-sweet i{background:var(--ok-glow)}
+.power-scale{display:flex;justify-content:space-between;margin-top:.3rem;font:700 var(--t-sm)/1 var(--f-display);color:var(--ink-2)}
+.overlay--flight{right:3%;top:3.7rem;text-align:right}
+.overlay--flight .big-read{font-size:4.5rem}
+.overlay--result{left:50%;top:9%;transform:translateX(-50%);width:min(34rem,82%)}
+.result{position:relative;text-align:center;padding:1rem 1.2rem 1.1rem;box-shadow:var(--shadow-float),var(--shadow-hard)}
+.result-dist{font:700 var(--t-mega)/.9 var(--f-display);font-stretch:82%;font-variant-numeric:tabular-nums}
+.result-best{margin-top:.2rem;font-weight:600;color:var(--ink-2)}
+.sticker{position:absolute;top:-1rem;right:-1.4rem;transform:rotate(7deg);padding:.4rem .9rem;border:var(--bw) solid var(--line);border-radius:var(--r-md);background:var(--yolk);color:var(--on-yolk);font:700 var(--t-lg)/1 var(--f-display);letter-spacing:.03em;box-shadow:var(--shadow-hard);animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.8rem 0 .2rem}
+.tile{padding:.4rem .3rem;border:var(--bw) solid var(--line);border-radius:var(--r-md);background:var(--bg)}
+.tile b{display:block;font:700 var(--t-xl)/1 var(--f-display);font-variant-numeric:tabular-nums}
+.tile span{font-size:var(--t-sm);font-weight:600;color:var(--ink-2)}
+.tile--coins{background:var(--yolk-soft)}
+
+/* loja */
+.balance{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .7rem .2rem .3rem;border:var(--bw) solid var(--line);border-radius:var(--r-pill);background:var(--yolk);color:var(--on-yolk);font:700 var(--t-lg)/1 var(--f-display);font-variant-numeric:tabular-nums}
+.coin{display:grid;place-items:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--yolk-deep);border:var(--bw) solid var(--on-yolk);font:700 .8rem/1 var(--f-display);color:var(--on-yolk)}
+.upgrade{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.5rem;align-items:center;padding:.4rem 0;border-top:var(--bw) dashed var(--line)}
+.upgrade strong{display:block;font:700 var(--t-md)/1.15 var(--f-display)}
+.upgrade small{display:block;font-size:var(--t-sm);color:var(--ink-2);line-height:1.25}
+.upgrade .btn{min-width:6.2rem;justify-content:center;text-align:center}
+.owned{display:inline-flex;align-items:center;gap:.25rem;padding:.3rem .6rem;border:var(--bw) solid var(--line);border-radius:var(--r-pill);background:var(--ok-soft);color:var(--ink);font:700 var(--t-sm)/1 var(--f-display)}
+.owned .icon{width:1rem;height:1rem;color:var(--ok)}
+.shop-note{display:flex;align-items:center;gap:.4rem;margin-top:.5rem;font-size:var(--t-sm);font-weight:600;color:var(--ink-2)}
+.shop-note .icon{width:1.1rem;height:1.1rem}
+.keys{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.keys .btn{justify-content:space-between;min-height:2.4rem;padding:.3rem .6rem;font-size:var(--t-base)}
+.keys .wide{grid-column:1/-1}
+
+/* ============================================================
+   8. MÚSICA NO AR
+   ============================================================ */
+.scene--music{display:grid;grid-template-rows:minmax(0,1fr) 44%;background:linear-gradient(180deg,var(--sky-2),var(--surface))}
+.now{position:relative;display:flex;align-items:center;justify-content:center;gap:2.5rem;padding:2.4rem 1.5rem 0;min-height:0}
+.now-note{text-align:left}
+.note-big{font:700 7rem/.85 var(--f-display);font-stretch:82%;letter-spacing:.01em}
+.now-pet{width:9.5rem;position:relative}
+.now-pet svg{width:100%;height:auto}
+.now-pet.singing svg{animation:hop .6s ease-in-out infinite}
+.now-pet .n{position:absolute;top:0;right:-.6rem;font:700 2rem/1 var(--f-display);color:var(--ultra);opacity:0}
+.now-pet.singing .n{animation:noteup 1.4s ease-out infinite}
+.now-pet.singing .n2{right:auto;left:-.4rem;animation-delay:.7s;color:var(--ir)}
+.scene--music.is-muted .note-big{color:var(--ink-2);text-decoration:line-through;text-decoration-thickness:.35rem}
+.xylo{display:grid;grid-template-columns:repeat(8,1fr);gap:.6rem;align-items:end;padding:0 1.4rem 1.2rem;min-height:0}
+.bar{position:relative;display:grid;align-content:end;justify-items:center;gap:.1rem;height:var(--h);padding-bottom:.5rem;border:var(--bw) solid var(--line);border-radius:var(--r-md);background:var(--ultra-soft);color:var(--ink);box-shadow:var(--shadow-hard);transition:transform .12s,background .12s}
+.bar::before,.bar::after{content:"";position:absolute;left:50%;width:.55rem;height:.55rem;margin-left:-.275rem;border-radius:50%;background:var(--ink-2);opacity:.6}
+.bar::before{top:.55rem}.bar::after{display:none}
+.bar b{font:700 var(--t-xl)/1 var(--f-display);font-stretch:88%}
+.bar span{font:700 var(--t-sm)/1 var(--f-mono);color:var(--ink-2)}
+.bar.on{background:var(--yolk);color:var(--on-yolk);transform:translateY(-.6rem)} .bar.on span{color:var(--on-yolk-2)}
+.scene--music.is-muted .bar.on{background:var(--surface);color:var(--ink);border-style:dashed}
+.sound-cta{position:absolute;left:50%;top:.8rem;transform:translateX(-50%);z-index:5;white-space:nowrap}
+.range-row{display:flex;align-items:center;gap:.6rem;margin-top:.3rem}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:2rem;background:transparent;--fill:35%;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:.9rem;border:var(--bw) solid var(--line);border-radius:var(--r-pill);background:linear-gradient(90deg,var(--yolk) 0 var(--fill),var(--bg) var(--fill) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:1.8rem;height:1.8rem;margin-top:-.58rem;border-radius:50%;background:var(--surface);border:var(--bw) solid var(--line);box-shadow:0 .15rem 0 var(--line)}
+input[type=range]::-moz-range-track{height:.65rem;border:var(--bw) solid var(--line);border-radius:var(--r-pill);background:var(--bg)}
+input[type=range]::-moz-range-progress{height:.65rem;border-radius:var(--r-pill);background:var(--yolk)}
+input[type=range]::-moz-range-thumb{width:1.5rem;height:1.5rem;border-radius:50%;background:var(--surface);border:var(--bw) solid var(--line)}
+input[type=range]:disabled{opacity:.5;cursor:not-allowed}
+.kv{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.4rem 0;border-top:var(--bw) dashed var(--line);font-weight:600}
+.kv:first-of-type{border-top:0}
+.kv b{font:700 var(--t-md)/1.1 var(--f-display);font-variant-numeric:tabular-nums;text-align:right}
+
+/* ============================================================
+   9. SLIDES NO AR
+   ============================================================ */
+#view-slides{--panel-w:18rem}
+.slide-stage{display:grid;place-items:center;min-height:0;min-width:0;container-type:size}
+.slide{position:relative;width:min(100cqw,calc(100cqh * 16 / 9));aspect-ratio:16/9;container-type:inline-size;border:var(--bw) solid var(--line);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow-hard);overflow:hidden}
+.slide-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:5cqw 7cqw 7cqw}
+.slide-eyebrow{align-self:flex-start;padding:.6cqw 1.6cqw;border:.25cqw solid var(--line);border-radius:var(--r-pill);background:var(--yolk);color:var(--on-yolk);font:700 2.1cqw/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase}
+.slide-title{margin-top:2.6cqw;max-width:72%;font:700 6.4cqw/1 var(--f-display);font-stretch:84%;text-wrap:balance}
+.slide-body{margin-top:2.4cqw;max-width:66%;font-size:2.5cqw;line-height:1.35;color:var(--ink-2)}
+.slide-pet{position:absolute;right:5cqw;bottom:7cqw;width:20cqw}
+.slide-pet svg{width:100%;height:auto}
+.slide-foot{position:absolute;left:7cqw;right:7cqw;bottom:2.6cqw;display:flex;align-items:center;gap:2cqw;font:700 1.9cqw/1 var(--f-display);letter-spacing:.06em;color:var(--ink-2)}
+.slide-dots{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:.8cqw}
+.slide-dots i{height:.9cqw;border-radius:var(--r-pill);background:var(--bg);border:.2cqw solid var(--line)}
+.slide-dots i.on{background:var(--yolk)}
+.slide-nav{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.slide-count{font:700 var(--t-xxl)/1 var(--f-display);font-stretch:84%;font-variant-numeric:tabular-nums}
+.legend{display:grid;gap:.45rem}
+.legend li{display:flex;align-items:center;gap:.5rem;font-weight:600}
+.legend li b{margin-left:auto;font:700 var(--t-md)/1 var(--f-display);white-space:nowrap}
+
+/* ============================================================
+   10. DISPOSITIVO
+   ============================================================ */
+#view-device{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));padding-bottom:var(--press)}
+#view-device .card{min-height:0;overflow:auto}
+.spark{width:100%;height:4.2rem;margin-top:.4rem;border:var(--bw) solid var(--line);border-radius:var(--r-md);background:var(--bg)}
+.spark polyline{fill:none;stroke:var(--ultra);stroke-width:2.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.lcd{padding:.7rem .8rem;border:var(--bw) solid var(--line);border-radius:var(--r-md);background:#1B2A12;color:#B9F27C;font:400 var(--t-md)/1.35 var(--f-mono);white-space:pre;overflow:hidden}
+.events-list{display:grid;gap:.3rem}
+.events-list div{display:grid;grid-template-columns:auto 1fr;gap:.6rem;padding:.3rem 0;border-top:var(--bw) dashed var(--line);font-size:var(--t-base)}
+.events-list div:first-child{border-top:0}
+.events-list time{font:400 var(--t-sm)/1.5 var(--f-mono);color:var(--ink-2)}
+.shortcuts{display:grid;grid-template-columns:auto 1fr;gap:.35rem .7rem;align-items:center}
+.conf{height:.7rem;border:var(--bw) solid var(--line);border-radius:var(--r-pill);background:var(--bg);overflow:hidden}
+.conf i{display:block;height:100%;background:var(--ultra)}
+
+/* ============================================================
+   11. HUD DOS SENSORES (sempre visível)
+   ============================================================ */
+.hud{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:1.25rem;height:var(--hud-h);padding:.65rem 1.25rem .7rem;background:var(--console);color:var(--console-ink);border-top:var(--bw) solid var(--console-line)}
+.hud .label{color:var(--console-ink-2)}
+.hud .silk{color:var(--console-ink-2)}
+/* fita de demonstração: listras de aviso no topo do HUD */
+body[data-origin=demo][data-conn=live] .hud::before,body[data-origin=demo][data-conn=lag] .hud::before{content:"";position:absolute;left:0;right:0;top:calc(-1 * var(--bw));height:.4rem;background:repeating-linear-gradient(135deg,var(--yolk) 0 .7rem,var(--console) .7rem 1.4rem)}
+.hud-read{min-width:7.2rem}
+.hud-value{display:flex;align-items:baseline;gap:.3rem;font:700 3.4rem/.95 var(--f-display);font-stretch:84%;font-variant-numeric:tabular-nums;color:var(--ultra-glow)}
+.hud-value small{font-size:1.4rem;color:var(--console-ink)}
+.hud-sub{font-size:var(--t-sm);font-weight:600;color:var(--console-ink-2);white-space:nowrap}
+.hud-tape{min-width:0}
+.hud-cap{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.25rem;white-space:nowrap;overflow:hidden}
+.tape-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.4rem;align-items:end}
+.sensor-glyph{width:2.6rem;height:2.25rem}
+.tape-area{position:relative;cursor:ew-resize;touch-action:none}
+.zones{position:relative;height:1.7rem;margin-bottom:.3rem}
+.zone{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:0 .4rem;border:.09rem solid var(--console-line);border-radius:var(--r-sm);color:var(--console-ink-2);font:700 var(--t-sm)/1 var(--f-display);letter-spacing:.05em;white-space:nowrap;overflow:hidden;transition:background .12s,color .12s}
+.zone+.zone{margin-left:.15rem}
+.zone.quiet{border-style:dashed;font-weight:600;letter-spacing:.02em}
+.zone.on{background:var(--yolk);border-color:var(--yolk);color:var(--on-yolk)}
+.zone.quiet.on{background:var(--console-2);border-color:var(--console-ink);border-style:solid;color:var(--console-ink)}
+.zone.scale{justify-content:space-between}
+.tape{position:relative;height:2.2rem;border-radius:var(--r-sm);background:var(--yolk);box-shadow:inset 0 0 0 var(--bw) #000}
+.tape::before{content:"";position:absolute;inset:0;border-radius:inherit;background:
+  repeating-linear-gradient(90deg,var(--on-yolk) 0 1px,transparent 1px calc(100% / 60)) 0 0/100% 28% no-repeat,
+  repeating-linear-gradient(90deg,var(--on-yolk) 0 2px,transparent 2px calc(100% / 12)) 0 0/100% 52% no-repeat}
+.tape span{position:absolute;bottom:.12rem;transform:translateX(-50%);font:700 var(--t-sm)/1 var(--f-display);color:var(--on-yolk)}
+.tape span:last-of-type{transform:translateX(-110%)}
+.hand{position:absolute;top:1.55rem;left:0;z-index:2;width:2.5rem;height:2.9rem;margin-left:-1.25rem;display:grid;place-items:center;border:var(--bw) solid var(--console);border-radius:var(--r-md);background:var(--ultra-glow);color:var(--console);box-shadow:0 0 0 .12rem var(--ultra-glow),0 .25rem .8rem rgba(0,0,0,.5);transition:left var(--tick) linear;pointer-events:none}
+.hand::before{content:"";position:absolute;left:50%;top:-.62rem;margin-left:-.4rem;border:.4rem solid transparent;border-bottom-color:var(--ultra-glow);border-top:0;height:0}
+.hand .icon{width:1.6rem;height:1.6rem}
+.hand.far::after{content:"›";position:absolute;right:-.95rem;top:50%;transform:translateY(-55%);font:700 1.6rem/1 var(--f-display);color:var(--ultra-glow)}
+.tape-msg{position:absolute;inset:0;top:auto;height:2.2rem;display:none;place-items:center;border-radius:var(--r-sm);background:repeating-linear-gradient(135deg,#3A3024 0 .6rem,#2B2318 .6rem 1.2rem);box-shadow:inset 0 0 0 var(--bw) var(--console-line);color:var(--console-ink);font:700 var(--t-base)/1 var(--f-display);letter-spacing:.03em;z-index:3}
+/* lâmpada do infravermelho */
+.hud-ir{display:flex;align-items:center;gap:.8rem;min-width:13.5rem}
+.lamp{flex:none;position:relative;width:4.2rem;height:4.2rem;border-radius:50%;border:.19rem solid var(--console-line);background:radial-gradient(circle at 35% 30%,#5A2A22,#2A120F 70%);cursor:pointer;padding:0;transition:box-shadow .12s,background .12s}
+.lamp::after{content:"";position:absolute;inset:.55rem;border-radius:50%;border:.12rem dashed rgba(255,245,219,.35)}
+.lamp.on{border-color:#FFD3CC;background:radial-gradient(circle at 35% 30%,#FFC2B8,var(--ir-glow) 55%,#D8271B);box-shadow:0 0 0 .45rem rgba(255,82,64,.3),0 0 2.2rem .4rem rgba(255,82,64,.75)}
+.lamp.on::after{border-color:transparent}
+.ir-state{font:700 1.7rem/1 var(--f-display);font-stretch:86%;letter-spacing:.02em;color:var(--console-ink)}
+.lamp.on+div .ir-state{color:var(--ir-glow-text)}
+/* conexão */
+.hud-conn{display:grid;gap:.35rem;width:17.5rem;padding-left:1.1rem;border-left:var(--bw) dashed var(--console-line)}
+.conn-top{display:flex;align-items:center;gap:.55rem;min-width:0}
+.dot{flex:none;width:.9rem;height:.9rem;border-radius:50%;background:var(--console-line);box-shadow:0 0 0 .2rem rgba(138,120,88,.3)}
+.conn-label{font:700 var(--t-lg)/1.1 var(--f-display);font-stretch:88%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conn-detail{font-size:var(--t-sm);font-weight:600;color:var(--console-ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conn-row{display:flex;gap:.4rem;align-items:center}
+.hud select{flex:1;min-width:0;height:2.4rem;padding:0 .5rem;border:var(--bw) solid var(--console-line);border-radius:var(--r-md);background:var(--console-2);color:var(--console-ink);font-weight:600}
+.hud .btn{min-height:2.4rem;padding:.3rem .8rem;font-size:var(--t-base);box-shadow:0 .2rem 0 #000;border-color:var(--console-line);background:var(--console-2);color:var(--console-ink)}
+.hud .btn:hover{background:#3A3024}
+.hud .btn--primary{background:var(--yolk);border-color:var(--yolk);color:var(--on-yolk)} .hud .btn--primary:hover{background:var(--yolk-deep)}
+.hud .btn--icon{padding:.3rem .55rem}
+.badge-demo{padding:.1rem .45rem;border-radius:var(--r-sm);background:var(--yolk);color:var(--on-yolk);font:700 var(--t-sm)/1.2 var(--f-display);letter-spacing:.06em}
+.palco-nav{display:none;gap:.3rem}
+.palco-nav .btn{min-width:2.4rem;justify-content:center;padding:.3rem .5rem}
+.palco-nav .btn.active{background:var(--yolk);color:var(--on-yolk);border-color:var(--yolk)}
+
+/* estados do HUD */
+body[data-conn=live] .dot{background:var(--ok-glow);box-shadow:0 0 0 .2rem rgba(111,219,149,.3);animation:pulse 1.6s ease-in-out infinite}
+body[data-conn=lag] .dot{background:var(--warn-glow);box-shadow:0 0 0 .2rem rgba(255,184,77,.3)}
+body[data-conn=lag] .conn-detail{color:var(--warn-glow)}
+body[data-conn=stale] .dot,body[data-conn=error] .dot{background:var(--ir-glow);box-shadow:0 0 0 .2rem rgba(255,82,64,.3)}
+body[data-conn=stale] .conn-detail,body[data-conn=error] .conn-detail{color:var(--ir-glow-text)}
+body[data-conn=connecting] .dot{background:var(--yolk);animation:pulse .7s ease-in-out infinite}
+body[data-conn=off] .hud-conn,body[data-conn=error] .hud-conn{padding:.45rem .6rem .5rem .8rem;border:var(--bw) solid var(--yolk);border-radius:var(--r-md);background:var(--console-2)}
+body:is([data-conn=off],[data-conn=connecting],[data-conn=error]) :is(.hud-value,.ir-state){color:var(--console-line)}
+body:is([data-conn=off],[data-conn=connecting],[data-conn=error],[data-conn=stale]) .tape-msg{display:grid}
+body:is([data-conn=off],[data-conn=connecting],[data-conn=error]) .hand{display:none}
+body:is([data-conn=off],[data-conn=connecting],[data-conn=error]) .zone{opacity:.45}
+body[data-conn=stale] .hud-value{color:var(--console-ink-2)}
+body[data-conn=stale] .hand{opacity:.45;filter:grayscale(1)}
+body[data-conn=stale] .tape-msg{background:repeating-linear-gradient(135deg,rgba(74,26,21,.92) 0 .6rem,rgba(43,18,15,.92) .6rem 1.2rem);box-shadow:inset 0 0 0 var(--bw) var(--ir-glow)}
+/* sem placa: a cena fica "dormindo" */
+body:is([data-conn=off],[data-conn=connecting],[data-conn=error],[data-conn=stale]) .scene{filter:saturate(.35)}
+body:is([data-conn=off],[data-conn=connecting],[data-conn=error],[data-conn=stale]) .scene *{animation-play-state:paused!important}
+
+/* ============================================================
+   12. MODO PALCO (tela cheia, só o essencial)
+   ============================================================ */
+body.palco .rail{display:none}
+body.palco .app{grid-template-columns:minmax(0,1fr)}
+body.palco .main{grid-area:1/1;padding:1rem 1.25rem}
+body.palco .hud{grid-area:2/1}
+body.palco .view{grid-template-columns:minmax(0,1fr)}
+body.palco .panel{display:none}
+body.palco #view-pet{grid-template-columns:minmax(0,1fr) 19rem}
+body.palco #view-pet .panel{display:flex}
+body.palco #view-pet .card--actions{display:none}
+body.palco #view-pet .meters{grid-template-columns:1fr;gap:1rem}
+body.palco #view-pet .meter-head{font-size:var(--t-lg)} body.palco #view-pet .meter-head strong{font-size:var(--t-xl)}
+body.palco #view-pet .track{height:1.2rem}
+body.palco #view-pet .card--status{flex:1;display:flex;flex-direction:column;justify-content:center}
+body.palco .coach{min-height:6.6rem;padding:.8rem 1.4rem;gap:1.2rem}
+body.palco .coach-badge{width:4.4rem;height:4.4rem;font-size:2.6rem} body.palco .coach-badge .icon{width:2.3rem;height:2.3rem}
+body.palco .coach-title{font-size:3rem}
+body.palco .coach-sub{font-size:1.5rem}
+body.palco .step{font-size:var(--t-md);padding:.35rem .9rem .35rem .35rem} body.palco .step i{width:2rem;height:2rem}
+body.palco .hud-conn{width:auto}
+body.palco .hud-conn .conn-row--port,body.palco #disconnect{display:none}
+body.palco .palco-nav{display:flex}
+body.palco .bubble{font-size:var(--t-xl)}
+body.palco .result-dist{font-size:7rem}
+body.palco .overlay--result{width:min(44rem,80%);top:7%}
+body.palco .tile b{font-size:2.4rem} body.palco .tile span{font-size:var(--t-md)}
+body.palco .note-big{font-size:10rem}
+body.palco[data-view=slides] .coach{min-height:0;padding:.35rem 1rem} body.palco[data-view=slides] .coach-title{font-size:var(--t-lg)} body.palco[data-view=slides] .coach-sub{display:none}
+body.palco[data-view=slides] .coach-badge{width:2rem;height:2rem;font-size:1rem} body.palco[data-view=slides] .coach-badge .icon{width:1.1rem;height:1.1rem}
+body.palco[data-view=device] .view{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+/* ============================================================
+   13. PROTO: painel de simulação (não faz parte do produto)
+   ============================================================ */
+.proto{position:fixed;left:calc(var(--rail-w) + .6rem);bottom:calc(var(--hud-h) + .6rem);z-index:20;width:19rem;padding:.8rem;border:var(--bw) dashed var(--ink);border-radius:var(--r-lg);background:var(--surface);color:var(--ink);box-shadow:var(--shadow-float)}
+.proto h2{font:700 var(--t-md)/1.1 var(--f-display);margin-bottom:.15rem}
+.proto p{font-size:var(--t-sm);color:var(--ink-2);margin-bottom:.5rem}
+.proto label{display:grid;grid-template-columns:6.2rem 1fr;align-items:center;gap:.4rem;margin-top:.35rem;font-size:var(--t-sm);font-weight:600}
+.proto select{height:2rem;border:var(--bw) solid var(--line);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);min-width:0}
+.proto .check{grid-template-columns:auto 1fr}
+body.no-sim .proto,body.no-sim .rail-btn--proto{display:none}
+
+/* ============================================================
+   14. ANIMAÇÕES (leves; tudo desliga com prefers-reduced-motion)
+   ============================================================ */
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-.5rem)}}
+@keyframes hop{0%,100%{transform:translateY(0) scale(1,1)}40%{transform:translateY(-1rem) scale(.97,1.04)}}
+@keyframes wiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.03,.97)}}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(4rem)}}
+@keyframes floatup{from{opacity:0;transform:translate(-50%,0)}15%{opacity:1}to{opacity:0;transform:translate(-50%,-5rem)}}
+@keyframes tumble{to{transform:rotate(360deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}50%{transform:translateX(.12rem)}}
+@keyframes pop{from{transform:rotate(7deg) scale(0)}to{transform:rotate(7deg) scale(1)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes noteup{0%{opacity:0;transform:translateY(.6rem)}25%{opacity:1}100%{opacity:0;transform:translateY(-2.6rem) rotate(14deg)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition-duration:0s!important}
+}
+
+/* ============================================================
+   15. TELAS ESTREITAS (~800 px): empilha e deixa rolar
+   ============================================================ */
+@media (max-width:900px){
+  html{font-size:15px}
+  body{height:auto;overflow:auto}
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;height:auto;min-height:100dvh}
+  .rail{grid-area:1/1;position:sticky;top:0;z-index:10;flex-direction:row;align-items:center;gap:.25rem;padding:.35rem .5rem;overflow:visible}
+  .brand{padding:0 .4rem 0 .1rem} .brand span{display:none} .brand svg{width:2.1rem;height:2.1rem}
+  .nav{width:auto;flex:1;grid-auto-flow:column;justify-content:center;align-items:center;gap:.35rem;padding:.45rem .3rem} .nav .icon{width:1.3rem;height:1.3rem}
+  .nav kbd,.rail-btn kbd,.rail-btn span{display:none}
+  .rail-foot{margin:0;grid-auto-flow:column}
+  .rail-btn{width:2.6rem;padding:.5rem 0}
+  .main{grid-area:2/1;display:block;padding:.75rem}
+  .coach{margin-bottom:.75rem;flex-wrap:wrap} .stepper{flex-wrap:wrap} .step{padding:.2rem .5rem .2rem .2rem}
+  .view,#view-pet,#view-slides{grid-template-columns:minmax(0,1fr)}
+  .scene{height:27rem}
+  .slide-stage{height:24rem}
+  .panel{overflow:visible}
+  #view-device{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .overlay--help{display:none!important}
+  .overlay--menu,.overlay--pilot{width:58%;top:14%}
+  .overlay--charge{left:36%}
+  .hud{grid-area:3/1;position:sticky;bottom:0;z-index:10;height:auto;grid-template-columns:auto minmax(0,1fr);gap:.6rem 1rem;padding:.6rem .75rem}
+  .hud-tape{grid-column:2}
+  .hud-ir{grid-column:1/2;min-width:0} .lamp{width:3.2rem;height:3.2rem} .hud-ir .silk{display:none}
+  .hud-conn{grid-column:2;width:auto;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+  .hud-cap .silk{display:none}
+  .proto{left:.6rem;bottom:13rem}
+  .toast{position:fixed;left:.75rem;bottom:13.5rem}
+}
+</style>
+</head>
+<body data-view="pet" data-conn="live" data-origin="hw">
+
+<!-- ================= SVG: pet e ícones ================= -->
+<svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <!-- Mesma geometria dos símbolos atuais (#pet-egg, #pet-chick, #pet-cyber); só as cores mudaram. -->
+  <symbol id="pet-egg" viewBox="0 0 200 210"><ellipse cx="100" cy="182" rx="54" ry="9" fill="#1D1710" opacity=".18"/><path d="M100 20c-33 0-65 61-65 105 0 40 27 59 65 59s65-19 65-59c0-44-32-105-65-105Z" fill="#FFF9E3" stroke="#1D1710" stroke-width="5"/><path d="m43 121 24-9 14 12 19-13 19 13 17-12 21 9" fill="none" stroke="#F2A900" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="79" cy="92" r="5" fill="#1D1710"/><circle cx="121" cy="92" r="5" fill="#1D1710"/><path d="m93 100 7 7 7-7Z" fill="#F2793B" stroke="#1D1710" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="pet-chick" viewBox="0 0 200 210"><ellipse cx="100" cy="184" rx="56" ry="9" fill="#1D1710" opacity=".18"/><path d="M79 45c-8-14 0-23 3-25 2 10 9 15 13 16 0-13 8-20 12-21-1 12 3 20 9 24" fill="#F2A900" stroke="#1D1710" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M73 168v12m54-12v12m-61 2h14m40 0h14" fill="none" stroke="#C96A2B" stroke-width="6" stroke-linecap="round"/><ellipse cx="100" cy="111" rx="63" ry="65" fill="#FFD34D" stroke="#1D1710" stroke-width="5"/><path d="M49 111c-15-5-21 5-15 18 6 12 16 15 28 12m89-30c15-5 21 5 15 18-6 12-16 15-28 12" fill="#F5B62A" stroke="#1D1710" stroke-width="5" stroke-linecap="round"/><circle cx="79" cy="101" r="6" fill="#1D1710"/><circle cx="121" cy="101" r="6" fill="#1D1710"/><circle cx="81" cy="99" r="2" fill="#FFF9E3"/><circle cx="123" cy="99" r="2" fill="#FFF9E3"/><path d="m90 110 10 10 10-10Z" fill="#F2793B" stroke="#1D1710" stroke-width="2.5" stroke-linejoin="round"/><circle cx="64" cy="117" r="8" fill="#FF9E8A" opacity=".75"/><circle cx="136" cy="117" r="8" fill="#FF9E8A" opacity=".75"/></symbol>
+  <symbol id="pet-cyber" viewBox="0 0 200 210"><use href="#pet-chick"/><path d="M67 81 77 64h46l10 17" fill="#BDE4F7" stroke="#1D1710" stroke-width="4" stroke-linejoin="round"/><rect x="62" y="84" width="76" height="28" rx="8" fill="#1D1710"/><path d="M74 98h16m20 0h16" stroke="#7DE3F4" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="72" r="4" fill="#FF5240"/></symbol>
+  <symbol id="brand-egg" viewBox="0 0 40 40"><path d="M20 4C12.5 4 6.5 15.5 6.5 23.5a13.5 13.5 0 0 0 27 0C33.500 15.500 27.500 4 20 4Z" fill="#FFC72C" stroke="#FFF5DB" stroke-width="2"/><circle cx="15.500" cy="20" r="1.800" fill="#1D1710"/><circle cx="24.500" cy="20" r="1.800" fill="#1D1710"/><path d="m18 23 2 2 2-2Z" fill="#F2793B"/></symbol>
+  <symbol id="hcsr04" viewBox="0 0 52 44"><rect x="1.500" y="5" width="49" height="30" rx="4" fill="#1857B8" stroke="#D9CBA8" stroke-width="2"/><circle cx="15" cy="20" r="9.500" fill="#D9D5CC" stroke="#1D1710" stroke-width="2"/><circle cx="37" cy="20" r="9.500" fill="#D9D5CC" stroke="#1D1710" stroke-width="2"/><circle cx="15" cy="20" r="4" fill="#1D1710"/><circle cx="37" cy="20" r="4" fill="#1D1710"/><path d="M19 35v7m5-7v7m4-7v7m5-7v7" stroke="#D9CBA8" stroke-width="2"/></symbol>
+  <symbol id="i-pet" viewBox="0 0 24 24"><path d="M12 3C8 3 5 9 5 13.500a7 7 0 0 0 14 0C19 9 16 3 12 3Z"/><path d="M9.500 12h.01M14.500 12h.01"/><path d="m10.800 14.500 1.200 1.200 1.200-1.200"/></symbol>
+  <symbol id="i-launch" viewBox="0 0 24 24"><path d="M3 20c2-9 7-14 16-15"/><path d="m14 3 6 1.800-2.500 5.700"/><path d="M3 20h18" stroke-dasharray="1 3.500"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5.500l11-2.500v12.500"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="15.500" r="3"/></symbol>
+  <symbol id="i-slides" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8M10.500 8l4 2-4 2Z"/></symbol>
+  <symbol id="i-chip" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.500"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/></symbol>
+  <symbol id="i-stage" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.500"/><path d="M12 3.500v17a8.500 8.500 0 0 0 0-17Z" fill="currentColor"/></symbol>
+  <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 13V5.500a1.500 1.500 0 0 1 3 0V11m0-6.500a1.500 1.500 0 0 1 3 0V11m0-5a1.500 1.500 0 0 1 3 0v6m0-3.500a1.500 1.500 0 0 1 3 0V14c0 4.500-3 7.500-7 7.500-3.200 0-5-1.500-6.500-4L4 14.500a1.600 1.600 0 0 1 2.700-1.700L8 14.500"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.500"/><path d="M3 10.500h18M7 14.500h4"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 2.500V7M15 2.500V7M6 7h12v4a6 6 0 0 1-12 0ZM12 17v4.500"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.500 4.500 4.500L19 7.500"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.600-5.900"/><path d="M20 4v5h-5"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+  <symbol id="i-food" viewBox="0 0 24 24"><path d="M4 12h16a8 8 0 0 1-16 0Z"/><path d="M9 8c0-2 2-2 2-4M14 8c0-2 2-2 2-4"/></symbol>
+  <symbol id="i-ball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.500"/><path d="M5 8c4 1 6 4 6 12M19 8c-3 .500-5 2-6 5"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.500A8.500 8.500 0 1 1 9.500 4 6.500 6.500 0 0 0 20 14.500Z"/></symbol>
+  <symbol id="i-heal" viewBox="0 0 24 24"><rect x="3.500" y="3.500" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.500-4.500-7.500-10A4.300 4.300 0 0 1 12 7.500 4.300 4.300 0 0 1 19.500 10c0 5.500-7.500 10-7.500 10Z"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5Z"/><path d="M8.500 4v5.500h6V4M8 20v-6h8v6"/></symbol>
+  <symbol id="i-load" viewBox="0 0 24 24"><path d="M4 15v4.500h16V15M12 15V4m-4.500 4.500L12 4l4.500 4.500"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.500v5h3.500L12 19V5L7.500 9.500ZM15.500 9a4.500 4.500 0 0 1 0 6M18 6.500a8 8 0 0 1 0 11"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.500v5h3.500L12 19V5L7.500 9.500ZM16 9.500l5 5m0-5-5 5"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4m0 1h11l-2.500 4 2.500 4H6"/></symbol>
+  <symbol id="i-sim" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+</svg>
+
+<div class="app">
+  <!-- ================= TRILHO ================= -->
+  <aside class="rail">
+    <a class="brand" href="#view=pet" aria-label="MotionPet"><svg><use href="#brand-egg"/></svg><span>MOTION<b>PET</b></span></a>
+    <nav aria-label="Modos" style="display:contents">
+      <button class="nav active" data-view="pet" aria-current="page"><svg class="icon"><use href="#i-pet"/></svg>Meu Pet<kbd>1</kbd></button>
+      <button class="nav" data-view="launch"><svg class="icon"><use href="#i-launch"/></svg>Pet Launch<kbd>2</kbd></button>
+      <button class="nav" data-view="music"><svg class="icon"><use href="#i-music"/></svg>Música<kbd>3</kbd></button>
+      <button class="nav" data-view="slides"><svg class="icon"><use href="#i-slides"/></svg>Slides<kbd>4</kbd></button>
+    </nav>
+    <div class="rail-foot">
+      <button class="nav" data-view="device" style="padding:.4rem .2rem"><svg class="icon" style="width:1.4rem;height:1.4rem"><use href="#i-chip"/></svg>Dispositivo<kbd>5</kbd></button>
+      <button class="rail-btn" id="theme-toggle" aria-label="Alternar tema claro e escuro"><svg class="icon"><use href="#i-theme"/></svg><span>Tema</span></button>
+      <button class="rail-btn rail-btn--stage" id="stage-toggle" aria-pressed="false"><svg class="icon"><use href="#i-stage"/></svg><span>Palco</span><kbd>F</kbd></button>
+      <button class="rail-btn rail-btn--proto" id="proto-toggle" aria-expanded="false" title="Só no protótipo"><svg class="icon"><use href="#i-sim"/></svg><span>Simular</span></button>
+    </div>
+  </aside>
+
+  <!-- ================= CONTEÚDO ================= -->
+  <main class="main">
+    <header class="coach" id="coach" data-tone="go">
+      <span class="coach-badge" id="coach-badge">1</span>
+      <div class="coach-text">
+        <h1 class="coach-title" id="coach-title" aria-live="polite">—</h1>
+        <p class="coach-sub" id="coach-sub">—</p>
+      </div>
+      <ol class="stepper" id="stepper" aria-label="Etapas do lançamento">
+        <li class="step" data-step="1"><i>1</i>Piloto</li>
+        <li class="step" data-step="2"><i>2</i>Mira</li>
+        <li class="step" data-step="3"><i>3</i>Força</li>
+        <li class="step" data-step="4"><i>4</i>Voo</li>
+        <li class="step" data-step="5"><i>5</i>Resultado</li>
+      </ol>
+    </header>
+
+    <!-- ---------- MEU PET ---------- -->
+    <section class="view active" id="view-pet" aria-label="Meu Pet">
+      <div class="scene scene--pet">
+        <div class="sun"></div><div class="cloud c1"></div><div class="cloud c2"></div>
+        <div class="hill back"></div><div class="hill"></div>
+        <div class="scene-chips">
+          <div><span class="chip chip--yolk"><span id="pet-stage">PINTINHO</span> · nível <span id="pet-level">3</span></span><span class="chip" id="pet-xp">120 XP</span></div>
+          <div><span class="chip"><span class="coin">$</span><span id="pet-coins">42</span> moedas</span></div>
+        </div>
+        <div class="bubble" id="pet-mood">Que dia bom!</div>
+        <div class="pet-sprite" id="pet-sprite" data-motion="IDLE"><svg viewBox="0 0 200 210" role="img" aria-label="Piu-piu"><use id="pet-art" href="#pet-chick"/></svg></div>
+        <div class="fx" id="pet-fx" aria-hidden="true"></div>
+        <div class="evo" id="evo" aria-label="Evolução">
+          <span class="evo-node" data-stage="EGG"><svg viewBox="0 0 200 210"><use href="#pet-egg"/></svg>Ovo</span><i class="evo-sep"></i>
+          <span class="evo-node" data-stage="CHICK"><svg viewBox="0 0 200 210"><use href="#pet-chick"/></svg>Pintinho</span><i class="evo-sep"></i>
+          <span class="evo-node" data-stage="CYBER_ROOSTER"><svg viewBox="0 0 200 210"><use href="#pet-cyber"/></svg>Galo cyber</span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="card card--status">
+          <div class="card-head"><h2 class="card-title" id="profile-name">Piu-piu</h2><span class="chip chip--ok" id="profile-message">Feliz</span></div>
+          <div class="meters" id="stats">
+            <div class="meter" id="hunger-meter"><div class="meter-head"><span>Saciedade</span><strong id="hunger-value">—</strong></div><div class="track"><i id="hunger-bar"></i></div><small class="meter-note"></small></div>
+            <div class="meter" id="happiness-meter"><div class="meter-head"><span>Felicidade</span><strong id="happiness-value">—</strong></div><div class="track"><i id="happiness-bar"></i></div><small class="meter-note"></small></div>
+            <div class="meter" id="energy-meter"><div class="meter-head"><span>Energia</span><strong id="energy-value">—</strong></div><div class="track"><i id="energy-bar"></i></div><small class="meter-note"></small></div>
+            <div class="meter" id="health-meter"><div class="meter-head"><span>Saúde</span><strong id="health-value">—</strong></div><div class="track"><i id="health-bar"></i></div><small class="meter-note"></small></div>
+          </div>
+        </div>
+        <div class="card card--actions">
+          <div class="card-head"><h2 class="card-title">Cuidar</h2></div>
+          <div class="actions">
+            <button class="btn" data-action="feed" data-requires="pet"><svg class="icon"><use href="#i-food"/></svg><span>Alimentar<small>ou cartão no IR</small></span></button>
+            <button class="btn" data-action="interact" data-requires="pet"><svg class="icon"><use href="#i-heart"/></svg><span>Carinho<small>ou mão perto</small></span></button>
+            <button class="btn" data-action="play" data-requires="pet"><svg class="icon"><use href="#i-ball"/></svg>Brincar</button>
+            <button class="btn" data-action="rest" data-requires="pet"><svg class="icon"><use href="#i-moon"/></svg>Descansar</button>
+            <button class="btn" data-action="heal" data-requires="pet" style="grid-column:1/-1"><svg class="icon"><use href="#i-heal"/></svg>Cuidar da saúde</button>
+          </div>
+          <div class="save-row">
+            <button class="btn btn--sm" data-action="save" data-requires="pet"><svg class="icon"><use href="#i-save"/></svg>Salvar</button>
+            <button class="btn btn--sm" data-action="load" data-requires="connected"><svg class="icon"><use href="#i-load"/></svg>Carregar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PET LAUNCH ---------- -->
+    <section class="view" id="view-launch" aria-label="Pet Launch">
+      <div class="scene scene--launch" id="launch-scene" data-phase="MENU">
+        <div class="sun" style="top:3.6rem;right:auto;left:4%;width:3.4rem;height:3.4rem"></div><div class="cloud c1" style="top:4rem;left:24%"></div><div class="cloud c2" style="top:4.6rem;right:5%"></div>
+        <div class="ground"><div class="ground-ruler" id="ground-ruler"></div></div>
+        <svg class="trail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline id="flight-path" points=""/></svg>
+        <div class="flag" id="record-flag"><span>RECORDE<b id="launch-best">—</b></span></div>
+        <svg class="protractor" viewBox="0 0 250 235" aria-hidden="true">
+          <path class="post" d="M4 210V172M46 210V172"/>
+          <path class="band" id="prot-band" d=""/>
+          <path class="rim" d="M225 210A200 200 0 0 0 25 10"/>
+          <g id="prot-ticks"></g>
+          <line class="needle" id="prot-needle" x1="25" y1="210" x2="238" y2="210"/>
+        </svg>
+        <div class="flyer" id="flyer"><svg viewBox="0 0 200 210"><use id="flying-pet" href="#pet-chick"/></svg></div>
+        <div class="scene-chips">
+          <div><span class="chip"><svg class="icon"><use href="#i-flag"/></svg>Recorde <span id="launch-best-chip">—</span></span></div>
+          <div><span class="chip"><span class="coin">$</span><span class="coins-out">42</span> moedas</span></div>
+        </div>
+
+        <div class="overlay overlay--menu"><div class="card">
+          <h2 class="menu-title">ATÉ ONDE O<br>PIU-PIU VOA?</h2>
+          <ol class="menu-steps">
+            <li><i>1</i><span class="chip chip--hand"><svg class="icon"><use href="#i-hand"/></svg>mão</span>mira o ângulo</li>
+            <li><i>2</i><span class="chip chip--card"><svg class="icon"><use href="#i-card"/></svg>cartão</span>segura para dar força</li>
+            <li><i>3</i>solta na faixa verde e voa!</li>
+          </ol>
+          <p class="cta"><svg class="icon"><use href="#i-card"/></svg>Aproxime e afaste o cartão do IR para jogar</p>
+        </div></div>
+
+        <div class="overlay overlay--pilot"><div class="card">
+          <div class="pilot">
+            <svg viewBox="0 0 200 210"><use class="pilot-art" href="#pet-chick"/></svg>
+            <div><p class="label">Piloto de hoje</p><h2 class="menu-title" style="font-size:2.4rem">PIU-PIU</h2>
+              <p style="margin-top:.35rem;display:flex;gap:.35rem;flex-wrap:wrap"><span class="chip chip--yolk" id="pilot-stage">Pintinho · nível 3</span><span class="chip chip--ok" id="pilot-ready">Energia 85% · pronto</span></p></div>
+          </div>
+          <p class="cta" id="pilot-cta"><svg class="icon"><use href="#i-card"/></svg>Passe o cartão de novo para ir à rampa</p>
+        </div></div>
+
+        <div class="overlay overlay--aim">
+          <p class="label" style="color:var(--ink)">Ângulo</p>
+          <p class="big-read" id="launch-angle">—</p>
+          <p style="margin-top:.4rem"><span class="chip chip--hand"><svg class="icon"><use href="#i-hand"/></svg>mão a <span id="aim-distance">—</span></span></p>
+        </div>
+        <div class="overlay overlay--help"><div class="card">
+          <div class="help-row"><span class="chip chip--hand"><svg class="icon"><use href="#i-hand"/></svg>perto</span>sobe<b>70°</b></div>
+          <div class="help-row"><span class="chip chip--hand"><svg class="icon"><use href="#i-hand"/></svg>longe</span>desce<b>20°</b></div>
+          <p class="cta" style="font-size:var(--t-base)"><svg class="icon"><use href="#i-card"/></svg>Pronto? Segure o cartão no IR</p>
+        </div></div>
+
+        <div class="overlay overlay--charge">
+          <div class="power-head"><p class="label" style="color:var(--ink)">Força</p><p class="big-read" id="launch-charge" style="font-size:4.5rem">—</p></div>
+          <div class="power" id="power"><i id="charge-bar"></i><div class="sweet"><b>FAIXA PERFEITA</b></div></div>
+          <div class="power-scale"><span>0</span><span>50%</span><span>100%</span></div>
+          <p style="margin-top:.6rem"><span class="chip chip--card" id="launch-sweet"><svg class="icon"><use href="#i-card"/></svg>tire o cartão para lançar</span></p>
+        </div>
+
+        <div class="overlay overlay--flight">
+          <p class="label" style="color:var(--ink)">Distância</p>
+          <p class="big-read" id="flight-distance">0,0 m</p>
+          <p style="margin-top:.4rem"><span class="chip" id="flight-detail">altura 0,0 m</span></p>
+        </div>
+
+        <div class="overlay overlay--result"><div class="card result">
+          <span class="sticker" id="record-sticker">NOVO RECORDE!</span>
+          <p class="label">Distância do voo</p>
+          <p class="result-dist" id="result-distance">—</p>
+          <p class="result-best" id="result-best">—</p>
+          <div class="tiles">
+            <div class="tile"><b id="result-score">—</b><span>pontos</span></div>
+            <div class="tile tile--coins"><b id="result-coins">—</b><span>moedas</span></div>
+            <div class="tile"><b id="result-xp">—</b><span>XP</span></div>
+            <div class="tile"><b id="result-bounces">—</b><span>quiques</span></div>
+          </div>
+          <p class="cta" style="justify-content:center"><svg class="icon"><use href="#i-card"/></svg>Passe o cartão para jogar de novo</p>
+        </div></div>
+        <p id="launch-status" hidden></p><p id="launch-phase" hidden></p>
+      </div>
+
+      <div class="panel">
+        <div class="card">
+          <div class="card-head"><h2 class="card-title">Loja</h2><span class="balance" aria-label="Saldo"><span class="coin">$</span><span class="coins-out">42</span></span></div>
+          <div id="upgrades-list"></div>
+          <p class="shop-note" id="shop-note"></p>
+        </div>
+        <div class="card">
+          <p class="label" style="margin-bottom:.5rem">Sem a placa? Use o teclado</p>
+          <div class="keys">
+            <button class="btn btn--primary wide" data-key="enter" data-requires="launch" id="launch-confirm"><span id="launch-confirm-label">Jogar</span><kbd>Enter</kbd></button>
+            <button class="btn wide" data-key="space" data-requires="launch" id="launch-charge-btn">Carregar força<kbd>Espaço</kbd></button>
+            <button class="btn" data-key="w" data-requires="launch">Ângulo +<kbd>↑</kbd></button>
+            <button class="btn" data-key="z" data-requires="launch">Ângulo −<kbd>↓</kbd></button>
+            <button class="btn wide" data-key="esc" data-requires="launch">Voltar<kbd>B</kbd></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- MÚSICA NO AR ---------- -->
+    <section class="view" id="view-music" aria-label="Música no ar">
+      <div class="scene scene--music" id="music-scene">
+        <button class="btn btn--primary sound-cta" data-audio-toggle id="sound-cta"><svg class="icon"><use href="#i-sound"/></svg>Ativar som<kbd>M</kbd></button>
+        <div class="now">
+          <div class="now-note"><p class="label" style="color:var(--ink)" id="music-note">Nota de agora</p><p class="note-big" id="note-name">—</p><p style="margin-top:.5rem"><span class="chip" id="note-frequency">—</span></p></div>
+          <div class="now-pet" id="music-pet"><svg viewBox="0 0 200 210"><use class="pilot-art" href="#pet-chick"/></svg><span class="n">♪</span><span class="n n2">♫</span></div>
+        </div>
+        <div class="xylo" id="xylo" aria-hidden="true"></div>
+      </div>
+      <div class="panel">
+        <div class="card">
+          <div class="card-head"><h2 class="card-title">Som</h2><span class="chip" id="audio-chip">desligado</span></div>
+          <button class="btn btn--primary btn--block" id="enable-audio" data-audio-toggle data-requires="connected"><svg class="icon"><use href="#i-sound"/></svg><span class="grow">Ativar som</span><kbd>M</kbd></button>
+          <p id="audio-status" class="muted" style="margin-top:.5rem;font-size:var(--t-sm)">O navegador só libera o áudio depois de um clique.</p>
+          <label for="volume" class="kv" style="margin-top:.5rem;border-top:var(--bw) dashed var(--line)">Volume <b id="volume-label">35%</b></label>
+          <div class="range-row"><svg class="icon"><use href="#i-mute"/></svg><input id="volume" type="range" min="0" max="1" step="0.05" value="0.35" data-requires="connected"><svg class="icon"><use href="#i-sound"/></svg></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2 class="card-title">Como tocar</h2></div>
+          <ul class="legend">
+            <li><span class="chip chip--hand"><svg class="icon"><use href="#i-hand"/></svg>perto</span><b>notas graves</b></li>
+            <li><span class="chip chip--hand"><svg class="icon"><use href="#i-hand"/></svg>longe</span><b>notas agudas</b></li>
+            <li><span class="chip chip--card"><svg class="icon"><use href="#i-card"/></svg>cartão</span><b id="mute-state">silêncio: não</b></li>
+          </ul>
+          <p class="muted" style="margin-top:.5rem;font-size:var(--t-sm)">Faixa das notas: de 8 a 48 cm do sensor.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- SLIDES NO AR ---------- -->
+    <section class="view" id="view-slides" aria-label="Slides no ar">
+      <div class="slide-stage">
+        <article class="slide" id="slide">
+          <div class="slide-inner">
+            <span class="slide-eyebrow" id="slide-eyebrow">01 · Olá, mundo</span>
+            <h2 class="slide-title" id="slide-title">—</h2>
+            <p class="slide-body" id="slide-body">—</p>
+          </div>
+          <div class="slide-pet"><svg viewBox="0 0 200 210"><use class="pilot-art" href="#pet-chick"/></svg></div>
+          <div class="slide-foot"><span>MOTIONPET</span><div class="slide-dots" id="slide-dots"></div><span id="slide-count-foot">1 / 8</span></div>
+        </article>
+      </div>
+      <div class="panel">
+        <div class="card">
+          <div class="card-head"><h2 class="card-title">Slide</h2><span class="slide-count" id="slide-count">1 / 8</span></div>
+          <div class="slide-nav">
+            <button class="btn" data-action="slides_prev" data-requires="connected"><svg class="icon"><use href="#i-left"/></svg>Anterior</button>
+            <button class="btn btn--primary" data-action="slides_next" data-requires="connected">Próximo<svg class="icon"><use href="#i-right"/></svg></button>
+          </div>
+          <p id="slides-status" class="muted" style="margin-top:.6rem;font-weight:600">Pronto.</p>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2 class="card-title">Gestos</h2></div>
+          <ul class="legend">
+            <li><span class="chip chip--hand"><svg class="icon"><use href="#i-hand"/></svg>perto</span><b>próximo</b></li>
+            <li><span class="chip chip--hand"><svg class="icon"><use href="#i-hand"/></svg>longe</span><b>anterior</b></li>
+            <li><span class="chip chip--card"><svg class="icon"><use href="#i-card"/></svg>cartão</span><b>próximo</b></li>
+          </ul>
+          <p class="muted" style="margin-top:.5rem;font-size:var(--t-sm)">Espere 1 segundo entre um gesto e outro. Teclado: <kbd>←</kbd> <kbd>→</kbd></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- DISPOSITIVO ---------- -->
+    <section class="view" id="view-device" aria-label="Detalhes do dispositivo">
+      <div class="card"><div class="card-head"><h2 class="card-title">Conexão</h2><span class="chip" id="dev-origin">—</span></div>
+        <div class="kv">Porta <b id="dev-port">—</b></div><div class="kv">Estado <b id="dev-status">—</b></div>
+        <div class="kv">Última leitura <b id="dev-age">—</b></div><div class="kv">Quadros recebidos <b id="dev-frames">—</b></div>
+        <div class="kv">Pacotes RX / TX <b id="dev-packets">—</b></div></div>
+      <div class="card"><div class="card-head"><h2 class="card-title">Ultrassom</h2><span class="silk muted">HC-SR04 · TRIG GPIO5 · ECHO GPIO34</span></div>
+        <div class="kv">Distância <b id="distance">—</b></div><div class="kv">Leitura válida <b id="distance-detail">—</b></div>
+        <svg class="spark" viewBox="0 0 90 60" preserveAspectRatio="none" aria-label="Últimas 90 leituras de distância"><polyline id="spark-line" points=""/></svg></div>
+      <div class="card"><div class="card-head"><h2 class="card-title">Infravermelho e gesto</h2><span class="silk muted">TCRT5000 · GPIO35</span></div>
+        <div class="kv">Cartão no IR <b id="ir">—</b></div><div class="kv">Gesto do classificador <b id="gesture">—</b></div>
+        <div class="kv" style="border-top:0;padding-top:0"><span class="muted" id="gesture-detail" style="font-size:var(--t-sm)">—</span></div><div class="conf"><i id="gesture-conf" style="width:0"></i></div>
+        <p class="muted" style="margin-top:.5rem;font-size:var(--t-sm)">Os modos usam regras de distância e as bordas do IR; o classificador aparece aqui só para consulta.</p></div>
+      <div class="card"><div class="card-head"><h2 class="card-title">LCD lógico 20×4</h2><span class="chip">substituído pela tela</span></div>
+        <pre class="lcd" id="diagnostics-text"></pre></div>
+      <div class="card"><div class="card-head"><h2 class="card-title">Aconteceu por aqui</h2></div><div id="events-list" class="events-list"></div></div>
+      <div class="card"><div class="card-head"><h2 class="card-title">Atalhos</h2></div>
+        <div class="shortcuts"><kbd>1</kbd><span>a <kbd>5</kbd> troca de tela</span><kbd>F</kbd><span>Modo Palco (tela cheia) · <kbd>Esc</kbd> sai</span><kbd>T</kbd><span>tema claro / escuro</span><kbd>Enter</kbd><span>Pet Launch: confirmar / lançar</span><kbd>Espaço</kbd><span>Pet Launch: carregar força</span><kbd>↑</kbd><span><kbd>↓</kbd> ângulo · <kbd>B</kbd> voltar</span><kbd>←</kbd><span><kbd>→</kbd> slides</span><kbd>M</kbd><span>Música: ligar / desligar o som</span></div></div>
+    </section>
+
+    <div class="toast" id="notice" role="status"></div>
+  </main>
+
+  <!-- ================= HUD DOS SENSORES ================= -->
+  <footer class="hud" id="hud" aria-label="Sensores e conexão">
+    <div class="hud-read">
+      <p class="label">Mão</p>
+      <p class="hud-value"><span id="hud-distance">—</span><small>cm</small></p>
+      <p class="hud-sub" id="hud-distance-sub">distância da mão</p>
+    </div>
+    <div class="hud-tape">
+      <div class="hud-cap"><span class="label" id="hud-zone-caption">O que a mão faz aqui</span><span class="silk">HC-SR04 · TRIG GPIO5 · ECHO GPIO34</span></div>
+      <div class="tape-row">
+        <svg class="sensor-glyph" aria-hidden="true"><use href="#hcsr04"/></svg>
+        <div class="tape-area" id="tape-area" title="PROTO: passe o mouse aqui para mover a mão">
+          <div class="zones" id="zones"></div>
+          <div class="tape" id="tape"><span style="left:0;transform:translateX(15%)">0</span><span style="left:16.666%">10</span><span style="left:33.333%">20</span><span style="left:50%">30</span><span style="left:66.666%">40</span><span style="left:83.333%">50</span><span style="left:100%">60+</span></div>
+          <div class="hand" id="hand"><svg class="icon"><use href="#i-hand"/></svg></div>
+          <div class="tape-msg" id="tape-msg">Sem placa: conecte ao lado para ver a mão aqui</div>
+        </div>
+      </div>
+    </div>
+    <div class="hud-ir">
+      <button class="lamp" id="lamp" aria-label="PROTO: segure para simular o cartão no IR" title="PROTO: segure para simular o cartão (ou tecla C)"></button>
+      <div>
+        <p class="label">Cartão no IR</p>
+        <p class="ir-state" id="hud-ir">—</p>
+        <p class="hud-sub" id="hud-ir-hint">—</p>
+        <p class="silk" style="margin-top:.1rem">TCRT5000 · GPIO35</p>
+      </div>
+    </div>
+    <div class="hud-conn">
+      <div class="conn-top"><span id="connection-dot" class="dot"></span><div style="min-width:0"><p class="conn-label" id="connection-label">Desconectado</p><p class="conn-detail" id="connection-detail">Escolha a porta e conecte</p></div></div>
+      <div class="conn-row conn-row--port" id="connection-panel">
+        <select id="ports" aria-label="Porta USB"><option value="COM3">COM3 · ESP32 (simulada)</option><option value="DEMO">DEMO · sem placa</option></select>
+        <button class="btn btn--icon" id="refresh-ports" aria-label="Atualizar lista de portas"><svg class="icon" style="width:1.2rem;height:1.2rem"><use href="#i-refresh"/></svg></button>
+        <button class="btn btn--primary" id="connect"><svg class="icon" style="width:1.2rem;height:1.2rem"><use href="#i-plug"/></svg>Conectar</button>
+      </div>
+      <div class="conn-row">
+        <button class="btn" id="disconnect">Desconectar</button>
+        <div class="palco-nav" aria-label="Trocar de tela">
+          <button class="btn" data-view="pet" aria-label="Meu Pet">1</button><button class="btn" data-view="launch" aria-label="Pet Launch">2</button><button class="btn" data-view="music" aria-label="Música">3</button><button class="btn" data-view="slides" aria-label="Slides">4</button>
+          <button class="btn btn--primary" id="stage-exit">Sair<kbd>Esc</kbd></button>
+        </div>
+      </div>
+      <p id="connection-message" hidden></p>
+    </div>
+  </footer>
+</div>
+
+<!-- ================= PROTO: simulação ================= -->
+<aside class="proto" id="proto" hidden aria-label="Simulação do protótipo">
+  <h2>Simulação (só no protótipo)</h2>
+  <p>Passe o mouse na régua para mover a mão. Segure a lâmpada do IR ou a tecla <kbd>C</kbd> para o cartão.</p>
+  <label>Conexão<select id="sim-conn"><option value="live">ESP32 ao vivo</option><option value="demo">DEMO</option><option value="off">desconectado</option><option value="connecting">conectando</option><option value="lag">leitura atrasada (1,2 s)</option><option value="stale">sem leituras (&gt; 2 s)</option><option value="error">erro do dispositivo</option></select></label>
+  <label>Fase do Launch<select id="sim-phase"><option>MENU</option><option>SELECT_PET</option><option>PREP</option><option>CHARGING</option><option>LAUNCHING</option><option>FLIGHT</option><option>RESULT</option></select></label>
+  <label>Estágio do pet<select id="sim-stage"><option value="EGG">Ovo</option><option value="CHICK" selected>Pintinho</option><option value="CYBER_ROOSTER">Galo cyber</option></select></label>
+  <label>Humor<select id="sim-mood"><option value="HAPPY">Feliz</option><option value="HUNGRY">Com fome</option><option value="TIRED">Cansado</option><option value="SICK">Doente</option><option value="SLEEPING">Dormindo</option></select></label>
+  <label class="check"><input type="checkbox" id="sim-auto" checked> Mão e cartão automáticos</label>
+</aside>
+
+<script>
+(() => {
+'use strict';
+/* ============================================================
+   PROTÓTIPO: estado falso + motor de simulação.
+   Nada daqui vai para o app; o que interessa ao aplicador são as
+   funções render*() (o que cada elemento mostra em cada estado).
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const num = (v, d = 0) => Number(v).toLocaleString('pt-BR', {minimumFractionDigits: d, maximumFractionDigits: d});
+const setText = (id, v) => { const n = $(id); if (n && n.textContent !== String(v)) n.textContent = v; };
+const VIEWS = ['pet', 'launch', 'music', 'slides', 'device'];
+const TAPE_MAX = 60;                       // a régua mostra 0–60 cm; acima disso o marcador encosta no fim
+const NEAR_CM = 15, FAR_CM = 35;           // zonas de terminal/web/session.py
+const AIM_NEAR = 8, AIM_FAR = 45;          // 8 cm = 70°, 45 cm = 20°
+const SWEET = [0.80, 0.95];
+const GROUND = 17;                         // % da cena ocupada pelo chão (igual a --ground no CSS)
+const NOTES = [['C4','Dó',261.63],['D4','Ré',293.66],['E4','Mi',329.63],['G4','Sol',392.00],['A4','Lá',440.00],['C5','Dó',523.25],['D5','Ré',587.33],['E5','Mi',659.25]];
+const UPGRADES = [
+  {id:'SLINGSHOT_PRO', name:'Estilingue Pro',    desc:'+12% de velocidade', cost:15},
+  {id:'AERO_CAPE',     name:'Capa Aerodinâmica', desc:'−25% de resistência do ar',   cost:25},
+  {id:'SPRING_BOOTS',  name:'Botas de Mola',     desc:'Quica mais alto, +1 salto', cost:35},
+];
+const SLIDES = [
+  ['01 · Olá, mundo','Uma pequena criatura. Um grande vínculo.','Seu MotionPet responde ao mundo físico. Aproxime a mão do ultrassom ou um cartão do sensor infravermelho.'],
+  ['02 · O que sentimos','Sua mão vira movimento.','O ultrassom mede a distância. O infravermelho reconhece a presença bem de perto. Os dois trabalham juntos.'],
+  ['03 · Nosso pet','Cuidar também é brincar.','Alimente, dê carinho, descanse e cuide da saúde. Cada interação faz parte da evolução do seu companheiro.'],
+  ['04 · Pet Launch','Pronto para ganhar o céu?','Mude o ângulo com a distância da mão. Aproxime o cartão para carregar e afaste para lançar.'],
+  ['05 · Música no ar','Encontre sua própria melodia.','A distância escolhe a nota. Um toque sem contato no infravermelho pausa ou retoma o instrumento.'],
+  ['06 · Evolução','Do ovo ao galo cibernético.','Experiência, cuidados e brincadeiras acompanham a evolução. O estado do pet continua na ESP32.'],
+  ['07 · Dois mundos','Conectado ao que é real.','A ESP32 cuida dos sensores e do pet. O notebook desenha esse pequeno mundo e dá voz às interações.'],
+  ['08 · Até logo','O próximo movimento é seu.','Continue explorando. Sem trocar fios, você pode cuidar, jogar, criar música e navegar pela apresentação.'],
+];
+const STAGE = {EGG:['Ovo','#pet-egg'], CHICK:['Pintinho','#pet-chick'], CYBER_ROOSTER:['Galo cyber','#pet-cyber']};
+const MOOD = {
+  HAPPY:   ['Feliz','ok','Que dia bom!'],
+  ECSTATIC:['Radiante','ok','Hoje eu tô demais!'],
+  HUNGRY:  ['Com fome','warn','Tô com fominha…'],
+  TIRED:   ['Cansado','warn','Preciso de um cochilo…'],
+  SICK:    ['Precisa de cuidado','warn','Não tô muito bem…'],
+  SLEEPING:['Dormindo','ok','Zzz…'],
+};
+const MOTION_LINE = {EATING:'Nham nham!', PETTING:'Aaah, carinho…', PLAYING:'Oba, brincar!', SLEEPING:'Zzz…', HEALING:'Já tô melhorando!'};
+
+const S = {
+  view:'pet', palco:false, auto:true, t:0,
+  conn:'live', origin:'ESP32_HW', port:'COM3', age:80, ageMode:'fresh', connUntil:0, connTarget:'live', frames:1284,
+  d:28, valid:true, ir:false, lastIr:false, zone:null, lastInput:0, lastCharge:0,
+  manualUntil:0, manualIr:false, irPulseUntil:0, irHold:false, history:[],
+  pet:{name:'Piu-piu', stage:'CHICK', moodLock:null, animation:'IDLE', animUntil:0, level:3, xp:120, coins:42, hunger:25, happiness:80, energy:85, health:95, launches:7},
+  launch:{phase:'MENU', since:0, angle:42, charge:0, best:38.4, flight:null, ft:0, result:null, owned:new Set(['SLINGSHOT_PRO']), blocked:false, manualAngleUntil:0},
+  music:{audio:false, muted:false, volume:.35},
+  slides:{current:1, flash:'', flashUntil:0},
+  events:[], gesture:{name:'NEUTRAL', conf:.62},
+};
+const now = () => performance.now();
+const fresh = () => S.conn === 'live' && S.age <= 2000;
+const connKey = () => S.conn !== 'live' ? S.conn : S.age > 2000 ? 'stale' : S.age > 500 ? 'lag' : 'live';
+const mood = () => { const p = S.pet; if (p.moodLock) return p.moodLock; return p.health < 35 ? 'SICK' : p.hunger > 70 ? 'HUNGRY' : p.energy < 20 ? 'TIRED' : p.happiness > 88 ? 'ECSTATIC' : 'HAPPY'; };
+
+function pushEvent(text, kind = 'info') { S.events.unshift({text, kind, at: new Date()}); S.events.length = Math.min(S.events.length, 24); toast(text, kind); }
+let toastTimer = 0;
+function toast(text, kind = 'info') { const n = $('notice'); n.textContent = text; n.dataset.kind = kind; n.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => n.classList.remove('show'), 3600); }
+
+/* ---------------- conexão (falsa) ---------------- */
+function setConn(v) {
+  S.ageMode = 'fresh'; S.age = 80;
+  if (v === 'off') S.conn = 'off';
+  else if (v === 'connecting') { S.conn = 'connecting'; S.connUntil = Infinity; }
+  else if (v === 'error') S.conn = 'error';
+  else { S.conn = 'live'; if (v === 'demo') { S.origin = 'DEMO'; S.port = 'DEMO'; } else if (v === 'live') { S.origin = 'ESP32_HW'; S.port = 'COM3'; }
+         if (v === 'lag') { S.ageMode = 'lag'; S.age = 1200; } if (v === 'stale') { S.ageMode = 'stale'; S.age = 3200; } }
+  $('sim-conn').value = v;
+}
+
+/* ---------------- ações (o app real envia /api/action) ---------------- */
+function petAction(a) {
+  if (!fresh()) return;
+  const p = S.pet, t = now();
+  const fx = (txt) => { const s = document.createElement('span'); s.textContent = txt; $('pet-fx').append(s); setTimeout(() => s.remove(), 1500); };
+  if (a === 'feed') { p.hunger = clamp(p.hunger - 25, 0, 100); p.happiness = clamp(p.happiness + 3, 0, 100); p.animation = 'EATING'; fx('+ comidinha'); pushEvent('Comidinha a caminho!'); }
+  if (a === 'interact') { p.happiness = clamp(p.happiness + 8, 0, 100); p.animation = 'PETTING'; fx('+ carinho'); pushEvent('Um carinho para o Piu-piu.'); }
+  if (a === 'play') { p.happiness = clamp(p.happiness + 10, 0, 100); p.energy = clamp(p.energy - 9, 0, 100); p.hunger = clamp(p.hunger + 6, 0, 100); p.animation = 'PLAYING'; fx('+ diversão'); pushEvent('Hora de brincar!'); }
+  if (a === 'rest') { p.energy = clamp(p.energy + 22, 0, 100); p.animation = 'SLEEPING'; fx('+ energia'); pushEvent('Uma pausa no ninho.'); }
+  if (a === 'heal') { p.health = clamp(p.health + 18, 0, 100); p.animation = 'HEALING'; fx('+ saúde'); pushEvent('Um cuidado especial.'); }
+  if (a === 'save') return pushEvent('Progresso salvo na placa.');
+  if (a === 'load') return pushEvent('Progresso carregado da placa.');
+  p.moodLock = null; $('sim-mood').value = 'HAPPY';
+  p.animUntil = t + 1700; p.xp += 5; p.level = 1 + Math.floor(p.xp / 50);
+}
+function slidesGo(delta, how) {
+  if (!fresh()) return;
+  const s = S.slides, before = s.current; s.current = clamp(s.current + delta, 1, SLIDES.length);
+  s.flash = s.current === before ? (delta > 0 ? 'Este já é o último slide.' : 'Este já é o primeiro slide.') : `${delta > 0 ? 'Avançou' : 'Voltou'} para o slide ${s.current} de ${SLIDES.length}${how ? ' · ' + how : ''}.`;
+  s.flashUntil = now() + 1800;
+}
+function launchKey(k) {
+  if (!fresh()) return;
+  const L = S.launch, t = now();
+  if (k === 'enter') {
+    if (L.phase === 'MENU') setPhase('SELECT_PET');
+    else if (L.phase === 'SELECT_PET') { if (readiness().ok) { L.charge = 0; setPhase('PREP'); } else toast(readiness().why, 'error'); }
+    else if (L.phase === 'CHARGING') doLaunch();
+    else if (L.phase === 'PREP') toast('Carregue a força primeiro: segure o cartão no IR.', 'error');
+    else if (L.phase === 'RESULT') { L.charge = 0; setPhase('MENU'); }
+  } else if (k === 'space') {
+    if (L.phase === 'PREP') setPhase('CHARGING');
+    if (L.phase === 'CHARGING') L.charge = L.charge >= 0.999 ? 0.07 : Math.min(1, +(L.charge + 0.07).toFixed(2));
+  } else if (k === 'w' || k === 'z') { L.angle = clamp(L.angle + (k === 'w' ? 3 : -3), 20, 70); L.manualAngleUntil = t + 4000; }
+  else if (k === 'esc') { if (L.phase === 'SELECT_PET') setPhase('MENU'); else if (L.phase === 'PREP') setPhase('SELECT_PET'); else if (L.phase === 'CHARGING') { L.charge = 0; setPhase('PREP'); } else if (L.phase === 'RESULT') setPhase('MENU'); }
+  else if (['7', '8', '9'].includes(k)) buy(UPGRADES[+k - 7]);
+}
+function readiness() { const m = mood(), p = S.pet; if (S.launch.blocked || m === 'SLEEPING') return {ok:false, why:'Piu-piu está dormindo. Acorde-o em Meu Pet antes de lançar.'}; if (m === 'SICK') return {ok:false, why:'Piu-piu está doente. Cuide dele em Meu Pet antes de lançar.'}; if (p.energy < 10) return {ok:false, why:'Energia baixa. Deixe o Piu-piu descansar em Meu Pet.'}; return {ok:true, why:''}; }
+function setPhase(p) { S.launch.phase = p; S.launch.since = now(); $('sim-phase').value = p; }
+function buy(u) { const L = S.launch; if (L.phase !== 'MENU' || L.owned.has(u.id) || S.pet.coins < u.cost) return; S.pet.coins -= u.cost; L.owned.add(u.id); pushEvent(`${u.name} comprado por ${u.cost} moedas.`); }
+
+/* voo falso, só para ter uma trajetória plausível */
+function simulateFlight(angleDeg, power, owned) {
+  const a = angleDeg * Math.PI / 180, g = 9.81, dt = .03;
+  const v0 = (7 + power * 15) * (owned.has('SLINGSHOT_PRO') ? 1.12 : 1), drag = .010 * (owned.has('AERO_CAPE') ? .75 : 1);
+  const rest = .48 + (owned.has('SPRING_BOOTS') ? .12 : 0), maxB = 3 + (owned.has('SPRING_BOOTS') ? 1 : 0);
+  let x = 0, y = 0, vx = v0 * Math.cos(a), vy = v0 * Math.sin(a), t = 0, b = 0, maxH = 0, rolling = false;
+  const pts = [{t:0, x:0, y:0, b:0}];
+  for (let i = 0; i < 3000; i++) {
+    if (!rolling) { const sp = Math.hypot(vx, vy); vx -= drag * sp * vx * dt; vy -= (g + drag * sp * vy) * dt; x += vx * dt; y += vy * dt;
+      if (y <= 0) { y = 0; if (b < maxB && Math.abs(vy) * rest > 1.05) { vy = -vy * rest; vx *= .8; b++; } else { rolling = true; vy = 0; } } maxH = Math.max(maxH, y); }
+    else { vx -= .55 * g * dt; if (vx <= .1) break; x += vx * dt; }
+    t += dt; pts.push({t, x, y, b});
+  }
+  return {pts, distance:x, maxH, bounces:b, time:t};
+}
+function doLaunch() {
+  const L = S.launch, sweet = L.charge >= SWEET[0] && L.charge <= SWEET[1];
+  L.flight = simulateFlight(L.angle, L.charge * (sweet ? 1.08 : 1), L.owned); L.flight.sweet = sweet; L.flight.power = L.charge; L.ft = 0; L.result = null; setPhase('LAUNCHING');
+}
+function finishFlight() {
+  const L = S.launch, f = L.flight, record = f.distance > L.best;
+  L.result = {distance_m:f.distance, max_height_m:f.maxH, bounces:f.bounces, score:Math.round(f.distance * 13 + f.maxH * 4 + (f.sweet ? 60 : 0)), coins_reward:Math.max(1, Math.floor(f.distance / 4)) + (f.sweet ? 2 : 0), xp_reward:Math.max(2, Math.round(f.distance / 3)), sweet_spot_bonus:f.sweet, is_new_record:record, previous_best:L.best};
+  if (record) L.best = f.distance; S.pet.coins += L.result.coins_reward; S.pet.xp += L.result.xp_reward; S.pet.level = 1 + Math.floor(S.pet.xp / 50); S.pet.launches++;
+  setPhase('RESULT'); pushEvent(`Voo de ${num(f.distance, 1)} m · +${L.result.coins_reward} moedas.`);
+}
+
+/* ---------------- mão e cartão automáticos (roteiro de demonstração) ---------------- */
+function autoplay(t) {
+  const s = S.t, L = S.launch, since = (t - L.since) / 1000;
+  const pulse = () => { S.irPulseUntil = t + 520; };
+  let d = S.d;
+  if (S.view === 'pet') { d = 30 + 20 * Math.sin(s * .55) + 2 * Math.sin(s * 2.1); if (Math.floor(s / 9) !== Math.floor((s - .15) / 9) && s > 3) pulse(); }
+  else if (S.view === 'music') { d = 28 + 21 * Math.sin(s * .7) + 1.5 * Math.sin(s * 3); if (Math.floor(s / 13) !== Math.floor((s - .15) / 13) && s > 5) pulse(); }
+  else if (S.view === 'slides') { d = 25 + 19 * Math.sin(s * .42); }
+  else if (S.view === 'device') { d = 34 + 30 * Math.sin(s * .5) + 3 * Math.sin(s * 2.7); if (Math.floor(s / 6) !== Math.floor((s - .15) / 6)) pulse(); }
+  else if (S.view === 'launch') {
+    S.irHold = false;
+    if (L.phase === 'MENU') { d = 30 + 6 * Math.sin(s * .8); if (since > 3.2 && t > S.irPulseUntil + 900) pulse(); }
+    else if (L.phase === 'SELECT_PET') { d = 30 + 6 * Math.sin(s * .8); if (since > 2.8 && t > S.irPulseUntil + 900) pulse(); }
+    else if (L.phase === 'PREP') { d = since < 4 ? 26 + 14 * Math.sin(since * 1.5) : S.d + (25 - S.d) * .3; if (since > 5) S.irHold = true; }
+    else if (L.phase === 'CHARGING') { d = 25 + .6 * Math.sin(s * 3); S.irHold = !(L.charge >= .84 && L.charge <= .93); }
+    else if (L.phase === 'RESULT') { d = 32 + 5 * Math.sin(s * .7); if (since > 5.5 && t > S.irPulseUntil + 900) pulse(); }
+  }
+  if (t > S.manualUntil) { S.d = clamp(d, 3, 78); S.valid = true; }
+  if (!S.manualIr) S.ir = t < S.irPulseUntil || S.irHold;
+}
+
+/* mesma lógica de terminal/web/session.py::_sensor_controls */
+function sensorControls(t) {
+  const rising = !S.lastIr && S.ir, falling = S.lastIr && !S.ir; S.lastIr = S.ir;
+  let zone = null; if (S.valid && S.d != null) zone = S.d < NEAR_CM ? 'near' : S.d > FAR_CM ? 'far' : 'middle';
+  const changed = zone && S.zone && zone !== S.zone; if (zone) S.zone = zone;
+  const L = S.launch;
+  if (S.view === 'pet') {
+    if (rising && t - S.lastInput > 800) { petAction('feed'); S.lastInput = t; }
+    else if (changed && zone === 'near' && t - S.lastInput > 1000) { petAction('interact'); S.lastInput = t; }
+  } else if (S.view === 'launch') {
+    if (S.valid && ['MENU', 'SELECT_PET', 'PREP', 'CHARGING'].includes(L.phase) && t > L.manualAngleUntil) L.angle = +(20 + clamp((AIM_FAR - S.d) / (AIM_FAR - AIM_NEAR), 0, 1) * 50).toFixed(0);
+    if (rising && ['MENU', 'SELECT_PET', 'RESULT'].includes(L.phase)) { launchKey('enter'); S.lastCharge = t + 400; }
+    else if (S.ir && ['PREP', 'CHARGING'].includes(L.phase) && t - S.lastCharge > 140) { launchKey('space'); S.lastCharge = t; }
+    else if (falling && L.phase === 'CHARGING') launchKey('enter');
+  } else if (S.view === 'music') {
+    if (rising && t - S.lastInput > 500) { S.music.muted = !S.music.muted; S.lastInput = t; pushEvent(S.music.muted ? 'Silêncio ligado pelo cartão.' : 'O som voltou.'); }
+  } else if (S.view === 'slides' && t - S.lastInput > 1000) {
+    if (rising) { slidesGo(1, 'cartão'); S.lastInput = t; }
+    else if (changed && zone === 'near') { slidesGo(1, 'mão perto'); S.lastInput = t; }
+    else if (changed && zone === 'far') { slidesGo(-1, 'mão longe'); S.lastInput = t; }
+  }
+}
+function stepWorld(t, dt) {
+  const p = S.pet, L = S.launch;
+  if (p.animation !== 'IDLE' && t > p.animUntil) p.animation = 'IDLE';
+  p.hunger = clamp(p.hunger + dt * .35, 0, 100); p.energy = clamp(p.energy - dt * .08, 0, 100);
+  if (L.phase === 'LAUNCHING' && t - L.since > 450) setPhase('FLIGHT');
+  if (L.phase === 'FLIGHT') { L.ft += dt; if (L.ft >= L.flight.time) finishFlight(); }
+  S.history.push(S.valid ? S.d : null); if (S.history.length > 90) S.history.shift();
+  S.frames += 2;
+  S.gesture = S.zone === 'near' ? {name:'APPROACH', conf:.81} : S.zone === 'far' ? {name:'RETREAT', conf:.74} : {name:'NEUTRAL', conf:.6};
+}
+
+/* ============================================================
+   RENDER: é isto que o aplicador precisa reproduzir no app.js
+   ============================================================ */
+const noteIndex = () => clamp(Math.floor((clamp(S.d, 8, 48) - 8) / 40 * NOTES.length), 0, NOTES.length - 1);
+
+function coachCopy() {
+  const key = connKey(), L = S.launch, p = S.pet, m = mood();
+  if (key === 'off') return {tone:'warn', badge:'#i-plug', title:'Conecte o MotionPet para começar', sub:'Na barra de baixo, escolha a porta USB e clique em Conectar. Feche antes o monitor serial: só um programa usa a COM3 por vez.'};
+  if (key === 'connecting') return {tone:'warn', badge:'#i-plug', title:`Conectando à ${S.port}…`, sub:'Só um instante: a placa está respondendo.'};
+  if (key === 'error') return {tone:'danger', badge:'#i-plug', title:'A conexão com a placa caiu', sub:'Confira o cabo USB e clique em Conectar de novo na barra de baixo.'};
+  if (key === 'stale') return {tone:'danger', badge:'#i-plug', title:`Sem leituras há ${num(S.age / 1000, 1)} s`, sub:'As ações ficam bloqueadas até a placa voltar a responder. Confira o cabo USB.'};
+  if (S.view === 'pet') {
+    if (p.animation === 'EATING') return {tone:'ok', badge:'#i-food', title:'Nham! Comidinha entregue', sub:'O cartão passou pelo sensor infravermelho.'};
+    if (p.animation === 'PETTING') return {tone:'ok', badge:'#i-heart', title:'Carinho recebido!', sub:'Sua mão chegou a menos de 15 cm do ultrassom.'};
+    if (m === 'SLEEPING') return {tone:'go', badge:'#i-moon', title:'Piu-piu está dormindo', sub:'Deixe descansar ou faça um carinho chegando a mão perto do sensor.'};
+    if (m === 'HUNGRY') return {tone:'go', badge:'#i-card', title:'Piu-piu está com fome: aproxime o cartão do IR', sub:'O cartão precisa ficar a poucos milímetros do sensor infravermelho.'};
+    if (m === 'SICK') return {tone:'go', badge:'#i-heal', title:'Piu-piu precisa de cuidado: clique em Cuidar da saúde', sub:'Depois, um carinho ajuda: chegue a mão perto do ultrassom.'};
+    if (m === 'TIRED') return {tone:'go', badge:'#i-moon', title:'Piu-piu está cansado: clique em Descansar', sub:'A energia volta depois de uma pausa no ninho.'};
+    return {tone:'go', badge:'#i-hand', title:'Cartão no IR dá comida · mão perto faz carinho', sub:'Chegue a mão a menos de 15 cm do ultrassom, ou encoste o cartão no infravermelho.'};
+  }
+  if (S.view === 'launch') {
+    const r = readiness();
+    if (L.phase === 'MENU') return {tone:'go', badge:'#i-card', title:'Aproxime e afaste o cartão para jogar', sub:`Recorde: ${num(L.best, 1)} m · ${p.launches} voos · a loja está aberta ao lado.`};
+    if (L.phase === 'SELECT_PET') return r.ok ? {tone:'go', badge:'1', title:'Piu-piu vai ser o piloto', sub:'Passe o cartão de novo (aproxime e afaste) para ir à rampa.'} : {tone:'warn', badge:'1', title:'Piu-piu não pode voar agora', sub:r.why};
+    if (L.phase === 'PREP') return {tone:'go', badge:'2', title:'Mire com a mão: perto sobe, longe desce', sub:'Quando gostar do ângulo, segure o cartão no IR para carregar a força.'};
+    if (L.phase === 'CHARGING') return (L.charge >= SWEET[0] && L.charge <= SWEET[1]) ? {tone:'ok', badge:'3', title:'SOLTE AGORA! Tire o cartão', sub:'Você está na faixa perfeita: bônus de pontos e moedas.'} : {tone:'go', badge:'3', title:'Segure o cartão… solte na faixa verde', sub:'A força sobe e recomeça. A faixa perfeita vai de 80% a 95%.'};
+    if (L.phase === 'LAUNCHING') return {tone:'go', badge:'4', title:'Lá vai o Piu-piu!', sub:`Saída com ${num(L.angle)}° e ${num(L.flight.power * 100)}% de força${L.flight.sweet ? ' · disparo perfeito' : ''}.`};
+    if (L.phase === 'FLIGHT') return {tone:'go', badge:'4', title:'Voando…', sub:'Agora é só torcer: a mão e o cartão descansam até o pouso.'};
+    return L.result.is_new_record ? {tone:'ok', badge:'5', title:'Novo recorde!', sub:'Passe o cartão para voltar ao menu e jogar de novo.'} : {tone:'go', badge:'5', title:'Pousou!', sub:`Faltaram ${num(Math.max(0, L.best - L.result.distance_m), 1)} m para o recorde. Passe o cartão para jogar de novo.`};
+  }
+  if (S.view === 'music') {
+    if (!S.music.audio) return {tone:'warn', badge:'#i-sound', title:'Clique em Ativar som para ouvir', sub:'O navegador só libera o áudio depois de um clique. As notas já aparecem na tela.'};
+    if (S.music.muted) return {tone:'go', badge:'#i-mute', title:'Em silêncio. Aproxime o cartão para voltar a tocar', sub:'O cartão no infravermelho liga e desliga o silêncio.'};
+    if (!S.valid) return {tone:'go', badge:'#i-hand', title:'Coloque a mão na frente do sensor', sub:'A faixa das notas vai de 8 a 48 cm.'};
+    return {tone:'go', badge:'#i-hand', title:'Mova a mão: cada distância é uma nota', sub:'Perto toca grave, longe toca agudo. O cartão no IR faz silêncio.'};
+  }
+  if (S.view === 'slides') {
+    if (now() < S.slides.flashUntil) return {tone:'ok', badge:'#i-slides', title:S.slides.flash, sub:'Espere 1 segundo antes do próximo gesto.'};
+    return {tone:'go', badge:'#i-hand', title:'Mão perto avança · mão longe volta', sub:`Slide ${S.slides.current} de ${SLIDES.length}. O cartão no IR também avança.`};
+  }
+  return {tone:'go', badge:'#i-chip', title:'Detalhes do dispositivo', sub:'Leituras brutas, eventos e o LCD lógico 20×4. Nada daqui é necessário durante a apresentação.'};
+}
+function renderCoach() {
+  const c = coachCopy(), coach = $('coach'), badge = $('coach-badge');
+  coach.dataset.tone = c.tone; setText('coach-title', c.title); setText('coach-sub', c.sub);
+  if (badge.dataset.v !== c.badge) { badge.dataset.v = c.badge; badge.innerHTML = c.badge.startsWith('#') ? `<svg class="icon"><use href="${c.badge}"/></svg>` : c.badge; }
+  const order = {MENU:0, SELECT_PET:1, PREP:2, CHARGING:3, LAUNCHING:4, FLIGHT:4, RESULT:5}[S.launch.phase];
+  for (const li of document.querySelectorAll('.step')) { const n = +li.dataset.step, st = n < order ? 'done' : n === order ? 'now' : 'todo'; if (li.dataset.state !== st) { li.dataset.state = st; if (st === 'now') li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); } }
+}
+
+function zonesFor() {
+  const ph = S.launch.phase;
+  if (S.view === 'music') return {cap:'Cada faixa da régua é uma nota', z:NOTES.map((n, i) => ({from:i ? 8 + i * 5 : 0, to:i === 7 ? TAPE_MAX : 13 + i * 5, label:n[1], id:'n' + i}))};
+  if (S.view === 'slides') return {cap:'O que a mão faz nos slides', z:[{from:0, to:NEAR_CM, label:'PRÓXIMO ▶', id:'near'}, {from:NEAR_CM, to:FAR_CM, label:'neutro', id:'mid', quiet:1}, {from:FAR_CM, to:TAPE_MAX, label:'◀ ANTERIOR', id:'far'}]};
+  if (S.view === 'launch') return ['MENU', 'SELECT_PET', 'PREP', 'CHARGING'].includes(ph)
+    ? {cap:'A mão escolhe o ângulo do lançamento', z:[{from:0, to:AIM_NEAR, label:'70°', id:'max', quiet:1}, {from:AIM_NEAR, to:AIM_FAR, label:'', id:'aim', scale:1}, {from:AIM_FAR, to:TAPE_MAX, label:'20°', id:'min', quiet:1}]}
+    : {cap:'Durante o voo a mão descansa', z:[{from:0, to:TAPE_MAX, label:'sem ação nesta etapa', id:'rest', quiet:1}]};
+  if (S.view === 'pet') return {cap:'O que a mão faz no Meu Pet', z:[{from:0, to:NEAR_CM, label:'CARINHO', id:'near'}, {from:NEAR_CM, to:FAR_CM, label:'neutro', id:'mid', quiet:1}, {from:FAR_CM, to:TAPE_MAX, label:'longe', id:'far', quiet:1}]};
+  return {cap:'Zonas usadas pelos modos', z:[{from:0, to:NEAR_CM, label:'PERTO · até 15 cm', id:'near'}, {from:NEAR_CM, to:FAR_CM, label:'MEIO', id:'mid'}, {from:FAR_CM, to:TAPE_MAX, label:'LONGE · mais de 35 cm', id:'far'}]};
+}
+function irHint() {
+  const ph = S.launch.phase;
+  if (S.view === 'pet') return 'dá comida';
+  if (S.view === 'music') return S.music.muted ? 'tira o silêncio' : 'faz silêncio';
+  if (S.view === 'slides') return 'avança o slide';
+  if (S.view === 'launch') return ph === 'PREP' ? 'segure para dar força' : ph === 'CHARGING' ? 'tire para lançar' : ['LAUNCHING', 'FLIGHT'].includes(ph) ? 'sem ação no voo' : 'confirma a etapa';
+  return 'borda de subida e de descida';
+}
+let zonesKey = '';
+function renderHud() {
+  const key = connKey(), live = key === 'live' || key === 'lag', known = live || key === 'stale';
+  const show = known && S.valid && S.d != null;
+  setText('hud-distance', show ? num(S.d) : '—');
+  setText('hud-distance-sub', !known ? 'sem leitura' : !S.valid ? 'nada na frente do sensor' : S.d > TAPE_MAX ? 'longe, fora da régua' : key === 'stale' ? 'último valor recebido' : 'distância da mão');
+  const hand = $('hand'); hand.style.left = (show ? clamp(S.d, 0, TAPE_MAX) / TAPE_MAX * 100 : 0) + '%'; hand.hidden = !show; hand.classList.toggle('far', show && S.d > TAPE_MAX);
+  const zs = zonesFor(), zk = S.view + '|' + (S.view === 'launch' ? (['MENU', 'SELECT_PET', 'PREP', 'CHARGING'].includes(S.launch.phase) ? 'aim' : 'rest') : '');
+  if (zk !== zonesKey) { zonesKey = zk; setText('hud-zone-caption', zs.cap);
+    $('zones').innerHTML = zs.z.map(z => `<div class="zone${z.quiet ? ' quiet' : ''}${z.scale ? ' scale' : ''}" data-id="${z.id}" data-from="${z.from}" data-to="${z.to}" style="left:${z.from / TAPE_MAX * 100}%;width:calc(${(z.to - z.from) / TAPE_MAX * 100}% - .15rem)">${z.scale ? '<span>◀ 70°</span><b id="zone-aim">MIRA</b><span>20° ▶</span>' : z.label}</div>`).join(''); }
+  const dd = clamp(S.d ?? 0, 0, TAPE_MAX - .01);
+  for (const el of $('zones').children) el.classList.toggle('on', show && live && dd >= +el.dataset.from && dd < +el.dataset.to);
+  if ($('zone-aim')) setText('zone-aim', `MIRA · ${num(S.launch.angle)}°`);
+  setText('tape-msg', key === 'stale' ? `Leitura parada há ${num(S.age / 1000, 1)} s: valor congelado` : key === 'connecting' ? 'Conectando…' : key === 'error' ? 'Conexão interrompida' : 'Sem placa: conecte ao lado para ver a mão aqui');
+  $('lamp').classList.toggle('on', live && S.ir);
+  setText('hud-ir', !known ? '—' : S.ir ? 'DETECTADO' : 'LIVRE');
+  setText('hud-ir-hint', known ? irHint() : 'sem leitura');
+  // conexão
+  const demo = S.origin === 'DEMO';
+  const label = {off:'Desconectado', connecting:'Conectando…', error:'Conexão interrompida', stale:`${S.port} · sem leituras`, lag:demo ? 'DEMO · simulação' : `${S.port} · ESP32`, live:demo ? 'DEMO · simulação' : `${S.port} · ESP32`}[key];
+  const detail = {off:'Escolha a porta e clique em Conectar', connecting:`Abrindo ${S.port}`, error:'Confira o cabo USB e conecte de novo', stale:`última leitura há ${num(S.age / 1000, 1)} s`, lag:`leitura há ${num(S.age / 1000, 1)} s`, live:demo ? 'leituras simuladas, sem placa' : 'ao vivo · leitura há 0,1 s'}[key];
+  setText('connection-label', label); setText('connection-detail', detail);
+  $('connection-panel').hidden = !(key === 'off' || key === 'error');
+  $('disconnect').hidden = key === 'off' || key === 'error';
+  setText('disconnect', key === 'connecting' ? 'Cancelar' : 'Desconectar');
+}
+
+function renderPet() {
+  const p = S.pet, m = mood(), [stageName, sprite] = STAGE[p.stage], [moodName, moodTone, moodLine] = MOOD[m];
+  setText('pet-stage', stageName.toUpperCase()); setText('pet-level', p.level); setText('pet-xp', `${p.xp} XP`); setText('pet-coins', p.coins);
+  for (const n of document.querySelectorAll('.coins-out')) if (n.textContent !== String(p.coins)) n.textContent = p.coins;
+  if ($('pet-art').getAttribute('href') !== sprite) { $('pet-art').setAttribute('href', sprite); $('flying-pet').setAttribute('href', sprite); for (const u of document.querySelectorAll('.pilot-art')) u.setAttribute('href', sprite); }
+  const motion = p.animation !== 'IDLE' ? p.animation : m === 'SLEEPING' ? 'SLEEPING' : 'IDLE';
+  $('pet-sprite').dataset.motion = motion;
+  setText('pet-mood', fresh() ? (MOTION_LINE[p.animation] || moodLine) : 'Zzz… me conecta?');
+  setText('profile-message', moodName); $('profile-message').className = 'chip chip--' + moodTone;
+  const order = ['EGG', 'CHICK', 'CYBER_ROOSTER'], at = order.indexOf(p.stage);
+  for (const n of document.querySelectorAll('.evo-node')) { const i = order.indexOf(n.dataset.stage); n.dataset.state = i < at ? 'done' : i === at ? 'now' : 'todo'; }
+  const meter = (name, value) => { const v = Math.round(clamp(value, 0, 100)), box = $(name + '-meter'), level = v < 25 ? 'low' : v < 50 ? 'mid' : 'ok';
+    setText(name + '-value', v + '%'); $(name + '-bar').style.width = v + '%'; box.dataset.level = level; box.querySelector('.meter-note').textContent = level === 'low' ? 'baixa' : ''; };
+  meter('hunger', 100 - p.hunger); meter('happiness', p.happiness); meter('energy', p.energy); meter('health', p.health);
+}
+
+let scaleKey = '';
+function renderLaunch() {
+  const L = S.launch, scene = $('launch-scene'), f = L.flight, r = L.result;
+  scene.dataset.phase = L.phase;
+  const maxX = Math.max(40, L.best * 1.18, f ? f.distance * 1.12 : 0), maxY = Math.max(12, f ? f.maxH * 1.3 : 0);
+  const px = (x) => 10 + clamp(x / maxX, 0, 1) * 84, py = (y) => GROUND + clamp(y / maxY, 0, 1) * (76 - GROUND);
+  const sk = Math.round(maxX);
+  if (String(sk) !== scaleKey) { scaleKey = String(sk); const step = maxX <= 60 ? 10 : 20; let h = ''; for (let m = step; m < maxX; m += step) h += `<span style="left:${px(m)}%">${m} m</span>`; $('ground-ruler').innerHTML = h; }
+  $('record-flag').style.left = px(L.best) + '%'; setText('launch-best', `${num(L.best, 1)} m`); setText('launch-best-chip', `${num(L.best, 1)} m`);
+  // transferidor
+  const arc = (a0, a1, rad) => { const p = (a) => [25 + rad * Math.cos(a * Math.PI / 180), 210 - rad * Math.sin(a * Math.PI / 180)]; const [x0, y0] = p(a0), [x1, y1] = p(a1); return `M${x0.toFixed(1)} ${y0.toFixed(1)}A${rad} ${rad} 0 0 0 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+  if (!$('prot-band').getAttribute('d')) { $('prot-band').setAttribute('d', arc(20, 70, 188)); let g = '';
+    for (let a = 0; a <= 90; a += 10) { const c = Math.cos(a * Math.PI / 180), s = Math.sin(a * Math.PI / 180), r0 = a % 30 === 0 || a === 20 || a === 70 ? 172 : 182; g += `<line class="tick" x1="${25 + r0 * c}" y1="${210 - r0 * s}" x2="${25 + 200 * c}" y2="${210 - 200 * s}"/>`; if (a === 20 || a === 70 || a === 45) g += ''; }
+    for (const a of [20, 45, 70]) { const c = Math.cos(a * Math.PI / 180), s = Math.sin(a * Math.PI / 180); g += `<text x="${25 + 150 * c}" y="${210 - 150 * s + 5}" text-anchor="middle">${a}°</text>`; }
+    $('prot-ticks').innerHTML = g; }
+  $('prot-needle').style.transform = `rotate(${-L.angle}deg)`;
+  setText('launch-angle', `${num(L.angle)}°`); setText('aim-distance', S.valid ? `${num(S.d)} cm` : '—');
+  // força
+  const pct = Math.round(L.charge * 100), sweet = L.charge >= SWEET[0] && L.charge <= SWEET[1];
+  setText('launch-charge', `${pct}%`); $('charge-bar').style.width = pct + '%'; $('power').classList.toggle('is-sweet', sweet && L.phase === 'CHARGING');
+  $('launch-sweet').lastChild.textContent = sweet ? 'faixa perfeita: tire o cartão!' : 'tire o cartão para lançar';
+  $('launch-sweet').className = 'chip ' + (sweet ? 'chip--ok' : 'chip--card');
+  // voo
+  const flyer = $('flyer'); let fx = 0, fy = 0, pull = '';
+  if (f && ['FLIGHT', 'RESULT'].includes(L.phase)) {
+    const upto = L.phase === 'RESULT' ? f.time : L.ft; let last = f.pts[0]; const out = [];
+    for (const p of f.pts) { if (p.t > upto) break; last = p; out.push(`${px(p.x).toFixed(2)},${(100 - py(p.y)).toFixed(2)}`); }
+    $('flight-path').setAttribute('points', out.join(' ')); fx = last.x; fy = last.y;
+    setText('flight-distance', `${num(last.x, 1)} m`); setText('flight-detail', `altura ${num(last.y, 1)} m · ${last.b} ${last.b === 1 ? 'quique' : 'quiques'}`);
+  } else { $('flight-path').setAttribute('points', ''); if (L.phase === 'LAUNCHING') { setText('flight-distance', '0,0 m'); setText('flight-detail', 'decolando'); }
+    if (L.phase === 'CHARGING') { const a = L.angle * Math.PI / 180; pull = ` translate(${(-Math.cos(a) * L.charge * 1.3).toFixed(2)}rem,${(Math.sin(a) * L.charge * 1.3).toFixed(2)}rem)`; } }
+  flyer.style.left = px(fx) + '%'; flyer.style.bottom = py(fy) + '%'; flyer.style.transform = `translate(-50%,13%)${pull}`;
+  // piloto
+  const rd = readiness(), [stageName] = STAGE[S.pet.stage];
+  setText('pilot-stage', `${stageName} · nível ${S.pet.level}`); setText('pilot-ready', rd.ok ? `Energia ${Math.round(S.pet.energy)}% · pronto` : 'Ainda não pode voar'); $('pilot-ready').className = 'chip ' + (rd.ok ? 'chip--ok' : 'chip--warn');
+  $('pilot-cta').lastChild.textContent = rd.ok ? 'Passe o cartão de novo para ir à rampa' : 'Cuide do Piu-piu em Meu Pet (tecla 1)';
+  // resultado
+  if (r) { setText('result-distance', `${num(r.distance_m, 1)} m`); $('record-sticker').hidden = !r.is_new_record;
+    setText('result-best', r.is_new_record ? `Recorde anterior: ${num(r.previous_best, 1)} m` : `Recorde: ${num(L.best, 1)} m`);
+    setText('result-score', num(r.score)); setText('result-coins', `+${r.coins_reward}`); setText('result-xp', `+${r.xp_reward}`); setText('result-bounces', r.bounces); }
+  // loja
+  const open = L.phase === 'MENU' && fresh(), list = $('upgrades-list'), sig = [...L.owned].join() + '|' + S.pet.coins + '|' + open;
+  if (list.dataset.sig !== sig) { list.dataset.sig = sig; list.replaceChildren();
+    UPGRADES.forEach((u, i) => { const row = document.createElement('div'); row.className = 'upgrade'; const copy = document.createElement('div'); copy.innerHTML = `<strong></strong><small></small>`; copy.firstChild.textContent = u.name; copy.lastChild.textContent = u.desc; row.append(copy);
+      if (L.owned.has(u.id)) { const o = document.createElement('span'); o.className = 'owned'; o.innerHTML = '<svg class="icon"><use href="#i-check"/></svg>Comprado'; row.append(o); }
+      else { const b = document.createElement('button'), miss = u.cost - S.pet.coins; b.className = 'btn btn--sm' + (miss <= 0 ? ' btn--primary' : ''); b.disabled = !open || miss > 0;
+        b.innerHTML = miss > 0 ? `<span>${u.cost} moedas<small>faltam ${miss}</small></span>` : `<span class="coin">$</span>${u.cost}`; b.setAttribute('aria-label', `Comprar ${u.name} por ${u.cost} moedas`); b.addEventListener('click', () => launchKey(String(7 + i))); row.append(b); }
+      list.append(row); });
+    $('shop-note').innerHTML = open ? '<svg class="icon"><use href="#i-check"/></svg>Loja aberta: compre antes de jogar.' : '<svg class="icon"><use href="#i-lock"/></svg>A loja só abre no menu.'; }
+  // botões do teclado
+  setText('launch-confirm-label', {MENU:'Jogar', SELECT_PET:'Ir para a rampa', PREP:'Lançar', CHARGING:'Lançar!', LAUNCHING:'Lançar', FLIGHT:'Lançar', RESULT:'Jogar de novo'}[L.phase]);
+}
+
+let xyloBuilt = false;
+function renderMusic() {
+  const M = S.music, i = noteIndex(), n = NOTES[i], sounding = fresh() && S.valid && !M.muted;
+  if (!xyloBuilt) { xyloBuilt = true; $('xylo').innerHTML = NOTES.map((x, k) => `<div class="bar" style="--h:${100 - k * 6.5}%"><b>${x[1]}</b><span>${x[0]}</span></div>`).join(''); }
+  [...$('xylo').children].forEach((el, k) => el.classList.toggle('on', fresh() && S.valid && k === i));
+  $('music-scene').classList.toggle('is-muted', M.muted);
+  setText('music-note', M.muted ? 'Em silêncio' : 'Nota de agora');
+  setText('note-name', fresh() && S.valid ? n[1].toUpperCase() : '—');
+  setText('note-frequency', fresh() && S.valid ? `${n[0]} · ${num(n[2], 1)} Hz` : 'aguardando a mão');
+  $('music-pet').classList.toggle('singing', sounding && M.audio);
+  $('sound-cta').hidden = M.audio;
+  $('enable-audio').querySelector('.grow').textContent = M.audio ? 'Desativar som' : 'Ativar som'; $('enable-audio').classList.toggle('btn--primary', !M.audio);
+  setText('audio-chip', M.audio ? (M.muted ? 'em silêncio' : 'tocando') : 'desligado'); $('audio-chip').className = 'chip ' + (M.audio && !M.muted ? 'chip--ok' : M.audio ? 'chip--warn' : '');
+  setText('audio-status', M.audio ? 'Som ligado neste navegador.' : 'O navegador só libera o áudio depois de um clique.');
+  setText('volume-label', `${Math.round(M.volume * 100)}%`); $('volume').style.setProperty('--fill', M.volume * 100 + '%');
+  setText('mute-state', M.muted ? 'silêncio: sim' : 'silêncio: não');
+  audioUpdate(sounding ? n[2] : 0);
+}
+
+function renderSlides() {
+  const s = S.slides, it = SLIDES[s.current - 1];
+  setText('slide-eyebrow', it[0]); setText('slide-title', it[1]); setText('slide-body', it[2]);
+  setText('slide-count', `${s.current} / ${SLIDES.length}`); setText('slide-count-foot', `${s.current} / ${SLIDES.length}`);
+  const dots = $('slide-dots'); if (dots.children.length !== SLIDES.length) dots.innerHTML = SLIDES.map(() => '<i></i>').join('');
+  [...dots.children].forEach((d, k) => d.classList.toggle('on', k < s.current));
+  setText('slides-status', now() < s.flashUntil ? s.flash : fresh() ? 'Pronto para o próximo gesto.' : 'Aguardando a conexão.');
+}
+
+function renderDevice() {
+  const key = connKey(), known = key === 'live' || key === 'lag' || key === 'stale';
+  setText('dev-origin', !known ? 'sem placa' : S.origin === 'DEMO' ? 'DEMO' : 'ESP32 física'); setText('dev-port', known || key === 'connecting' ? S.port : '—');
+  setText('dev-status', {off:'desconectado', connecting:'conectando', error:'erro', stale:'sem leituras', lag:'leitura atrasada', live:'ao vivo'}[key]);
+  setText('dev-age', known ? `${num(S.age)} ms` : '—'); setText('dev-frames', known ? num(S.frames) : '—'); setText('dev-packets', known ? `${num(S.frames + 12)} / ${num(38)}` : '—');
+  setText('distance', known && S.valid ? `${num(S.d, 1)} cm` : '—'); setText('distance-detail', !known ? '—' : S.valid ? 'sim' : 'não (sem eco)');
+  setText('ir', !known ? '—' : S.ir ? 'detectado' : 'livre');
+  const G = {NEUTRAL:'em repouso', APPROACH:'aproximando', RETREAT:'afastando'};
+  setText('gesture', known ? G[S.gesture.name] : '—'); setText('gesture-detail', known ? `${Math.round(S.gesture.conf * 100)}% de confiança` : 'aguardando leitura'); $('gesture-conf').style.width = (known ? S.gesture.conf * 100 : 0) + '%';
+  $('spark-line').setAttribute('points', S.history.map((d, i) => `${i},${(60 - clamp(d ?? 0, 0, 80) / 80 * 56 - 2).toFixed(1)}`).join(' '));
+  const L = S.launch, p = S.pet, pad = (s, n) => String(s).padEnd(n).slice(0, n);
+  const lcd = !known ? ['', '   SEM LEITURA', '', ''] : S.view === 'launch'
+    ? [`PET LAUNCH: ${L.phase}`, `${pad('Piu-piu', 9)}${pad(p.stage.slice(0, 5), 6)}EN:${Math.round(p.energy)}%`, `ANG:${L.angle.toFixed(1)}d REC:${L.best.toFixed(0).padStart(4)}m`, '[APP]JOGAR [U]LOJA']
+    : [`${pad('Piu-piu', 10)}NV${p.level} ${pad(mood(), 6)}`, `FOME:${String(Math.round(p.hunger)).padStart(3)} FEL:${String(Math.round(p.happiness)).padStart(3)}`, `ENER:${String(Math.round(p.energy)).padStart(3)} SAU:${String(Math.round(p.health)).padStart(3)}`, `D:${S.valid ? S.d.toFixed(1).padStart(5) : '  ---'}cm IR:${S.ir ? 'ON ' : 'OFF'}`];
+  setText('diagnostics-text', lcd.map(l => pad(l, 20)).join('\n'));
+  const list = $('events-list'), sig = S.events.length + '|' + (S.events[0]?.text || '');
+  if (list.dataset.sig !== sig) { list.dataset.sig = sig; list.replaceChildren(...(S.events.length ? S.events.slice(0, 8) : [{text:'Os eventos aparecem aqui.', at:new Date()}]).map(e => { const row = document.createElement('div'), tm = document.createElement('time'), tx = document.createElement('span'); tm.textContent = e.at.toLocaleTimeString('pt-BR'); tx.textContent = e.text; row.append(tm, tx); return row; })); }
+}
+
+function syncDisabled() {
+  const ok = fresh(), L = S.launch;
+  for (const n of document.querySelectorAll('[data-requires]')) n.disabled = !ok;
+  if (ok) { $('launch-confirm').disabled = ['PREP', 'LAUNCHING', 'FLIGHT'].includes(L.phase); $('launch-charge-btn').disabled = !['PREP', 'CHARGING'].includes(L.phase);
+    for (const k of ['w', 'z']) document.querySelector(`[data-key="${k}"]`).disabled = !['MENU', 'SELECT_PET', 'PREP', 'CHARGING'].includes(L.phase);
+    document.querySelector('[data-key="esc"]').disabled = ['MENU', 'LAUNCHING', 'FLIGHT'].includes(L.phase); }
+  $('enable-audio').disabled = false; $('connect').disabled = S.conn === 'connecting';
+}
+
+function render() {
+  document.body.dataset.conn = connKey(); document.body.dataset.origin = S.origin === 'DEMO' ? 'demo' : 'hw'; document.body.dataset.view = S.view;
+  renderCoach(); renderHud(); renderPet(); renderLaunch(); renderMusic(); renderSlides(); renderDevice(); syncDisabled();
+}
+
+/* ---------------- navegação, tema, palco ---------------- */
+function setView(v) {
+  if (!VIEWS.includes(v)) return; S.view = v; S.zone = null; S.lastIr = S.ir; zonesKey = '';
+  for (const n of document.querySelectorAll('.view')) n.classList.toggle('active', n.id === `view-${v}`);
+  for (const n of document.querySelectorAll('[data-view]')) { const on = n.dataset.view === v; n.classList.toggle('active', on); if (on) n.setAttribute('aria-current', 'page'); else n.removeAttribute('aria-current'); }
+  if (v === 'launch') S.launch.since = now();
+  render();
+}
+function setTheme(t) { document.documentElement.dataset.theme = t; }
+function setPalco(on, fullscreen = true) {
+  S.palco = on; document.body.classList.toggle('palco', on); $('stage-toggle').setAttribute('aria-pressed', String(on));
+  if (!fullscreen) return;
+  try { if (on && !document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {}); else if (!on && document.fullscreenElement) document.exitFullscreen?.(); } catch { /* sem tela cheia: o layout de palco continua valendo */ }
+}
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && S.palco) setPalco(false, false); });
+
+/* ---------------- áudio (igual ao app atual: um oscilador) ---------------- */
+let ctx = null, osc = null, gain = null;
+function audioToggle() {
+  const M = S.music;
+  if (M.audio) { M.audio = false; audioUpdate(0); return render(); }
+  try { const A = window.AudioContext || window.webkitAudioContext; if (A && !ctx) { ctx = new A(); osc = ctx.createOscillator(); gain = ctx.createGain(); osc.type = 'sine'; gain.gain.value = 0; osc.connect(gain); gain.connect(ctx.destination); osc.start(); } ctx?.resume(); } catch { /* protótipo: segue sem som */ }
+  M.audio = true; render();
+}
+function audioUpdate(freq) { if (!ctx || !gain) return; const on = S.music.audio && S.view === 'music' && freq > 0 && !document.hidden; if (on) osc.frequency.setTargetAtTime(freq, ctx.currentTime, .04); gain.gain.setTargetAtTime(on ? S.music.volume * .14 : 0, ctx.currentTime, .04); }
+
+/* ---------------- eventos de interface ---------------- */
+for (const n of document.querySelectorAll('[data-view]')) n.addEventListener('click', () => setView(n.dataset.view));
+for (const n of document.querySelectorAll('[data-action]')) n.addEventListener('click', () => { const a = n.dataset.action; if (a === 'slides_next') slidesGo(1, 'botão'); else if (a === 'slides_prev') slidesGo(-1, 'botão'); else petAction(a); render(); });
+for (const n of document.querySelectorAll('[data-key]')) n.addEventListener('click', () => { launchKey(n.dataset.key); render(); });
+for (const n of document.querySelectorAll('[data-audio-toggle]')) n.addEventListener('click', audioToggle);
+$('volume').addEventListener('input', () => { S.music.volume = +$('volume').value; render(); });
+$('theme-toggle').addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+$('stage-toggle').addEventListener('click', () => setPalco(!S.palco));
+$('stage-exit').addEventListener('click', () => setPalco(false));
+$('connect').addEventListener('click', () => { const port = $('ports').value; S.port = port; S.conn = 'connecting'; S.connUntil = now() + 1400; S.connTarget = port === 'DEMO' ? 'demo' : 'live'; $('sim-conn').value = 'connecting'; render(); });
+$('disconnect').addEventListener('click', () => { setConn('off'); pushEvent('USB desconectada do aplicativo.'); render(); });
+$('refresh-ports').addEventListener('click', () => toast('Lista de portas atualizada.'));
+$('proto-toggle').addEventListener('click', () => { const p = $('proto'); p.hidden = !p.hidden; $('proto-toggle').setAttribute('aria-expanded', String(!p.hidden)); });
+$('sim-conn').addEventListener('change', (e) => { setConn(e.target.value); render(); });
+$('sim-phase').addEventListener('change', (e) => { forcePhase(e.target.value); render(); });
+$('sim-stage').addEventListener('change', (e) => { S.pet.stage = e.target.value; render(); });
+$('sim-mood').addEventListener('change', (e) => { S.pet.moodLock = e.target.value === 'HAPPY' ? null : e.target.value; if (e.target.value === 'HUNGRY') S.pet.hunger = 82; render(); });
+$('sim-auto').addEventListener('change', (e) => { S.auto = e.target.checked; });
+// PROTO: a régua segue o mouse; a lâmpada simula o cartão
+$('tape-area').addEventListener('pointermove', (e) => { const r = $('tape').getBoundingClientRect(); S.d = clamp((e.clientX - r.left) / r.width, 0, 1.25) * TAPE_MAX; S.valid = true; S.manualUntil = now() + 3500; });
+const cardDown = () => { S.manualIr = true; S.ir = true; }, cardUp = () => { if (S.manualIr) { S.manualIr = false; S.ir = false; } };
+$('lamp').addEventListener('pointerdown', cardDown); for (const ev of ['pointerup', 'pointerleave', 'blur']) $('lamp').addEventListener(ev, cardUp);
+
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key, tag = e.target.tagName;
+  if (tag === 'SELECT' || (tag === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox')) return;
+  if ((k === 'Enter' || k === ' ') && e.target.closest('button,a,input,select')) return;      // deixa o botão focado agir
+  if (k >= '1' && k <= '5') return setView(VIEWS[+k - 1]);
+  if (k === 'f' || k === 'F') return setPalco(!S.palco);
+  if (k === 't' || k === 'T') return $('theme-toggle').click();
+  if (k === 'Escape' && S.palco) return setPalco(false);
+  if (k === 'c' || k === 'C') { if (!e.repeat) cardDown(); return; }
+  if (S.view === 'slides') { if (k === 'ArrowRight' || k === 'PageDown') { slidesGo(1, 'teclado'); e.preventDefault(); } if (k === 'ArrowLeft' || k === 'PageUp') { slidesGo(-1, 'teclado'); e.preventDefault(); } }
+  if (S.view === 'launch') { const map = {Enter:'enter', ' ':'space', ArrowUp:'w', ArrowDown:'z', b:'esc', B:'esc', Backspace:'esc'}; if (map[k]) { launchKey(map[k]); e.preventDefault(); } }
+  if (S.view === 'music' && (k === 'm' || k === 'M')) audioToggle();
+  render();
+});
+document.addEventListener('keyup', (e) => { if (e.key === 'c' || e.key === 'C') cardUp(); });
+
+/* PROTO: põe o Launch numa fase qualquer com dados coerentes (painel e capturas) */
+function forcePhase(ph, o = {}) {
+  const L = S.launch; L.phase = ph; L.since = now(); L.blocked = !!o.blocked;
+  if (['PREP', 'CHARGING'].includes(ph)) L.angle = o.angle ?? L.angle;
+  L.charge = ph === 'CHARGING' ? (o.charge ?? .46) : 0;
+  if (['LAUNCHING', 'FLIGHT', 'RESULT'].includes(ph)) { const power = o.charge ?? .88; if (o.record === false) L.best = 61.5; else if (o.record) L.best = 29.6;
+    L.angle = o.angle ?? 46; L.flight = simulateFlight(L.angle, power * 1.08, L.owned); L.flight.sweet = true; L.flight.power = power; L.ft = L.flight.time * (o.fp ?? .5); L.result = null;
+    if (ph === 'RESULT') { const keepCoins = S.pet.coins, keepXp = S.pet.xp; finishFlight(); S.pet.coins = keepCoins; S.pet.xp = keepXp; S.events.shift(); $('notice').classList.remove('show'); } }
+  $('sim-phase').value = ph;
+}
+
+/* ---------------- laço: 150 ms, como o poll do app ---------------- */
+let lastTick = now();
+function tick() {
+  const t = now(), dt = Math.min(.3, (t - lastTick) / 1000); lastTick = t;
+  if (!S.frozen) {                       // S.frozen (auto=0 no hash) congela tudo para as capturas
+    S.t += dt;
+    if (S.conn === 'connecting' && t > S.connUntil) { setConn(S.connTarget); pushEvent(S.connTarget === 'demo' ? 'Demonstração local: leituras simuladas.' : 'ESP32 conectada pela USB.'); }
+    if (S.conn === 'live') { if (S.ageMode === 'stale') S.age += dt * 1000; else if (S.ageMode === 'fresh') S.age = 60 + Math.random() * 90; }
+    if (fresh() && S.ageMode === 'fresh') {
+      if (S.auto) autoplay(t); else if (!S.manualIr) S.ir = false;
+      sensorControls(t); stepWorld(t, dt);
+    }
+  }
+  render();
+}
+
+/* ---------------- estado inicial pelo hash ---------------- */
+(function init() {
+  const q = new URLSearchParams(location.hash.slice(1)), has = (k) => q.has(k), f = (k) => parseFloat(q.get(k));
+  for (let i = 0; i < 90; i++) S.history.push(30 + 20 * Math.sin(i * .12) + 3 * Math.sin(i * .7));
+  S.events.push({text:'ESP32 conectada pela USB.', kind:'connection', at:new Date(Date.now() - 95000)}, {text:'O cartão trouxe uma comidinha.', kind:'sensor', at:new Date(Date.now() - 61000)}, {text:'Seu pet sentiu a mão se aproximar.', kind:'sensor', at:new Date(Date.now() - 20000)}); S.events.reverse();
+  if (q.get('theme') === 'dark') setTheme('dark');
+  if (q.get('sim') === '0') document.body.classList.add('no-sim');
+  if (has('stage')) { S.pet.stage = q.get('stage'); $('sim-stage').value = S.pet.stage; }
+  if (has('mood')) { S.pet.moodLock = q.get('mood'); if (S.pet.moodLock === 'HUNGRY') S.pet.hunger = 84; if (S.pet.moodLock === 'TIRED') S.pet.energy = 14; if (S.pet.moodLock === 'SICK') S.pet.health = 22; $('sim-mood').value = S.pet.moodLock; }
+  if (has('coins')) S.pet.coins = f('coins');
+  if (has('conn')) setConn(q.get('conn'));
+  if (q.get('auto') === '0') { S.auto = false; S.frozen = true; $('sim-auto').checked = false; }
+  if (has('d')) { S.d = f('d'); if (q.get('d') === 'none') { S.valid = false; S.d = null; } }
+  if (has('ir')) { S.ir = q.get('ir') === '1'; S.frozenIr = S.ir; S.lastIr = S.ir; }
+  if (has('audio')) S.music.audio = q.get('audio') === '1';
+  if (has('muted')) S.music.muted = q.get('muted') === '1';
+  if (has('slide')) S.slides.current = clamp(f('slide') | 0, 1, SLIDES.length);
+  if (has('anim')) { S.pet.animation = q.get('anim'); S.pet.animUntil = Infinity; }
+  const aimFromHand = S.valid && S.d != null ? Math.round(20 + clamp((AIM_FAR - S.d) / (AIM_FAR - AIM_NEAR), 0, 1) * 50) : undefined;
+  if (aimFromHand != null) S.launch.angle = aimFromHand;
+  if (has('phase')) forcePhase(q.get('phase'), {charge:has('charge') ? f('charge') : undefined, angle:has('angle') ? f('angle') : aimFromHand, fp:has('fp') ? f('fp') : undefined, record:has('record') ? q.get('record') === '1' : undefined, blocked:q.get('blocked') === '1'});
+  if (q.get('palco') === '1') setPalco(true, false);
+  setView(VIEWS.includes(q.get('view')) ? q.get('view') : 'pet');
+  setInterval(tick, 150);
+})();
+})();
+</script>
+</body>
+</html>

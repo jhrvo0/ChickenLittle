@@ -11,6 +11,12 @@ venv/
 .mypy_cache/
 .ruff_cache/
 
+# Configuração local: exemplos explícitos podem ser versionados.
+.env
+.env.*
+!.env.example
+!.env.*.example
+
 # Runtime & user saves / generated ML artifacts
 *.save.json
 *.parity.json
@@ -19,6 +25,13 @@ data/raw/*.jsonl
 data/raw/*.csv
 data/raw/*.meta.json
 data/raw/synthetic/
+# MotionLab: sessões gravadas pela interface (reais e de demonstração) e ajustes locais
+data/raw/real/
+data/raw/demo/
+data/motionlab/
+data/experiments/
+data/mlflow/
+mlruns/
 data/processed/*
 data/models/*
 data/reports/*
@@ -45,3 +58,8 @@ hardware/tools/wheels/
 
 # gravacao de firmware (saida local)
 gravar_firmware_saida.txt
+
+# Fase E: credenciais/CA locais e telemetria sem rótulos (nunca corpus acadêmico)
+firmware/communication/iot_config.local.h
+ops/iot/local/
+data/iot/

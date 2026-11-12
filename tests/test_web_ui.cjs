@@ -25,7 +25,7 @@ test('interface usa chave local, mantém controles seguros e apresenta slide ini
   const fetch=async(path,options)=>{requests.push({path,options});return {ok:true,json:async()=>path==='/api/ports'?{ports:[{device:'COM3',description:'ESP32'}]}:path==='/api/state'?state:{ok:true,state}}};
   const Audio=class { constructor(){this.currentTime=0;this.destination={}} createOscillator(){return {frequency:{setTargetAtTime(){}},connect(){},start(){}}} createGain(){return {gain:{value:0,setTargetAtTime(value){gainValues.push(value)}},connect(){}}} async resume(){} };
   const context={document,window:{AudioContext:Audio},fetch,Option:class{constructor(text,value){this.text=text;this.value=value}},setTimeout:fn=>{timers.push(fn);return timers.length},clearTimeout(){},console};
-  vm.runInNewContext(fs.readFileSync('terminal/web/static/app.js','utf8'),context);
+  vm.runInNewContext(fs.readFileSync('terminal/web/static/legacy/app.js','utf8'),context);
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(get('slide-title').textContent,'Primeiro');assert.equal(get('slide-count').textContent,'1 / 2');
   assert.equal(get('distance').textContent,'15,0 cm');assert.equal(get('ir').textContent,'Livre');assert.equal(buttons[0].disabled,false);

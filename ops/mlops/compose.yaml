@@ -1,0 +1,133 @@
+name: motionlab-mlops
+
+x-runtime: &runtime
+  image: motionlab-runtime:phase-c
+  build: {context: ../.., dockerfile: ops/mlops/Dockerfile}
+  init: true
+  cpus: 1.0
+  environment: {OMP_NUM_THREADS: "1", OPENBLAS_NUM_THREADS: "1", MKL_NUM_THREADS: "1"}
+
+services:
+  mqtt:
+    image: eclipse-mosquitto:2.0.22@sha256:81a6193ae693942a3231cd3ac52875b02b7e3a19da671b2fb4b55cc874c5b279
+    mem_limit: 64m
+    ports: ["127.0.0.1:1883:1883"]
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqtt-data:/mosquitto/data
+    healthcheck:
+      test: ["CMD", "mosquitto_pub", "-h", "localhost", "-t", "motionlab/health", "-m", "ok"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+  mlflow:
+    <<: *runtime
+    mem_limit: 1024m
+    environment:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MLFLOW_SERVER_ENABLE_JOB_EXECUTION: "false"
+      MLFLOW_SERVER_JOB_ENABLE_PERIODIC_TASKS: "false"
+    command: ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--workers", "1", "--backend-store-uri", "sqlite:////workspace/data/mlflow/tracking.db", "--artifacts-destination", "/workspace/data/mlflow/artifacts", "--allowed-hosts", "mlflow:5000,localhost:5000,127.0.0.1:5000"]
+    ports: ["127.0.0.1:5000:5000"]
+    volumes: ["${MOTIONLAB_DATA_DIR:-../../data/experiments/phase-c/stack}:/workspace/data"]
+    entrypoint: ["sh", "-c", "mkdir -p /workspace/data/mlflow && exec \"$$@\"", "--"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=2)"]
+      interval: 5s
+      timeout: 4s
+      retries: 24
+  ingest:
+    <<: *runtime
+    mem_limit: 256m
+    command: ["python", "-m", "ml.mqtt_ingestion", "consume", "--host", "mqtt", "--ready-file", "data/pipeline/ingest.ready"]
+    restart: on-failure
+    depends_on: {mqtt: {condition: service_healthy}}
+    volumes: ["${MOTIONLAB_DATA_DIR:-../../data/experiments/phase-c/stack}:/workspace/data"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "from pathlib import Path; assert Path('data/pipeline/ingest.ready').is_file()"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+  api:
+    <<: *runtime
+    mem_limit: 384m
+    command: ["python", "-m", "ml.inference_api", "--host", "0.0.0.0", "--deployment", "data/pipeline/deployment.json", "--watch-raw-root", "data/raw", "--predictions", "data/pipeline/predictions.json"]
+    ports: ["127.0.0.1:8768:8768"]
+    volumes: ["${MOTIONLAB_DATA_DIR:-../../data/experiments/phase-c/stack}:/workspace/data"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8768/health', timeout=2)"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+  dashboard:
+    <<: *runtime
+    mem_limit: 256m
+    command: ["python", "-m", "terminal.web", "--host", "0.0.0.0", "--demo", "--ml-api-url", "http://api:8768"]
+    ports: ["127.0.0.1:8767:8767"]
+    volumes: ["${MOTIONLAB_DATA_DIR:-../../data/experiments/phase-c/stack}:/workspace/data"]
+    depends_on: {api: {condition: service_healthy}}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8767/health', timeout=2)"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+  publisher:
+    <<: *runtime
+    mem_limit: 256m
+    command: ["python", "-m", "ml.mqtt_ingestion", "publish-demo", "--host", "mqtt"]
+    depends_on: {ingest: {condition: service_healthy}}
+  airflow-init:
+    image: motionlab-airflow:phase-c
+    user: "0:0"
+    entrypoint: /bin/sh
+    command: ["-c", "chown 50000:0 /opt/airflow/runtime && chmod 775 /opt/airflow/runtime"]
+    network_mode: none
+    mem_limit: 32m
+    volumes: ["airflow-home:/opt/airflow/runtime"]
+  airflow:
+    image: motionlab-airflow:phase-c
+    build: {context: ../.., dockerfile: ops/mlops/Dockerfile.airflow}
+    init: true
+    mem_limit: 1400m
+    cpus: 1.0
+    command: ["bash", "/workspace/ops/mlops/airflow-demo.sh"]
+    environment: &airflow-env
+      AIRFLOW_HOME: /opt/airflow/runtime
+      CONNECTION_CHECK_MAX_COUNT: "0"
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__PARALLELISM: "1"
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: "1"
+      AIRFLOW__CORE__DAGS_FOLDER: /workspace/ops/mlops/dags
+      PYTHONPATH: /workspace
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+    volumes: &airflow-volumes
+      - ./:/workspace/ops/mlops:ro
+      - ../../ml:/workspace/ml:ro
+      - ../../terminal:/workspace/terminal:ro
+      - ../../simulator:/workspace/simulator:ro
+      - ../../requirements.txt:/workspace/requirements.txt:ro
+      - ../../requirements-mlops.lock:/workspace/requirements-mlops.lock:ro
+      - ../../pyproject.toml:/workspace/pyproject.toml:ro
+      - ${MOTIONLAB_DATA_DIR:-../../data/experiments/phase-c/stack}:/workspace/data
+      - airflow-home:/opt/airflow/runtime
+    depends_on:
+      airflow-init: {condition: service_completed_successfully}
+      publisher: {condition: service_completed_successfully}
+      mlflow: {condition: service_healthy}
+  airflow-ui:
+    profiles: ["console"]
+    image: motionlab-airflow:phase-c
+    mem_limit: 1800m
+    cpus: 1.0
+    command: standalone
+    ports: ["127.0.0.1:8080:8080"]
+    environment: *airflow-env
+    volumes: *airflow-volumes
+    depends_on: {airflow: {condition: service_completed_successfully}}
+volumes:
+  mqtt-data:
+  airflow-home:

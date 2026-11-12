@@ -1,0 +1,4698 @@
+{
+  "captured_at": "2026-11-11T22:25:12.769988-03:00",
+  "base_url": "http://127.0.0.1:8790",
+  "responses": {
+    "state": {
+      "http_status": 200,
+      "body": {
+        "pet_name": "Piu-piu",
+        "experience": "lab",
+        "connection": {
+          "status": "connected",
+          "port": "DEMO",
+          "origin": "DEMO",
+          "message": "Demonstração local — sem sensores físicos.",
+          "frames": 9841,
+          "age_ms": 6
+        },
+        "mode": "MOTION_PET",
+        "pet": {
+          "name": "Piu-piu",
+          "hunger": 0.32,
+          "happiness": 100.0,
+          "energy": 100.0,
+          "health": 100.0,
+          "xp": 6006,
+          "level": 121,
+          "stage": "CYBER_ROOSTER",
+          "mood": "ECSTATIC",
+          "personality": "FOODIE",
+          "animation": "IDLE",
+          "animation_ttl_ticks": 0,
+          "is_sleeping": false,
+          "age_ticks": 246,
+          "last_action": "WOKE UP",
+          "care_counters": {
+            "feed": 308,
+            "play": 0,
+            "rest": 154,
+            "interact": 154,
+            "heal": 0
+          },
+          "coins": 0,
+          "best_launch_distance_m": 0.0,
+          "best_launch_score": 0,
+          "total_launches": 0,
+          "unlocked_upgrades": []
+        },
+        "sensors": {
+          "distance_cm": 74.6,
+          "ir_detected": false,
+          "pot_norm": 0.5,
+          "valid_ultrasonic": true
+        },
+        "gesture": {
+          "gesture": "RETREAT",
+          "confidence": 0.84,
+          "source": "sim_sensor",
+          "window_ms": 480
+        },
+        "events": [
+          {
+            "id": 1,
+            "type": "connection",
+            "text": "Demonstração local — sem sensores físicos.",
+            "timestamp": 1794445813.325713
+          }
+        ],
+        "controls": {
+          "MOTION_PET": "Aproxime um cartão do IR para alimentar. Aproxime a mão do ultrassom para fazer carinho.",
+          "PET_LAUNCH": "O IR confirma as etapas. Segure o cartão perto do IR para carregar e afaste para lançar. A distância da mão ajusta o ângulo.",
+          "AIR_MUSIC": "A distância da mão escolhe a nota. Aproxime o cartão do IR para pausar ou retomar o som.",
+          "AIR_SLIDES": "Mão perto do ultrassom avança; longe volta. Aproxime o cartão do IR para avançar."
+        },
+        "display_lines": [
+          "Pip     CYB L99 ECST",
+          "(^v^)* HG:  0 HP:100",
+          "*IDLE* EN:100 HL:100",
+          "D:044cm WOKE UP     "
+        ],
+        "metrics": {
+          "rx_packets": 12188,
+          "tx_packets": 1,
+          "history": [
+            {
+              "distance_cm": 18.0,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.67,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.95,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.35,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.25,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.4,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.47,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.42,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.19,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.72,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.84,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.18,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.26,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.89,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.75,
+              "valid": true
+            },
+            {
+              "distance_cm": 12.25,
+              "valid": true
+            },
+            {
+              "distance_cm": 15.58,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.66,
+              "valid": true
+            },
+            {
+              "distance_cm": 23.0,
+              "valid": true
+            },
+            {
+              "distance_cm": 25.4,
+              "valid": true
+            },
+            {
+              "distance_cm": 29.63,
+              "valid": true
+            },
+            {
+              "distance_cm": 33.19,
+              "valid": true
+            },
+            {
+              "distance_cm": 36.01,
+              "valid": true
+            },
+            {
+              "distance_cm": 40.08,
+              "valid": true
+            },
+            {
+              "distance_cm": 43.28,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.83,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.97,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.99,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.62,
+              "valid": true
+            },
+            {
+              "distance_cm": 75.14,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.43,
+              "valid": true
+            },
+            {
+              "distance_cm": 75.53,
+              "valid": true
+            },
+            {
+              "distance_cm": 75.15,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.73,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.52,
+              "valid": true
+            },
+            {
+              "distance_cm": 76.21,
+              "valid": true
+            },
+            {
+              "distance_cm": 76.04,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.76,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.57,
+              "valid": true
+            },
+            {
+              "distance_cm": 75.26,
+              "valid": true
+            },
+            {
+              "distance_cm": 75.7,
+              "valid": true
+            },
+            {
+              "distance_cm": 75.83,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.79,
+              "valid": true
+            },
+            {
+              "distance_cm": 75.36,
+              "valid": true
+            },
+            {
+              "distance_cm": 75.09,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.65,
+              "valid": true
+            },
+            {
+              "distance_cm": 75.19,
+              "valid": true
+            },
+            {
+              "distance_cm": 75.31,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.95,
+              "valid": true
+            },
+            {
+              "distance_cm": 44.42,
+              "valid": true
+            },
+            {
+              "distance_cm": 40.82,
+              "valid": true
+            },
+            {
+              "distance_cm": 37.09,
+              "valid": true
+            },
+            {
+              "distance_cm": 33.77,
+              "valid": true
+            },
+            {
+              "distance_cm": 30.15,
+              "valid": true
+            },
+            {
+              "distance_cm": 26.55,
+              "valid": true
+            },
+            {
+              "distance_cm": 23.52,
+              "valid": true
+            },
+            {
+              "distance_cm": 19.16,
+              "valid": true
+            },
+            {
+              "distance_cm": 15.93,
+              "valid": true
+            },
+            {
+              "distance_cm": 11.97,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.06,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.0,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.21,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.61,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.33,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.57,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.09,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.12,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.96,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.33,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.6,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.86,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.68,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.58,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.48,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.13,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.62,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.52,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.68,
+              "valid": true
+            },
+            {
+              "distance_cm": 17.88,
+              "valid": true
+            },
+            {
+              "distance_cm": 12.64,
+              "valid": true
+            },
+            {
+              "distance_cm": 15.33,
+              "valid": true
+            },
+            {
+              "distance_cm": 18.73,
+              "valid": true
+            },
+            {
+              "distance_cm": 22.44,
+              "valid": true
+            },
+            {
+              "distance_cm": 25.3,
+              "valid": true
+            },
+            {
+              "distance_cm": 29.19,
+              "valid": true
+            },
+            {
+              "distance_cm": 33.07,
+              "valid": true
+            },
+            {
+              "distance_cm": 36.4,
+              "valid": true
+            },
+            {
+              "distance_cm": 40.48,
+              "valid": true
+            },
+            {
+              "distance_cm": 43.99,
+              "valid": true
+            },
+            {
+              "distance_cm": 74.6,
+              "valid": true
+            }
+          ]
+        },
+        "launch": {
+          "phase": "MENU",
+          "angle_deg": 45.0,
+          "charge_norm": 0.0,
+          "sweet_spot": false,
+          "flight": {
+            "x_m": 0.0,
+            "y_m": 0.0,
+            "vx_mps": 0.0,
+            "vy_mps": 0.0,
+            "initial_speed_mps": 0.0,
+            "launch_angle_deg": 45.0,
+            "power_norm": 0.0,
+            "elapsed_s": 0.0,
+            "steps": 0,
+            "max_height_m": 0.0,
+            "bounces": 0,
+            "roll_distance_m": 0.0,
+            "motion_phase": "IDLE",
+            "collected_stars": [],
+            "events": []
+          },
+          "trajectory": [],
+          "result": null,
+          "best_distance_m": 0.0,
+          "status_message": "Bem-vindo ao Pet Launch! [APPROACH/ENTER] Selecionar Pet",
+          "best_score": 0,
+          "matches_completed": 0,
+          "phases": [
+            "MENU",
+            "SELECT_PET",
+            "PREP",
+            "CHARGING",
+            "LAUNCHING",
+            "FLIGHT",
+            "RESULT",
+            "RETURN_TO_PET"
+          ],
+          "upgrades": [
+            {
+              "upgrade_id": "SLINGSHOT_PRO",
+              "slot_key": "7",
+              "name": "Estilingue Pro",
+              "cost_coins": 15,
+              "description": "+12% velocidade inicial",
+              "speed_bonus": 0.12,
+              "drag_factor": 1.0,
+              "restitution_bonus": 0.0,
+              "extra_bounces": 0,
+              "owned": false
+            },
+            {
+              "upgrade_id": "AERO_CAPE",
+              "slot_key": "8",
+              "name": "Capa Aerodinamica",
+              "cost_coins": 25,
+              "description": "-25% resistencia do ar",
+              "speed_bonus": 0.0,
+              "drag_factor": 0.75,
+              "restitution_bonus": 0.0,
+              "extra_bounces": 0,
+              "owned": false
+            },
+            {
+              "upgrade_id": "SPRING_BOOTS",
+              "slot_key": "9",
+              "name": "Botas de Mola",
+              "cost_coins": 35,
+              "description": "+0.12 quique e +1 salto",
+              "speed_bonus": 0.0,
+              "drag_factor": 1.0,
+              "restitution_bonus": 0.12,
+              "extra_bounces": 1,
+              "owned": false
+            }
+          ]
+        },
+        "music": {
+          "note": "---",
+          "frequency_hz": 0.0,
+          "volume": 0.35,
+          "muted": false,
+          "trigger": "AGUARDANDO GESTO"
+        },
+        "slides": {
+          "current": 1,
+          "total": 8,
+          "items": [
+            {
+              "eyebrow": "01 · Olá, mundo",
+              "title": "Uma pequena criatura. Um grande vínculo.",
+              "body": "Seu MotionPet responde ao mundo físico. Aproxime a mão do ultrassom ou um cartão do sensor infravermelho."
+            },
+            {
+              "eyebrow": "02 · O que sentimos",
+              "title": "Sua mão vira movimento.",
+              "body": "O ultrassom mede a distância. O infravermelho reconhece a presença bem de perto. Os dois trabalham juntos."
+            },
+            {
+              "eyebrow": "03 · Nosso pet",
+              "title": "Cuidar também é brincar.",
+              "body": "Alimente, dê carinho, descanse e cuide da saúde. Cada interação faz parte da evolução do seu companheiro."
+            },
+            {
+              "eyebrow": "04 · Pet Launch",
+              "title": "Pronto para ganhar o céu?",
+              "body": "Mude o ângulo com a distância da mão. Aproxime o cartão para carregar e afaste para lançar."
+            },
+            {
+              "eyebrow": "05 · Música no ar",
+              "title": "Encontre sua própria melodia.",
+              "body": "A distância escolhe a nota. Um toque sem contato no infravermelho pausa ou retoma o instrumento."
+            },
+            {
+              "eyebrow": "06 · Evolução",
+              "title": "Do ovo ao galo cibernético.",
+              "body": "Experiência, cuidados e brincadeiras acompanham a evolução. O estado do pet continua na ESP32."
+            },
+            {
+              "eyebrow": "07 · Dois mundos",
+              "title": "Conectado ao que é real.",
+              "body": "A ESP32 cuida dos sensores e do pet. O notebook desenha esse pequeno mundo e dá voz às interações."
+            },
+            {
+              "eyebrow": "08 · Até logo",
+              "title": "O próximo movimento é seu.",
+              "body": "Continue explorando. Sem trocar fios, você pode cuidar, jogar, criar música e navegar pela apresentação."
+            }
+          ],
+          "status": "PRONTO"
+        },
+        "device_error": null,
+        "device_errors": [],
+        "commands": {
+          "pending": 0,
+          "last": {
+            "seq": 1,
+            "command": "SWITCH_MODE",
+            "action": null,
+            "status": "confirmed",
+            "detail": "ok",
+            "age_ms": 899445
+          },
+          "recent": [
+            {
+              "seq": 1,
+              "command": "SWITCH_MODE",
+              "action": null,
+              "status": "confirmed",
+              "detail": "ok",
+              "age_ms": 899445
+            }
+          ]
+        },
+        "discarded": {
+          "count": 0,
+          "last": null,
+          "age_ms": null
+        }
+      }
+    },
+    "live": {
+      "http_status": 200,
+      "body": {
+        "frame_seq": 9841,
+        "event_seq": 2215,
+        "frames": [
+          {
+            "seq": 9722,
+            "ts": 583320,
+            "d": 74.83,
+            "f": 74.8,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9723,
+            "ts": 583380,
+            "d": 74.73,
+            "f": 74.77,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9724,
+            "ts": 583440,
+            "d": 75.26,
+            "f": 74.99,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9725,
+            "ts": 583500,
+            "d": 74.7,
+            "f": 74.86,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9726,
+            "ts": 583560,
+            "d": 75.41,
+            "f": 75.11,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9727,
+            "ts": 583620,
+            "d": 75.02,
+            "f": 75.07,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9728,
+            "ts": 583680,
+            "d": 74.85,
+            "f": 74.97,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9729,
+            "ts": 583740,
+            "d": 74.73,
+            "f": 74.86,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9730,
+            "ts": 583800,
+            "d": 75.34,
+            "f": 75.08,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9731,
+            "ts": 583860,
+            "d": 75.17,
+            "f": 75.12,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9732,
+            "ts": 583920,
+            "d": 75.48,
+            "f": 75.28,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9733,
+            "ts": 583980,
+            "d": 75.07,
+            "f": 75.19,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9734,
+            "ts": 584040,
+            "d": 74.96,
+            "f": 75.08,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9735,
+            "ts": 584100,
+            "d": 74.11,
+            "f": 74.65,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9736,
+            "ts": 584160,
+            "d": 74.78,
+            "f": 74.71,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9737,
+            "ts": 584220,
+            "d": 43.98,
+            "f": 60.88,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9738,
+            "ts": 584280,
+            "d": 40.38,
+            "f": 51.65,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9739,
+            "ts": 584340,
+            "d": 37.29,
+            "f": 45.19,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9740,
+            "ts": 584400,
+            "d": 33.2,
+            "f": 39.79,
+            "p": 0.8699,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9741,
+            "ts": 584460,
+            "d": 29.9,
+            "f": 35.34,
+            "p": 0.7586,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9742,
+            "ts": 584520,
+            "d": 26.92,
+            "f": 31.55,
+            "p": 0.6638,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9743,
+            "ts": 584580,
+            "d": 22.49,
+            "f": 27.47,
+            "p": 0.5619,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9744,
+            "ts": 584640,
+            "d": 19.1,
+            "f": 23.71,
+            "p": 0.4676,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9745,
+            "ts": 584700,
+            "d": 16.01,
+            "f": 20.24,
+            "p": 0.3811,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9746,
+            "ts": 584760,
+            "d": 11.5,
+            "f": 16.31,
+            "p": 0.2827,
+            "v": true,
+            "ir": true
+          },
+          {
+            "seq": 9747,
+            "ts": 584820,
+            "d": 17.24,
+            "f": 16.73,
+            "p": 0.2932,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9748,
+            "ts": 584880,
+            "d": 18.35,
+            "f": 17.46,
+            "p": 0.3114,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9749,
+            "ts": 584940,
+            "d": 17.37,
+            "f": 17.42,
+            "p": 0.3105,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9750,
+            "ts": 585000,
+            "d": 18.02,
+            "f": 17.69,
+            "p": 0.3172,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9751,
+            "ts": 585060,
+            "d": 19.55,
+            "f": 18.53,
+            "p": 0.3382,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9752,
+            "ts": 585120,
+            "d": 18.0,
+            "f": 18.29,
+            "p": 0.3322,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9753,
+            "ts": 585180,
+            "d": 18.67,
+            "f": 18.46,
+            "p": 0.3365,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9754,
+            "ts": 585240,
+            "d": 17.95,
+            "f": 18.23,
+            "p": 0.3308,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9755,
+            "ts": 585300,
+            "d": 18.35,
+            "f": 18.28,
+            "p": 0.3321,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9756,
+            "ts": 585360,
+            "d": 18.25,
+            "f": 18.27,
+            "p": 0.3317,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9757,
+            "ts": 585420,
+            "d": 18.4,
+            "f": 18.33,
+            "p": 0.3332,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9758,
+            "ts": 585480,
+            "d": 18.47,
+            "f": 18.39,
+            "p": 0.3348,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9759,
+            "ts": 585540,
+            "d": 17.42,
+            "f": 17.95,
+            "p": 0.3239,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9760,
+            "ts": 585600,
+            "d": 18.19,
+            "f": 18.06,
+            "p": 0.3265,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9761,
+            "ts": 585660,
+            "d": 17.72,
+            "f": 17.91,
+            "p": 0.3227,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9762,
+            "ts": 585720,
+            "d": 17.84,
+            "f": 17.88,
+            "p": 0.3219,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9763,
+            "ts": 585780,
+            "d": 18.18,
+            "f": 18.01,
+            "p": 0.3253,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9764,
+            "ts": 585840,
+            "d": 18.26,
+            "f": 18.12,
+            "p": 0.3281,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9765,
+            "ts": 585900,
+            "d": 17.89,
+            "f": 18.02,
+            "p": 0.3255,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9766,
+            "ts": 585960,
+            "d": 17.75,
+            "f": 17.9,
+            "p": 0.3224,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9767,
+            "ts": 586020,
+            "d": 12.25,
+            "f": 15.36,
+            "p": 0.2589,
+            "v": true,
+            "ir": true
+          },
+          {
+            "seq": 9768,
+            "ts": 586080,
+            "d": 15.58,
+            "f": 15.46,
+            "p": 0.2614,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9769,
+            "ts": 586140,
+            "d": 18.66,
+            "f": 16.9,
+            "p": 0.2975,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9770,
+            "ts": 586200,
+            "d": 23.0,
+            "f": 19.64,
+            "p": 0.3661,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9771,
+            "ts": 586260,
+            "d": 25.4,
+            "f": 22.23,
+            "p": 0.4309,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9772,
+            "ts": 586320,
+            "d": 29.63,
+            "f": 25.56,
+            "p": 0.5141,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9773,
+            "ts": 586380,
+            "d": 33.19,
+            "f": 28.99,
+            "p": 0.5999,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9774,
+            "ts": 586440,
+            "d": 36.01,
+            "f": 32.15,
+            "p": 0.6788,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9775,
+            "ts": 586500,
+            "d": 40.08,
+            "f": 35.72,
+            "p": 0.768,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9776,
+            "ts": 586560,
+            "d": 43.28,
+            "f": 39.12,
+            "p": 0.853,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9777,
+            "ts": 586620,
+            "d": 74.83,
+            "f": 55.19,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9778,
+            "ts": 586680,
+            "d": 74.97,
+            "f": 64.09,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9779,
+            "ts": 586740,
+            "d": 74.99,
+            "f": 69.0,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9780,
+            "ts": 586800,
+            "d": 74.62,
+            "f": 71.53,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9781,
+            "ts": 586860,
+            "d": 75.14,
+            "f": 73.15,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9782,
+            "ts": 586920,
+            "d": 74.43,
+            "f": 73.73,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9783,
+            "ts": 586980,
+            "d": 75.53,
+            "f": 74.54,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9784,
+            "ts": 587040,
+            "d": 75.15,
+            "f": 74.81,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9785,
+            "ts": 587100,
+            "d": 74.73,
+            "f": 74.78,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9786,
+            "ts": 587160,
+            "d": 74.52,
+            "f": 74.66,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9787,
+            "ts": 587220,
+            "d": 76.21,
+            "f": 75.36,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9788,
+            "ts": 587280,
+            "d": 76.04,
+            "f": 75.66,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9789,
+            "ts": 587340,
+            "d": 74.76,
+            "f": 75.26,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9790,
+            "ts": 587400,
+            "d": 74.57,
+            "f": 74.95,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9791,
+            "ts": 587460,
+            "d": 75.26,
+            "f": 75.09,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9792,
+            "ts": 587520,
+            "d": 75.7,
+            "f": 75.36,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9793,
+            "ts": 587580,
+            "d": 75.83,
+            "f": 75.57,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9794,
+            "ts": 587640,
+            "d": 74.79,
+            "f": 75.22,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9795,
+            "ts": 587700,
+            "d": 75.36,
+            "f": 75.28,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9796,
+            "ts": 587760,
+            "d": 75.09,
+            "f": 75.2,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9797,
+            "ts": 587820,
+            "d": 74.65,
+            "f": 74.95,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9798,
+            "ts": 587880,
+            "d": 75.19,
+            "f": 75.06,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9799,
+            "ts": 587940,
+            "d": 75.31,
+            "f": 75.17,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9800,
+            "ts": 588000,
+            "d": 74.95,
+            "f": 75.07,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9801,
+            "ts": 588060,
+            "d": 44.42,
+            "f": 61.28,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9802,
+            "ts": 588120,
+            "d": 40.82,
+            "f": 52.07,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9803,
+            "ts": 588180,
+            "d": 37.09,
+            "f": 45.33,
+            "p": null,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9804,
+            "ts": 588240,
+            "d": 33.77,
+            "f": 40.13,
+            "p": 0.8782,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9805,
+            "ts": 588300,
+            "d": 30.15,
+            "f": 35.64,
+            "p": 0.7659,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9806,
+            "ts": 588360,
+            "d": 26.55,
+            "f": 31.55,
+            "p": 0.6637,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9807,
+            "ts": 588420,
+            "d": 23.52,
+            "f": 27.94,
+            "p": 0.5734,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9808,
+            "ts": 588480,
+            "d": 19.16,
+            "f": 23.99,
+            "p": 0.4747,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9809,
+            "ts": 588540,
+            "d": 15.93,
+            "f": 20.36,
+            "p": 0.384,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9810,
+            "ts": 588600,
+            "d": 11.97,
+            "f": 16.59,
+            "p": 0.2896,
+            "v": true,
+            "ir": true
+          },
+          {
+            "seq": 9811,
+            "ts": 588660,
+            "d": 18.06,
+            "f": 17.25,
+            "p": 0.3062,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9812,
+            "ts": 588720,
+            "d": 18.0,
+            "f": 17.59,
+            "p": 0.3147,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9813,
+            "ts": 588780,
+            "d": 17.21,
+            "f": 17.42,
+            "p": 0.3104,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9814,
+            "ts": 588840,
+            "d": 18.61,
+            "f": 17.95,
+            "p": 0.3238,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9815,
+            "ts": 588900,
+            "d": 18.33,
+            "f": 18.12,
+            "p": 0.3281,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9816,
+            "ts": 588960,
+            "d": 18.57,
+            "f": 18.32,
+            "p": 0.3331,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9817,
+            "ts": 589020,
+            "d": 18.09,
+            "f": 18.22,
+            "p": 0.3305,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9818,
+            "ts": 589080,
+            "d": 18.12,
+            "f": 18.17,
+            "p": 0.3294,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9819,
+            "ts": 589140,
+            "d": 17.96,
+            "f": 18.08,
+            "p": 0.3269,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9820,
+            "ts": 589200,
+            "d": 18.33,
+            "f": 18.19,
+            "p": 0.3298,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9821,
+            "ts": 589260,
+            "d": 17.6,
+            "f": 17.93,
+            "p": 0.3231,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9822,
+            "ts": 589320,
+            "d": 17.86,
+            "f": 17.9,
+            "p": 0.3224,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9823,
+            "ts": 589380,
+            "d": 18.68,
+            "f": 18.25,
+            "p": 0.3312,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9824,
+            "ts": 589440,
+            "d": 18.58,
+            "f": 18.4,
+            "p": 0.3349,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9825,
+            "ts": 589500,
+            "d": 17.48,
+            "f": 17.98,
+            "p": 0.3246,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9826,
+            "ts": 589560,
+            "d": 17.13,
+            "f": 17.6,
+            "p": 0.315,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9827,
+            "ts": 589620,
+            "d": 18.62,
+            "f": 18.06,
+            "p": 0.3265,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9828,
+            "ts": 589680,
+            "d": 18.52,
+            "f": 18.27,
+            "p": 0.3317,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9829,
+            "ts": 589740,
+            "d": 18.68,
+            "f": 18.45,
+            "p": 0.3363,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9830,
+            "ts": 589800,
+            "d": 17.88,
+            "f": 18.19,
+            "p": 0.3299,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9831,
+            "ts": 589860,
+            "d": 12.64,
+            "f": 15.7,
+            "p": 0.2674,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9832,
+            "ts": 589920,
+            "d": 15.33,
+            "f": 15.53,
+            "p": 0.2633,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9833,
+            "ts": 589980,
+            "d": 18.73,
+            "f": 16.97,
+            "p": 0.2993,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9834,
+            "ts": 590040,
+            "d": 22.44,
+            "f": 19.43,
+            "p": 0.3608,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9835,
+            "ts": 590100,
+            "d": 25.3,
+            "f": 22.07,
+            "p": 0.4268,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9836,
+            "ts": 590160,
+            "d": 29.19,
+            "f": 25.28,
+            "p": 0.5069,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9837,
+            "ts": 590220,
+            "d": 33.07,
+            "f": 28.78,
+            "p": 0.5946,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9838,
+            "ts": 590280,
+            "d": 36.4,
+            "f": 32.21,
+            "p": 0.6803,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9839,
+            "ts": 590340,
+            "d": 40.48,
+            "f": 35.93,
+            "p": 0.7733,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9840,
+            "ts": 590400,
+            "d": 43.99,
+            "f": 39.56,
+            "p": 0.864,
+            "v": true,
+            "ir": false
+          },
+          {
+            "seq": 9841,
+            "ts": 590460,
+            "d": 74.6,
+            "f": 55.33,
+            "p": null,
+            "v": true,
+            "ir": false
+          }
+        ],
+        "events": [
+          {
+            "id": 2156,
+            "t": 954969,
+            "frame_seq": 9618,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_ON",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2157,
+            "t": 955058,
+            "frame_seq": 9619,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_OFF",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2158,
+            "t": 955058,
+            "frame_seq": 9619,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "ir",
+            "gesture": "IR_TAP",
+            "confidence": null,
+            "confidence_kind": null,
+            "status": "rejected"
+          },
+          {
+            "id": 2159,
+            "t": 955689,
+            "frame_seq": 9626,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "HOLD",
+            "confidence": 0.88,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2160,
+            "t": 955759,
+            "frame_seq": 9627,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "RETREAT",
+            "confidence": 0.7812,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2161,
+            "t": 955852,
+            "frame_seq": 9628,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "HOLD",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          },
+          {
+            "id": 2162,
+            "t": 956402,
+            "frame_seq": 9634,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "HOLD",
+            "confidence": 0.88,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2163,
+            "t": 956885,
+            "frame_seq": 9639,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_ON",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2164,
+            "t": 956886,
+            "frame_seq": 9639,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "HOLD",
+            "confidence": 0.8652,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2165,
+            "t": 956985,
+            "frame_seq": 9640,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_OFF",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2166,
+            "t": 956985,
+            "frame_seq": 9640,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "ir",
+            "gesture": "IR_TAP",
+            "confidence": null,
+            "confidence_kind": null,
+            "status": "rejected"
+          },
+          {
+            "id": 2167,
+            "t": 957480,
+            "frame_seq": 9645,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "RETREAT",
+            "confidence": 0.84,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2168,
+            "t": 957555,
+            "frame_seq": 9646,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "RETREAT",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          },
+          {
+            "id": 2169,
+            "t": 958003,
+            "frame_seq": 9651,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "RETREAT",
+            "confidence": 0.9555,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2170,
+            "t": 960423,
+            "frame_seq": 9677,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "APPROACH",
+            "confidence": 0.95,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2171,
+            "t": 960623,
+            "frame_seq": 9679,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "APPROACH",
+            "confidence": 0.9164,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2172,
+            "t": 960712,
+            "frame_seq": 9680,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "APPROACH",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          },
+          {
+            "id": 2173,
+            "t": 960879,
+            "frame_seq": 9682,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_ON",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2174,
+            "t": 960984,
+            "frame_seq": 9683,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_OFF",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2175,
+            "t": 960984,
+            "frame_seq": 9683,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "ir",
+            "gesture": "IR_TAP",
+            "confidence": null,
+            "confidence_kind": null,
+            "status": "rejected"
+          },
+          {
+            "id": 2176,
+            "t": 961625,
+            "frame_seq": 9690,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "HOLD",
+            "confidence": 0.88,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2177,
+            "t": 961719,
+            "frame_seq": 9691,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "RETREAT",
+            "confidence": 0.7797,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2178,
+            "t": 961811,
+            "frame_seq": 9692,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "HOLD",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          },
+          {
+            "id": 2179,
+            "t": 962354,
+            "frame_seq": 9698,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "HOLD",
+            "confidence": 0.88,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2180,
+            "t": 962819,
+            "frame_seq": 9703,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_ON",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2181,
+            "t": 962820,
+            "frame_seq": 9703,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "HOLD",
+            "confidence": 0.8558,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2182,
+            "t": 962889,
+            "frame_seq": 9704,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_OFF",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2183,
+            "t": 962889,
+            "frame_seq": 9704,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "ir",
+            "gesture": "IR_TAP",
+            "confidence": null,
+            "confidence_kind": null,
+            "status": "rejected"
+          },
+          {
+            "id": 2184,
+            "t": 963371,
+            "frame_seq": 9709,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "RETREAT",
+            "confidence": 0.84,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2185,
+            "t": 963473,
+            "frame_seq": 9710,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "RETREAT",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          },
+          {
+            "id": 2186,
+            "t": 963934,
+            "frame_seq": 9715,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "RETREAT",
+            "confidence": 0.9493,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2187,
+            "t": 966321,
+            "frame_seq": 9741,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "APPROACH",
+            "confidence": 0.95,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2188,
+            "t": 966501,
+            "frame_seq": 9743,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "APPROACH",
+            "confidence": 0.9183,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2189,
+            "t": 966595,
+            "frame_seq": 9744,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "APPROACH",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          },
+          {
+            "id": 2190,
+            "t": 966802,
+            "frame_seq": 9746,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_ON",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2191,
+            "t": 966900,
+            "frame_seq": 9747,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_OFF",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2192,
+            "t": 966900,
+            "frame_seq": 9747,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "ir",
+            "gesture": "IR_TAP",
+            "confidence": null,
+            "confidence_kind": null,
+            "status": "rejected"
+          },
+          {
+            "id": 2193,
+            "t": 967555,
+            "frame_seq": 9754,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "HOLD",
+            "confidence": 0.88,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2194,
+            "t": 967626,
+            "frame_seq": 9755,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "HOLD",
+            "confidence": 0.8321,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2195,
+            "t": 967727,
+            "frame_seq": 9756,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "HOLD",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          },
+          {
+            "id": 2196,
+            "t": 968323,
+            "frame_seq": 9762,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "HOLD",
+            "confidence": 0.88,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2197,
+            "t": 968836,
+            "frame_seq": 9767,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_ON",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2198,
+            "t": 968934,
+            "frame_seq": 9768,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_OFF",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2199,
+            "t": 968934,
+            "frame_seq": 9768,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "ir",
+            "gesture": "IR_TAP",
+            "confidence": null,
+            "confidence_kind": null,
+            "status": "rejected"
+          },
+          {
+            "id": 2200,
+            "t": 969205,
+            "frame_seq": 9771,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "RETREAT",
+            "confidence": 0.7201,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2201,
+            "t": 969402,
+            "frame_seq": 9773,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "RETREAT",
+            "confidence": 0.85,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2202,
+            "t": 969496,
+            "frame_seq": 9774,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "RETREAT",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          },
+          {
+            "id": 2203,
+            "t": 972288,
+            "frame_seq": 9805,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "APPROACH",
+            "confidence": 0.95,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2204,
+            "t": 972483,
+            "frame_seq": 9807,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "APPROACH",
+            "confidence": 0.9185,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2205,
+            "t": 972579,
+            "frame_seq": 9808,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "APPROACH",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          },
+          {
+            "id": 2206,
+            "t": 972765,
+            "frame_seq": 9810,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_ON",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2207,
+            "t": 972859,
+            "frame_seq": 9811,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ir",
+            "gesture": "IR_OFF",
+            "confidence": null,
+            "status": "observed"
+          },
+          {
+            "id": 2208,
+            "t": 972859,
+            "frame_seq": 9811,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "ir",
+            "gesture": "IR_TAP",
+            "confidence": null,
+            "confidence_kind": null,
+            "status": "rejected"
+          },
+          {
+            "id": 2209,
+            "t": 973501,
+            "frame_seq": 9818,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "HOLD",
+            "confidence": 0.88,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2210,
+            "t": 973596,
+            "frame_seq": 9819,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "RETREAT",
+            "confidence": 0.7756,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2211,
+            "t": 973673,
+            "frame_seq": 9820,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "HOLD",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          },
+          {
+            "id": 2212,
+            "t": 974205,
+            "frame_seq": 9826,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "HOLD",
+            "confidence": 0.88,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2213,
+            "t": 974676,
+            "frame_seq": 9831,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "ml",
+            "gesture": "HOLD",
+            "confidence": 0.8497,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2214,
+            "t": 975223,
+            "frame_seq": 9837,
+            "action": null,
+            "context": null,
+            "reason": null,
+            "source": "device",
+            "gesture": "RETREAT",
+            "confidence": 0.84,
+            "confidence_kind": "softmax",
+            "status": "observed"
+          },
+          {
+            "id": 2215,
+            "t": 975315,
+            "frame_seq": 9838,
+            "action": null,
+            "context": null,
+            "reason": "no_module",
+            "source": "rules",
+            "gesture": "RETREAT",
+            "confidence": 0.85,
+            "confidence_kind": "rule",
+            "status": "rejected"
+          }
+        ],
+        "signal": {
+          "raw_cm": 74.6,
+          "filtered_cm": 55.33,
+          "position": null,
+          "velocity_cm_s": 161.0,
+          "valid": true,
+          "present": false
+        },
+        "ir": {
+          "active": false,
+          "held_ms": 0
+        },
+        "age_ms": 16,
+        "armed": false,
+        "external_enabled": false,
+        "module": "intelligence",
+        "origin": "DEMO",
+        "recording": {
+          "active": false,
+          "last_result": null
+        },
+        "cooldown_left_ms": 0,
+        "connection": {
+          "status": "connected",
+          "port": "DEMO",
+          "origin": "DEMO",
+          "message": "Demonstração local — sem sensores físicos.",
+          "frames": 9841,
+          "age_ms": 16,
+          "live": true
+        }
+      }
+    },
+    "lab": {
+      "http_status": 200,
+      "body": {
+        "module": "intelligence",
+        "armed": false,
+        "external_enabled": false,
+        "external_available": true,
+        "external_reason": "",
+        "origin": "DEMO",
+        "store": {
+          "settings": {
+            "driver": "rules",
+            "min_confidence": 0.7,
+            "cooldown_ms": 900,
+            "repeat_lock": true,
+            "near_cm": 5.0,
+            "far_cm": 45.0,
+            "ir_hold_ms": 900
+          },
+          "profiles": [
+            {
+              "id": "media",
+              "name": "Mídia",
+              "context": "control",
+              "builtin": true,
+              "bindings": {
+                "IR_TAP": "media.play_pause",
+                "APPROACH": "media.next",
+                "RETREAT": "media.prev",
+                "IR_HOLD": "lab.toggle_armed"
+              }
+            },
+            {
+              "id": "presenter",
+              "name": "Apresentador",
+              "context": "control",
+              "builtin": true,
+              "bindings": {
+                "APPROACH": "present.next",
+                "RETREAT": "present.prev",
+                "IR_TAP": "present.next",
+                "IR_HOLD": "lab.toggle_armed"
+              }
+            },
+            {
+              "id": "volume",
+              "name": "Volume",
+              "context": "control",
+              "builtin": true,
+              "bindings": {
+                "APPROACH": "media.volume_up",
+                "RETREAT": "media.volume_down",
+                "IR_TAP": "media.mute",
+                "IR_HOLD": "lab.toggle_armed"
+              }
+            },
+            {
+              "id": "canvas",
+              "name": "Canvas",
+              "context": "canvas",
+              "builtin": true,
+              "bindings": {
+                "APPROACH": "canvas.burst",
+                "RETREAT": "canvas.next_palette",
+                "IR_TAP": "canvas.next_style",
+                "IR_HOLD": "canvas.freeze"
+              }
+            },
+            {
+              "id": "music",
+              "name": "Música",
+              "context": "music",
+              "builtin": true,
+              "bindings": {
+                "IR_TAP": "music.toggle_record",
+                "IR_HOLD": "music.next_timbre"
+              }
+            },
+            {
+              "id": "deck",
+              "name": "Deck integrado",
+              "context": "slides",
+              "builtin": true,
+              "bindings": {
+                "APPROACH": "slides.next",
+                "RETREAT": "slides.prev",
+                "IR_TAP": "slides.next",
+                "IR_HOLD": "slides.blank"
+              }
+            },
+            {
+              "id": "deck-external",
+              "name": "Apresentação externa",
+              "context": "slides",
+              "builtin": true,
+              "bindings": {
+                "APPROACH": "present.next",
+                "RETREAT": "present.prev",
+                "IR_TAP": "present.next",
+                "IR_HOLD": "present.blank"
+              }
+            }
+          ],
+          "active": {
+            "control": "presenter",
+            "canvas": "canvas",
+            "music": "music",
+            "slides": "deck"
+          },
+          "load_error": null
+        },
+        "catalog": [
+          {
+            "id": "lab.toggle_armed",
+            "label": "Ativar/desativar gestos",
+            "kind": "system",
+            "contexts": [
+              "control",
+              "canvas",
+              "music",
+              "slides"
+            ]
+          },
+          {
+            "id": "media.play_pause",
+            "label": "Mídia: tocar/pausar",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "media.next",
+            "label": "Mídia: próxima faixa",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "media.prev",
+            "label": "Mídia: faixa anterior",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "media.volume_up",
+            "label": "Volume +",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "media.volume_down",
+            "label": "Volume −",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "media.mute",
+            "label": "Mudo",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "present.next",
+            "label": "Apresentação: avançar (PageDown)",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "present.prev",
+            "label": "Apresentação: voltar (PageUp)",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "present.start",
+            "label": "Apresentação: iniciar (F5)",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "present.blank",
+            "label": "Apresentação: tela preta (B)",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "present.end",
+            "label": "Apresentação: sair (Esc)",
+            "kind": "external",
+            "contexts": [
+              "control",
+              "slides"
+            ]
+          },
+          {
+            "id": "slides.next",
+            "label": "Deck: próximo slide",
+            "kind": "internal",
+            "contexts": [
+              "slides"
+            ]
+          },
+          {
+            "id": "slides.prev",
+            "label": "Deck: slide anterior",
+            "kind": "internal",
+            "contexts": [
+              "slides"
+            ]
+          },
+          {
+            "id": "slides.blank",
+            "label": "Deck: tela preta",
+            "kind": "internal",
+            "contexts": [
+              "slides"
+            ]
+          },
+          {
+            "id": "canvas.next_style",
+            "label": "Canvas: próximo estilo",
+            "kind": "internal",
+            "contexts": [
+              "canvas"
+            ]
+          },
+          {
+            "id": "canvas.next_palette",
+            "label": "Canvas: próxima paleta",
+            "kind": "internal",
+            "contexts": [
+              "canvas"
+            ]
+          },
+          {
+            "id": "canvas.freeze",
+            "label": "Canvas: congelar/retomar",
+            "kind": "internal",
+            "contexts": [
+              "canvas"
+            ]
+          },
+          {
+            "id": "canvas.burst",
+            "label": "Canvas: explosão",
+            "kind": "internal",
+            "contexts": [
+              "canvas"
+            ]
+          },
+          {
+            "id": "canvas.reset",
+            "label": "Canvas: limpar",
+            "kind": "internal",
+            "contexts": [
+              "canvas"
+            ]
+          },
+          {
+            "id": "music.toggle_record",
+            "label": "Música: gravar/parar loop",
+            "kind": "internal",
+            "contexts": [
+              "music"
+            ]
+          },
+          {
+            "id": "music.toggle_play",
+            "label": "Música: tocar/pausar loops",
+            "kind": "internal",
+            "contexts": [
+              "music"
+            ]
+          },
+          {
+            "id": "music.next_timbre",
+            "label": "Música: próximo timbre",
+            "kind": "internal",
+            "contexts": [
+              "music"
+            ]
+          },
+          {
+            "id": "music.clear_layer",
+            "label": "Música: apagar última camada",
+            "kind": "internal",
+            "contexts": [
+              "music"
+            ]
+          },
+          {
+            "id": "music.toggle_mute",
+            "label": "Música: silenciar instrumento",
+            "kind": "internal",
+            "contexts": [
+              "music"
+            ]
+          }
+        ],
+        "recognizers": [
+          {
+            "source": "rules",
+            "label": "Regras",
+            "kind": "rules",
+            "available": true,
+            "origin": "deterministic",
+            "error": null,
+            "model": {
+              "model_name": "rule_baseline",
+              "experimental_status": "RULES_NO_TRAINING",
+              "data_origins": [],
+              "window_size": 10
+            },
+            "confidence_meaning": "n/a (regra fixa 0,85)",
+            "windows": 9832,
+            "events": 462,
+            "rejected": {
+              "unstable_state": 462,
+              "cooldown_active": 4963
+            },
+            "latency": {
+              "mean_ms": 0.113,
+              "p95_ms": 0.201
+            },
+            "last_raw": {
+              "label": "RETREAT",
+              "confidence": 0.85,
+              "ts_ms": 590460
+            }
+          },
+          {
+            "source": "ml",
+            "label": "ML no host",
+            "kind": "ml",
+            "available": true,
+            "origin": "synthetic",
+            "error": null,
+            "model": {
+              "model_name": "mlp_compact",
+              "experimental_status": "AWAITING_REAL_DATA",
+              "data_origins": [
+                "synthetic_simulator"
+              ],
+              "window_size": 10
+            },
+            "confidence_meaning": "softmax não calibrado",
+            "windows": 9832,
+            "events": 528,
+            "rejected": {
+              "unstable_state": 606,
+              "cooldown_active": 4254,
+              "low_confidence": 462
+            },
+            "latency": {
+              "mean_ms": 0.472,
+              "p95_ms": 0.772
+            },
+            "last_raw": {
+              "label": "RETREAT",
+              "confidence": 0.9844,
+              "ts_ms": 590460
+            }
+          },
+          {
+            "source": "device",
+            "label": "Detector do simulador",
+            "kind": "ml",
+            "available": true,
+            "origin": "simulator",
+            "events": 616,
+            "last_raw": {
+              "label": "RETREAT",
+              "confidence": 0.84,
+              "ts_ms": 590220,
+              "wire_source": "sim_sensor"
+            },
+            "confidence_meaning": "heurística do simulador",
+            "note": "Na demonstração, esta faixa recebe o detector heurístico do simulador, não o TinyML."
+          }
+        ],
+        "sample_period": {
+          "mean_ms": 60.0,
+          "max_ms": 60,
+          "p95_ms": 60
+        },
+        "counts": {
+          "device": {
+            "observed": 80
+          },
+          "ml": {
+            "observed": 70
+          },
+          "rules": {
+            "rejected:no_module": 60
+          },
+          "ir": {
+            "observed": 60,
+            "rejected:no_module": 30
+          }
+        },
+        "agreement": {
+          "rules_vs_ml": {
+            "matched": 48,
+            "only_a": 12,
+            "only_b": 22,
+            "rate": 0.585
+          },
+          "rules_vs_device": {
+            "matched": 60,
+            "only_a": 0,
+            "only_b": 20,
+            "rate": 0.75
+          },
+          "window_frames": 10
+        },
+        "recording": {
+          "active": false,
+          "last_result": null
+        },
+        "connection": {
+          "status": "connected",
+          "port": "DEMO",
+          "origin": "DEMO",
+          "message": "Demonstração local — sem sensores físicos.",
+          "frames": 9841,
+          "age_ms": 32,
+          "live": true
+        },
+        "experience": "lab",
+        "sessions": {
+          "real": [],
+          "demo": []
+        }
+      }
+    },
+    "ml/status": {
+      "http_status": 200,
+      "body": {
+        "schema_version": 1,
+        "status": "ready",
+        "source": "ml_host",
+        "model_name": "mlp_compact",
+        "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218",
+        "trained_on": [
+          "synthetic_simulator"
+        ],
+        "experiment_id": "20261111T200245_b7c2e150",
+        "experimental_status": "AWAITING_REAL_DATA",
+        "feature_names": [
+          "d_min",
+          "d_max",
+          "d_mean",
+          "d_std",
+          "d_delta",
+          "v_mean",
+          "v_peak",
+          "trend_slope",
+          "sign_inversions",
+          "ir_active_ratio",
+          "invalid_ratio"
+        ],
+        "physical_validation": "pending",
+        "deployment_status": "published",
+        "training_cohort": "demo"
+      }
+    },
+    "ml/evaluations": {
+      "http_status": 200,
+      "body": {
+        "schema_version": 1,
+        "physical_validation": "pending",
+        "real": {
+          "status": "pending",
+          "cohort": "real",
+          "metrics": null,
+          "message": "Nenhum experimento completo para esta origem."
+        },
+        "synthetic": {
+          "status": "pending",
+          "cohort": "synthetic",
+          "metrics": null,
+          "message": "Nenhum experimento completo para esta origem."
+        },
+        "demo": {
+          "status": "evaluated",
+          "cohort": "demo",
+          "experiment_id": "20261111T200245_b7c2e150",
+          "dataset_sha256": "9951827210f1f27a06157c8a0d3c31bf76e33f76943aa7ed09259c1bf0e514eb",
+          "evaluation_scope": "grouped_holdout",
+          "selected_model": "mlp_compact",
+          "metrics": {
+            "rule_baseline": {
+              "model_name": "rule_baseline",
+              "val_f1_macro": 0.5253,
+              "test_f1_macro": 0.5718,
+              "accuracy": 0.7125,
+              "false_activation_rate_neutral": 0.0698,
+              "neutral_support": 43,
+              "false_activation_rate_neutral_status": "evaluated",
+              "latency_mean_ms": 0.0044,
+              "latency_p95_ms": 0.0047,
+              "latency_scope": "notebook_python",
+              "memory": {
+                "serialized_bytes": 387,
+                "estimated_esp32_flash_bytes": 512,
+                "estimated_esp32_sram_bytes": 64
+              },
+              "memory_scope": "estimated_esp32",
+              "per_class": {
+                "NEUTRAL": {
+                  "precision": 0.8696,
+                  "recall": 0.9302,
+                  "f1": 0.8989,
+                  "support": 43
+                },
+                "APPROACH": {
+                  "precision": 0.4,
+                  "recall": 0.6,
+                  "f1": 0.48,
+                  "support": 10
+                },
+                "RETREAT": {
+                  "precision": 0.5,
+                  "recall": 0.5714,
+                  "f1": 0.5333,
+                  "support": 14
+                },
+                "HOLD": {
+                  "precision": 1.0,
+                  "recall": 0.2308,
+                  "f1": 0.375,
+                  "support": 13
+                }
+              },
+              "confusion_matrix": [
+                [
+                  40,
+                  0,
+                  3,
+                  0
+                ],
+                [
+                  2,
+                  6,
+                  2,
+                  0
+                ],
+                [
+                  3,
+                  3,
+                  8,
+                  0
+                ],
+                [
+                  1,
+                  6,
+                  3,
+                  3
+                ]
+              ],
+              "event_level": {
+                "true_episodes": 6,
+                "matched_episodes": 3,
+                "duplicate_activations": 0,
+                "false_activations": 5,
+                "rejected_windows": 72,
+                "event_precision": 0.375,
+                "event_recall": 0.5,
+                "event_f1": 0.4286
+              },
+              "far_neutral": {
+                "status": "evaluated",
+                "value": 0.0698,
+                "support": 43
+              }
+            },
+            "decision_tree": {
+              "model_name": "decision_tree",
+              "val_f1_macro": 0.7379,
+              "test_f1_macro": 0.5961,
+              "accuracy": 0.725,
+              "false_activation_rate_neutral": 0.1395,
+              "neutral_support": 43,
+              "false_activation_rate_neutral_status": "evaluated",
+              "latency_mean_ms": 0.0439,
+              "latency_p95_ms": 0.0504,
+              "latency_scope": "notebook_python",
+              "memory": {
+                "serialized_bytes": 5657,
+                "estimated_esp32_flash_bytes": 1080,
+                "estimated_esp32_sram_bytes": 128
+              },
+              "memory_scope": "estimated_esp32",
+              "per_class": {
+                "NEUTRAL": {
+                  "precision": 1.0,
+                  "recall": 0.8605,
+                  "f1": 0.925,
+                  "support": 43
+                },
+                "APPROACH": {
+                  "precision": 0.4348,
+                  "recall": 1.0,
+                  "f1": 0.6061,
+                  "support": 10
+                },
+                "RETREAT": {
+                  "precision": 0.6429,
+                  "recall": 0.6429,
+                  "f1": 0.6429,
+                  "support": 14
+                },
+                "HOLD": {
+                  "precision": 0.3333,
+                  "recall": 0.1538,
+                  "f1": 0.2105,
+                  "support": 13
+                }
+              },
+              "confusion_matrix": [
+                [
+                  37,
+                  2,
+                  2,
+                  2
+                ],
+                [
+                  0,
+                  10,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  3,
+                  9,
+                  2
+                ],
+                [
+                  0,
+                  8,
+                  3,
+                  2
+                ]
+              ],
+              "event_level": {
+                "true_episodes": 6,
+                "matched_episodes": 4,
+                "duplicate_activations": 0,
+                "false_activations": 4,
+                "rejected_windows": 72,
+                "event_precision": 0.5,
+                "event_recall": 0.6667,
+                "event_f1": 0.5714
+              },
+              "far_neutral": {
+                "status": "evaluated",
+                "value": 0.1395,
+                "support": 43
+              }
+            },
+            "random_forest": {
+              "model_name": "random_forest",
+              "val_f1_macro": 0.8729,
+              "test_f1_macro": 0.8466,
+              "accuracy": 0.8875,
+              "false_activation_rate_neutral": 0.0698,
+              "neutral_support": 43,
+              "false_activation_rate_neutral_status": "evaluated",
+              "latency_mean_ms": 0.7076,
+              "latency_p95_ms": 0.7753,
+              "latency_scope": "notebook_python",
+              "memory": {
+                "serialized_bytes": 103385,
+                "estimated_esp32_flash_bytes": 22648,
+                "estimated_esp32_sram_bytes": 256
+              },
+              "memory_scope": "estimated_esp32",
+              "per_class": {
+                "NEUTRAL": {
+                  "precision": 0.9756,
+                  "recall": 0.9302,
+                  "f1": 0.9524,
+                  "support": 43
+                },
+                "APPROACH": {
+                  "precision": 0.7143,
+                  "recall": 1.0,
+                  "f1": 0.8333,
+                  "support": 10
+                },
+                "RETREAT": {
+                  "precision": 0.7647,
+                  "recall": 0.9286,
+                  "f1": 0.8387,
+                  "support": 14
+                },
+                "HOLD": {
+                  "precision": 1.0,
+                  "recall": 0.6154,
+                  "f1": 0.7619,
+                  "support": 13
+                }
+              },
+              "confusion_matrix": [
+                [
+                  40,
+                  1,
+                  2,
+                  0
+                ],
+                [
+                  0,
+                  10,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  0,
+                  13,
+                  0
+                ],
+                [
+                  0,
+                  3,
+                  2,
+                  8
+                ]
+              ],
+              "event_level": {
+                "true_episodes": 6,
+                "matched_episodes": 5,
+                "duplicate_activations": 0,
+                "false_activations": 0,
+                "rejected_windows": 75,
+                "event_precision": 1.0,
+                "event_recall": 0.8333,
+                "event_f1": 0.9091
+              },
+              "far_neutral": {
+                "status": "evaluated",
+                "value": 0.0698,
+                "support": 43
+              }
+            },
+            "mlp_compact": {
+              "model_name": "mlp_compact",
+              "val_f1_macro": 0.8962,
+              "test_f1_macro": 0.9713,
+              "accuracy": 0.975,
+              "false_activation_rate_neutral": 0.0465,
+              "neutral_support": 43,
+              "false_activation_rate_neutral_status": "evaluated",
+              "latency_mean_ms": 0.1638,
+              "latency_p95_ms": 0.175,
+              "latency_scope": "notebook_python",
+              "memory": {
+                "serialized_bytes": 42089,
+                "estimated_esp32_flash_bytes": 1544,
+                "estimated_esp32_sram_bytes": 256
+              },
+              "memory_scope": "estimated_esp32",
+              "per_class": {
+                "NEUTRAL": {
+                  "precision": 1.0,
+                  "recall": 0.9535,
+                  "f1": 0.9762,
+                  "support": 43
+                },
+                "APPROACH": {
+                  "precision": 0.8333,
+                  "recall": 1.0,
+                  "f1": 0.9091,
+                  "support": 10
+                },
+                "RETREAT": {
+                  "precision": 1.0,
+                  "recall": 1.0,
+                  "f1": 1.0,
+                  "support": 14
+                },
+                "HOLD": {
+                  "precision": 1.0,
+                  "recall": 1.0,
+                  "f1": 1.0,
+                  "support": 13
+                }
+              },
+              "confusion_matrix": [
+                [
+                  41,
+                  2,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  10,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  14,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  13
+                ]
+              ],
+              "event_level": {
+                "true_episodes": 6,
+                "matched_episodes": 6,
+                "duplicate_activations": 0,
+                "false_activations": 0,
+                "rejected_windows": 74,
+                "event_precision": 1.0,
+                "event_recall": 1.0,
+                "event_f1": 1.0
+              },
+              "far_neutral": {
+                "status": "evaluated",
+                "value": 0.0465,
+                "support": 43
+              }
+            },
+            "decision_stump_baseline": {
+              "model_name": "decision_stump_baseline",
+              "val_f1_macro": 0.3279,
+              "test_f1_macro": 0.3548,
+              "accuracy": 0.65,
+              "false_activation_rate_neutral": 0.093,
+              "neutral_support": 43,
+              "false_activation_rate_neutral_status": "evaluated",
+              "latency_mean_ms": 0.0492,
+              "latency_p95_ms": 0.0658,
+              "latency_scope": "notebook_python",
+              "memory": {
+                "serialized_bytes": 1625,
+                "estimated_esp32_flash_bytes": 72,
+                "estimated_esp32_sram_bytes": 128
+              },
+              "memory_scope": "estimated_esp32",
+              "per_class": {
+                "NEUTRAL": {
+                  "precision": 0.9512,
+                  "recall": 0.907,
+                  "f1": 0.9286,
+                  "support": 43
+                },
+                "APPROACH": {
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0,
+                  "support": 10
+                },
+                "RETREAT": {
+                  "precision": 0.3333,
+                  "recall": 0.9286,
+                  "f1": 0.4906,
+                  "support": 14
+                },
+                "HOLD": {
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0,
+                  "support": 13
+                }
+              },
+              "confusion_matrix": [
+                [
+                  39,
+                  0,
+                  4,
+                  0
+                ],
+                [
+                  1,
+                  0,
+                  9,
+                  0
+                ],
+                [
+                  1,
+                  0,
+                  13,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  13,
+                  0
+                ]
+              ],
+              "event_level": {
+                "true_episodes": 6,
+                "matched_episodes": 0,
+                "duplicate_activations": 0,
+                "false_activations": 0,
+                "rejected_windows": 80,
+                "event_precision": 0.0,
+                "event_recall": 0.0,
+                "event_f1": 0.0
+              },
+              "far_neutral": {
+                "status": "evaluated",
+                "value": 0.093,
+                "support": 43
+              }
+            }
+          },
+          "software_only": true,
+          "generated_at_iso": "2026-11-11T20:02:45.319687+00:00",
+          "split": {
+            "strategy": "by_participant",
+            "train_groups": [
+              "demo_p01",
+              "demo_p03",
+              "demo_p04"
+            ],
+            "validation_groups": [
+              "demo_p02"
+            ],
+            "test_groups": [
+              "demo_p05"
+            ],
+            "warnings": []
+          },
+          "validation": {
+            "group_kfold": {
+              "status": "evaluated",
+              "group_attr": "participant_id",
+              "method": "GroupKFold",
+              "n_splits": 4,
+              "scope": "development_only",
+              "models": {
+                "rule_baseline": {
+                  "folds": [
+                    {
+                      "fold": 0,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p02",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p01"
+                      ],
+                      "f1_macro": 0.5072791462777329,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 1,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p02"
+                      ],
+                      "f1_macro": 0.5252507802528219,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 2,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p03"
+                      ],
+                      "validation_groups": [
+                        "demo_p04"
+                      ],
+                      "f1_macro": 0.49005439005439005,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 3,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p03"
+                      ],
+                      "f1_macro": 0.5142606640965054,
+                      "missing_validation_classes": []
+                    }
+                  ],
+                  "valid_folds": 4,
+                  "f1_macro_mean": 0.5092112451703625,
+                  "f1_macro_std": 0.01278164133844316
+                },
+                "decision_tree": {
+                  "folds": [
+                    {
+                      "fold": 0,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p02",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p01"
+                      ],
+                      "f1_macro": 0.6913311720208272,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 1,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p02"
+                      ],
+                      "f1_macro": 0.7378637566137565,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 2,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p03"
+                      ],
+                      "validation_groups": [
+                        "demo_p04"
+                      ],
+                      "f1_macro": 0.7610420979986197,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 3,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p03"
+                      ],
+                      "f1_macro": 0.6702597402597402,
+                      "missing_validation_classes": []
+                    }
+                  ],
+                  "valid_folds": 4,
+                  "f1_macro_mean": 0.7151241917232359,
+                  "f1_macro_std": 0.0360710019260787
+                },
+                "random_forest": {
+                  "folds": [
+                    {
+                      "fold": 0,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p02",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p01"
+                      ],
+                      "f1_macro": 0.633771525588164,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 1,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p02"
+                      ],
+                      "f1_macro": 0.8728740395407062,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 2,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p03"
+                      ],
+                      "validation_groups": [
+                        "demo_p04"
+                      ],
+                      "f1_macro": 0.8911036977812087,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 3,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p03"
+                      ],
+                      "f1_macro": 0.8240762860328077,
+                      "missing_validation_classes": []
+                    }
+                  ],
+                  "valid_folds": 4,
+                  "f1_macro_mean": 0.8054563872357217,
+                  "f1_macro_std": 0.10210655463307147
+                },
+                "mlp_compact": {
+                  "folds": [
+                    {
+                      "fold": 0,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p02",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p01"
+                      ],
+                      "f1_macro": 0.8077651515151516,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 1,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p02"
+                      ],
+                      "f1_macro": 0.8961673130790778,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 2,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p03"
+                      ],
+                      "validation_groups": [
+                        "demo_p04"
+                      ],
+                      "f1_macro": 0.9025764895330112,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 3,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p03"
+                      ],
+                      "f1_macro": 0.8154604100388829,
+                      "missing_validation_classes": []
+                    }
+                  ],
+                  "valid_folds": 4,
+                  "f1_macro_mean": 0.8554923410415309,
+                  "f1_macro_std": 0.0440221833548459
+                },
+                "decision_stump_baseline": {
+                  "folds": [
+                    {
+                      "fold": 0,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p02",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p01"
+                      ],
+                      "f1_macro": 0.3382936507936508,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 1,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p02"
+                      ],
+                      "f1_macro": 0.3279220779220779,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 2,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p03"
+                      ],
+                      "validation_groups": [
+                        "demo_p04"
+                      ],
+                      "f1_macro": 0.3491512345679012,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 3,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p03"
+                      ],
+                      "f1_macro": 0.3379329004329004,
+                      "missing_validation_classes": []
+                    }
+                  ],
+                  "valid_folds": 4,
+                  "f1_macro_mean": 0.3383249659291326,
+                  "f1_macro_std": 0.0075097081753746145
+                }
+              }
+            },
+            "leave_one_group_out": {
+              "status": "evaluated",
+              "group_attr": "participant_id",
+              "method": "LeaveOneGroupOut",
+              "n_splits": 4,
+              "scope": "development_only",
+              "models": {
+                "rule_baseline": {
+                  "folds": [
+                    {
+                      "fold": 0,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p02",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p01"
+                      ],
+                      "f1_macro": 0.5072791462777329,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 1,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p02"
+                      ],
+                      "f1_macro": 0.5252507802528219,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 2,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p03"
+                      ],
+                      "f1_macro": 0.5142606640965054,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 3,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p03"
+                      ],
+                      "validation_groups": [
+                        "demo_p04"
+                      ],
+                      "f1_macro": 0.49005439005439005,
+                      "missing_validation_classes": []
+                    }
+                  ],
+                  "valid_folds": 4,
+                  "f1_macro_mean": 0.5092112451703625,
+                  "f1_macro_std": 0.01278164133844316
+                },
+                "decision_tree": {
+                  "folds": [
+                    {
+                      "fold": 0,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p02",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p01"
+                      ],
+                      "f1_macro": 0.6913311720208272,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 1,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p02"
+                      ],
+                      "f1_macro": 0.7378637566137565,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 2,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p03"
+                      ],
+                      "f1_macro": 0.6702597402597402,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 3,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p03"
+                      ],
+                      "validation_groups": [
+                        "demo_p04"
+                      ],
+                      "f1_macro": 0.7610420979986197,
+                      "missing_validation_classes": []
+                    }
+                  ],
+                  "valid_folds": 4,
+                  "f1_macro_mean": 0.7151241917232359,
+                  "f1_macro_std": 0.0360710019260787
+                },
+                "random_forest": {
+                  "folds": [
+                    {
+                      "fold": 0,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p02",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p01"
+                      ],
+                      "f1_macro": 0.633771525588164,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 1,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p02"
+                      ],
+                      "f1_macro": 0.8728740395407062,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 2,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p03"
+                      ],
+                      "f1_macro": 0.8240762860328077,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 3,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p03"
+                      ],
+                      "validation_groups": [
+                        "demo_p04"
+                      ],
+                      "f1_macro": 0.8911036977812087,
+                      "missing_validation_classes": []
+                    }
+                  ],
+                  "valid_folds": 4,
+                  "f1_macro_mean": 0.8054563872357215,
+                  "f1_macro_std": 0.10210655463307147
+                },
+                "mlp_compact": {
+                  "folds": [
+                    {
+                      "fold": 0,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p02",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p01"
+                      ],
+                      "f1_macro": 0.8077651515151516,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 1,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p02"
+                      ],
+                      "f1_macro": 0.8961673130790778,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 2,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p03"
+                      ],
+                      "f1_macro": 0.8154604100388829,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 3,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p03"
+                      ],
+                      "validation_groups": [
+                        "demo_p04"
+                      ],
+                      "f1_macro": 0.9025764895330112,
+                      "missing_validation_classes": []
+                    }
+                  ],
+                  "valid_folds": 4,
+                  "f1_macro_mean": 0.8554923410415309,
+                  "f1_macro_std": 0.0440221833548459
+                },
+                "decision_stump_baseline": {
+                  "folds": [
+                    {
+                      "fold": 0,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p02",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p01"
+                      ],
+                      "f1_macro": 0.3382936507936508,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 1,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p03",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p02"
+                      ],
+                      "f1_macro": 0.3279220779220779,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 2,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p04"
+                      ],
+                      "validation_groups": [
+                        "demo_p03"
+                      ],
+                      "f1_macro": 0.3379329004329004,
+                      "missing_validation_classes": []
+                    },
+                    {
+                      "fold": 3,
+                      "status": "evaluated",
+                      "train_groups": [
+                        "demo_p01",
+                        "demo_p02",
+                        "demo_p03"
+                      ],
+                      "validation_groups": [
+                        "demo_p04"
+                      ],
+                      "f1_macro": 0.3491512345679012,
+                      "missing_validation_classes": []
+                    }
+                  ],
+                  "valid_folds": 4,
+                  "f1_macro_mean": 0.3383249659291325,
+                  "f1_macro_std": 0.0075097081753746145
+                }
+              }
+            }
+          },
+          "eda": {
+            "scope": "development_only",
+            "cohort": "demo",
+            "figures": [
+              {
+                "path": "eda/01_classes.svg",
+                "interpretation": "Janelas por classe: {'NEUTRAL': 172, 'HOLD': 49, 'RETREAT': 45, 'APPROACH': 49}. Desbalanceamento exige F1-macro e suporte por classe."
+              },
+              {
+                "path": "eda/02_participants.svg",
+                "interpretation": "4 participantes no desenvolvimento; contagens {'demo_p01': 86, 'demo_p03': 75, 'demo_p04': 76, 'demo_p02': 78}. Janelas sobrepostas não são observações independentes; a unidade de generalização é o grupo."
+              },
+              {
+                "path": "eda/03_trace.svg",
+                "interpretation": "Sessão ilustrativa mqtt_demo_p01_42_6160d119, 191 amostras. Rótulos vêm do cronograma solicitado; não comprovam que a pessoa executou o gesto corretamente. Inspecionar transições antes de interpretar erros."
+              },
+              {
+                "path": "eda/04_invalid.svg",
+                "interpretation": "Fração inválida por sessão: {'mqtt_demo_p01_42_6160d119': 0.073, 'mqtt_demo_p02_42_6160d119': 0.051, 'mqtt_demo_p03_42_6160d119': 0.058, 'mqtt_demo_p04_42_6160d119': 0.057}. Timeouts são tratados causalmente; alta perda pode mudar a distribuição e gerar falsos acionamentos."
+              },
+              {
+                "path": "eda/05_correlations.svg",
+                "interpretation": "Maior correlação absoluta: v_mean × d_delta = 1.000. Redundância pode favorecer modelos compactos; correlação não estabelece causalidade. Features constantes aparecem como zero."
+              }
+            ],
+            "class_distribution": {
+              "NEUTRAL": 172,
+              "HOLD": 49,
+              "RETREAT": 45,
+              "APPROACH": 49
+            },
+            "participants": {
+              "demo_p01": 86,
+              "demo_p03": 75,
+              "demo_p04": 76,
+              "demo_p02": 78
+            },
+            "invalid_ratio_by_session": {
+              "mqtt_demo_p01_42_6160d119": 0.07329842931937172,
+              "mqtt_demo_p02_42_6160d119": 0.05113636363636364,
+              "mqtt_demo_p03_42_6160d119": 0.057803468208092484,
+              "mqtt_demo_p04_42_6160d119": 0.056818181818181816
+            }
+          },
+          "tuning": {
+            "status": "selected_on_development_cv",
+            "selected_dt_max_depth": 7,
+            "trials": [
+              {
+                "dt_max_depth": 3,
+                "status": "evaluated",
+                "cv_f1_macro": 0.6258648196261627,
+                "cv": {
+                  "status": "evaluated",
+                  "group_attr": "participant_id",
+                  "method": "GroupKFold",
+                  "n_splits": 4,
+                  "scope": "development_only",
+                  "models": {
+                    "decision_tree": {
+                      "folds": [
+                        {
+                          "fold": 0,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p02",
+                            "demo_p03",
+                            "demo_p04"
+                          ],
+                          "validation_groups": [
+                            "demo_p01"
+                          ],
+                          "f1_macro": 0.5753063028925098,
+                          "missing_validation_classes": []
+                        },
+                        {
+                          "fold": 1,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p01",
+                            "demo_p03",
+                            "demo_p04"
+                          ],
+                          "validation_groups": [
+                            "demo_p02"
+                          ],
+                          "f1_macro": 0.6396324863883848,
+                          "missing_validation_classes": []
+                        },
+                        {
+                          "fold": 2,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p01",
+                            "demo_p02",
+                            "demo_p03"
+                          ],
+                          "validation_groups": [
+                            "demo_p04"
+                          ],
+                          "f1_macro": 0.6349747474747475,
+                          "missing_validation_classes": []
+                        },
+                        {
+                          "fold": 3,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p01",
+                            "demo_p02",
+                            "demo_p04"
+                          ],
+                          "validation_groups": [
+                            "demo_p03"
+                          ],
+                          "f1_macro": 0.6535457417490085,
+                          "missing_validation_classes": []
+                        }
+                      ],
+                      "valid_folds": 4,
+                      "f1_macro_mean": 0.6258648196261627,
+                      "f1_macro_std": 0.02997889464840275
+                    }
+                  }
+                }
+              },
+              {
+                "dt_max_depth": 5,
+                "status": "evaluated",
+                "cv_f1_macro": 0.667738641238402,
+                "cv": {
+                  "status": "evaluated",
+                  "group_attr": "participant_id",
+                  "method": "GroupKFold",
+                  "n_splits": 4,
+                  "scope": "development_only",
+                  "models": {
+                    "decision_tree": {
+                      "folds": [
+                        {
+                          "fold": 0,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p02",
+                            "demo_p03",
+                            "demo_p04"
+                          ],
+                          "validation_groups": [
+                            "demo_p01"
+                          ],
+                          "f1_macro": 0.6412543594655664,
+                          "missing_validation_classes": []
+                        },
+                        {
+                          "fold": 1,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p01",
+                            "demo_p03",
+                            "demo_p04"
+                          ],
+                          "validation_groups": [
+                            "demo_p02"
+                          ],
+                          "f1_macro": 0.6294121826449413,
+                          "missing_validation_classes": []
+                        },
+                        {
+                          "fold": 2,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p01",
+                            "demo_p02",
+                            "demo_p03"
+                          ],
+                          "validation_groups": [
+                            "demo_p04"
+                          ],
+                          "f1_macro": 0.8049945694933808,
+                          "missing_validation_classes": []
+                        },
+                        {
+                          "fold": 3,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p01",
+                            "demo_p02",
+                            "demo_p04"
+                          ],
+                          "validation_groups": [
+                            "demo_p03"
+                          ],
+                          "f1_macro": 0.5952934533497194,
+                          "missing_validation_classes": []
+                        }
+                      ],
+                      "valid_folds": 4,
+                      "f1_macro_mean": 0.667738641238402,
+                      "f1_macro_std": 0.08102133931672202
+                    }
+                  }
+                }
+              },
+              {
+                "dt_max_depth": 7,
+                "status": "evaluated",
+                "cv_f1_macro": 0.7151241917232359,
+                "cv": {
+                  "status": "evaluated",
+                  "group_attr": "participant_id",
+                  "method": "GroupKFold",
+                  "n_splits": 4,
+                  "scope": "development_only",
+                  "models": {
+                    "decision_tree": {
+                      "folds": [
+                        {
+                          "fold": 0,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p02",
+                            "demo_p03",
+                            "demo_p04"
+                          ],
+                          "validation_groups": [
+                            "demo_p01"
+                          ],
+                          "f1_macro": 0.6913311720208272,
+                          "missing_validation_classes": []
+                        },
+                        {
+                          "fold": 1,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p01",
+                            "demo_p03",
+                            "demo_p04"
+                          ],
+                          "validation_groups": [
+                            "demo_p02"
+                          ],
+                          "f1_macro": 0.7378637566137565,
+                          "missing_validation_classes": []
+                        },
+                        {
+                          "fold": 2,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p01",
+                            "demo_p02",
+                            "demo_p03"
+                          ],
+                          "validation_groups": [
+                            "demo_p04"
+                          ],
+                          "f1_macro": 0.7610420979986197,
+                          "missing_validation_classes": []
+                        },
+                        {
+                          "fold": 3,
+                          "status": "evaluated",
+                          "train_groups": [
+                            "demo_p01",
+                            "demo_p02",
+                            "demo_p04"
+                          ],
+                          "validation_groups": [
+                            "demo_p03"
+                          ],
+                          "f1_macro": 0.6702597402597402,
+                          "missing_validation_classes": []
+                        }
+                      ],
+                      "valid_folds": 4,
+                      "f1_macro_mean": 0.7151241917232359,
+                      "f1_macro_std": 0.0360710019260787
+                    }
+                  }
+                }
+              }
+            ],
+            "caveat": "CV após tuning é descritiva; o holdout externo é a estimativa final reservada."
+          },
+          "tracking": {
+            "status": "logged",
+            "run_id": "2891cdd2ced34bb5bbe337e096d59768",
+            "experiment_id": "1",
+            "tracking_uri": "http://mlflow:5000"
+          },
+          "orchestration": {
+            "engine": "apache_airflow",
+            "dag_id": "motionlab_experiment",
+            "run_id": "manual__2026-11-11T20:02:37.415864+00:00"
+          },
+          "message": "Desempenho físico não validado."
+        }
+      }
+    },
+    "ml/predictions": {
+      "http_status": 200,
+      "body": {
+        "schema_version": 1,
+        "status": "ready",
+        "items": [
+          {
+            "schema_version": 1,
+            "status": "ready",
+            "source": "ml_host",
+            "model_name": "mlp_compact",
+            "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218",
+            "trained_on": [
+              "synthetic_simulator"
+            ],
+            "experiment_id": "20261111T200245_b7c2e150",
+            "experimental_status": "AWAITING_REAL_DATA",
+            "feature_names": [
+              "d_min",
+              "d_max",
+              "d_mean",
+              "d_std",
+              "d_delta",
+              "v_mean",
+              "v_peak",
+              "trend_slope",
+              "sign_inversions",
+              "ir_active_ratio",
+              "invalid_ratio"
+            ],
+            "physical_validation": "pending",
+            "deployment_status": "published",
+            "training_cohort": "demo",
+            "input_origin": "demo",
+            "label": "NEUTRAL",
+            "confidence": 0.9999931153012915,
+            "probabilities": {
+              "NEUTRAL": 0.9999931153012915,
+              "APPROACH": 6.8835610282496605e-06,
+              "RETREAT": 1.058348920576809e-09,
+              "HOLD": 7.933124600441104e-11
+            },
+            "scope": "last_window_of_session",
+            "event_gate_applied": false,
+            "message": "Inferência de janela; não envia ações nem equivale a avaliação de desempenho.",
+            "session_id": "mqtt_demo_p01_42_6160d119",
+            "dataset_sha256": "85a580624dff0bc805eb429c259f7ded4da687687f9f6c89e96267307afb9338",
+            "processing_version": 1,
+            "window_end_ts_ms": 14252,
+            "samples": 191,
+            "windows": 91,
+            "generated_at_iso": "2026-11-11T20:03:28.362598+00:00"
+          },
+          {
+            "schema_version": 1,
+            "status": "ready",
+            "source": "ml_host",
+            "model_name": "mlp_compact",
+            "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218",
+            "trained_on": [
+              "synthetic_simulator"
+            ],
+            "experiment_id": "20261111T200245_b7c2e150",
+            "experimental_status": "AWAITING_REAL_DATA",
+            "feature_names": [
+              "d_min",
+              "d_max",
+              "d_mean",
+              "d_std",
+              "d_delta",
+              "v_mean",
+              "v_peak",
+              "trend_slope",
+              "sign_inversions",
+              "ir_active_ratio",
+              "invalid_ratio"
+            ],
+            "physical_validation": "pending",
+            "deployment_status": "published",
+            "training_cohort": "demo",
+            "input_origin": "demo",
+            "label": "NEUTRAL",
+            "confidence": 0.6738724327249825,
+            "probabilities": {
+              "NEUTRAL": 0.6738724327249825,
+              "APPROACH": 0.29302549558719715,
+              "RETREAT": 0.03310028038701542,
+              "HOLD": 1.791300805031832e-06
+            },
+            "scope": "last_window_of_session",
+            "event_gate_applied": false,
+            "message": "Inferência de janela; não envia ações nem equivale a avaliação de desempenho.",
+            "session_id": "mqtt_demo_p02_42_6160d119",
+            "dataset_sha256": "6815b7efb309073bc86ec659c2e2dbec6e2f4ee5430b7c2a14aec9063260663a",
+            "processing_version": 1,
+            "window_end_ts_ms": 13157,
+            "samples": 176,
+            "windows": 84,
+            "generated_at_iso": "2026-11-11T20:03:28.385914+00:00"
+          },
+          {
+            "schema_version": 1,
+            "status": "ready",
+            "source": "ml_host",
+            "model_name": "mlp_compact",
+            "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218",
+            "trained_on": [
+              "synthetic_simulator"
+            ],
+            "experiment_id": "20261111T200245_b7c2e150",
+            "experimental_status": "AWAITING_REAL_DATA",
+            "feature_names": [
+              "d_min",
+              "d_max",
+              "d_mean",
+              "d_std",
+              "d_delta",
+              "v_mean",
+              "v_peak",
+              "trend_slope",
+              "sign_inversions",
+              "ir_active_ratio",
+              "invalid_ratio"
+            ],
+            "physical_validation": "pending",
+            "deployment_status": "published",
+            "training_cohort": "demo",
+            "input_origin": "demo",
+            "label": "NEUTRAL",
+            "confidence": 0.99990275569124,
+            "probabilities": {
+              "NEUTRAL": 0.99990275569124,
+              "APPROACH": 9.719068708343863e-05,
+              "RETREAT": 5.1688993640855594e-08,
+              "HOLD": 1.9326828853918213e-09
+            },
+            "scope": "last_window_of_session",
+            "event_gate_applied": false,
+            "message": "Inferência de janela; não envia ações nem equivale a avaliação de desempenho.",
+            "session_id": "mqtt_demo_p03_42_6160d119",
+            "dataset_sha256": "d0e06e8f5b8a171912d15aacbb51c09ff2ac24c9504a4a47d8cc7d580d9d6182",
+            "processing_version": 1,
+            "window_end_ts_ms": 12914,
+            "samples": 173,
+            "windows": 82,
+            "generated_at_iso": "2026-11-11T20:03:28.410484+00:00"
+          },
+          {
+            "schema_version": 1,
+            "status": "ready",
+            "source": "ml_host",
+            "model_name": "mlp_compact",
+            "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218",
+            "trained_on": [
+              "synthetic_simulator"
+            ],
+            "experiment_id": "20261111T200245_b7c2e150",
+            "experimental_status": "AWAITING_REAL_DATA",
+            "feature_names": [
+              "d_min",
+              "d_max",
+              "d_mean",
+              "d_std",
+              "d_delta",
+              "v_mean",
+              "v_peak",
+              "trend_slope",
+              "sign_inversions",
+              "ir_active_ratio",
+              "invalid_ratio"
+            ],
+            "physical_validation": "pending",
+            "deployment_status": "published",
+            "training_cohort": "demo",
+            "input_origin": "demo",
+            "label": "NEUTRAL",
+            "confidence": 0.9999692579509318,
+            "probabilities": {
+              "NEUTRAL": 0.9999692579509318,
+              "APPROACH": 3.072931458745857e-05,
+              "RETREAT": 1.2501835348445195e-08,
+              "HOLD": 2.3264541191689705e-10
+            },
+            "scope": "last_window_of_session",
+            "event_gate_applied": false,
+            "message": "Inferência de janela; não envia ações nem equivale a avaliação de desempenho.",
+            "session_id": "mqtt_demo_p04_42_6160d119",
+            "dataset_sha256": "40553e17221d89360e356dc2afd1a1a99a28f79c035723999613c63689459ea1",
+            "processing_version": 1,
+            "window_end_ts_ms": 13198,
+            "samples": 176,
+            "windows": 84,
+            "generated_at_iso": "2026-11-11T20:03:28.431060+00:00"
+          },
+          {
+            "schema_version": 1,
+            "status": "ready",
+            "source": "ml_host",
+            "model_name": "mlp_compact",
+            "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218",
+            "trained_on": [
+              "synthetic_simulator"
+            ],
+            "experiment_id": "20261111T200245_b7c2e150",
+            "experimental_status": "AWAITING_REAL_DATA",
+            "feature_names": [
+              "d_min",
+              "d_max",
+              "d_mean",
+              "d_std",
+              "d_delta",
+              "v_mean",
+              "v_peak",
+              "trend_slope",
+              "sign_inversions",
+              "ir_active_ratio",
+              "invalid_ratio"
+            ],
+            "physical_validation": "pending",
+            "deployment_status": "published",
+            "training_cohort": "demo",
+            "input_origin": "demo",
+            "label": "NEUTRAL",
+            "confidence": 0.9950303933834103,
+            "probabilities": {
+              "NEUTRAL": 0.9950303933834103,
+              "APPROACH": 0.004938535346785515,
+              "RETREAT": 3.105089624118553e-05,
+              "HOLD": 2.037356283975671e-08
+            },
+            "scope": "last_window_of_session",
+            "event_gate_applied": false,
+            "message": "Inferência de janela; não envia ações nem equivale a avaliação de desempenho.",
+            "session_id": "mqtt_demo_p05_42_6160d119",
+            "dataset_sha256": "8add95a33c3cd58dae995ef83d725b3a9f110857057314e8c3694fdeb5517ce4",
+            "processing_version": 1,
+            "window_end_ts_ms": 13511,
+            "samples": 180,
+            "windows": 86,
+            "generated_at_iso": "2026-11-11T20:03:28.452965+00:00"
+          },
+          {
+            "schema_version": 1,
+            "status": "ready",
+            "source": "ml_host",
+            "model_name": "mlp_compact",
+            "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218",
+            "trained_on": [
+              "synthetic_simulator"
+            ],
+            "experiment_id": "20261111T200245_b7c2e150",
+            "experimental_status": "AWAITING_REAL_DATA",
+            "feature_names": [
+              "d_min",
+              "d_max",
+              "d_mean",
+              "d_std",
+              "d_delta",
+              "v_mean",
+              "v_peak",
+              "trend_slope",
+              "sign_inversions",
+              "ir_active_ratio",
+              "invalid_ratio"
+            ],
+            "physical_validation": "pending",
+            "deployment_status": "published",
+            "training_cohort": "demo",
+            "input_origin": "demo",
+            "label": "NEUTRAL",
+            "confidence": 0.9418227736974801,
+            "probabilities": {
+              "NEUTRAL": 0.9418227736974801,
+              "APPROACH": 0.05693368431303755,
+              "RETREAT": 0.0012432250760666711,
+              "HOLD": 3.169134157910456e-07
+            },
+            "scope": "last_window_of_session",
+            "event_gate_applied": false,
+            "message": "Inferência de janela; não envia ações nem equivale a avaliação de desempenho.",
+            "session_id": "verify_new_7ec23b87",
+            "dataset_sha256": "9cddf26f4b0aec5de4be31ee61577928d2c77df50d6c4b278b9a74a01f1a0fc7",
+            "processing_version": 1,
+            "window_end_ts_ms": 13197,
+            "samples": 177,
+            "windows": 84,
+            "generated_at_iso": "2026-11-11T20:05:12.223230+00:00"
+          }
+        ],
+        "errors": [],
+        "physical_validation": "pending"
+      }
+    }
+  }
+}

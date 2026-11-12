@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "software_only": true,
+  "checks": [
+    {
+      "check": "api_ready_after_airflow_publication",
+      "status": "passed",
+      "experiment_id": "20261111T200245_b7c2e150",
+      "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218"
+    },
+    {
+      "check": "evaluations_and_mlflow",
+      "status": "passed",
+      "models": [
+        "rule_baseline",
+        "decision_tree",
+        "random_forest",
+        "mlp_compact",
+        "decision_stump_baseline"
+      ],
+      "run_id": "2891cdd2ced34bb5bbe337e096d59768",
+      "real": "pending"
+    },
+    {
+      "check": "identified_airflow_run_and_mlflow_children",
+      "status": "passed",
+      "airflow": {
+        "run_id": "manual__2026-11-11T20:02:37.415864+00:00",
+        "state": "success",
+        "tasks": {
+          "configuration": "success",
+          "experiment": "success",
+          "prepare": "success",
+          "publish": "success"
+        }
+      },
+      "finished_mlflow_children": 8,
+      "saved_models": 5
+    },
+    {
+      "check": "dashboard_backend_consumes_api",
+      "status": "passed",
+      "visual_integration": "pending_claude"
+    },
+    {
+      "check": "invalid_http_input_rejected",
+      "status": "passed",
+      "http_status": 400
+    },
+    {
+      "check": "http_inference_and_dashboard_proxy_match",
+      "status": "passed",
+      "label": "NEUTRAL",
+      "input_origin": "demo",
+      "trained_on": [
+        "synthetic_simulator"
+      ]
+    },
+    {
+      "check": "mqtt_duplicate_deduplicated",
+      "status": "passed",
+      "session_id": "mqtt_demo_p01_42_6160d119",
+      "dataset_sha256": "85a580624dff0bc805eb429c259f7ded4da687687f9f6c89e96267307afb9338"
+    },
+    {
+      "check": "invalid_conflicting_and_wrong_topic_mqtt_do_not_change_corpus",
+      "status": "passed"
+    },
+    {
+      "check": "new_mqtt_session_automatically_reaches_dashboard_backend",
+      "status": "passed",
+      "session_id": "verify_new_7ec23b87",
+      "label": "NEUTRAL",
+      "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218"
+    },
+    {
+      "check": "consumer_restart_preserves_idempotency",
+      "status": "passed"
+    },
+    {
+      "check": "broker_restart_reconnects_consumer",
+      "status": "passed"
+    },
+    {
+      "check": "api_failure_and_restart_preserve_dashboard_and_predictions",
+      "status": "passed"
+    },
+    {
+      "check": "mlflow_restart_does_not_interrupt_published_inference",
+      "status": "passed"
+    }
+  ],
+  "status": "passed"
+}

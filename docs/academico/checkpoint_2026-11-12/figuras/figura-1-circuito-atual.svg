@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1010" viewBox="0 0 1400 1010">
+<title>Figura 1 Circuito vigente sem LCD</title>
+<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8" fill="#374151"/></marker></defs>
+<rect width="1400" height="1010" fill="white"/>
+<text x="55" y="60" font-family="Arial, sans-serif" font-size="38" font-weight="700" fill="#172033" text-anchor="start">Figura 1  Circuito vigente sem LCD</text>
+<text x="55" y="99" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#172033" text-anchor="start">Derivado da netlist revisão 5 • montagem relatada em 10/11/2026 • não é fotografia</text>
+<rect x="80" y="190" width="320" height="585" rx="12" fill="#edf4fb" stroke="#406a98" stroke-width="2"/>
+<text x="110" y="239" font-family="Arial, sans-serif" font-size="31" font-weight="700" fill="#172033" text-anchor="start">ESP32 DevKit</text>
+<text x="110" y="273" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#172033" text-anchor="start">38 pinos • P1</text>
+<rect x="1000" y="190" width="330" height="280" rx="12" fill="#f5f7fa" stroke="#c6ccd6" stroke-width="2"/>
+<text x="1030" y="230" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#172033" text-anchor="start">HC-SR04</text>
+<rect x="1000" y="575" width="330" height="230" rx="12" fill="#f5f7fa" stroke="#c6ccd6" stroke-width="2"/>
+<text x="1030" y="618" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#172033" text-anchor="start">TCRT5000</text>
+<text x="110" y="327" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">GPIO5  /  P1:10A</text>
+<text x="1020" y="327" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">TRIG</text>
+<polyline points="400,320 1000,320" fill="none" stroke="#356ea5" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="1020" y="267" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">VCC 5 V</text>
+<polyline points="900,260 1000,260" fill="none" stroke="#bd4b3d" stroke-width="3" stroke-linejoin="round"/>
+<text x="792" y="250" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#9e382d" text-anchor="start">5 V • trilho + P1</text>
+<text x="1020" y="397" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">ECHO</text>
+<polyline points="1000,390 825,390" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+<rect x="745" y="376" width="80" height="28" rx="12" fill="white" stroke="#374151" stroke-width="2"/>
+<text x="785" y="360" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="middle">R1 1 kΩ</text>
+<polyline points="745,390 660,390" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="660" cy="390" r="7" fill="#172033"/>
+<polyline points="660,390 560,390 560,470 400,470" fill="none" stroke="#356ea5" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="110" y="478" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">GPIO34 / P1:15J</text>
+<polyline points="660,390 660,430" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+<rect x="646" y="430" width="28" height="60" rx="12" fill="white" stroke="#374151" stroke-width="2"/>
+<text x="705" y="466" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">R2 1 kΩ</text>
+<polyline points="660,490 660,520" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+<rect x="646" y="520" width="28" height="60" rx="12" fill="white" stroke="#374151" stroke-width="2"/>
+<text x="705" y="556" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">R3 300 Ω</text>
+<polyline points="660,580 660,607" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="660,607 660,621" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="641,621 679,621" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="648,629 672,629" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="654,637 666,637" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<text x="705" y="614" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#172033" text-anchor="start">GND comum</text>
+<text x="1020" y="447" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">GND</text>
+<polyline points="1000,440 955,440 955,480" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="955,480 955,494" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="936,494 974,494" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="943,502 967,502" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="949,510 961,510" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<text x="110" y="550" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#9e382d" text-anchor="start">5 V → trilho + P1</text>
+<text x="110" y="589" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#9e382d" text-anchor="start">3V3 → trilho + P2</text>
+<text x="110" y="629" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#172033" text-anchor="start">GND por P1:6J</text>
+<text x="110" y="720" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">GPIO35 / P1:14J</text>
+<text x="1020" y="717" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">DO</text>
+<polyline points="1000,710 400,710" fill="none" stroke="#356ea5" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="1020" y="658" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">VCC 3,3 V</text>
+<polyline points="950,650 1000,650" fill="none" stroke="#bd4b3d" stroke-width="3" stroke-linejoin="round"/>
+<text x="798" y="638" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#9e382d" text-anchor="start">3V3 • trilho + P2</text>
+<text x="1020" y="767" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">GND</text>
+<polyline points="1000,760 955,760 955,808" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="955,808 955,822" fill="none" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="936,822 974,822" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="943,830 967,830" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="949,838 961,838" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<text x="1030" y="798" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#172033" text-anchor="start">AO sem ligação</text>
+<rect x="450" y="125" width="490" height="100" rx="12" fill="#fff8e8" stroke="#c5a354" stroke-width="2"/>
+<text x="470" y="165" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#172033" text-anchor="start">Nó do divisor → GPIO34</text>
+<text x="470" y="200" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#172033" text-anchor="start">2,83 V nominal calculado; não medido</text>
+<text x="55" y="866" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#172033" text-anchor="start">P2: R1 8C–12C • R2 12D–16D • R3 16E–20E • 20A → GND</text>
+<text x="55" y="904" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#172033" text-anchor="start">5 V e 3,3 V em trilhos separados; negativos interligados. Sem LCD ou atuador externo.</text>
+<text x="55" y="942" font-family="Arial, sans-serif" font-size="21" font-weight="400" fill="#172033" text-anchor="start">Fonte: hardware/netlist/motionpet_atual_sem_lcd.json + docs/bench_verified_wiring.md</text>
+<text x="55" y="975" font-family="Arial, sans-serif" font-size="21" font-weight="400" fill="#172033" text-anchor="start">Conferência estática em 11/11/2026. Sem COM3, simulação elétrica ou nova validação física.</text>
+</svg>

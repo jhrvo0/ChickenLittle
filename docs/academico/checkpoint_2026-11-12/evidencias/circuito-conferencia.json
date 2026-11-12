@@ -1,0 +1,19 @@
+{
+  "scope": "Conferencia estatica, sem simulacao eletrica nem COM3",
+  "checks": {
+    "PIN_HCSR04_TRIG": true,
+    "PIN_HCSR04_ECHO": true,
+    "PIN_TCRT5000_DO": true,
+    "resistors_wokwi_match_netlist": true,
+    "no_lcd_in_current_netlist": true,
+    "no_lcd_part_in_current_wokwi": true
+  },
+  "netlist_status": "BENCH_REPORTED_BOTH_SENSORS_READ_NOT_MEASURED",
+  "wokwi_limitations": [
+    "TCRT5000 representado por marcador LDR",
+    "ESP32 virtual separado, sem fios esp:*; GPIOs dependem do mapeamento de furos real",
+    "Posicao relativa e cores nao sao foto nem gabarito verificado"
+  ],
+  "voltage_nominal_calculated_v": 2.8261,
+  "measured": false
+}
