@@ -19,6 +19,7 @@ Este índice separa a descrição atual dos registros produzidos ao longo do des
 
 ## Machine learning
 
+- [Aprendizado de Máquina: requisitos × repositório](aprendizado_maquina.md): matriz da especificação da disciplina, comandos e resultados de referência.
 - [Experimentos e operação de ML/MLOps](motionlab_mlops.md): ambiente, corpus, treinamento, avaliação e rastreabilidade. A tabela inicial registra a fase anterior à integração.
 - [Especificação do pipeline](ml_pipeline_spec.md): coleta, processamento, modelos e TinyML.
 - [Coleta de dados reais](real_data_collection_guide.md): plano de campanha e cuidados. Caminhos absolutos ou comandos históricos devem ser adaptados ao ambiente.

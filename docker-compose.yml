@@ -1,0 +1,18 @@
+# Execução completa do MotionLab com um único comando, a partir da raiz do repositório:
+#
+#   docker compose up --build
+#
+# Serviços (definidos em ops/mlops/compose.yaml):
+#   mqtt        broker Mosquitto (127.0.0.1:1883)
+#   publisher   sistema embarcado simulado: publica sessões rotuladas por MQTT
+#   ingest      consumidor MQTT → JSONL em data/raw (persistência do pipeline)
+#   airflow     DAG motionlab_experiment: ingestão → preparação → treino/validação → MLflow → publicação
+#   mlflow      rastreamento de experimentos (http://127.0.0.1:5000)
+#   api         API de inferência; observa data/raw e gera previsões para dados novos (http://127.0.0.1:8768)
+#   dashboard   MotionLab, com o painel Motion Intelligence (http://127.0.0.1:8767)
+#
+# A interface web do Airflow é opcional: docker compose --profile console up --build
+# Os dados ficam em data/experiments/phase-c/stack (ou em MOTIONLAB_DATA_DIR).
+# Requer Docker Compose 2.20 ou superior (diretiva include).
+include:
+  - ops/mlops/compose.yaml

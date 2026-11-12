@@ -247,9 +247,9 @@
   const CLASS_GLYPH = {NEUTRAL: '○', APPROACH: '↓', RETREAT: '↑', HOLD: '■'};
   const COHORTS = ['real', 'synthetic', 'demo'];
   const COHORT_PT = {real: 'Dados físicos', synthetic: 'Simulador · verificação', demo: 'Demonstração'};
-  const MODEL_PT = {decision_stump_baseline: 'Árvore depth 1', rule_baseline: 'Regras', decision_tree: 'Decision Tree', random_forest: 'Random Forest', mlp_compact: 'MLP compacto'};
+  const MODEL_PT = {decision_stump_baseline: 'Árvore depth 1', rule_baseline: 'Regras', decision_tree: 'Decision Tree', random_forest: 'Random Forest', mlp_compact: 'MLP compacto', knn: 'KNN', adaboost: 'AdaBoost'};
   const MODEL_ROLE = {decision_stump_baseline: 'baseline aprendido', rule_baseline: 'referência · sem treino'};
-  const MODEL_ORDER = ['decision_stump_baseline', 'rule_baseline', 'decision_tree', 'random_forest', 'mlp_compact'];
+  const MODEL_ORDER = ['decision_stump_baseline', 'rule_baseline', 'decision_tree', 'random_forest', 'mlp_compact', 'knn', 'adaboost'];
   const PROV = {
     real: {kind: 'real', text: 'Real', long: 'Dados físicos declarados no corpus'},
     synthetic: {kind: 'synthetic', text: 'Sintético', long: 'Experimento sintético · verificação do pipeline'},

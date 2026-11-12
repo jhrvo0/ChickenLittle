@@ -101,10 +101,16 @@ def verify(args):
         parent = tracking.get_run(evaluations["demo"]["tracking"]["run_id"])
         assert parent.info.status == "FINISHED" and parent.data.tags["experiment_id"] == state["experiment_id"]
         children = tracking.search_runs([parent.info.experiment_id], filter_string="tags.mlflow.parentRunId = '" + parent.info.run_id + "'")
-        assert len(children) == 8 and all(r.info.status == "FINISHED" for r in children)
+        # Um filho por modelo avaliado mais os três trials de profundidade da árvore (--tune).
+        expected_models = len(evaluations["demo"]["metrics"])
+        assert {"knn", "adaboost"} <= set(evaluations["demo"]["metrics"]), "KNN/AdaBoost ausentes da comparação."
+        assert len(children) == expected_models + 3 and all(r.info.status == "FINISHED" for r in children)
         child_ids = {r.info.run_id for r in children}
         logged_models = [m for m in tracking.search_logged_models(experiment_ids=[parent.info.experiment_id]) if m.source_run_id in child_ids]
-        assert len(logged_models) == 5
+        assert len(logged_models) == expected_models
+        search = tracking.get_experiment_by_name("MotionLab-demo-hiperparametros")
+        assert search is not None and tracking.search_runs([search.experiment_id]), "Busca de hiperparâmetros não registrada no MLflow."
+        record("hyperparameter_search_logged", experiment=search.experiment_id)
         record("identified_airflow_run_and_mlflow_children", airflow=airflow_run, finished_mlflow_children=len(children), saved_models=len(logged_models))
         with urlopen(args.dashboard + "/", timeout=5) as response:
             page = response.read().decode()
