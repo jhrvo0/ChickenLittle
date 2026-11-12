@@ -4,7 +4,7 @@
 > **Status Experimental Atual: `PENDING_PHYSICAL_VALIDATION` / `AWAITING_REAL_DATA`**
 >
 > - **Firmware de Aquisição Alvo:** `MOTIONPET_FW_VERSION = "0.5.0-cycle5"`
-> - **Pinagem Canônica:** `MOTIONPET_PINOUT_STATUS = "CANONICAL_GPIO34_PENDING_PHYSICAL_VALIDATION"` ([pinout_config.h](file:///c:/Users/joaoh/Downloads/ChickenLittle/firmware/main/pinout_config.h))
+> - **Pinagem Canônica:** `MOTIONPET_PINOUT_STATUS = "CANONICAL_GPIO34_PENDING_PHYSICAL_VALIDATION"` ([pinout_config.h](../firmware/main/pinout_config.h))
 >
 > Toda a cadeia de coleta guiada (`ml.collection`), pré-processamento estritamente causal, treinamento comparativo, avaliação por janela e por evento estabilizado, exportação C++ estática e orquestração automatizada (`ml.real_pipeline`) está implementada e verificada por testes automatizados. Contudo, **nenhuma métrica obtida sobre dados sintéticos representa o desempenho físico real do sensor HC-SR04**.
 >
@@ -15,7 +15,7 @@
 ## 1. Pré-requisitos de Segurança Elétrica, Firmware e Bancada
 
 1. **Comissionamento Físico Aprovado (`Etapas A -> B -> C`)**:
-   - Seguir integralmente [hardware_safety.md](file:///c:/Users/joaoh/Downloads/ChickenLittle/docs/hardware_safety.md) e [cycle5_bench_checklist.md](file:///c:/Users/joaoh/Downloads/ChickenLittle/docs/cycle5_bench_checklist.md):
+   - Seguir integralmente [hardware_safety.md](hardware_safety.md) e [cycle5_bench_checklist.md](cycle5_bench_checklist.md):
      - **`HC-SR04 ECHO -> divisor 1 kΩ / (1 kΩ + 300 Ω) -> GPIO34`**, conforme a netlist atual, após ensaio e medição do pico com instrumento adequado garantindo **`<= 3,30 V`**. Consulte [segurança elétrica](hardware_safety.md).
      - **`TCRT5000`** (`DO -> GPIO35`) e **`Potenciômetro`** (`GPIO36`) alimentados estritamente em **`3,3 V` (`3V3`)** e **barramento `GND` comum**.
 2. **Verificação de Dependências e Saúde Metrológica na Bancada**:
