@@ -7,7 +7,7 @@ const vm = require('node:vm');
 
 const page = fs.readFileSync(path.join(__dirname, '../hardware/guia_montagem_final.html'), 'utf8');
 const script = page.match(/<script>([\s\S]*?)<\/script>/)[1];
-const slides = JSON.parse(script.match(/const slides=(\[.*?\]);\n/)[1]);
+const slides = JSON.parse(script.match(/const slides=(\[.*?\]);\r?\n/)[1]);
 const settle = () => new Promise(setImmediate);
 
 async function ui(connected = true, storage = new Map(), hash = '') {
