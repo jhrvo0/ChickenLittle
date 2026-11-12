@@ -31,6 +31,17 @@ Os PNGs podem ser inseridos manualmente nas áreas de figuras do modelo. A Figur
 | GitHub | [Consulta autenticada de visibilidade](evidencias/github.json) | **Privado**; requisito de repositório público ainda não atendido |
 | IPv6 fim a fim | Sem evidência de operação | Ambiguidade no enunciado: funcionamento obrigatório e bônus mencionam IPv6 |
 
+### Atualização posterior à preparação (12/11/2026)
+
+As evidências desta pasta são um retrato de 11/11/2026 e foram mantidas sem alteração. Desde então:
+
+- **Wi-Fi/MQTT na ESP32:** implementado no firmware (`firmware/communication/iot_transport.cpp`) e exercitado na bancada; ver [ensaio de bancada IoT](../../motionlab_bancada_iot_2026-11-12.md).
+- **GitHub:** o repositório passou a ser **público**; `evidencias/github.json` ainda registra a consulta anterior (privado).
+- **Commits:** `evidencias/total-commits.txt` registra 21; o histórico passou a 25 commits, todos do mesmo autor.
+- **Fotos e figuras:** as fotos da montagem (Figura 2) estão em [docs/fotos-bancada](../../fotos-bancada/) e as capturas do dashboard (Figuras 4 e 5) em [docs/capturas-motionlab](../../capturas-motionlab/). As figuras finais usadas no relatório e no site estão em [docs/figuras](../../figuras/); a `figura-3-arquitetura` desta pasta ainda mostra o Wi-Fi da ESP32 como pendente.
+- **Checklists:** `01_checklist_campos.md` e `03_arquitetura_mqtt.md` descrevem o estado de 11/11 (Wi-Fi/MQTT ausente, README sem equipe e Google Sites) e não foram reescritos.
+- **Testes:** os logs versionados registram 594 testes Python (591 aprovados, 3 ignorados) e 20 de interface. Qualquer total maior citado no relatório (por exemplo, 655 aprovados) precisa de um novo `pytest.log`/`pytest.xml` versionado aqui para ter evidência.
+
 ## Verificações desta preparação
 
 | Comando | Resultado real | Evidência |
@@ -48,7 +59,7 @@ Os três skips são comparações opcionais com `FRITZING_PARTS_DIR`, não defin
 Cópias idênticas às fornecidas, sem preenchimento ou alteração:
 
 - [Modelo do checkpoint](../Relatorio_CheckPoint_Sistemas_Embarcados_CESAR_School_2026.1.docx), SHA-256 `2ec97ec51e08b00f68fdc3f9ae666cd93c40ff803b670fbf3b0cef3e6331aa21`.
-- [Enunciado de Embarcados](../Projeto-Embarcados_CesarSchool-CSBC%20(1).pdf), SHA-256 `cf7c517dd67f5491309e5e994f777da5f77adcd1ece2bd9e6c9552009f29dd2f`.
+- Enunciado de Embarcados (`Projeto-Embarcados_CesarSchool-CSBC (1).pdf`, fornecido pelos professores e não versionado neste repositório), SHA-256 `cf7c517dd67f5491309e5e994f777da5f77adcd1ece2bd9e6c9552009f29dd2f`.
 
 O DOCX foi lido integralmente por OOXML, incluindo todas as tabelas, cabeçalhos e rodapés. A prévia já aberta no Google Drive foi lida para localizar os campos por página: **6 páginas exibidas**, com painel docente na página 6. Os metadados `docProps/app.xml` e os valores em cache do rodapé ainda indicam 7. Isso explica a divergência; o checklist usa a paginação da prévia e também nomes de seção. A paginação pode mudar no editor usado pelo grupo. Não foram corrigidos os campos do modelo. O renderer local não estava disponível (`soffice.exe` ausente do runtime); nenhuma renderização local foi apresentada como concluída.
 
