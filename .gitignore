@@ -63,3 +63,6 @@ gravar_firmware_saida.txt
 firmware/communication/iot_config.local.h
 ops/iot/local/
 data/iot/
+
+# Configuração local do Claude Code
+.claude/
