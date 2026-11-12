@@ -52,8 +52,9 @@ def motionlab_experiment():
         from pathlib import Path
         run = run_experiment(spec["raw_dir"], cohort=spec["cohort"],
                              output_root=str(Path(spec["data_root"]) / "experiments"),
-                             leave_one_out=True, tune=True,
-                             training_config=TrainingConfig(include_learned_baseline=True),
+                             leave_one_out=True, tune=True, search="grid",
+                             training_config=TrainingConfig(include_learned_baseline=True,
+                                                            include_extended_candidates=True),
                              orchestration={"engine": "apache_airflow", "dag_id": "motionlab_experiment", "run_id": spec["airflow_run_id"]},
                              tracking_uri=os.environ.get("MLFLOW_TRACKING_URI"))
         return {**spec, "run_dir": str(run)}
