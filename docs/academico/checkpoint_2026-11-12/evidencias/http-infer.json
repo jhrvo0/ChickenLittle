@@ -1,0 +1,171 @@
+{
+  "captured_at": "2026-11-11T22:33:41.513420-03:00",
+  "url": "http://127.0.0.1:8790/api/ml/infer",
+  "http_status": 200,
+  "request": {
+    "schema_version": 1,
+    "input_origin": "demo",
+    "samples": [
+      {
+        "ts_ms": 73,
+        "distance_cm": 76.44,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 145,
+        "distance_cm": 75.23,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 216,
+        "distance_cm": 74.93,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 292,
+        "distance_cm": 75.13,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 370,
+        "distance_cm": 76.32,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 441,
+        "distance_cm": 73.88,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 516,
+        "distance_cm": 73.18,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 595,
+        "distance_cm": 78.33,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 670,
+        "distance_cm": 75.54,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 747,
+        "distance_cm": null,
+        "valid_ultrasonic": false,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 824,
+        "distance_cm": 75.21,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 896,
+        "distance_cm": 75.15,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 969,
+        "distance_cm": 74.47,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 1044,
+        "distance_cm": 75.06,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 1120,
+        "distance_cm": 12.02,
+        "valid_ultrasonic": true,
+        "ir_detected": true
+      },
+      {
+        "ts_ms": 1197,
+        "distance_cm": 14.2,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      },
+      {
+        "ts_ms": 1274,
+        "distance_cm": 11.98,
+        "valid_ultrasonic": true,
+        "ir_detected": true
+      },
+      {
+        "ts_ms": 1351,
+        "distance_cm": 11.4,
+        "valid_ultrasonic": true,
+        "ir_detected": true
+      },
+      {
+        "ts_ms": 1427,
+        "distance_cm": 11.79,
+        "valid_ultrasonic": true,
+        "ir_detected": true
+      },
+      {
+        "ts_ms": 1498,
+        "distance_cm": 13.33,
+        "valid_ultrasonic": true,
+        "ir_detected": false
+      }
+    ]
+  },
+  "response": {
+    "schema_version": 1,
+    "status": "ready",
+    "source": "ml_host",
+    "model_name": "mlp_compact",
+    "model_sha256": "8e6dc933beeb1a794a26d3509a2f6e7054a0eef41bedc364f74d5a8a1c30b218",
+    "trained_on": [
+      "synthetic_simulator"
+    ],
+    "experiment_id": "20261111T200245_b7c2e150",
+    "experimental_status": "AWAITING_REAL_DATA",
+    "feature_names": [
+      "d_min",
+      "d_max",
+      "d_mean",
+      "d_std",
+      "d_delta",
+      "v_mean",
+      "v_peak",
+      "trend_slope",
+      "sign_inversions",
+      "ir_active_ratio",
+      "invalid_ratio"
+    ],
+    "physical_validation": "pending",
+    "deployment_status": "published",
+    "training_cohort": "demo",
+    "input_origin": "demo",
+    "label": "HOLD",
+    "confidence": 0.9896475786614335,
+    "probabilities": {
+      "NEUTRAL": 0.0004189939843394549,
+      "APPROACH": 0.009897225164777713,
+      "RETREAT": 3.62021894493901e-05,
+      "HOLD": 0.9896475786614335
+    },
+    "scope": "single_window",
+    "event_gate_applied": false,
+    "message": "Inferência de janela; não envia ações nem equivale a avaliação de desempenho."
+  }
+}

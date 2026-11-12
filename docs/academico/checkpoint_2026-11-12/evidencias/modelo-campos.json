@@ -1,0 +1,747 @@
+[
+  {
+    "body_index": 0,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 1,
+    "type": "tbl",
+    "text": "RELATÓRIO DE CHECK POINT | Projeto Sistemas Embarcados com ESP32  |  Validação da evolução do projeto",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "RELATÓRIO DE CHECK POINT Projeto Sistemas Embarcados com ESP32  |  Validação da evolução do projeto"
+      ]
+    ]
+  },
+  {
+    "body_index": 2,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 3,
+    "type": "tbl",
+    "text": "Disciplina | Sistemas Embarcados – CESAR School | Professores | Bella Nunes | Jymmy Barreto | Data do Check Point | 17/11/2026 | Grupo (nº) | [Informe o número do grupo] | Título do projeto | [Informe o título do projeto] | Resumo do projeto | [Em 2 ou 3 linhas: o que o sistema faz e qual problema resolve.] | Representante do grupo | [Nome completo]",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Disciplina",
+        "Sistemas Embarcados – CESAR School"
+      ],
+      [
+        "Professores",
+        "Bella Nunes | Jymmy Barreto"
+      ],
+      [
+        "Data do Check Point",
+        "17/11/2026"
+      ],
+      [
+        "Grupo (nº)",
+        "[Informe o número do grupo]"
+      ],
+      [
+        "Título do projeto",
+        "[Informe o título do projeto]"
+      ],
+      [
+        "Resumo do projeto",
+        "[Em 2 ou 3 linhas: o que o sistema faz e qual problema resolve.]"
+      ],
+      [
+        "Representante do grupo",
+        "[Nome completo]"
+      ]
+    ]
+  },
+  {
+    "body_index": 4,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 5,
+    "type": "p",
+    "text": "Integrantes",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 6,
+    "type": "tbl",
+    "text": "Nº | Nome completo | Usuário no GitHub | Responsabilidade no projeto | 1 | 2 | 3 | 4 | 5 | 6 | 7",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Nº",
+        "Nome completo",
+        "Usuário no GitHub",
+        "Responsabilidade no projeto"
+      ],
+      [
+        "1",
+        "",
+        "",
+        ""
+      ],
+      [
+        "2",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3",
+        "",
+        "",
+        ""
+      ],
+      [
+        "4",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5",
+        "",
+        "",
+        ""
+      ],
+      [
+        "6",
+        "",
+        "",
+        ""
+      ],
+      [
+        "7",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  {
+    "body_index": 7,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 8,
+    "type": "tbl",
+    "text": "Como preencher | Substitua os textos cinza entre colchetes [ ], marque as opções com ☒ e insira imagens nas áreas pontilhadas. Seja objetivo: o foco é mostrar o quanto o projeto evoluiu até aqui. O painel da última página é de uso dos docentes.",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Como preencher Substitua os textos cinza entre colchetes [ ], marque as opções com ☒ e insira imagens nas áreas pontilhadas. Seja objetivo: o foco é mostrar o quanto o projeto evoluiu até aqui. O painel da última página é de uso dos docentes."
+      ]
+    ]
+  },
+  {
+    "body_index": 9,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 1
+  },
+  {
+    "body_index": 10,
+    "type": "p",
+    "text": "1. Prototipagem",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 11,
+    "type": "p",
+    "text": "1.1 Uso dos sensores/atuadores",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 12,
+    "type": "p",
+    "text": "Orientação:  | Mantenha apenas os componentes que o grupo já está usando e acrescente os que não constam na lista.",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 13,
+    "type": "tbl",
+    "text": "Componente | Tipo | Função no projeto | Pino(s) / GPIO | Situação | ESP32 | Controlador | ☐  | OK   ☐ Parcial   ☐ Pendente | [Outro componente] | [ | Controlador, Sensor,Atuador] | ☐  | OK   ☐ Parcial   ☐ Pendente | [Outro componente] | [ | Controlador, Sensor,Atuador] | ☐  | OK   ☐ Parcial   ☐ Pendente | [Outro componente] | [ | Controlador, Sensor,Atuador] | ☐  | OK   ☐ Parcial   ☐ Pendente | [Outro componente] | [ | Controlador, Sensor,Atuador] | ☐  | OK   ☐ Parcial   ☐ Pendente",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Componente",
+        "Tipo",
+        "Função no projeto",
+        "Pino(s) / GPIO",
+        "Situação"
+      ],
+      [
+        "ESP32",
+        "Controlador",
+        "",
+        "",
+        "☐  OK   ☐ Parcial   ☐ Pendente"
+      ],
+      [
+        "[Outro componente]",
+        "[ Controlador, Sensor,Atuador]",
+        "",
+        "",
+        "☐  OK   ☐ Parcial   ☐ Pendente"
+      ],
+      [
+        "[Outro componente]",
+        "[ Controlador, Sensor,Atuador]",
+        "",
+        "",
+        "☐  OK   ☐ Parcial   ☐ Pendente"
+      ],
+      [
+        "[Outro componente]",
+        "[ Controlador, Sensor,Atuador]",
+        "",
+        "",
+        "☐  OK   ☐ Parcial   ☐ Pendente"
+      ],
+      [
+        "[Outro componente]",
+        "[ Controlador, Sensor,Atuador]",
+        "",
+        "",
+        "☐  OK   ☐ Parcial   ☐ Pendente"
+      ]
+    ]
+  },
+  {
+    "body_index": 14,
+    "type": "p",
+    "text": "1.2 Organização do circuito",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 15,
+    "type": "tbl",
+    "text": "[Esquemático do circuito (Tinkercad, Cirkit, Fritzing, Wokwi ou KiCad)] | [Foto da montagem física na protoboard] | Figura 1 – Esquemático | Figura 2 – Montagem física | Arquivo no repositório | [Caminho em /schematics] | Circuito testado | ☐  | Cada componente testado individualmente     ☐ Circuito completo testado | Situação | ☐  | Concluído     ☐ Em andamento     ☐ Não iniciado | Próximos passos | [O que falta fazer até a entrega final?]",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "[Esquemático do circuito (Tinkercad, Cirkit, Fritzing, Wokwi ou KiCad)]",
+        "",
+        "[Foto da montagem física na protoboard]"
+      ],
+      [
+        "Figura 1 – Esquemático",
+        "",
+        "Figura 2 – Montagem física"
+      ],
+      [
+        "Arquivo no repositório",
+        "[Caminho em /schematics]"
+      ],
+      [
+        "Circuito testado",
+        "☐  Cada componente testado individualmente     ☐ Circuito completo testado"
+      ],
+      [
+        "Situação",
+        "☐  Concluído     ☐ Em andamento     ☐ Não iniciado"
+      ],
+      [
+        "Próximos passos",
+        "[O que falta fazer até a entrega final?]"
+      ]
+    ]
+  },
+  {
+    "body_index": 16,
+    "type": "p",
+    "text": "2. Artefatos de Desenvolvimento",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 17,
+    "type": "p",
+    "text": "2.1 Códigos-fonte",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 18,
+    "type": "tbl",
+    "text": "Artefato | Tecnologias / linguagem | Caminho no repositório | Progresso | Situação | Firmware | /esp32-esp8266 | ____ % | ☐  | Concluído | ☐  | Em andamento | ☐  | Não iniciado | Back-End | /applications | ____ % | ☐  | Concluído | ☐  | Em andamento | ☐  | Não iniciado | Front-End | /applications | ____ % | ☐  | Concluído | ☐  | Em andamento | ☐  | Não iniciado",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Artefato",
+        "Tecnologias / linguagem",
+        "Caminho no repositório",
+        "Progresso",
+        "Situação"
+      ],
+      [
+        "Firmware",
+        "",
+        "/esp32-esp8266",
+        "____ %",
+        "☐  Concluído ☐  Em andamento ☐  Não iniciado"
+      ],
+      [
+        "Back-End",
+        "",
+        "/applications",
+        "____ %",
+        "☐  Concluído ☐  Em andamento ☐  Não iniciado"
+      ],
+      [
+        "Front-End",
+        "",
+        "/applications",
+        "____ %",
+        "☐  Concluído ☐  Em andamento ☐  Não iniciado"
+      ]
+    ]
+  },
+  {
+    "body_index": 19,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 20,
+    "type": "tbl",
+    "text": "O que já funciona | [Ex.: leitura dos sensores, publicação MQTT, tela inicial...] | Próximos passos | [O que falta desenvolver até a entrega final?]",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "O que já funciona",
+        "[Ex.: leitura dos sensores, publicação MQTT, tela inicial...]"
+      ],
+      [
+        "Próximos passos",
+        "[O que falta desenvolver até a entrega final?]"
+      ]
+    ]
+  },
+  {
+    "body_index": 21,
+    "type": "p",
+    "text": "3. Arquitetura do Projeto",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 22,
+    "type": "p",
+    "text": "3.1 Fluxo de comunicação",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 23,
+    "type": "tbl",
+    "text": "[Diagrama da arquitetura: dispositivos, rede, broker MQTT, back-end, banco de dados e dashboard]",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "[Diagrama da arquitetura: dispositivos, rede, broker MQTT, back-end, banco de dados e dashboard]"
+      ]
+    ]
+  },
+  {
+    "body_index": 24,
+    "type": "p",
+    "text": "Figura 3 – Arquitetura e fluxo de comunicação",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 25,
+    "type": "tbl",
+    "text": "Descrição do fluxo | [Descreva o caminho do dado: do sensor até o dashboard e, se houver, do dashboard até o atuador.]",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Descrição do fluxo",
+        "[Descreva o caminho do dado: do sensor até o dashboard e, se houver, do dashboard até o atuador.]"
+      ]
+    ]
+  },
+  {
+    "body_index": 26,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 27,
+    "type": "tbl",
+    "text": "Tópico MQTT | Publisher | Subscriber | Payload (formato / exemplo)",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Tópico MQTT",
+        "Publisher",
+        "Subscriber",
+        "Payload (formato / exemplo)"
+      ],
+      [
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  {
+    "body_index": 28,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 29,
+    "type": "tbl",
+    "text": "Situação | ☐  | Concluído     ☐ Em andamento     ☐ Não iniciado | Próximos passos | [O que falta integrar ou testar na comunicação?]",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Situação",
+        "☐  Concluído     ☐ Em andamento     ☐ Não iniciado"
+      ],
+      [
+        "Próximos passos",
+        "[O que falta integrar ou testar na comunicação?]"
+      ]
+    ]
+  },
+  {
+    "body_index": 30,
+    "type": "p",
+    "text": "3.2 Infraestrutura (local/nuvem)",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 31,
+    "type": "tbl",
+    "text": "Broker MQTT | ☐  | Local (PC / WSL / contêiner / Raspberry Pi)     ☐ ESP32     ☐ Nuvem: [ ] | Back-end e dashboard | ☐  | Local     ☐ Nuvem     Detalhes: [ ] | Serviços de nuvem | [Ex.: AWS EC2, IoT Core, Lambda, DynamoDB. Se não houver, escreva \"não se aplica\".] | Situação | ☐  | Concluído     ☐ Em andamento     ☐ Não iniciado | Próximos passos | [O que falta fazer até a entrega final?]",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Broker MQTT",
+        "☐  Local (PC / WSL / contêiner / Raspberry Pi)     ☐ ESP32     ☐ Nuvem: [ ]"
+      ],
+      [
+        "Back-end e dashboard",
+        "☐  Local     ☐ Nuvem     Detalhes: [ ]"
+      ],
+      [
+        "Serviços de nuvem",
+        "[Ex.: AWS EC2, IoT Core, Lambda, DynamoDB. Se não houver, escreva \"não se aplica\".]"
+      ],
+      [
+        "Situação",
+        "☐  Concluído     ☐ Em andamento     ☐ Não iniciado"
+      ],
+      [
+        "Próximos passos",
+        "[O que falta fazer até a entrega final?]"
+      ]
+    ]
+  },
+  {
+    "body_index": 32,
+    "type": "p",
+    "text": "4. Documentação (Git)",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 33,
+    "type": "tbl",
+    "text": "URL do repositório | [https://github.com/...] | Visibilidade | ☐  | Público     ☐ Privado (precisa ser público) | Gestão de tarefas | ☐  | GitHub Projects     ☐ Issues     ☐ Não utilizado | Commits do grupo | ☐  | Todos os integrantes já fizeram commits     Total aproximado: [ ]",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "URL do repositório",
+        "[https://github.com/...]"
+      ],
+      [
+        "Visibilidade",
+        "☐  Público     ☐ Privado (precisa ser público)"
+      ],
+      [
+        "Gestão de tarefas",
+        "☐  GitHub Projects     ☐ Issues     ☐ Não utilizado"
+      ],
+      [
+        "Commits do grupo",
+        "☐  Todos os integrantes já fizeram commits     Total aproximado: [ ]"
+      ]
+    ]
+  },
+  {
+    "body_index": 34,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 35,
+    "type": "tbl",
+    "text": "Item da estrutura | Situação | Observações | README.md | ☐  | Completo   ☐ Parcial   ☐ Ausente | /docs | ☐  | Completo   ☐ Parcial   ☐ Ausente | /applications | ☐  | Completo   ☐ Parcial   ☐ Ausente | /esp32-esp8266 | ☐  | Completo   ☐ Parcial   ☐ Ausente | /schematics | ☐  | Completo   ☐ Parcial   ☐ Ausente",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Item da estrutura",
+        "Situação",
+        "Observações"
+      ],
+      [
+        "README.md",
+        "☐  Completo   ☐ Parcial   ☐ Ausente",
+        ""
+      ],
+      [
+        "/docs",
+        "☐  Completo   ☐ Parcial   ☐ Ausente",
+        ""
+      ],
+      [
+        "/applications",
+        "☐  Completo   ☐ Parcial   ☐ Ausente",
+        ""
+      ],
+      [
+        "/esp32-esp8266",
+        "☐  Completo   ☐ Parcial   ☐ Ausente",
+        ""
+      ],
+      [
+        "/schematics",
+        "☐  Completo   ☐ Parcial   ☐ Ausente",
+        ""
+      ]
+    ]
+  },
+  {
+    "body_index": 36,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 1
+  },
+  {
+    "body_index": 37,
+    "type": "p",
+    "text": "5. Aplicação",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 38,
+    "type": "p",
+    "text": "5.1 Dashboard",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 39,
+    "type": "tbl",
+    "text": "Tecnologia | [Ex.: Node-RED Dashboard, Grafana, React...] | Dados exibidos | [Ex.: temperatura, distância, estado do atuador, histórico...] | Atualização em tempo real | ☐  | Sim     ☐ Parcial     ☐ Ainda não | Envia comandos aos atuadores | ☐  | Sim     ☐ Não     ☐ Previsto | Situação | ☐  | Concluído     ☐ Em andamento     ☐ Não iniciado | Próximos passos | [O que falta fazer até a entrega final?]",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Tecnologia",
+        "[Ex.: Node-RED Dashboard, Grafana, React...]"
+      ],
+      [
+        "Dados exibidos",
+        "[Ex.: temperatura, distância, estado do atuador, histórico...]"
+      ],
+      [
+        "Atualização em tempo real",
+        "☐  Sim     ☐ Parcial     ☐ Ainda não"
+      ],
+      [
+        "Envia comandos aos atuadores",
+        "☐  Sim     ☐ Não     ☐ Previsto"
+      ],
+      [
+        "Situação",
+        "☐  Concluído     ☐ Em andamento     ☐ Não iniciado"
+      ],
+      [
+        "Próximos passos",
+        "[O que falta fazer até a entrega final?]"
+      ]
+    ]
+  },
+  {
+    "body_index": 40,
+    "type": "p",
+    "text": "5.2 Protótipo do Front-End",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 41,
+    "type": "tbl",
+    "text": "Ferramenta e link | [Ex.: Figma – URL] | Telas previstas | [Liste as telas e seus objetivos.]",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Ferramenta e link",
+        "[Ex.: Figma – URL]"
+      ],
+      [
+        "Telas previstas",
+        "[Liste as telas e seus objetivos.]"
+      ]
+    ]
+  },
+  {
+    "body_index": 42,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 43,
+    "type": "tbl",
+    "text": "[Print do dashboard em funcionamento] | [Imagem do protótipo do Front-End] | Figura 4 – Dashboard | Figura 5 – Protótipo do Front-End",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "[Print do dashboard em funcionamento]",
+        "",
+        "[Imagem do protótipo do Front-End]"
+      ],
+      [
+        "Figura 4 – Dashboard",
+        "",
+        "Figura 5 – Protótipo do Front-End"
+      ]
+    ]
+  },
+  {
+    "body_index": 44,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 1
+  },
+  {
+    "body_index": 45,
+    "type": "tbl",
+    "text": "Painel de Avaliação do Check Point | Uso exclusivo dos docentes – não preencher",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Painel de Avaliação do Check Point Uso exclusivo dos docentes – não preencher"
+      ]
+    ]
+  },
+  {
+    "body_index": 46,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 47,
+    "type": "tbl",
+    "text": "Ponto avaliado | Observações dos docentes | Atende? | Prototipagem – uso dos sensores/atuadores | ☐  | Sim   ☐ Parcial   ☐ Não | Prototipagem – organização do circuito | ☐  | Sim   ☐ Parcial   ☐ Não | Artefatos – códigos-fonte (Front-End, Back-End, Firmware) | ☐  | Sim   ☐ Parcial   ☐ Não | Arquitetura – fluxo de comunicação | ☐  | Sim   ☐ Parcial   ☐ Não | Arquitetura – infraestrutura (local/nuvem) | ☐  | Sim   ☐ Parcial   ☐ Não | Documentação – Git | ☐  | Sim   ☐ Parcial   ☐ Não | Aplicação – dashboard | ☐  | Sim   ☐ Parcial   ☐ Não | Aplicação – protótipo do Front-End | ☐  | Sim   ☐ Parcial   ☐ Não",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Ponto avaliado",
+        "Observações dos docentes",
+        "Atende?"
+      ],
+      [
+        "Prototipagem – uso dos sensores/atuadores",
+        "",
+        "☐  Sim   ☐ Parcial   ☐ Não"
+      ],
+      [
+        "Prototipagem – organização do circuito",
+        "",
+        "☐  Sim   ☐ Parcial   ☐ Não"
+      ],
+      [
+        "Artefatos – códigos-fonte (Front-End, Back-End, Firmware)",
+        "",
+        "☐  Sim   ☐ Parcial   ☐ Não"
+      ],
+      [
+        "Arquitetura – fluxo de comunicação",
+        "",
+        "☐  Sim   ☐ Parcial   ☐ Não"
+      ],
+      [
+        "Arquitetura – infraestrutura (local/nuvem)",
+        "",
+        "☐  Sim   ☐ Parcial   ☐ Não"
+      ],
+      [
+        "Documentação – Git",
+        "",
+        "☐  Sim   ☐ Parcial   ☐ Não"
+      ],
+      [
+        "Aplicação – dashboard",
+        "",
+        "☐  Sim   ☐ Parcial   ☐ Não"
+      ],
+      [
+        "Aplicação – protótipo do Front-End",
+        "",
+        "☐  Sim   ☐ Parcial   ☐ Não"
+      ]
+    ]
+  },
+  {
+    "body_index": 48,
+    "type": "p",
+    "text": "",
+    "explicit_page_breaks": 0
+  },
+  {
+    "body_index": 49,
+    "type": "tbl",
+    "text": "Evolução do projeto | ☐  | Adequada     ☐ Parcial     ☐ Insuficiente | Pontuação do Check Point | Nota: ________  /  15 pts | Parecer e encaminhamentos | Docente avaliador / data",
+    "explicit_page_breaks": 0,
+    "rows": [
+      [
+        "Evolução do projeto",
+        "☐  Adequada     ☐ Parcial     ☐ Insuficiente"
+      ],
+      [
+        "Pontuação do Check Point",
+        "Nota: ________  /  15 pts"
+      ],
+      [
+        "Parecer e encaminhamentos",
+        ""
+      ],
+      [
+        "Docente avaliador / data",
+        ""
+      ]
+    ]
+  },
+  {
+    "body_index": 50,
+    "type": "sectPr",
+    "text": "",
+    "explicit_page_breaks": 0
+  }
+]

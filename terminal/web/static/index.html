@@ -1,10 +1,459 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f5f3ea"><title>MotionPet — Seu pequeno mundo</title><link rel="stylesheet" href="/app.css"><script src="/app.js" defer></script></head>
-<body><svg class="svg-defs" xmlns="http://www.w3.org/2000/svg"><symbol id="pet-egg" viewBox="0 0 200 210"><ellipse cx="100" cy="177" rx="54" ry="10" fill="#445d49" opacity=".16"/><path d="M100 20c-33 0-65 61-65 105 0 40 27 59 65 59s65-19 65-59c0-44-32-105-65-105Z" fill="#fff9df" stroke="#293f35" stroke-width="4"/><path d="m43 121 24-9 14 12 19-13 19 13 17-12 21 9" fill="none" stroke="#e9c976" stroke-width="5" stroke-linecap="round"/><circle cx="79" cy="92" r="4" fill="#293f35"/><circle cx="121" cy="92" r="4" fill="#293f35"/><path d="m94 101 6 5 6-5" fill="#e9995c"/></symbol><symbol id="pet-chick" viewBox="0 0 200 210"><ellipse cx="100" cy="178" rx="56" ry="10" fill="#445d49" opacity=".16"/><path d="M79 45c-8-14 0-23 3-25 2 10 9 15 13 16 0-13 8-20 12-21-1 12 3 20 9 24" fill="#f6be4b" stroke="#293f35" stroke-width="4" stroke-linecap="round"/><ellipse cx="100" cy="111" rx="63" ry="65" fill="#f8d475" stroke="#293f35" stroke-width="4"/><path d="M49 111c-15-5-21 5-15 18 6 12 16 15 28 12m89-30c15-5 21 5 15 18-6 12-16 15-28 12" fill="#f1bd59" stroke="#293f35" stroke-width="4" stroke-linecap="round"/><circle cx="79" cy="101" r="5" fill="#293f35"/><circle cx="121" cy="101" r="5" fill="#293f35"/><path d="m91 111 9 9 9-9Z" fill="#e88c53"/><path d="M73 168v12m54-12v12m-61 2h14m40 0h14" fill="none" stroke="#c97e48" stroke-width="5" stroke-linecap="round"/><circle cx="65" cy="115" r="7" fill="#f4a78c" opacity=".65"/><circle cx="135" cy="115" r="7" fill="#f4a78c" opacity=".65"/></symbol><symbol id="pet-cyber" viewBox="0 0 200 210"><use href="#pet-chick"/><path d="M65 85h70v26H65z" fill="#344d49" stroke="#293f35" stroke-width="3"/><path d="M74 98h15m22 0h15" stroke="#9ce5cc" stroke-width="5" stroke-linecap="round"/><path d="M67 81 77 66h46l10 15" fill="#a9dacc" stroke="#293f35" stroke-width="3"/><circle cx="100" cy="74" r="3" fill="#eb9461"/></symbol></svg>
-<div class="shell"><aside class="sidebar"><a class="brand" href="#pet" aria-label="MotionPet início"><span class="brand-mark">✳</span><span>motion<span>pet</span></span></a><p class="sidebar-intro">Um mundo pequeno.<br>Grandes aventuras.</p><div class="nav-label">SEU ESPAÇO</div><nav aria-label="Navegação principal"><button class="nav active" data-view="pet"><span>◉</span> Meu Pet</button><button class="nav" data-view="launch"><span>↗</span> Pet Launch</button><button class="nav" data-view="music"><span>♫</span> Música no ar</button><button class="nav" data-view="slides"><span>▤</span> Slides no ar</button></nav><div class="side-bottom"><span class="side-star">✳</span><p>Feito para brincar<br><strong>fora da tela também.</strong></p></div></aside>
-<main><header class="topbar"><div><div class="eyebrow">SEU COMPANHEIRO INTERATIVO <span>✦</span></div><h1>Seu pequeno mundo,<br><em>movido por você.</em></h1></div><div class="connection"><span id="connection-dot" class="dot"></span><div><strong id="connection-label">Desconectado</strong><small id="connection-detail">Conecte seu MotionPet</small></div><button id="connection-toggle" class="icon-button" aria-label="Abrir conexão">⌁</button></div></header><div id="connection-panel" class="connection-panel" hidden><label for="ports">Porta USB</label><div class="connection-row"><select id="ports"><option value="">Nenhuma porta disponível</option></select><button id="refresh-ports" class="button ghost compact">Atualizar</button><button id="connect" class="button dark compact">Conectar</button><button id="disconnect" class="button ghost compact">Desconectar</button></div><p id="connection-message">Escolha a porta do seu dispositivo para começar.</p></div><div id="notice" class="notice" role="status" hidden></div>
-<section class="view active" id="view-pet"><div class="section-heading"><div><div class="eyebrow">UM DIA DE CADA VEZ</div><h2>Seu cantinho <span>✳</span></h2></div><p>Aproxime o cartão para alimentar.<br>Use a mão para fazer carinho.</p></div><div class="pet-layout"><div class="habitat card"><div class="habitat-top"><span class="pill translucent"><span class="spark">✦</span> UM LUGAR PARA CRESCER</span><span class="habitat-weather">☼ &nbsp; Bom dia, mundo</span></div><div class="cloud cloud-one"></div><div class="cloud cloud-two"></div><div class="sun"></div><div class="hill hill-back"></div><div class="hill hill-front"></div><div class="pet-sprite" id="pet-sprite"><svg viewBox="0 0 200 210" aria-label="Seu pet"><use id="pet-art" href="#pet-egg"></use></svg></div><div class="habitat-caption"><span id="pet-stage">UMA NOVA HISTÓRIA</span><strong id="pet-name">Piu-piu</strong><p id="pet-mood">Conecte para conhecer seu pet.</p></div><div class="habitat-flower flower-one">✿</div><div class="habitat-flower flower-two">✿</div></div><div class="pet-side"><div class="profile card"><div class="profile-heading"><div><div class="eyebrow">SEU COMPANHEIRO</div><h3 id="profile-name">Piu-piu</h3></div><span class="profile-icon">✦</span></div><p id="profile-message" class="muted">Conecte seu dispositivo para começar.</p><div class="profile-meta"><span>NÍVEL <strong id="pet-level">—</strong></span><span>✦ <strong id="pet-coins">—</strong> MOEDAS</span></div><div class="stats" id="stats"><div class="stat"><span>Saciedade</span><strong id="hunger-value">—</strong><div class="track"><i id="hunger-bar"></i></div></div><div class="stat"><span>Felicidade</span><strong id="happiness-value">—</strong><div class="track"><i id="happiness-bar"></i></div></div><div class="stat"><span>Energia</span><strong id="energy-value">—</strong><div class="track"><i id="energy-bar"></i></div></div><div class="stat"><span>Saúde</span><strong id="health-value">—</strong><div class="track"><i id="health-bar"></i></div></div></div></div><div class="activity card"><div class="eyebrow">UM CARINHO POR DIA</div><h3>O que vamos fazer?</h3><div class="action-grid"><button data-action="feed" data-requires="pet"><span>◒</span> Alimentar</button><button data-action="play" data-requires="pet"><span>✦</span> Brincar</button><button data-action="rest" data-requires="pet"><span>☾</span> Descansar</button><button data-action="heal" data-requires="pet"><span>✚</span> Cuidar</button><button data-action="interact" data-requires="pet"><span>♡</span> Carinho</button></div><div class="save-actions"><button data-action="save" data-requires="pet">Salvar progresso</button><button data-action="load" data-requires="connected">Carregar</button></div></div></div></div></section>
-<section class="view" id="view-launch"><div class="section-heading"><div><div class="eyebrow">UMA AVENTURA NAS ALTURAS</div><h2>Pet Launch <span>↗</span></h2></div><p>Prepare a aventura e veja<br>até onde seu pet consegue voar.</p></div><div class="launch-layout"><div class="launch-scene card"><div class="scene-top"><span class="pill translucent">✦ &nbsp; HORA DE VOAR</span><strong id="launch-phase">À espera</strong></div><svg id="flight-svg" viewBox="0 0 800 310" role="img" aria-label="Cena e trajetória do lançamento"><path d="M0 238 Q180 202 360 242 T800 224 V310 H0Z" fill="#c7dfbb"/><path d="M0 265 Q180 237 385 261 T800 250 V310 H0Z" fill="#81b697"/><path id="flight-path" d="" fill="none" stroke="#ec9b60" stroke-width="3" stroke-dasharray="6 7" stroke-linecap="round"/><path d="M90 255 110 197 125 197 145 255" fill="none" stroke="#805a47" stroke-width="8" stroke-linecap="round"/><use id="flying-pet" href="#pet-chick" x="74" y="140" width="95" height="100"/></svg><div class="launch-metrics"><div><small>ÂNGULO</small><strong id="launch-angle">—</strong></div><div><small>FORÇA</small><strong id="launch-charge">—</strong></div><div><small>RECORDE</small><strong id="launch-best">—</strong></div><div><small>ALVO</small><strong id="launch-sweet">—</strong></div></div><div class="charge-track"><i id="charge-bar"></i><span></span></div><p id="launch-status" class="muted">Conecte para iniciar uma aventura.</p></div><div class="launch-side"><div class="card launch-controls"><div class="eyebrow">COMANDO DA AVENTURA</div><h3>Pronto para voar?</h3><p>Use a mão para ajustar o ângulo. Aproxime o cartão para confirmar, segure para carregar e afaste para lançar.</p><div class="launch-buttons"><button class="button dark" data-key="enter" data-requires="launch">Confirmar / lançar ↗</button><button class="button peach" data-key="space" data-requires="launch">Carregar força</button><div class="inline-buttons"><button class="button ghost" data-key="w" data-requires="launch">Ângulo +</button><button class="button ghost" data-key="z" data-requires="launch">Ângulo −</button></div><button class="button ghost" data-key="esc" data-requires="launch">Voltar</button></div><p class="hint">Confirme para avançar pelas etapas. Após um voo, confirme para jogar novamente.</p></div><div class="card upgrades"><div class="eyebrow">LOJA DE MELHORIAS</div><h3>Um impulso extra <span>✦</span></h3><div id="upgrades-list"><p class="muted">As melhorias aparecem ao conectar.</p></div></div></div></div></section>
-<section class="view" id="view-music"><div class="section-heading"><div><div class="eyebrow">CRIE COM O MOVIMENTO</div><h2>Música no ar <span>♫</span></h2></div><p>Suas mãos dão ritmo<br>a uma nova melodia.</p></div><div class="music-layout"><div class="music-scene card"><div class="eyebrow">EXPERIMENTE O SOM</div><div class="music-orb"><div class="music-note" id="music-note">♪</div></div><div class="music-current"><small>NOTA ATUAL</small><strong id="note-name">—</strong><span id="note-frequency">Aguardando movimento</span></div><div class="music-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="card music-controls"><div class="eyebrow">FAÇA DO SEU JEITO</div><h3>Um gesto, uma nota.</h3><p>Ative o som e mova a mão para escolher a nota. Aproxime o cartão do sensor IR para pausar ou retomar.</p><button class="button dark" id="enable-audio" data-requires="connected">♫ &nbsp; Ativar som</button><label for="volume">Volume <span id="volume-label">—</span></label><input id="volume" type="range" min="0" max="1" step="0.05" value="0.5" data-requires="connected"><p id="audio-status" class="hint">Som desligado neste navegador.</p></div></div></section>
-<section class="view" id="view-slides"><div class="section-heading"><div><div class="eyebrow">SUAS IDEIAS EM MOVIMENTO</div><h2>Slides no ar <span>✳</span></h2></div><p>Apresente com gestos<br>ou use os controles abaixo.</p></div><div class="slide-layout"><div class="slide-frame card"><div class="slide-inner"><span class="eyebrow" id="slide-eyebrow">MOTIONPET / APRESENTAÇÃO</span><h3 id="slide-title">Sua próxima ideia<br>começa aqui.</h3><p id="slide-body">Conecte seu dispositivo para abrir a apresentação.</p><div class="slide-decoration">✳</div><div class="slide-footer"><span>MOTIONPET</span><span id="slide-count">— / —</span></div></div></div><div class="card slide-controls"><div class="eyebrow">NO SEU RITMO</div><h3>Passe para o próximo.</h3><p>Mão perto avança, mão longe volta; o cartão também avança. Ou navegue pelos botões.</p><div class="inline-buttons"><button class="button ghost" data-action="slides_prev" data-requires="connected">← Anterior</button><button class="button dark" data-action="slides_next" data-requires="connected">Próximo →</button></div><p id="slides-status" class="hint">Aguardando conexão.</p></div></div></section>
-<div class="bottom-grid"><div class="sensor-strip card"><div class="sensor-intro"><span class="sensor-icon">⌁</span><div><div class="eyebrow">MUNDO REAL</div><strong>Seus sensores</strong></div></div><div class="sensor-item"><small>DISTÂNCIA</small><strong id="distance">—</strong><span id="distance-detail">Aguardando conexão</span></div><div class="sensor-item"><small>SENSOR IR</small><strong id="ir">—</strong><span>presença do cartão</span></div><div class="sensor-item"><small>GESTO</small><strong id="gesture">—</strong><span id="gesture-detail">Aguardando leitura</span></div></div><div class="events card"><div class="eyebrow">ACONTECEU POR AQUI</div><div id="events-list" class="events-list">Suas novidades aparecerão aqui.</div></div></div><details class="diagnostics"><summary>Detalhes do dispositivo</summary><pre id="diagnostics-text">Nenhuma leitura disponível.</pre></details><footer>Feito para viver bons momentos <span>✳</span> MotionPet</footer></main></div></body></html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a0a0b">
+<title>MotionLab — interação gestual com ESP32</title>
+<link rel="stylesheet" href="/lab.css">
+<script src="/canvas.js" defer></script>
+<script src="/music.js" defer></script>
+<script src="/intel.js" defer></script>
+<script src="/lab.js" defer></script>
+</head>
+<body>
+<!-- ícones (traço 1,5 px, grade 24) -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4.5 10.5 12 4.5l7.5 6V19.5h-5v-5h-5v5h-5z"/></symbol>
+  <symbol id="i-control" viewBox="0 0 24 24"><path d="M4 7.5h9M17 7.5h3M4 16.5h3M11 16.5h9"/><circle cx="15" cy="7.5" r="2"/><circle cx="9" cy="16.5" r="2"/></symbol>
+  <symbol id="i-canvas" viewBox="0 0 24 24"><path d="M3 14.5c3-7 6-7 9 0s6 7 9 0"/><path d="M3 9.5c3-4 6-4 9 0s6 4 9 0" opacity=".45"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 17.5V6l10-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></symbol>
+  <symbol id="i-slides" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="11" rx="1.5"/><path d="M12 15.5v4M8 19.5h8"/></symbol>
+  <symbol id="i-intel" viewBox="0 0 24 24"><path d="M3 15.5h3l2.5-7 4 11 3-8 1.5 4H21"/></symbol>
+  <symbol id="i-legacy" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v3h3M12 8v4l2.5 2"/></symbol>
+  <symbol id="i-field" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><circle cx="6" cy="6" r="1.1"/><circle cx="12" cy="6" r="1.1"/><circle cx="18" cy="6" r="1.1"/><circle cx="6" cy="12" r="1.1"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.1"/><circle cx="6" cy="18" r="1.1"/><circle cx="12" cy="18" r="1.1"/><circle cx="18" cy="18" r="1.1"/></g></symbol>
+  <symbol id="i-waves" viewBox="0 0 24 24"><path d="M3 8c3-3 6 3 9 0s6-3 9 0M3 13c3-3 6 3 9 0s6-3 9 0M3 18c3-3 6 3 9 0s6-3 9 0"/></symbol>
+  <symbol id="i-flow" viewBox="0 0 24 24"><path d="M4 19c4 0 4-14 8-14s4 14 8 14"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="9" opacity=".5"/></symbol>
+  <symbol id="i-freeze" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></symbol>
+  <symbol id="i-burst" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></symbol>
+  <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M14.5 6.5 9 12l5.5 5.5"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M9.5 6.5 15 12l-5.5 5.5"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <!-- ============================== trilho ============================== -->
+  <nav class="rail" aria-label="Módulos">
+    <a class="brand" href="#home" aria-label="MotionLab — início">
+      <svg viewBox="0 0 32 32" aria-hidden="true" class="brand-mark"><path d="M3 21c3.5 0 3.5-10 7-10s3.5 10 7 10 3.5-10 7-10 3.5 6 5 6"/></svg>
+    </a>
+    <ul class="rail-list">
+      <li><a href="#home" data-nav="home"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg><span class="rail-label">Início</span></a></li>
+      <li><a href="#control" data-nav="control"><svg class="ic" aria-hidden="true"><use href="#i-control"/></svg><span class="rail-label">Motion Control</span></a></li>
+      <li><a href="#canvas" data-nav="canvas"><svg class="ic" aria-hidden="true"><use href="#i-canvas"/></svg><span class="rail-label">Motion Canvas</span></a></li>
+      <li><a href="#music" data-nav="music"><svg class="ic" aria-hidden="true"><use href="#i-music"/></svg><span class="rail-label">Air Music</span></a></li>
+      <li><a href="#slides" data-nav="slides"><svg class="ic" aria-hidden="true"><use href="#i-slides"/></svg><span class="rail-label">Air Slides</span></a></li>
+      <li><a href="#intelligence" data-nav="intelligence"><svg class="ic" aria-hidden="true"><use href="#i-intel"/></svg><span class="rail-label">Motion Intelligence</span></a></li>
+    </ul>
+    <div class="rail-foot">
+      <a class="legacy-link" href="/legacy/"><svg class="ic" aria-hidden="true"><use href="#i-legacy"/></svg><span class="rail-label">Experiência anterior (pet)</span></a>
+    </div>
+  </nav>
+
+  <!-- ============================== topo ============================== -->
+  <header class="topbar">
+    <div class="title-block">
+      <span class="eyebrow" id="view-code">00</span>
+      <h1 id="view-title">Início</h1>
+    </div>
+    <div class="signal-strip" aria-label="Sinal ao vivo">
+      <canvas id="strip-canvas" width="320" height="56" aria-hidden="true"></canvas>
+      <div class="readout">
+        <span class="readout-value" id="readout-distance">—</span>
+      </div>
+      <div class="ir-readout" id="readout-ir" data-on="false">
+        <span class="ir-lamp" aria-hidden="true"></span>
+        <span class="readout-label">IR</span>
+        <span class="sr" id="readout-ir-text">livre</span>
+      </div>
+      <span class="tag demo" id="demo-badge" hidden>Demo</span>
+    </div>
+    <div class="top-actions">
+      <label class="driver-select" title="Fonte de gestos que controla os módulos">
+        <span>Fonte</span>
+        <select id="driver">
+          <option value="rules">Regras</option>
+          <option value="ml">ML no host</option>
+          <option value="device">TinyML na ESP32</option>
+        </select>
+      </label>
+      <button class="arm" id="arm" type="button" role="switch" aria-checked="false" title="Armar ou pausar os gestos">
+        <span class="arm-track" aria-hidden="true"><span class="arm-knob"></span></span><span id="arm-text">Pausado</span>
+      </button>
+      <button class="conn-chip" id="conn-chip" type="button" aria-haspopup="dialog" aria-controls="conn-dialog">
+        <span class="dot" id="conn-dot"></span>
+        <span class="conn-text"><b id="conn-label">Desconectado</b><small id="conn-detail">Escolha a porta USB</small></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================== conteúdo ============================== -->
+  <main class="stage" id="stage">
+
+    <!-- INÍCIO -->
+    <section class="view" id="view-home" data-view="home">
+      <div class="home">
+        <div class="home-intro">
+          <p class="eyebrow">Computação física · ESP32 · ultrassom + IR</p>
+          <h2 class="display">Motion<span>Lab</span></h2>
+          <p class="home-sub">Dois sensores. Cinco formas de agir.</p>
+
+          <div class="home-connect" id="hero-connect">
+            <div class="connect-head"><span class="dot" id="hero-dot"></span><b id="hero-status">Desconectado</b></div>
+            <p class="connect-msg" id="hero-message">Conecte a ESP32 pela USB.</p>
+            <div class="connect-row">
+              <select id="ports" aria-label="Porta USB"><option value="">Procurando portas…</option></select>
+              <button class="btn ghost icon-btn" id="refresh-ports" type="button" title="Atualizar portas" aria-label="Atualizar portas"><svg class="ic" aria-hidden="true"><use href="#i-legacy"/></svg></button>
+              <button class="btn primary" id="connect" type="button">Conectar</button>
+              <button class="btn ghost" id="disconnect" type="button">Desconectar</button>
+            </div>
+            <dl class="connect-stats">
+              <div><dt>Origem</dt><dd id="hero-origin">—</dd></div>
+              <div><dt>Frames</dt><dd id="hero-frames">0</dd></div>
+              <div><dt>Período</dt><dd id="hero-period">—</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <figure class="home-field">
+          <canvas id="home-field" aria-label="Campo do sensor: distância da mão e estado do IR"></canvas>
+          <figcaption class="field-caption"><span class="eyebrow">HC-SR04</span><span class="eyebrow">0 — 90 cm</span></figcaption>
+        </figure>
+
+        <nav class="module-index" aria-label="Módulos">
+          <a class="module-entry" href="#control" data-nav-card="control">
+            <span class="num">01</span><svg class="ic" aria-hidden="true"><use href="#i-control"/></svg>
+            <span class="name">Motion Control</span><span class="verb">gesto → ação</span>
+          </a>
+          <a class="module-entry" href="#canvas" data-nav-card="canvas">
+            <span class="num">02</span><svg class="ic" aria-hidden="true"><use href="#i-canvas"/></svg>
+            <span class="name">Motion Canvas</span><span class="verb">distância → luz</span>
+          </a>
+          <a class="module-entry" href="#music" data-nav-card="music">
+            <span class="num">03</span><svg class="ic" aria-hidden="true"><use href="#i-music"/></svg>
+            <span class="name">Air Music</span><span class="verb">distância → nota</span>
+          </a>
+          <a class="module-entry" href="#slides" data-nav-card="slides">
+            <span class="num">04</span><svg class="ic" aria-hidden="true"><use href="#i-slides"/></svg>
+            <span class="name">Air Slides</span><span class="verb">gesto → slide</span>
+          </a>
+          <a class="module-entry" href="#intelligence" data-nav-card="intelligence">
+            <span class="num">05</span><svg class="ic" aria-hidden="true"><use href="#i-intel"/></svg>
+            <span class="name">Motion Intelligence</span><span class="verb">regras × ML × TinyML</span>
+          </a>
+        </nav>
+      </div>
+    </section>
+
+    <!-- MOTION CONTROL -->
+    <section class="view" id="view-control" data-view="control" hidden>
+      <div class="control-layout">
+        <aside class="panel profiles-panel">
+          <header class="panel-head"><span class="eyebrow">Perfis</span><button class="btn ghost small" id="profile-new" type="button">+ Novo</button></header>
+          <ul class="profile-list" id="profile-list"></ul>
+        </aside>
+
+        <section class="panel bindings-panel">
+          <header class="panel-head">
+            <div><span class="eyebrow">Perfil ativo</span><h2 id="profile-name">—</h2></div>
+            <div class="head-actions">
+              <button class="btn ghost small" id="profile-reset" type="button">Restaurar</button>
+              <button class="btn ghost small danger" id="profile-delete" type="button">Apagar</button>
+            </div>
+          </header>
+          <div class="field name-field" id="profile-name-field" hidden>
+            <label for="profile-name-input">Nome</label>
+            <input id="profile-name-input" maxlength="40" autocomplete="off">
+          </div>
+          <table class="bindings">
+            <thead><tr><th>Gatilho</th><th aria-hidden="true"></th><th>Ação</th><th><span class="sr">Testar</span></th></tr></thead>
+            <tbody id="bindings-body"></tbody>
+          </table>
+          <p class="hint" id="bindings-status">Salvo ao escolher a ação.</p>
+
+          <div class="activity-block">
+            <header class="panel-head"><span class="eyebrow">Atividade</span><span class="eyebrow" id="cooldown-left"></span></header>
+            <ol class="activity" id="activity"></ol>
+          </div>
+        </section>
+
+        <aside class="panel safety-panel">
+          <div class="safety-key">
+            <div class="toggle-row">
+              <svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg>
+              <div><b>Ações no sistema</b><small>Envia teclas à janela em foco. Desliga a cada início.</small></div>
+              <button class="switch" id="external" type="button" role="switch" aria-checked="false" aria-label="Ações no sistema"><span></span></button>
+            </div>
+            <p class="warn" id="external-reason" hidden></p>
+          </div>
+          <span class="eyebrow">Sensibilidade</span>
+          <div class="field range">
+            <label for="min-confidence">Confiança mínima <output id="min-confidence-out">0,70</output></label>
+            <input type="range" id="min-confidence" min="0.5" max="0.99" step="0.01">
+            <small>ML e TinyML. Regras não têm probabilidade.</small>
+          </div>
+          <div class="field range">
+            <label for="cooldown">Cooldown <output id="cooldown-out">900 ms</output></label>
+            <input type="range" id="cooldown" min="200" max="5000" step="50">
+          </div>
+          <div class="field range">
+            <label for="far">Zona ativa até <output id="far-out">45 cm</output></label>
+            <input type="range" id="far" min="15" max="120" step="1">
+          </div>
+          <div class="field range">
+            <label for="near">Perto a partir de <output id="near-out">5 cm</output></label>
+            <input type="range" id="near" min="2" max="30" step="1">
+          </div>
+          <div class="field range">
+            <label for="ir-hold">Toque longo no IR <output id="ir-hold-out">900 ms</output></label>
+            <input type="range" id="ir-hold" min="500" max="3000" step="50">
+          </div>
+          <label class="check"><input type="checkbox" id="repeat-lock"> Bloquear gesto repetido</label>
+        </aside>
+      </div>
+    </section>
+
+    <!-- MOTION CANVAS -->
+    <section class="view view-bleed" id="view-canvas" data-view="canvas" hidden>
+      <div class="canvas-stage" id="canvas-stage">
+        <canvas id="art" aria-label="Arte generativa controlada pela distância da mão"></canvas>
+        <div class="canvas-meta">
+          <span id="canvas-style-name">Campo</span><span id="canvas-palette-name">Aurora</span><span id="canvas-fps">— fps</span><span id="canvas-count">—</span>
+        </div>
+        <div class="tag demo canvas-demo-banner" id="canvas-demo-banner" hidden>Demo</div>
+        <div class="canvas-empty" id="canvas-empty" hidden><span class="flatline" aria-hidden="true"></span>Sem sinal da ESP32</div>
+        <div class="canvas-hud dock" role="toolbar" aria-label="Ferramentas do canvas">
+          <div class="hud-group" role="group" aria-label="Estilo">
+            <button class="tool" data-style="field" type="button" title="Campo" aria-label="Campo"><svg class="ic" aria-hidden="true"><use href="#i-field"/></svg></button>
+            <button class="tool" data-style="waves" type="button" title="Ondas" aria-label="Ondas"><svg class="ic" aria-hidden="true"><use href="#i-waves"/></svg></button>
+            <button class="tool" data-style="flow" type="button" title="Fluxo" aria-label="Fluxo"><svg class="ic" aria-hidden="true"><use href="#i-flow"/></svg></button>
+            <button class="tool" data-style="pulse" type="button" title="Pulso" aria-label="Pulso"><svg class="ic" aria-hidden="true"><use href="#i-pulse"/></svg></button>
+          </div>
+          <div class="hud-group">
+            <button class="tool swatches" id="canvas-palette" type="button" title="Trocar paleta" aria-label="Trocar paleta"><i></i><i></i><i></i></button>
+            <button class="tool" id="canvas-freeze" type="button" aria-pressed="false" title="Congelar" aria-label="Congelar"><svg class="ic" aria-hidden="true"><use href="#i-freeze"/></svg></button>
+            <button class="tool" id="canvas-burst" type="button" title="Explosão" aria-label="Explosão"><svg class="ic" aria-hidden="true"><use href="#i-burst"/></svg></button>
+            <button class="tool" id="canvas-fullscreen" type="button" title="Tela cheia" aria-label="Tela cheia"><svg class="ic" aria-hidden="true"><use href="#i-full"/></svg></button>
+          </div>
+          <div class="hud-group">
+            <button class="demo-toggle" id="canvas-demo" type="button" aria-pressed="false" title="Sinal sintético: mouse na vertical, espaço = IR">Demo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AIR MUSIC -->
+    <section class="view" id="view-music" data-view="music" hidden>
+      <div class="music-layout">
+        <section class="instrument-panel">
+          <header class="music-head">
+            <div class="note-block">
+              <span class="eyebrow">Nota</span>
+              <h2 id="music-note">—</h2>
+              <div class="music-status"><span id="music-freq">— Hz</span><span id="music-gate">Sem mão</span><span id="music-demo" class="tag demo" hidden>Demo</span></div>
+            </div>
+            <div class="head-actions">
+              <button class="btn ghost demo-toggle" id="music-demo-toggle" type="button" aria-pressed="false" title="Sinal sintético: mouse na horizontal, espaço = IR">Demo</button>
+              <button class="btn primary" id="audio-toggle" type="button">Ativar áudio</button>
+            </div>
+          </header>
+          <canvas id="pitch-canvas" class="pitch-canvas" aria-label="Escala e posição da mão"></canvas>
+        </section>
+
+        <aside class="panel sound-panel">
+          <span class="eyebrow">Som</span>
+          <div class="field"><span class="label">Timbre</span><div class="chip-row" id="timbres"></div></div>
+          <div class="field two">
+            <label>Escala<select id="scale"></select></label>
+            <label>Tônica<select id="root"></select></label>
+          </div>
+          <div class="field range"><label for="octaves">Extensão <output id="octaves-out">2 oitavas</output></label><input type="range" id="octaves" min="1" max="3" step="1" value="2"></div>
+          <div class="field range"><label for="volume">Volume <output id="volume-out">70%</output></label><input type="range" id="volume" min="0" max="1" step="0.01" value="0.7"></div>
+          <div class="field range"><label for="brightness">Brilho <output id="brightness-out">60%</output></label><input type="range" id="brightness" min="0" max="1" step="0.01" value="0.6"></div>
+          <div class="field range"><label for="echo">Eco <output id="echo-out">25%</output></label><input type="range" id="echo" min="0" max="0.8" step="0.01" value="0.25"></div>
+          <div class="field range"><label for="space">Espaço <output id="space-out">30%</output></label><input type="range" id="space" min="0" max="1" step="0.01" value="0.3"></div>
+        </aside>
+
+        <section class="panel looper-panel">
+          <canvas id="loop-ring" class="loop-ring" width="320" height="320" aria-hidden="true"></canvas>
+          <div class="looper-side">
+            <header class="panel-head">
+              <div><span class="eyebrow">Looper</span><h2 id="looper-state">Parado</h2></div>
+              <div class="head-actions">
+                <button class="btn rec" id="loop-record" type="button">Gravar</button>
+                <button class="btn ghost" id="loop-play" type="button">Tocar</button>
+                <button class="btn ghost" id="loop-undo" type="button">Apagar última</button>
+              </div>
+            </header>
+            <div class="field two compact">
+              <label>BPM<select id="bpm"><option>72</option><option selected>90</option><option>110</option><option>128</option></select></label>
+              <label>Compassos<select id="bars"><option>1</option><option selected>2</option><option>4</option></select></label>
+            </div>
+            <ol class="layers" id="layers"></ol>
+            <p class="hint">IR: gravar / parar · toque longo: timbre</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- AIR SLIDES -->
+    <section class="view" id="view-slides" data-view="slides" hidden>
+      <div class="slides-layout">
+        <div class="slides-bar">
+          <div class="segmented" role="radiogroup" aria-label="Destino dos comandos">
+            <button type="button" role="radio" data-slides-target="deck" aria-checked="true">Deck integrado</button>
+            <button type="button" role="radio" data-slides-target="deck-external" aria-checked="false">Apresentação externa</button>
+          </div>
+          <div class="slides-map" id="slides-map"></div>
+        </div>
+        <p class="warn" id="slides-external-help" hidden>As teclas (PageDown/PageUp) vão para a janela em foco. Ative <b>Ações no sistema</b> em Motion Control, arme os gestos e clique na janela da apresentação.</p>
+        <div class="deck" id="deck" tabindex="0">
+          <article class="slide" id="slide"></article>
+          <div class="slide-flash" id="slide-flash" aria-hidden="true"></div>
+          <div class="slide-progress"><span id="slide-progress"></span></div>
+        </div>
+        <div class="slides-nav">
+          <button class="round" id="slide-prev" type="button" aria-label="Slide anterior"><svg class="ic" aria-hidden="true"><use href="#i-prev"/></svg></button>
+          <span id="slide-count">1 / 1</span>
+          <button class="round" id="slide-next" type="button" aria-label="Próximo slide"><svg class="ic" aria-hidden="true"><use href="#i-next"/></svg></button>
+          <span class="slide-dots" id="slide-dots" aria-hidden="true"></span>
+          <button class="btn ghost small" id="slide-full" type="button"><svg class="ic" aria-hidden="true"><use href="#i-full"/></svg>Apresentar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MOTION INTELLIGENCE -->
+    <section class="view" id="view-intelligence" data-view="intelligence" hidden>
+      <nav class="intel-levels" aria-label="Níveis do Motion Intelligence">
+        <button class="level" type="button" data-level="live" aria-pressed="true"><span class="level-n">05.1</span><span class="level-name">Sinais ao vivo</span><span class="level-state" id="level-state-live">—</span></button>
+        <button class="level" type="button" data-level="models" aria-pressed="false"><span class="level-n">05.2</span><span class="level-name">Modelos e experimentos</span><span class="level-state" id="level-state-models">—</span></button>
+        <button class="level" type="button" data-level="inference" aria-pressed="false"><span class="level-n">05.3</span><span class="level-name">Inferências</span><span class="level-state" id="level-state-inference">—</span></button>
+        <div class="ml-service" id="ml-service" role="status"></div>
+      </nav>
+
+      <!-- 05.1 · operação gestual em tempo real -->
+      <div class="intel-layout" data-level="live">
+        <section class="panel chart-panel">
+          <header class="panel-head">
+            <div><span class="eyebrow">Sinal · ~15 s</span><h2>Distância, IR e eventos</h2></div>
+            <div class="legend"><span class="lg raw">bruta</span><span class="lg filt">filtrada</span><span class="lg ir">IR</span><span class="lg rules">regras</span><span class="lg ml">ML</span><span class="lg dev">TinyML</span></div>
+          </header>
+          <canvas id="intel-chart" class="intel-chart" aria-label="Série temporal de distância e eventos"></canvas>
+        </section>
+
+        <section class="recognizers" id="recognizers"></section>
+
+        <section class="panel flow-panel">
+          <header class="panel-head"><span class="eyebrow">Concordância e fluxo</span></header>
+          <div class="kv-grid" id="intel-flow"></div>
+          <p class="hint">Concordância entre fontes (±10 frames) <b>não é acurácia</b>.</p>
+        </section>
+        <section class="panel rej-panel">
+          <header class="panel-head"><span class="eyebrow">Rejeições do portão</span></header>
+          <div class="bars" id="intel-rejections"></div>
+        </section>
+
+        <section class="panel history-panel">
+          <header class="panel-head"><span class="eyebrow">Histórico</span></header>
+          <div class="table-wrap"><table class="history"><thead><tr><th>t</th><th>Fonte</th><th>Gesto</th><th>Conf.</th><th>Desfecho</th><th>Ação</th></tr></thead><tbody id="intel-history"></tbody></table></div>
+        </section>
+
+        <section class="panel collect-panel">
+          <header class="panel-head"><div><span class="eyebrow">Dados reais · ESP32</span><h2>Coleta guiada</h2></div></header>
+          <div class="collect-form" id="collect-form">
+            <label>Participante<input id="participant" maxlength="24" placeholder="p01" autocomplete="off"></label>
+            <label>Repetições<select id="repeats"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+            <button class="btn primary" id="record-start" type="button">Iniciar gravação</button>
+            <button class="btn ghost" id="record-stop" type="button" hidden>Interromper</button>
+          </div>
+          <div class="prompt" id="collect-prompt" hidden>
+            <span class="prompt-label" id="prompt-label">—</span>
+            <span class="prompt-text" id="prompt-text"></span>
+            <div class="prompt-bar"><span id="prompt-bar"></span></div>
+            <small id="prompt-meta"></small>
+          </div>
+          <p class="hint" id="collect-result">Repouso, aproximar, afastar, segurar. Só a ESP32 real grava em <code>data/raw/real/</code>; a demonstração grava à parte e não entra na avaliação.</p>
+          <p class="hint" id="collect-sessions"></p>
+        </section>
+        <section class="panel eval-panel">
+          <header class="panel-head"><div><span class="eyebrow">Replay exploratório · não é o holdout</span><h2>Regras × ML em dados reais</h2></div><button class="btn ghost small" id="evaluate" type="button">Avaliar</button></header>
+          <div id="eval-real"></div>
+          <details class="synthetic">
+            <summary><span class="tag synthetic">Sintético</span> Relatório do pipeline · engenharia, não é evidência</summary>
+            <div id="eval-synthetic"></div>
+          </details>
+        </section>
+      </div>
+
+      <!-- 05.2 · experimentos acadêmicos (/api/ml/evaluations + /api/ml/status) -->
+      <div class="ml-level" data-level="models" id="ml-models" hidden>
+        <p class="ml-notice" id="ml-notice-models" hidden></p>
+        <section class="ml-hero">
+          <div class="ml-published" id="ml-published"></div>
+          <div class="ml-headline" id="ml-headline"></div>
+        </section>
+        <section class="ml-cohorts" id="ml-cohorts" aria-label="Avaliações por origem dos dados"></section>
+        <section class="panel ml-compare">
+          <header class="panel-head">
+            <div><span class="eyebrow">Comparação · F1-macro</span><h2>Candidatos no mesmo corpus</h2></div>
+            <div class="legend"><span class="lg fold">folds CV</span><span class="lg cvr">CV média ± dp</span><span class="lg val">validação</span><span class="lg test">teste reservado</span><span class="lg pub">publicado</span></div>
+          </header>
+          <div class="ml-plot" id="ml-compare"></div>
+          <p class="hint" id="ml-split"></p>
+        </section>
+        <section class="panel ml-focus" id="ml-focus"></section>
+        <section class="panel ml-tuning" id="ml-tuning"></section>
+        <section class="panel ml-pipeline">
+          <header class="panel-head"><div><span class="eyebrow">Rastreabilidade</span><h2 id="ml-pipeline-title">Do sensor à API</h2></div></header>
+          <div id="ml-pipeline"></div>
+        </section>
+      </div>
+
+      <!-- 05.3 · previsões de sessões persistidas (/api/ml/predictions) × gesto ao vivo -->
+      <div class="ml-level" data-level="inference" id="ml-inference" hidden>
+        <p class="ml-notice" id="ml-notice-inference" hidden></p>
+        <section class="inf-hero">
+          <div class="inf-latest" id="inf-latest"></div>
+          <div class="inf-live">
+            <span class="eyebrow">Gesto ao vivo · portão do MotionLab</span>
+            <div id="inf-live"></div>
+            <div class="inf-query">
+              <button class="btn ghost small" id="inf-query" type="button">Classificar a janela atual</button>
+              <span class="hint" id="inf-query-note"></span>
+            </div>
+            <div id="inf-query-result"></div>
+          </div>
+        </section>
+        <section class="panel ledger-panel">
+          <header class="panel-head">
+            <div><span class="eyebrow">Histórico · sessões persistidas</span><h2>Previsões automáticas</h2></div>
+            <span class="hint ledger-scope">Última janela causal de cada sessão · fora do portão · não aciona módulos</span>
+          </header>
+          <div class="table-wrap"><table class="history ledger"><thead><tr><th>Hora</th><th>Sessão</th><th>Entrada</th><th>Previsão</th><th>Distribuição</th><th>Conf.</th><th>Amostras / janelas</th><th>Modelo · treino</th><th>Estado</th></tr></thead><tbody id="inf-ledger"></tbody></table></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================== HUD de gesto ============================== -->
+  <div class="gesture-hud" id="gesture-hud" aria-live="polite" hidden>
+    <span class="hud-glyph" id="hud-glyph"></span>
+    <span class="hud-body"><b id="hud-title"></b><small id="hud-detail"></small></span>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<!-- diálogo de conexão (aberto pela pílula de status) -->
+<dialog class="conn-dialog" id="conn-dialog">
+  <form method="dialog">
+    <span class="eyebrow">Dispositivo</span>
+    <h2>Conexão</h2>
+    <p id="dialog-message">—</p>
+    <div class="connect-row"><select id="dialog-ports" aria-label="Porta USB"></select><button class="btn ghost" id="dialog-refresh" type="button">Atualizar</button></div>
+    <div class="connect-row"><button class="btn primary" id="dialog-connect" type="button">Conectar</button><button class="btn ghost" id="dialog-disconnect" type="button">Desconectar</button><button class="btn ghost close" value="close">Fechar</button></div>
+  </form>
+</dialog>
+</body>
+</html>

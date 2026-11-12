@@ -27,6 +27,18 @@ ml = [
     "numpy>=1.26",
     "scikit-learn>=1.4",
 ]
+mlops = [
+    "numpy>=1.26",
+    "scikit-learn>=1.4",
+    "matplotlib>=3.10,<4",
+    "mlflow-skinny==3.18.0",
+    "pandas>=2.2,<4",
+    "sqlalchemy>=2,<3",
+    "alembic>=1.13,<2",
+    "paho-mqtt==2.1.0",
+    # Wheels ARM64: versões >=49 exigem compilação no ambiente Windows atual.
+    "cryptography==46.0.3; sys_platform == 'win32' and platform_machine == 'ARM64'",
+]
 
 [project.scripts]
 motionpet = "terminal.app:main"

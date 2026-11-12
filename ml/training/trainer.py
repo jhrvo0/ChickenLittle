@@ -57,7 +57,7 @@ def assert_strictly_real_data(
 def compute_embedded_selection_score(
     val_f1_macro: float,
     val_event_f1: float,
-    val_neutral_far: float,
+    val_neutral_far: float | None,
     estimated_flash_bytes: int,
     estimated_sram_bytes: int,
     max_flash_budget_bytes: int = 32768,
@@ -85,7 +85,7 @@ def compute_embedded_selection_score(
     score = (
         0.45 * float(val_f1_macro)
         + 0.35 * float(val_event_f1)
-        + 0.15 * max(0.0, 1.0 - float(val_neutral_far))
+        + (0.15 * max(0.0, 1.0 - float(val_neutral_far)) if val_neutral_far is not None else 0.0)
         + 0.05 * float(compactness)
     )
     return round(float(score), 6)
@@ -112,6 +112,12 @@ class TrainedBundle:
     estimated_flash_bytes: int = 0
     estimated_sram_bytes: int = 0
     selection_score: float = 0.0
+    training_participants: tuple[str, ...] = ()
+    training_sessions: tuple[str, ...] = ()
+    development_participants: tuple[str, ...] = ()
+    development_sessions: tuple[str, ...] = ()
+    dataset_sha256: str = ""
+    experiment_id: str = ""
 
     def to_meta_dict(self) -> dict[str, Any]:
         """Gera dicionário legível em JSON sem o objeto binário do estimador."""
@@ -132,6 +138,12 @@ class TrainedBundle:
             "estimated_flash_bytes": int(self.estimated_flash_bytes),
             "estimated_sram_bytes": int(self.estimated_sram_bytes),
             "selection_score": round(float(self.selection_score), 6),
+            "training_participants": list(self.training_participants),
+            "training_sessions": list(self.training_sessions),
+            "development_participants": list(self.development_participants),
+            "development_sessions": list(self.development_sessions),
+            "dataset_sha256": self.dataset_sha256,
+            "experiment_id": self.experiment_id,
         }
 
 
@@ -183,7 +195,7 @@ def train_candidate_models(
 
         if len(y_val) > 0:
             y_pred = model.predict(X_val)
-            val_f1 = float(f1_score(y_val, y_pred, average="macro", zero_division=0))
+            val_f1 = float(f1_score(y_val, y_pred, labels=list(range(len(cfg.class_names))), average="macro", zero_division=0))
             val_acc = float(accuracy_score(y_val, y_pred))
             cls_val = evaluate_classification_metrics(model, X_val, y_val, class_names=cfg.class_names)
             val_far = float(cls_val.get("false_activation_rate_neutral", 0.0))
@@ -203,7 +215,7 @@ def train_candidate_models(
         sel_score = compute_embedded_selection_score(
             val_f1_macro=val_f1,
             val_event_f1=val_evt_f1,
-            val_neutral_far=val_far,
+            val_neutral_far=val_far if len(y_val) and cls_val.get("neutral_support", 0) else None,
             estimated_flash_bytes=flash_b,
             estimated_sram_bytes=sram_b,
         )
@@ -226,6 +238,10 @@ def train_candidate_models(
             estimated_flash_bytes=flash_b,
             estimated_sram_bytes=sram_b,
             selection_score=sel_score,
+            training_participants=tuple(sorted({w.participant_id for w in split.train})),
+            training_sessions=tuple(sorted({w.session_id for w in split.train})),
+            development_participants=tuple(sorted({w.participant_id for w in split.train + split.val})),
+            development_sessions=tuple(sorted({w.session_id for w in split.train + split.val})),
         )
 
     return bundles, split

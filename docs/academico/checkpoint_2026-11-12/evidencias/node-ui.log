@@ -1,0 +1,28 @@
+✔ arquivo local mostra como ativar testes e nao acessa USB automaticamente (4.9634ms)
+✔ navega todos os passos e preserva ECHO desconectado durante ensaio (2.2918ms)
+✔ botao envia porta, medidas e confirmacoes sem modo simulado ou gravação (2.7091ms)
+✔ sem medições permanece pendente e mostra quadro para comparação física (1.7189ms)
+✔ troca de porta, medidas e confirmações invalida aprovação anterior (1.5792ms)
+✔ IR pede nova medição e voltar ao LCD exige nova captura (1.4435ms)
+✔ diagnóstico bloqueia captura e navegação até declarar retorno aos fios de 3,3 V (2.9266ms)
+✔ recarregar página preserva aviso de diagnóstico pendente de restauração (2.4667ms)
+✔ link de luz piscando abre direto a ligação temporária e bloqueia o teste I2C (1.2408ms)
+✔ lab.js sem DOM só exporta o núcleo e não inicia nada (4.5621ms)
+✔ conexão: nunca diz "ao vivo" sem leituras e rotula a demonstração (2.1515ms)
+✔ HUD: observado não aparece; rejeição mostra o motivo; confiança só para softmax (1.6296ms)
+✔ buffer por cursor não duplica nem cresce sem limite (2.7087ms)
+✔ música: escala, nota por distância (perto = agudo) e camada cíclica do looper (1.3085ms)
+✔ canvas: a mola segue o alvo sem ultrapassar (1.0795ms)
+✔ rejeições agregadas por motivo, maiores primeiro (1.1269ms)
+✔ ML: estado do serviço distingue não configurado, indisponível, 403, pendente, inválido e publicado (1.0744ms)
+✔ ML: coorte exibida nunca é pendente; REAL vence quando avaliado; null não vira zero (1.2203ms)
+✔ ML: previsões ordenadas por data e amostras de inferência só do trecho contínuo (7.7597ms)
+✔ interface usa chave local, mantém controles seguros e apresenta slide inicial (17.2669ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 156.2015

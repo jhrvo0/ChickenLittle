@@ -165,6 +165,7 @@ def test_sensor_ir_and_distance_control_launch_over_serial(monkeypatch):
     monkeypatch.setattr(module, "PySerialEndpoint", lambda *a, **k: host)
     monkeypatch.setattr(module, "query_device_diag", lambda *a, **k: SimpleNamespace(is_physical_hardware=True))
     s = module.MotionPetSession()
+    s.set_experience("legacy")  # regras automáticas sensor→pet só valem na experiência legada
     codec = ProtocolCodec()
 
     def sample(ir, distance=8):

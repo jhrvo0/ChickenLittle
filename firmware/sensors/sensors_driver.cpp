@@ -138,7 +138,9 @@ void sensors_driver_read(SensorDriverContext *ctx, SensorRawFrame *out_frame) {
 
     uint64_t t0_us = ctx->hal.monotonic_us ? ctx->hal.monotonic_us() : 0ULL;
     uint32_t ts_ms = (uint32_t)(t0_us / 1000ULL);
-    if (ctx->last_timestamp_ms > 0UL && ts_ms <= ctx->last_timestamp_ms) {
+    // Modular difference accepts the normal millis() rollover after ~49.7 days.
+    const uint32_t elapsed_ms = ts_ms - ctx->last_timestamp_ms;
+    if (ctx->last_timestamp_ms > 0UL && (elapsed_ms == 0UL || elapsed_ms > 0x7FFFFFFFUL)) {
         ts_ms = ctx->last_timestamp_ms + 1UL;
     }
     ctx->last_timestamp_ms = ts_ms;

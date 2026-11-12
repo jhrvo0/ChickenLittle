@@ -1,0 +1,23 @@
+........................................................................ [ 12%]
+........................................................................ [ 24%]
+........................................................................ [ 36%]
+........................ss......s....................................... [ 48%]
+........................................................................ [ 60%]
+........................................................................ [ 72%]
+........................................................................ [ 84%]
+........................................................................ [ 96%]
+..................                                                       [100%]
+============================== warnings summary ===============================
+tests/test_mlops.py: 9 warnings
+tests/test_mlops_phase_c.py: 9 warnings
+  C:\Users\joaoh\Downloads\ChickenLittle\.venv\Lib\site-packages\sklearn\neural_network\_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (80) reached and the optimization hasn't converged yet.
+    warnings.warn(
+
+tests/test_mlops.py::test_mlflow_logs_parent_candidates_metrics_and_models
+  C:\Users\joaoh\Downloads\ChickenLittle\.venv\Lib\site-packages\mlflow\store\tracking\sqlalchemy_store.py:356: SADeprecationWarning: The ``noload`` loader strategy is deprecated and will be removed in a future release.  This option produces incorrect results by returning ``None`` for related items. (deprecated since: 2.1)
+    sqlalchemy.orm.configure_mappers()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [2] tests\test_hardware_cad.py:495: defina FRITZING_PARTS_DIR=<checkout do fritzing-parts> para comparar com o Fritzing
+SKIPPED [1] tests\test_hardware_cad.py:607: defina FRITZING_PARTS_DIR=<checkout do fritzing-parts> para comparar com o Fritzing

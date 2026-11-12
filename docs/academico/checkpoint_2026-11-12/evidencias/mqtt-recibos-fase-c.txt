@@ -1,0 +1,2 @@
+ingest-1     | {"status": "persisted", "cohort": "demo", "samples": 191, "dataset_sha256": "85a580624dff0bc805eb429c259f7ded4da687687f9f6c89e96267307afb9338", "session_id": "mqtt_demo_p01_42_6160d119"}
+ingest-1     | {"status": "duplicate", "cohort": "demo", "dataset_sha256": "85a580624dff0bc805eb429c259f7ded4da687687f9f6c89e96267307afb9338", "session_id": "mqtt_demo_p01_42_6160d119"}

@@ -783,6 +783,11 @@ static bool parse_plain_bench_command(const char *trimmed, JsonlRxParsed *out_p)
         out_p->kind = RX_MSG_ACQ_STOP;
         return true;
     }
+    if (fw_stricmp(trimmed, "IOT_DIAG") == 0) {
+        out_p->kind = RX_MSG_DIAG_REQUEST;
+        out_p->param_bool = true;
+        return true;
+    }
     if (fw_stricmp(trimmed, "DIAG") == 0 || fw_stricmp(trimmed, "STATUS") == 0) {
         out_p->kind = RX_MSG_DIAG_REQUEST;
         return true;
@@ -946,6 +951,11 @@ bool jsonl_parse_incoming_line(
             }
             out_parsed->kind = RX_MSG_ACQ_SET_IR;
             out_parsed->param_bool = en;
+            return true;
+        }
+        if (fw_strcmp(cmd_str, "IOT_DIAG") == 0) {
+            out_parsed->kind = RX_MSG_DIAG_REQUEST;
+            out_parsed->param_bool = true;
             return true;
         }
         if (fw_strcmp(cmd_str, "DIAG") == 0 || fw_strcmp(cmd_str, "STATUS") == 0) {

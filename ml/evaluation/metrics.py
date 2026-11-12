@@ -138,7 +138,7 @@ def evaluate_classification_metrics(
 
     y_pred = estimator.predict(X)
     acc = float(accuracy_score(y, y_pred))
-    f1_mac = float(f1_score(y, y_pred, average="macro", zero_division=0))
+    f1_mac = float(f1_score(y, y_pred, labels=list(range(len(class_names))), average="macro", zero_division=0))
 
     labels_idx = list(range(len(class_names)))
     cm = confusion_matrix(y, y_pred, labels=labels_idx).tolist()
@@ -180,6 +180,8 @@ def evaluate_classification_metrics(
         "confusion_matrix": cm,
         "per_class": per_class,
         "false_activation_rate_neutral": round(far_neutral, 4),
+        "neutral_support": n_neutral,
+        "false_activation_rate_neutral_status": "evaluated" if n_neutral else "pending_no_neutral_samples",
         "latency_mean_ms": latency_mean,
         "latency_p95_ms": latency_p95,
         "memory": mem,

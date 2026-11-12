@@ -23,6 +23,8 @@ def generate_evaluation_report(
 ) -> dict[str, Any]:
     """Gera um dicionário completo de avaliação estatística, latência, footprint e eventos."""
     now_iso = dt.datetime.now(dt.timezone.utc).isoformat()
+    if not bundles or not test_windows:
+        raise ValueError("Avaliação requer modelos e janelas de teste; sem dados, o estado é pendente.")
 
     # Determinação rigorosa de integridade experimental
     all_origins = set()
@@ -75,9 +77,13 @@ def generate_evaluation_report(
             "test_f1_macro": cls_metrics["f1_macro"],
             "accuracy": cls_metrics["accuracy"],
             "false_activation_rate_neutral": cls_metrics["false_activation_rate_neutral"],
+            "neutral_support": cls_metrics.get("neutral_support", 0),
+            "false_activation_rate_neutral_status": cls_metrics.get("false_activation_rate_neutral_status", "pending"),
             "latency_mean_ms": cls_metrics["latency_mean_ms"],
             "latency_p95_ms": cls_metrics["latency_p95_ms"],
+            "latency_scope": "notebook_python",
             "memory": cls_metrics["memory"],
+            "memory_scope": "estimated_esp32",
             "per_class": cls_metrics["per_class"],
             "confusion_matrix": cls_metrics["confusion_matrix"],
             "event_level": evt_metrics,
@@ -87,9 +93,9 @@ def generate_evaluation_report(
     best_name = best_bundle.model_name if best_bundle else "none"
 
     recommendation_reason = (
-        f"O modelo '{best_name}' foi selecionado para embarque TinyML no ESP32. "
-        "Ele oferece a melhor relação entre capacidade de generalização e restrições rígidas de tempo real, "
-        "dispensando qualquer alocação dinâmica de memória no heap durante a inferência."
+        f"O modelo '{best_name}' foi selecionado pelas métricas de validação e estimativas de memória. "
+        "O teste não determina a escolha. Custos embarcados são estimados; latência é medida no notebook. "
+        "Generalização física e custo na ESP32 precisam de validação independente."
     )
 
     return {
@@ -148,12 +154,17 @@ def format_evaluation_markdown(report: dict[str, Any]) -> str:
     lines.append("| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
 
     models = report.get("models", {})
+    def far_text(m):
+        if m.get("false_activation_rate_neutral_status") == "pending_no_neutral_samples":
+            return "não estimável (sem neutros)"
+        return f"{m.get('false_activation_rate_neutral', 0.0):.4f}"
+
     for name, m in models.items():
         mem = m.get("memory", {})
         evt = m.get("event_level", {})
         lines.append(
             f"| `{name}` | {m.get('val_f1_macro', 0.0):.4f} | {m.get('test_f1_macro', 0.0):.4f} | "
-            f"{m.get('accuracy', 0.0):.4f} | {m.get('false_activation_rate_neutral', 0.0):.4f} | "
+            f"{m.get('accuracy', 0.0):.4f} | {far_text(m)} | "
             f"{m.get('latency_mean_ms', 0.0):.3f} | {m.get('latency_p95_ms', 0.0):.3f} | "
             f"{mem.get('estimated_esp32_flash_bytes', 0)} | {mem.get('estimated_esp32_sram_bytes', 0)} | "
             f"{evt.get('event_f1', 0.0):.4f} |"
@@ -172,7 +183,7 @@ def format_evaluation_markdown(report: dict[str, Any]) -> str:
     for name, m in models.items():
         lines.append(f"### Modelo: `{name}`\n")
         lines.append(f"- **F1-Macro (Teste)**: `{m.get('test_f1_macro', 0.0):.4f}` | **Acurácia**: `{m.get('accuracy', 0.0):.4f}`")
-        lines.append(f"- **Taxa de Falsa Ativação (FAR Neutro)**: `{m.get('false_activation_rate_neutral', 0.0):.4f}`")
+        lines.append(f"- **Taxa de Falsa Ativação (FAR Neutro)**: `{far_text(m)}`")
         lines.append(f"- **Latência**: Média `{m.get('latency_mean_ms', 0.0):.3f} ms` | P95 `{m.get('latency_p95_ms', 0.0):.3f} ms`\n")
 
         # Métricas por classe

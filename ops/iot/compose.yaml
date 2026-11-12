@@ -1,0 +1,20 @@
+# Stack independente; não altera nem reinicia os serviços da Fase C.
+name: motionlab-iot
+services:
+  mqtt:
+    image: eclipse-mosquitto:2.0.22@sha256:81a6193ae693942a3231cd3ac52875b02b7e3a19da671b2fb4b55cc874c5b279
+    mem_limit: 64m
+    cpus: 0.5
+    restart: unless-stopped
+    # IP PRIVADO da máquina que executa o Engine, escolhido explicitamente.
+    ports: ["${MOTIONLAB_BROKER_BIND_IP:?Defina o IP privado do host Docker}:8883:8883"]
+    volumes:
+      - ./mosquitto-lan.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto-lan.acl:/mosquitto/config/motionlab.acl:ro
+      - ./local/ca.crt:/mosquitto/local/ca.crt:ro
+      - ./local/server.crt:/mosquitto/local/server.crt:ro
+      - ./local/server.key:/mosquitto/local/server.key:ro
+      - ./local/passwords:/mosquitto/local/passwords:ro
+      - mqtt-iot-data:/mosquitto/data
+volumes:
+  mqtt-iot-data:

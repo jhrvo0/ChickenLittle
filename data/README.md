@@ -1,39 +1,14 @@
-# Diretório de Dados — MotionPet
+# Dados locais do MotionLab
 
-Este diretório gerencia o armazenamento local de conjuntos de dados sensoriais brutos, matrizes de características processadas para treinamento e arquivos de persistência de estado do pet.
+Este diretório reúne dados de execução, sessões e artefatos gerados. A maior parte não é versionada; consulte as regras exatas em [.gitignore](../.gitignore).
 
----
+| Caminho | Conteúdo |
+|---|---|
+| `raw/real/` | Sessões declaradas como coleta física; exigem cuidados com dados de participantes. |
+| `raw/synthetic/` | Corpus sintético para verificar e estudar o pipeline. |
+| `raw/demo/` | Sessões da demonstração, de origem simulada. |
+| `processed/` · `models/` · `reports/` | Features, modelos e relatórios do fluxo histórico. |
+| `experiments/` · `mlflow/` | Execuções isoladas, rastreabilidade e artefatos de experimentos. |
+| `iot/` · `motionlab/` · `saves/` | Telemetria IoT, ajustes locais e estados persistidos. |
 
-## 1. Estrutura de Subdiretórios
-
-```
-data/
-├── raw/            # Séries temporais sensoriais brutas capturadas de sessões físicas/simuladas
-├── processed/      # Matrizes de features extraídas, normalizadas e particionadas (train/test)
-├── saves/          # Arquivos de persistência de estado do pet virtual (pet_save.json)
-├── .gitkeep
-└── README.md
-```
-
----
-
-## 2. Descrição dos Subdiretórios
-
-### 2.1 `data/raw/`
-- Armazena arquivos brutos de telemetria capturados via conexão serial com o firmware do ESP32 ou gerados por geradores de teste.
-- **Formato**: Linhas em JSON Lines (`.jsonl`) ou arquivos tabulares delimitados por vírgula (`.csv`).
-- **Nomenclatura Padrão**:
-  `session_<TIMESTAMP>_<USER_ID>_<GESTO>.jsonl`
-  *Exemplo*: `session_1730100000_u01_APPROACH.jsonl`
-- **Nota**: Arquivos nesta pasta representam a gravação contínua dos sensores e metadados antes de qualquer filtragem ou extração de features.
-
-### 2.2 `data/processed/`
-- Armazena as matrizes estruturadas prontas para consumo pelos algoritmos de aprendizado de máquina em `ml/training/`.
-- **Arquivos Típicos**:
-  - `features_dataset.csv`: Todas as janelas temporais processadas com as 8 características extraídas (`d_min`, `d_max`, `d_delta`, `d_mean`, `d_std`, `v_mean`, `v_peak`, `sign_inversions`), a coluna de rótulo `label` e as colunas de metadados (`session_id`, `user_id`).
-  - `train_features.csv` e `test_features.csv`: Partições geradas pelo split agrupado (*GroupKFold*) sem vazamento de dados (*data leakage*).
-
-### 2.3 `data/saves/`
-- Armazena os arquivos de estado persistente do pet virtual para a funcionalidade de salvar/carregar (`SAVE` e `LOAD` no protocolo JSON Lines v1).
-- **Arquivo Principal**: `pet_save.json`.
-- **Formato**: Snapshot JSON estruturado em conformidade com o esquema de `pet_state` do protocolo. Permite desligar o terminal ou o simulador e retomar a evolução exatamente do mesmo ponto biológico.
+O pipeline atual extrai 11 características por janela; a definição está em [ml/schemas.py](../ml/schemas.py) e a implementação em [ml/preprocessing/features.py](../ml/preprocessing/features.py). Os dados sintéticos não medem desempenho em pessoas ou sensores reais. Veja [ML/MLOps](../docs/motionlab_mlops.md) e [coleta real](../docs/real_data_collection_guide.md) para metodologia e limites.

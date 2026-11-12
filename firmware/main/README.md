@@ -2,6 +2,23 @@
 
 Este documento descreve a arquitetura multitarefa FreeRTOS efetivamente implementada em `firmware/main/main.cpp` para o `ESP-WROOM-32` (`ESP-IDF v4.4.7` / `framework-arduinoespressif32 @ 2.0.17`).
 
+## Extensão IoT da Fase E (somente software, 11/11/2026)
+
+`communication/iot_core.*` implementa a fila fixa de 32 amostras, serialização e máquina de estados testáveis em host. `communication/iot_transport.*` adapta esse núcleo ao Wi-Fi STA e ESP-MQTT já fornecidos pelo SDK; não há dependência externa nova. A aquisição mantém TinyML e USB e apenas copia a mesma leitura para a fila IoT, sem esperar pela rede. O timestamp de aquisição é estendido para 64 bits, incluindo rollover de 32 bits do protocolo USB. O estado de habilitação do IR é aplicado uma vez por ciclo; MQTT distingue IR desabilitado por `valid_ir=false`.
+
+A sexta tarefa `MotionIoT` tem prioridade 1, stack estática de **4096 bytes** e período de 20 ms. A tarefa interna ESP-MQTT usa stack de 6144 bytes e buffers RX/TX de 1024 bytes; o SDK aloca heap limitado para cliente, TCP/Wi-Fi/TLS e uma publicação QoS 1 pendente. Há no máximo uma mensagem no outbox: ela só sai da fila da aplicação após PUBACK. Falha ou timeout destrói o cliente antes de repetir a mesma identidade/conteúdo. PUBACK confirma recepção pelo broker, não gravação pelo consumidor. A fila usa **descarte da amostra nova** quando cheia, preservando a mensagem pendente; sequência avança mesmo no descarte e `dropped_total` é capturado de forma imutável por mensagem. Reiniciar/desenergizar perde o buffer volátil.
+
+Wi-Fi e broker têm backoff de 1–60 s e timeout de 10 s, executados somente na tarefa de rede. TLS valida CA e hostname; `clock_wait` aguarda hora civil SNTP válida antes do handshake, sem alterar os timestamps monotônicos do payload. TCP sem TLS exige opt-in local explícito. Sem SSID, host, senha MQTT e configuração de segurança, a rede permanece `disabled` e USB/TinyML continuam disponíveis. Identidade e sessão aparecem mesmo nesse estado.
+
+Copiar `communication/iot_config.example.h` para `communication/iot_config.local.h` somente no procedimento físico posterior, preenchendo valores privados fora do Git. O ambiente `esp32dev-iot-example` compila o caminho configurado TLS usando apenas placeholders e ignora o header local. Comandos de build não gravam nem acessam a placa:
+
+```powershell
+.\.venv\Scripts\python.exe -m platformio run -d firmware -e esp32dev
+.\.venv\Scripts\python.exe -m platformio run -d firmware -e esp32dev-iot-example
+```
+
+`IOT_DIAG` (curto ou `pet_command` JSONL) devolve estado, IDs, ocupação, descartes, PUBACKs, reconexões, erros de publicação e high-water mark em um `ack` v1. Não imprime credenciais nem texto fora do JSONL. O `DIAG` original é preservado. Contrato completo e procedimento físico: `docs/motionlab_fase_e.md` (raiz do projeto). Build e mocks não são validação física de RF, sensores, heap ou latência.
+
 Montagem atual: [guia integrado I²C](../../docs/bench_assembly_guide.md). `main.cpp` seleciona o HAL PCF8574; GPIO21=SDA e GPIO22=SCL, backpack em 3V3 sem conversor. O modo de quatro bits existe entre o expansor e o HD44780, não como seis fios da ESP32 ao LCD.
 
 ---

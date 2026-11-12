@@ -1,0 +1,5 @@
+FROM apache/airflow:3.1.6-python3.12@sha256:a573108e0b6bc18750ddce04783968a7bf344e24d592aa744089a0f7c22ad77a
+COPY --chown=airflow:root requirements.txt requirements-mlops.lock /tmp/
+# Ambiente separado: o lock científico não altera as dependências internas do Airflow.
+RUN python -m venv /opt/airflow/motionlab-venv && /opt/airflow/motionlab-venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt -r /tmp/requirements-mlops.lock
+ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1

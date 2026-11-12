@@ -32,6 +32,8 @@
 #include "display/lcd2004_i2c_hal.h"
 #include "display/lcd2004_anim.h"
 #include "communication/jsonl_protocol.h"
+#include "communication/iot_transport.h"
+#include "communication/iot_core.h"
 
 // Mensagens internas estáticas trocadas entre TaskSerialComm e TaskPetDomain (zero heap)
 typedef struct {
@@ -186,6 +188,9 @@ static void format_diag_status(char *out_buf, size_t cap) {
 static void TaskSensorAcquire(void *param) {
     (void)param;
     TickType_t last_wake = xTaskGetTickCount();
+    // Acquisition owns its mutable driver/timestamp; serial updates only the desired
+    // IR configuration in g_sensor_drv. Apply it once per cycle for coherent validity.
+    SensorDriverContext sensor_driver = g_sensor_drv;
 
     for (;;) {
         bool stream_tx_active = true;
@@ -194,11 +199,19 @@ static void TaskSensorAcquire(void *param) {
         if (xSemaphoreTake(g_state_mutex, pdMS_TO_TICKS(5)) == pdTRUE) {
             stream_tx_active = g_metrics.collection_active;
             period_ms = g_metrics.sample_period_ms;
+            sensor_driver.config.ir_enabled = g_sensor_drv.config.ir_enabled;
             xSemaphoreGive(g_state_mutex);
         }
 
         SensorRawFrame frame;
-        sensors_driver_read(&g_sensor_drv, &frame);
+        sensors_driver_read(&sensor_driver, &frame);
+
+        // Same acquisition as USB/TinyML. Extend the existing 32-bit timestamp using
+        // the ESP timer (64-bit); preserves exact acquisition time across millis rollover.
+        const uint64_t now_ms64 = (uint64_t)esp_timer_get_time() / 1000ULL;
+        const uint64_t acquisition_ms = iot_extend_timestamp_ms(frame.timestamp_ms, now_ms64);
+        iot_transport_acquire(&frame, acquisition_ms,
+            sensor_driver.config.ir_enabled && sensor_driver.hal.read_digital != NULL);
 
         // Alimenta sempre o pipeline local TinyML para autonomia embarcada
         bool dropped_infer = (xQueueSend(g_q_sensor_infer, &frame, 0) != pdTRUE);
@@ -531,7 +544,8 @@ static void handle_serial_rx_line(const char *rx_line, char *tx_buf, size_t tx_c
         }
         ack_msg = parsed.param_bool ? "ir_enabled" : "ir_disabled";
     } else if (parsed.kind == RX_MSG_DIAG_REQUEST) {
-        format_diag_status(status_buf, sizeof(status_buf));
+        if (parsed.param_bool) iot_transport_diag(status_buf, sizeof(status_buf));
+        else format_diag_status(status_buf, sizeof(status_buf));
         ack_msg = status_buf;
     }
 
@@ -735,6 +749,9 @@ void setup(void) {
     g_q_gesture_tx = xQueueCreate(QUEUE_LEN_GESTURE_TX, sizeof(GestureEvent));
     g_q_cmd_pet = xQueueCreate(QUEUE_LEN_CMD_PET, sizeof(PetCmdQueueItem));
     g_q_pet_reply_tx = xQueueCreate(QUEUE_LEN_CMD_PET, sizeof(PetReplyQueueItem));
+
+    // Disabled without private local configuration. No serial ownership in this module.
+    iot_transport_start();
 
     // 6. Cria as 5 tasks FreeRTOS em APP_CPU_NUM (evitando complexidade multicore desnecessária)
     xTaskCreatePinnedToCore(
