@@ -730,12 +730,16 @@ void setup(void) {
     gesture_classifier_ctx_init(&g_gesture_ctx, NULL);
     pet_persistence_init(&g_pet_nvs, NULL, PET_NVS_MIN_AUTO_INTERVAL_MS);
 
-    // 3. Inicializa driver do LCD 2004A pelo adaptador I2C PCF8574 (SDA=GPIO21, SCL=GPIO22)
+    // 3. LCD 2004A pelo adaptador I2C PCF8574 (SDA=GPIO21, SCL=GPIO22), apenas se ligado.
+    // Sem LCD, g_lcd_drv fica nao inicializado e lcd_ctx_render_frame() retorna sem I/O.
+#if MOTIONLAB_LCD_HW_ENABLED
     LCDPinConfig lcd_cfg{};
     lcd_i2c_fill_pin_config(&lcd_cfg);
-    lcd_ctx_init(&g_lcd_drv, &lcd_cfg, &g_lcd_i2c_hal_ops);
-    lcd_ctx_load_default_glyphs(&g_lcd_drv);
-    lcd_play_boot_animation(&g_lcd_drv);
+    if (lcd_ctx_init(&g_lcd_drv, &lcd_cfg, &g_lcd_i2c_hal_ops)) {
+        lcd_ctx_load_default_glyphs(&g_lcd_drv);
+        lcd_play_boot_animation(&g_lcd_drv);
+    }
+#endif
 
     // 4. Inicializa estado inicial compartilhado antes da partida das tasks
     pet_init(&g_shared_pet_state, "Bitinho", PERSONALITY_CURIOUS);
@@ -749,6 +753,12 @@ void setup(void) {
     g_q_gesture_tx = xQueueCreate(QUEUE_LEN_GESTURE_TX, sizeof(GestureEvent));
     g_q_cmd_pet = xQueueCreate(QUEUE_LEN_CMD_PET, sizeof(PetCmdQueueItem));
     g_q_pet_reply_tx = xQueueCreate(QUEUE_LEN_CMD_PET, sizeof(PetReplyQueueItem));
+    if (!g_state_mutex || !g_q_sensor_infer || !g_q_sensor_tx || !g_q_gesture_pet ||
+        !g_q_gesture_tx || !g_q_cmd_pet || !g_q_pet_reply_tx) {
+        // Sem heap para as primitivas do RTOS, as tasks acessariam handles nulos. Nao cria
+        // nenhuma task: a placa fica ociosa (sem fluxo serial) em vez de travar ou reiniciar em loop.
+        return;
+    }
 
     // Disabled without private local configuration. No serial ownership in this module.
     iot_transport_start();
