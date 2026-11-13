@@ -52,6 +52,14 @@
 #define PIN_LCD_SDA           21
 #define PIN_LCD_SCL           22
 
+// O LCD fisico esta fora da montagem atual (2026-11-10). Com 0, o firmware nao inicializa o
+// I2C, nao toca a animacao de boot (~3 s) e nao escreve no barramento; o quadro 20x4 continua
+// sendo montado e enviado ao notebook (interface legada). Use -D MOTIONLAB_LCD_HW_ENABLED=1
+// apenas se o LCD voltar a ser ligado.
+#ifndef MOTIONLAB_LCD_HW_ENABLED
+#define MOTIONLAB_LCD_HW_ENABLED 0
+#endif
+
 // Temporizacoes operacionais (em milissegundos)
 #define DEFAULT_SENSOR_PERIOD_MS   70UL   // Faixa inicial recomendada: 60..80 ms (~14.3 Hz)
 #define MIN_SENSOR_PERIOD_MS       50UL   // Minimo fisico para evitar eco residual acustico

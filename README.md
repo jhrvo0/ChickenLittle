@@ -88,7 +88,10 @@ Os resultados ficam em `data/experiments/synthetic/`, ignorado pelo Git. Depend�
 
 ## Testes e reprodutibilidade
 
+A suíte Python completa também cobre MQTT, provisionamento do broker, MLflow e Airflow; instale as dependências de ML/MLOps antes de rodá-la (só com `requirements.txt` a coleta falha por falta de `cryptography`).
+
 ```powershell
+uv pip install --python .venv/Scripts/python.exe -r requirements-mlops.lock
 .\.venv\Scripts\python.exe -m pytest -q
 node --test tests/test_lab_ui.cjs tests/test_web_ui.cjs tests/test_guide_ui.cjs
 .\.venv\Scripts\python.exe -m platformio run -d firmware
