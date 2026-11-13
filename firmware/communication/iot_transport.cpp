@@ -205,8 +205,12 @@ void iot_transport_start(void) {
     jw_init(&writer, g_topic, sizeof(g_topic));
     jw_puts(&writer, "motionlab/v1/devices/"); jw_puts(&writer, g_device); jw_puts(&writer, "/samples");
     if (!g_configured) return; // USB/inference do not depend on Wi-Fi initialization.
+    // PRO_CPU (core 0) hosts the Wi-Fi/lwIP stack. The acquisition task on APP_CPU busy-waits
+    // up to 25 ms per HC-SR04 echo at the highest priority; keeping the network worker off that
+    // core lets PUBACK handling and publishing proceed during the echo wait. g_lock is a
+    // portMUX spinlock, so the queue shared with the acquisition task stays SMP-safe.
     if (!xTaskCreateStaticPinnedToCore(network_task, "MotionIoT", sizeof(g_stack), NULL, 1,
-                                      g_stack, &g_task, APP_CPU_NUM)) {
+                                      g_stack, &g_task, PRO_CPU_NUM)) {
         g_configured = false;
         g_state = IOT_DISABLED;
     }

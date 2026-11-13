@@ -35,6 +35,7 @@ Este índice separa a descrição atual dos registros produzidos ao longo do des
 
 - [Testes automatizados](../tests/) e comandos no [README](../README.md#testes-e-reprodutibilidade).
 - [Checklist de bancada do ciclo 5](cycle5_bench_checklist.md): histórico de ensaios; a montagem atual não usa LCD e as ligações vigentes prevalecem.
+- [Revisão de firmware e testes (12/11)](revisao_firmware_testes_2026-11-12.md): testes em clone limpo, correções e pendências de ensaio na placa.
 - [Pendências de publicação](publicacao.md): auditoria de organização, riscos e pontos a resolver.
 
 ## Documentação acadêmica
