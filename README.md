@@ -99,6 +99,8 @@ O build requer PlatformIO no ambiente virtual. Testes automatizados e build veri
 ## Estado e limites
 
 - A interface e os fluxos de software estão implementados; a validação física completa, o desempenho dos gestos com participantes e ensaios longos do fluxo IoT permanecem pendentes.
+- O firmware ainda inicializa a tarefa e o barramento I2C do LCD (GPIO21/GPIO22) herdados do MotionPet; o LCD não faz parte da montagem atual, e essa tarefa não afeta a leitura dos sensores.
+- O envio Wi-Fi/MQTT exige uma configuração local (`firmware/communication/iot_config.local.h`, ignorada pelo Git). Com certificado da CA configurado, a conexão usa TLS; sem certificado, o envio fica desativado, a menos que `MOTIONLAB_ALLOW_INSECURE_LAN` seja habilitado explicitamente para usar TCP sem criptografia em rede local restrita. Um clone limpo compila sem Wi-Fi/MQTT ativo.
 - Áudio, envio real de teclas e controle de apresentações externas precisam de validação manual no ambiente de uso.
 - Modelos, sessões e resultados locais são ignorados pelo Git; um clone pode não ter o modelo necessário para a fonte ML no host.
 - A avaliação exploratória da interface não equivale ao teste reservado de um experimento. Métricas sintéticas e dados reais devem permanecer identificados separadamente.
@@ -124,11 +126,13 @@ Os pontos de entrada [applications/](applications/), [esp32-esp8266/](esp32-esp8
 | Integrante | GitHub | Responsabilidade atribuída |
 |---|---|---|
 | João Henrique R. V. de Oliveira | [@jhrvo0](https://github.com/jhrvo0) | Representação e coordenação do projeto |
-| Antônio Jose paes de andrade junior | [@AntonioPaess](https://github.com/AntonioPaess) | Hardware, sensores e montagem |
+| Antônio Jose Paes de Andrade Junior | [@AntonioPaess](https://github.com/AntonioPaess) | Hardware, sensores e montagem |
 | Marco Antônio Maciel | [@oMarcoMaciel](https://github.com/oMarcoMaciel) | Aprendizado de máquina e avaliação dos modelos |
 | Jorge Dias | [@Jorgedias96](https://github.com/Jorgedias96) | Interface e experiências interativas |
 | João Pedro | [@Joaopdornelas](https://github.com/Joaopdornelas) | Comunicação e integração Wi-Fi/MQTT |
 
-As responsabilidades acima são a divisão de trabalho proposta para o grupo, e não uma declaração de contribuições já realizadas. O endereço do Google Sites ainda precisa ser informado.
+As responsabilidades acima são a divisão de trabalho proposta para o grupo, e não uma declaração de contribuições já realizadas.
+
+**Página do projeto (Google Sites):** <https://sites.google.com/view/motionlab-grupo5>
 
 Comece pelo [índice da documentação](docs/README.md). Antes de publicação, consulte as [pendências de organização e segurança](docs/publicacao.md). Segundo informação do representante do grupo, o professor autorizou em sala o uso integral de IA no trabalho.
