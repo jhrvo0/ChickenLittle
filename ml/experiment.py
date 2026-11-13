@@ -23,7 +23,7 @@ from ml.schemas import CORE_GESTURE_CLASSES, FEATURE_NAMES, PreprocessingConfig
 from ml.training.models import TrainingConfig
 from ml.training.splitter import split_windows_grouped, windows_to_xy
 from ml.training.trainer import save_trained_bundle, select_best_embeddable_bundle, train_candidate_models
-from ml.validation import cross_validate_grouped, tune_tree_depth
+from ml.validation import cross_validate_grouped, search_hyperparameters, tune_tree_depth
 
 COHORT_ORIGIN = {"real": "real_hardware", "synthetic": "synthetic_simulator", "demo": "synthetic_simulator"}
 
@@ -63,7 +63,7 @@ def dataset_digest(records):
 
 
 def run_experiment(raw_dir, *, cohort, output_root="data/experiments", seed=42,
-                   leave_one_out=False, tracking_uri=None, verify_cpp=False, training_config=None, tune=False, orchestration=None):
+                   leave_one_out=False, tracking_uri=None, verify_cpp=False, training_config=None, tune=False, orchestration=None, search=None):
     records = load_raw_records_from_path(raw_dir)
     quality = validate_corpus(records, cohort)
     p_cfg = PreprocessingConfig()
@@ -138,6 +138,11 @@ def run_experiment(raw_dir, *, cohort, output_root="data/experiments", seed=42,
             manifest["training"] = cfg.to_dict()
         else:
             manifest["tuning"] = {"status": "not_requested", "trials": []}
+        if search:
+            cfg, manifest["hyperparameter_search"] = search_hyperparameters(development, cfg, group_attr, method=search)
+            manifest["training"] = cfg.to_dict()
+        else:
+            manifest["hyperparameter_search"] = {"status": "not_requested"}
         manifest["validation"] = {"group_kfold": cross_validate_grouped(development, cfg, group_attr=group_attr)}
         manifest["validation"]["leave_one_group_out"] = (
             cross_validate_grouped(development, cfg, group_attr=group_attr, leave_one_out=True)
@@ -181,6 +186,10 @@ def run_experiment(raw_dir, *, cohort, output_root="data/experiments", seed=42,
         if tracking_uri:
             from ml.tracking import log_experiment
             manifest["tracking"] = log_experiment(tracking_uri, f"MotionLab-{cohort}", out, manifest, bundles, report)
+            if manifest["hyperparameter_search"].get("status") == "evaluated":
+                from ml.tracking import log_hyperparameter_search
+                manifest["tracking"]["hyperparameter_search"] = log_hyperparameter_search(
+                    tracking_uri, f"MotionLab-{cohort}-hiperparametros", manifest)
             write_json(out / "manifest.json", manifest)
         # Publicação atômica só após todos os passos solicitados concluírem.
         temporary = root / f".latest-{run_id}.json"
@@ -203,9 +212,16 @@ def main(argv=None):
     parser.add_argument("--tracking-uri")
     parser.add_argument("--verify-cpp", action="store_true")
     parser.add_argument("--tune", action="store_true", help="Compara profundidades 3, 5 e 7 da árvore só na CV de desenvolvimento.")
+    parser.add_argument("--search", choices=("grid", "random"),
+                        help="Grid Search ou Random Search de hiperparâmetros por modelo, com GroupKFold no desenvolvimento.")
+    parser.add_argument("--extended-models", action="store_true", help="Inclui KNN e AdaBoost na comparação.")
+    parser.add_argument("--learned-baseline", action="store_true", help="Inclui o baseline aprendido (árvore de profundidade 1).")
     args = parser.parse_args(argv)
+    cfg = TrainingConfig(seed=args.seed, include_extended_candidates=args.extended_models,
+                         include_learned_baseline=args.learned_baseline)
     out = run_experiment(args.raw_dir, cohort=args.cohort, output_root=args.output_root, seed=args.seed,
-                         leave_one_out=args.leave_one_group_out, tracking_uri=args.tracking_uri, verify_cpp=args.verify_cpp, tune=args.tune)
+                         leave_one_out=args.leave_one_group_out, tracking_uri=args.tracking_uri, verify_cpp=args.verify_cpp, tune=args.tune,
+                         training_config=cfg, search=args.search)
     print(f"Experimento salvo em {out}; cohort={args.cohort}; validação física pendente.")
     return 0
 
