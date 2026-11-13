@@ -75,16 +75,26 @@ uv pip install --python .venv/Scripts/python.exe -r requirements.txt
 
 Abra [http://127.0.0.1:8767/](http://127.0.0.1:8767/) e escolha DEMO. Para usar a placa, inicie sem `--demo`, selecione a porta serial na interface e mantenha apenas um programa conectado a ela. A interface anterior está em [127.0.0.1:8767/legacy/](http://127.0.0.1:8767/legacy/).
 
+## Execução completa com Docker
+
+Um único comando, na raiz do repositório, sobe broker MQTT, simulador do sistema embarcado, ingestão, Airflow, MLflow, API de inferência e dashboard:
+
+```powershell
+docker compose up --build
+```
+
+Dashboard em [127.0.0.1:8767](http://127.0.0.1:8767/), API em [127.0.0.1:8768](http://127.0.0.1:8768/health) e MLflow em [127.0.0.1:5000](http://127.0.0.1:5000/). A interface do Airflow é opcional: `docker compose --profile console up --build`. A correspondência entre a especificação de Aprendizado de Máquina e o repositório está em [docs/aprendizado_maquina.md](docs/aprendizado_maquina.md).
+
 ## Treinamento e avaliação
 
 O experimento separa grupos de desenvolvimento e teste, compara modelos e registra origem, configuração e artefatos. Após instalar as dependências de ML/MLOps, o exemplo abaixo gera um corpus **sintético** e executa o fluxo isolado, sem escrever no firmware. Gere o corpus apenas se o diretório de destino ainda não contiver arquivos que precise preservar:
 
 ```powershell
 .\.venv\Scripts\python.exe -m ml.collection --generate-synthetic-corpus --output-dir data/raw/synthetic
-.\.venv\Scripts\python.exe -m ml.experiment --raw-dir data/raw/synthetic --cohort synthetic
+.\.venv\Scripts\python.exe -m ml.experiment --raw-dir data/raw/synthetic --cohort synthetic --extended-models --learned-baseline --search grid --leave-one-group-out --tune
 ```
 
-Os resultados ficam em `data/experiments/synthetic/`, ignorado pelo Git. Dependências adicionais, validação cruzada, rastreamento MLflow, exportação e limites metodológicos estão na [documentação de ML/MLOps](docs/motionlab_mlops.md#experimento-completo-sem-hardware). Esses resultados descrevem o cenário sintético; não medem generalização para gestos físicos. A coleta real requer autorização, identificação de origem e cuidado com dados de participantes.
+As opções comparam também KNN, AdaBoost e um baseline aprendido, fazem Grid Search de hiperparâmetros com validação agrupada e rodam LeaveOneGroupOut. Os resultados ficam em `data/experiments/synthetic/`, ignorado pelo Git. Dependências adicionais, validação cruzada, rastreamento MLflow, exportação e limites metodológicos estão na [documentação de ML/MLOps](docs/motionlab_mlops.md#experimento-completo-sem-hardware). Esses resultados descrevem o cenário sintético; não medem generalização para gestos físicos. A coleta real requer autorização, identificação de origem e cuidado com dados de participantes.
 
 ## Testes e reprodutibilidade
 

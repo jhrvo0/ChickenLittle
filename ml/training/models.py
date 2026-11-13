@@ -7,7 +7,8 @@ from typing import Any, Sequence
 
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -31,6 +32,13 @@ class TrainingConfig:
     mlp_max_iter: int = 1200
     mlp_alpha: float = 1e-3
     include_learned_baseline: bool = False
+    # KNN e AdaBoost: candidatos de comparação exigidos na disciplina de AM. Ficam fora da
+    # seleção para o firmware (o exportador C++ cobre só árvore, floresta e MLP).
+    include_extended_candidates: bool = False
+    knn_n_neighbors: int = 7
+    knn_weights: str = "distance"
+    ada_n_estimators: int = 50
+    ada_learning_rate: float = 0.5
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
@@ -138,7 +146,7 @@ class RuleBaselineModel(BaseEstimator, ClassifierMixin):
 
 
 def build_candidate_models(config: TrainingConfig | None = None) -> dict[str, Any]:
-    """Instancia os 4 modelos comparativos do pipeline de ML."""
+    """Instancia os modelos candidatos: baseline de regras, árvore, floresta e MLP; opcionalmente KNN, AdaBoost e stump."""
     cfg = config or TrainingConfig()
     candidates = {
         "rule_baseline": RuleBaselineModel(class_names=cfg.class_names),
@@ -171,6 +179,20 @@ def build_candidate_models(config: TrainingConfig | None = None) -> dict[str, An
             ]
         ),
     }
+    if cfg.include_extended_candidates:
+        # KNN usa distância: sem padronização, features em cm dominariam as booleanas.
+        candidates["knn"] = Pipeline(
+            [
+                ("scaler", StandardScaler()),
+                ("knn", KNeighborsClassifier(n_neighbors=cfg.knn_n_neighbors, weights=cfg.knn_weights)),
+            ]
+        )
+        candidates["adaboost"] = AdaBoostClassifier(
+            estimator=DecisionTreeClassifier(max_depth=1, class_weight="balanced", random_state=cfg.seed),
+            n_estimators=cfg.ada_n_estimators,
+            learning_rate=cfg.ada_learning_rate,
+            random_state=cfg.seed,
+        )
     if cfg.include_learned_baseline:
         candidates["decision_stump_baseline"] = DecisionTreeClassifier(
             max_depth=1, min_samples_leaf=cfg.dt_min_samples_leaf,
