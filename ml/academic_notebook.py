@@ -92,7 +92,7 @@ def build_notebook(run_dir, destination):
              "(árvore, floresta, MLP e, quando habilitados, KNN e AdaBoost). "
              "As regras são uma referência de domínio adicional, sem treino estatístico. "
              "A grade 3/5/7 da árvore é pequena, explícita e compatível com o orçamento embarcado. "
-             "GroupKFold e LOGO preservam os participantes; quando os números de folds coincidem são a mesma partição, não duas evidências independentes. "
+             "O k-fold agrupado (estratificado por classe quando possível) e o LOGO preservam os participantes; quando os números de folds coincidem são a mesma partição, não duas evidências independentes. "
              "A CV reutilizada no tuning é descritiva. O teste externo não escolhe hiperparâmetros. "
              "Diferenças entre treino, validação e teste abaixo ajudam a investigar sobreajuste; escores baixos em todos sugerem capacidade insuficiente ou dados difíceis, sem diagnóstico causal automático.")
     code("from sklearn.metrics import f1_score\nfrom ml.training.splitter import windows_to_xy\nfrom ml.training.trainer import load_trained_bundle\n"
@@ -108,7 +108,7 @@ def build_notebook(run_dir, destination):
     if search.get("status") == "evaluated":
         markdown("## Otimização de hiperparâmetros\n\n"
                  f"Estratégia: **{'Grid Search' if search['method'] == 'grid' else 'Random Search'}** por família de modelo, "
-                 "com GroupKFold só nos grupos de desenvolvimento. Os espaços são pequenos de propósito: o pipeline roda dentro "
+                 "com k-fold agrupado só nos grupos de desenvolvimento. Os espaços são pequenos de propósito: o pipeline roda dentro "
                  "do Airflow com 1 CPU, e o modelo escolhido precisa caber na ESP32. Grid Search avalia todas as combinações "
                  "desses espaços; Random Search sorteia um subconjunto quando o orçamento é menor. O critério é o F1-macro médio "
                  "da CV; em empate, vence a menor diferença treino-validação. O holdout externo não participa da escolha.")
@@ -149,6 +149,21 @@ def build_notebook(run_dir, destination):
              "    if model.get('train_f1_macro_mean') is not None:\n"
              "        print(f\"{name:24s} treino={model['train_f1_macro_mean']:.3f} validação={model['f1_macro_mean']:.3f}\"\n"
              "              f\" ±{model['f1_macro_std']:.3f} diferença={model['generalization_gap']:+.3f} → {model['fit_diagnosis']}\")")
+    comparison = manifest.get("model_comparison", {})
+    if comparison.get("status") == "evaluated":
+        markdown("## Comparação estatística dos modelos\n\n"
+                 "Todos os modelos foram avaliados nos mesmos folds, então os resultados são pareados. O teste de Friedman "
+                 "verifica se há diferença entre os modelos como um todo; em seguida, o melhor modelo é comparado com cada "
+                 "outro pelo teste de Wilcoxon pareado, com correção de Holm para comparações múltiplas. Com poucos folds o "
+                 "poder é baixo: p-valor alto indica falta de evidência de diferença, não modelos equivalentes. Os folds "
+                 "compartilham dados de treino, então os testes indicam tendência e não independência estrita.")
+        code("cmp = manifest['model_comparison']\n"
+             "print('Fonte:', cmp['source'], '| folds:', cmp['n_folds'], '| melhor:', cmp['best_model'])\n"
+             "print('Friedman: estatística=%.3f p=%.4g' % (cmp['friedman']['statistic'], cmp['friedman']['p_value']))\n"
+             "for name, rank in sorted(cmp['mean_rank'].items(), key=lambda item: item[1]):\n"
+             "    print(f'  posto médio {rank:.2f}  {name}')\n"
+             "for row in cmp['pairwise_vs_best']:\n"
+             "    print(f\"  {cmp['best_model']} vs {row['model']}: ΔF1={row['mean_f1_difference']:+.3f} p(Holm)={row['p_value_holm']:.4f} {'significativo' if row['significant'] else 'sem evidência'}\")")
     markdown("## Matrizes de confusão e comparação dos modelos\n\nLinhas são rótulos conhecidos no cenário simulado; colunas são previsões. Fora da diagonal estão os erros observados. As métricas de teste são descritivas desta execução reservada.")
     import matplotlib
     matplotlib.use("Agg")

@@ -1,9 +1,9 @@
-"""Indexa um checkout do fritzing-parts em um parts.db (SQLite) compativel com o `fzkit.partsdb` do fritzing-tools.
+"""Indexa um checkout do fritzing-parts em um parts.db (SQLite) no formato do indice de pecas do Fritzing.
 
-Por que existe: o fritzing-tools espera `<FRITZING_APP_ROOT>/parts/parts.db`, gerado pelo aplicativo Fritzing.
+Por que existe: o Fritzing gera `<FRITZING_APP_ROOT>/parts/parts.db` ao abrir as pecas.
 Sem o aplicativo instalado, este script cria um indice EQUIVALENTE (nao e o parts.db oficial) a partir dos .fzp.
 
-Esquema (lido de fzkit/partsdb.py, apenas como DADO): parts(id, moduleID, title, label, family, path),
+Esquema: parts(id, moduleID, title, label, family, path),
 tags(part_id, tag), connectors(part_id, connectorid, name, type) com type 0=male, 1=female, 2=pad.
 
 Uso:

@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 from sklearn.base import clone
 from sklearn.metrics import f1_score
-from sklearn.model_selection import GroupKFold, LeaveOneGroupOut
+from sklearn.model_selection import GroupKFold, LeaveOneGroupOut, StratifiedGroupKFold
 
 from ml.training.models import TrainingConfig, build_candidate_models
 from ml.training.splitter import windows_to_xy
@@ -19,7 +19,15 @@ def cross_validate_grouped(windows, config=None, *, group_attr="participant_id",
     count = len(set(groups))
     if count < 2:
         return {"status": "pending", "reason": "Menos de dois grupos de desenvolvimento.", "models": {}}
-    splitter = LeaveOneGroupOut() if leave_one_out else GroupKFold(n_splits=min(5, count))
+    n_splits = min(5, count)
+    if leave_one_out:
+        splitter, method = LeaveOneGroupOut(), "LeaveOneGroupOut"
+    elif _can_stratify(y, groups, n_splits):
+        # k-fold estratificado que também respeita os grupos: cada participante fica inteiro em um
+        # fold e a proporção das classes é equilibrada entre folds (NEUTRAL é majoritária).
+        splitter, method = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=cfg.seed), "StratifiedGroupKFold"
+    else:
+        splitter, method = GroupKFold(n_splits=n_splits), "GroupKFold"
     folds = list(splitter.split(X, y, groups))
     results = {}
     for name, prototype in (candidates if candidates is not None else build_candidate_models(cfg)).items():
@@ -52,8 +60,18 @@ def cross_validate_grouped(windows, config=None, *, group_attr="participant_id",
                          "fit_diagnosis": _fit_diagnosis(train_values, values)}
     complete = all(r["valid_folds"] == len(folds) for r in results.values())
     return {"status": "evaluated" if complete else "incomplete", "group_attr": group_attr,
-            "method": "LeaveOneGroupOut" if leave_one_out else "GroupKFold", "n_splits": len(folds),
+            "method": method, "n_splits": len(folds),
             "scope": "development_only", "models": results}
+
+
+def _can_stratify(y, groups, n_splits):
+    """Estratificar só faz sentido se cada classe aparece em pelo menos n_splits grupos."""
+    if n_splits < 2:
+        return False
+    for label in np.unique(y):
+        if len(set(groups[y == label])) < n_splits:
+            return False
+    return True
 
 
 def _fit_diagnosis(train_values, val_values, *, gap_limit=0.10, low_limit=0.60):
@@ -146,6 +164,45 @@ def search_hyperparameters(windows, config, group_attr, *, method="grid", n_iter
                           "best_cv_f1_macro": best["cv_f1_macro"], "evaluated_combinations": len(trials),
                           "trials": trials}
     return best_config, {"status": "evaluated" if families else "not_applicable", "method": method,
-                         "cv": "GroupKFold", "group_attr": group_attr, "scope": "development_only",
+                         "cv": "StratifiedGroupKFold/GroupKFold (ver validation)", "group_attr": group_attr, "scope": "development_only",
                          "selection_metric": "f1_macro", "models": families,
                          "caveat": "Seleção feita na CV de desenvolvimento; o holdout externo é a estimativa final."}
+
+
+def compare_models_statistically(cv_result, *, alpha=0.05):
+    """Compara os modelos nos mesmos folds: teste de Friedman e Wilcoxon pareado contra o melhor.
+
+    Os folds são os mesmos para todos os modelos, então as amostras são pareadas. Com poucos folds o
+    poder é baixo: um p-valor alto significa "sem evidência de diferença", não "modelos iguais".
+    p-valores do Wilcoxon são corrigidos por Holm para as comparações múltiplas.
+    """
+    from scipy.stats import friedmanchisquare, rankdata, wilcoxon
+
+    models = {name: m for name, m in cv_result.get("models", {}).items()
+              if m.get("valid_folds") and m["valid_folds"] == cv_result.get("n_splits")}
+    if len(models) < 3 or cv_result.get("n_splits", 0) < 3:
+        return {"status": "pending", "reason": "Exige 3+ modelos avaliados em todos os 3+ folds."}
+    names = list(models)
+    scores = np.array([[f["f1_macro"] for f in models[n]["folds"]] for n in names])  # modelos x folds
+    ranks = np.mean([rankdata(-scores[:, j]) for j in range(scores.shape[1])], axis=0)
+    friedman = friedmanchisquare(*scores)
+    best = names[int(np.argmax(scores.mean(axis=1)))]
+    raw = []
+    for i, name in enumerate(names):
+        if name == best:
+            continue
+        diff = scores[names.index(best)] - scores[i]
+        p = 1.0 if np.allclose(diff, 0) else float(wilcoxon(scores[names.index(best)], scores[i]).pvalue)
+        raw.append((name, p, float(diff.mean())))
+    # Holm: ordena p crescente e multiplica pelo número de hipóteses restantes, mantendo monotonia.
+    adjusted, running = {}, 0.0
+    for k, (name, p, _) in enumerate(sorted(raw, key=lambda r: r[1])):
+        running = max(running, min(1.0, p * (len(raw) - k)))
+        adjusted[name] = running
+    pairwise = [{"model": name, "mean_f1_difference": diff, "p_value": p, "p_value_holm": adjusted[name],
+                 "significant": adjusted[name] < alpha} for name, p, diff in raw]
+    return {"status": "evaluated", "cv_method": cv_result.get("method"), "n_folds": int(scores.shape[1]),
+            "alpha": alpha, "mean_rank": {n: float(r) for n, r in zip(names, ranks)},
+            "friedman": {"statistic": float(friedman.statistic), "p_value": float(friedman.pvalue)},
+            "best_model": best, "pairwise_vs_best": sorted(pairwise, key=lambda r: r["mean_f1_difference"]),
+            "caveat": "Folds de CV compartilham dados de treino; os testes indicam tendência, não independência estrita."}

@@ -31,7 +31,7 @@ O cálculo ideal é `5 × (1000 + 300) / (1000 + 1000 + 300) = 2,826... V`. **2,
 - `hardware/wokwi/montagem_atual/diagram.json`: memória vigente da protoboard, com ressalvas. O TCRT é representado por uma peça LDR; a ESP32 virtual aparece separada e **não tem fios `esp:*` no JSON**. As ligações terminam em furos P1, cujo mapeamento físico consta na documentação. Não é prova de simulação funcional de firmware no Wokwi.
 - `hardware/netlist/motionpet_atual_sem_lcd.json`: inventário de 13 fios, três resistores e GPIOs 5/34/35; sem LCD.
 - `hardware/out/esquematico_estagio*.png`, `montagem_final_i2c.png` e `hardware/guia_montagem_final.html`: desenhos históricos com outros perfis; **não usar como foto ou esquema vigente**.
-- Nenhuma foto física foi encontrada em `docs/`, `hardware/` na busca pelos formatos JPG/JPEG/WebP; os PNGs identificados em `hardware/out/` são desenhos gerados. Isso não prova que não exista uma foto em telefone ou fora do projeto.
+- Nenhuma foto física foi encontrada em `docs/` ou `hardware/` na busca pelos formatos JPG/JPEG/WebP; os PNGs identificados em `hardware/out/` são desenhos gerados. Isso não prova que não exista uma foto em telefone ou fora do projeto.
 
 A Figura 2 precisa ser uma fotografia real feita pelo grupo. Preferir vista superior bem iluminada, mostrando ESP32, os dois sensores, divisor e ambas as protoboards. Uma foto permite documentar disposição; não comprova tensão, precisão ou funcionamento. Não é necessário alterar a montagem para fotografá-la.
 

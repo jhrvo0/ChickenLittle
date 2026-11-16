@@ -2,7 +2,7 @@
 
 > Estado atual: [Fase C — execução integrada e auditoria dos documentos originais](motionlab_fase_c.md). As tabelas abaixo registram o histórico da frente B, anterior à execução dos containers. Enunciado e template originais agora estão em `docs/academico/`; simulação é expressamente aceita pela disciplina.
 
-Data: 11/11/2026. Frente B: ML, integração e evidência acadêmica. A frente visual pertence ao frontend; não houve alteração de HTML/CSS/JS, `session.py`, `server.py` ou firmware nesta entrega. Contrato para o frontend: [motionlab_ml_api.md](motionlab_ml_api.md).
+Data: 11/11/2026. Frente B: ML, integração e evidência acadêmica. Não houve alteração de HTML/CSS/JS, `session.py`, `server.py` ou firmware nesta entrega. Contrato para o frontend: [motionlab_ml_api.md](motionlab_ml_api.md).
 
 ## Diagnóstico de conformidade
 
@@ -36,7 +36,7 @@ Este mapeamento usa o checklist do briefing. O enunciado integral e a rubrica da
 5. Coletar sessões reais com o firmware já instalado, em etapa posterior conduzida com o usuário. Repetir EDA, treino e avaliação real sem incorporar demonstrações.
 6. Congelar um conjunto de teste antes de tuning; comparar baseline e modelos por grupo e por eventos. Só então discutir promoção para a UI ou TinyML.
 
-Responsabilidade: frontend em `terminal/web/static/`; backend em `ml/`, `ops/mlops/`, docs e testes. A única alteração desta entrega no backend visual é aditiva em `terminal/motionlab/dataset.py`: bloqueio de corpus contaminado e metadados de avaliação. Arquivos compartilhados `session.py` e `server.py` não precisaram de edição.
+A única alteração desta entrega no backend visual é aditiva em `terminal/motionlab/dataset.py`: bloqueio de corpus contaminado e metadados de avaliação. Arquivos compartilhados `session.py` e `server.py` não precisaram de edição.
 
 ## Ambiente local reproduzível
 
@@ -168,5 +168,5 @@ Esta lista exclui as alterações do MotionLab/redesign que já estavam no check
 | Avaliação e API | `ml/evaluation/metrics.py`, `ml/evaluation/report.py`, `ml/inference_api.py`, `ml/provenance.py`, `terminal/motionlab/dataset.py` |
 | Ingestão e infraestrutura | `ml/mqtt_ingestion.py`, `ops/mlops/compose.yaml`, `ops/mlops/Dockerfile`, `ops/mlops/Dockerfile.airflow`, `ops/mlops/mosquitto.conf`, `ops/mlops/dags/motionlab_experiment.py` |
 | Dependências e artefatos locais | `pyproject.toml`, `requirements-mlops.lock`, `.gitignore` |
-| Documentação e coordenação | `README.md`, `docs/README.md`, `docs/motionlab_mlops.md`, `docs/motionlab_ml_api.md`, `docs/relatorio_sbc_base.md` |
+| Documentação e coordenação | `README.md`, `docs/motionlab_mlops.md`, `docs/motionlab_ml_api.md`, `docs/relatorio_sbc_base.md` |
 | Testes | `tests/test_mlops.py` (21 casos) |

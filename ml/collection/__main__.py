@@ -62,7 +62,8 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Gera corpus sintetico multi-participante (exclusivo para testar codigo do pipeline).",
     )
-    parser.add_argument("--participants", type=int, default=5, help="Numero de participantes.")
+    parser.add_argument("--participants", type=int, default=12,
+                        help="Numero de participantes (12 permite holdout com mais de um participante e LOGO distinto do k-fold).")
     parser.add_argument(
         "--sessions-per-participant",
         type=int,

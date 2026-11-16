@@ -23,13 +23,14 @@ Endereços com Docker: dashboard em <http://127.0.0.1:8767>, API em <http://127.
 | Tratamento de dados com justificativa | Seção “Tratamento dos dados e justificativas” do notebook; `ml/preprocessing/filtering.py` | Atendido nesta revisão |
 | Mínimo de 5 visualizações interpretadas | 5 figuras de EDA (`ml/eda.py`), gráfico treino × validação e matrizes de confusão | Atendido |
 | Holdout | `split_windows_grouped`: participantes de teste reservados antes da EDA | Atendido |
-| Validação cruzada | `GroupKFold` por participante (`ml/validation.py`) | Atendido; k-fold estratificado comum vazaria janelas sobrepostas da mesma pessoa |
+| Validação cruzada | `StratifiedGroupKFold` (5 folds, estratificado por classe e agrupado por participante), com `GroupKFold` como alternativa quando uma classe não aparece em grupos suficientes (`ml/validation.py`) | Atendido; o k-fold estratificado comum vazaria janelas sobrepostas da mesma pessoa |
 | Leave-One-Out | `LeaveOneGroupOut` (um participante por vez) | Atendido; LOO por janela não é aplicável (janelas sobrepostas) |
 | Estabilidade, sobreajuste, subajuste e generalização | Desvio entre folds, F1 de treino × validação por fold, diagnóstico `fit_diagnosis`, holdout | Atendido nesta revisão |
 | Otimização de hiperparâmetros (Grid/Random) | `search_hyperparameters` em `ml/validation.py`, `--search grid` ou `--search random` | Atendido nesta revisão |
 | Baseline justificado | Árvore de profundidade 1 (`decision_stump_baseline`) e regras de domínio (`rule_baseline`) | Atendido |
 | ≥ 3 modelos da lista (KNN, Árvore, RF, AdaBoost, MLP) | Árvore, Random Forest e MLP; **KNN e AdaBoost** com `--extended-models` | Atendido: os 5 da lista |
 | Visualizações de comparação e análise crítica | Matrizes de confusão, F1 por classe, gráfico treino × validação, seção crítica do notebook | Atendido |
+| Comparação estatística dos modelos | Friedman nos folds do LOGO e Wilcoxon pareado contra o melhor, com correção de Holm (`compare_models_statistically`) | Atendido |
 | MLflow: parâmetros, métricas, artefatos, modelo salvo | `ml/tracking.py` | Atendido |
 | MLflow: múltiplos experimentos | `MotionLab-<coorte>` (baseline e comparação, papéis em tags) e `MotionLab-<coorte>-hiperparametros` (busca) | Atendido nesta revisão |
 | Sistema embarcado e MQTT | ESP32 real (`firmware/`) com MQTT/TLS; simulador (`simulator/`, serviço `publisher`) | Atendido |
@@ -39,7 +40,7 @@ Endereços com Docker: dashboard em <http://127.0.0.1:8767>, API em <http://127.
 | Dashboard interativo | MotionLab, painel Motion Intelligence: sinais ao vivo, métricas, previsões e estado do serviço | Atendido com aplicação própria (a especificação cita Streamlit/Dash como exemplos) |
 | Docker Compose com execução em um único comando | `docker-compose.yml` na raiz (inclui `ops/mlops/compose.yaml`) | Atendido nesta revisão; ver limites |
 | README com equipe, nome, instruções e Google Sites | `README.md` | Atendido após o merge do branch `docs/ajustes-checkpoint` (link do Google Sites) |
-| Relatório no template SBC | `reports/relatorio_aprendizado_maquina.pdf` e `.docx` | Candidato gerado com evidências locais; revisão humana e adequação à rubrica pendentes |
+| Relatório no template SBC | `reports/relatorio_aprendizado_maquina.docx` (fonte), `.md` e `.pdf`; figuras e tabelas geradas por `python -m ml.report_assets` | Atualizado em 16/11; o PDF precisa ser reexportado do `.docx` e o grupo deve revisar |
 
 ## O que mudou nesta revisão
 
@@ -50,25 +51,35 @@ Endereços com Docker: dashboard em <http://127.0.0.1:8767>, API em <http://127.
 - **`docker-compose.yml` na raiz:** `docker compose up --build` sobe a solução inteira.
 - **Notebook:** novas seções de tratamento de dados, otimização e sobreajuste; o caminho do experimento fica relativo à raiz.
 
+Revisão de 16/11:
+
+- **Corpus bootstrap com 12 participantes** (padrão de `ml.collection`): o teste externo passa a ter 2 participantes e o LOGO (10 folds) deixa de coincidir com o k-fold (5 folds).
+- **`StratifiedGroupKFold`** na validação cruzada e na busca, que é o k-fold estratificado da especificação sem misturar participantes.
+- **Comparação estatística** (`model_comparison` no manifesto): Friedman e Wilcoxon com Holm, também no notebook e no relatório.
+- **Simulador a 70 ms**, o período do firmware (antes 75 ms), e **variação entre participantes na demo** publicada por MQTT (antes os cinco eram idênticos, o que deixava a avaliação da demo otimista).
+- **`ml/report_assets.py`** gera figuras e `tabelas.json` do relatório a partir do experimento; o relatório foi reescrito com essas tabelas, referências bibliográficas e a comparação estatística.
+
 ## Resultado de referência (corpus simulado, seed 42)
 
-Execução local com o comando da tabela “Como rodar”, 5 participantes simulados (3 de treino, 1 de validação, 1 de teste). Os números descrevem o simulador, não pessoas reais.
+Experimento `20261116T230322_c96f733d`: 4303 leituras, 1918 janelas, 12 participantes simulados (7 de treino, 3 de validação e 2 de teste: sim_p04 e sim_p10). Comando: o da tabela “Como rodar”, com `--verify-cpp`. Os números descrevem o simulador, não pessoas reais.
 
-| Modelo | F1 CV (validação) | F1 treino (CV) | Diagnóstico | F1 holdout |
-|---|---|---|---|---|
-| Regras (referência) | 0,53 ± 0,01 | 0,53 | subajuste | 0,55 |
-| Árvore profundidade 1 (baseline) | 0,34 ± 0,02 | 0,34 | subajuste | 0,33 |
-| Árvore de decisão | 0,85 ± 0,08 | 0,99 | sobreajuste | 0,79 |
-| Random Forest | 0,88 ± 0,07 | 0,99 | sobreajuste | 0,88 |
-| MLP | 0,94 ± 0,02 | 1,00 | equilibrado | 0,91 |
-| KNN | 0,87 ± 0,06 | 1,00 | (memoriza o treino) | 0,84 |
-| AdaBoost | 0,66 ± 0,09 | 0,76 | sobreajuste | 0,60 |
+| Modelo | F1 SGKF (5 folds) | F1 LOGO (10 folds) | F1 treino | Diagnóstico | F1 teste |
+|---|---|---|---|---|---|
+| Árvore profundidade 1 (baseline) | 0,329 ± 0,011 | 0,328 ± 0,014 | 0,330 | subajuste | 0,343 |
+| Regras (referência) | 0,530 ± 0,014 | 0,529 ± 0,024 | 0,531 | subajuste | 0,546 |
+| Árvore de decisão | 0,897 ± 0,035 | 0,895 ± 0,050 | 0,976 | equilibrado | 0,909 |
+| Random Forest | 0,932 ± 0,031 | 0,933 ± 0,043 | 0,979 | equilibrado | 0,953 |
+| KNN | 0,917 ± 0,027 | 0,921 ± 0,034 | 1,000 | equilibrado | 0,882 |
+| AdaBoost | 0,629 ± 0,024 | 0,642 ± 0,050 | 0,660 | equilibrado | 0,766 |
+| MLP | 0,982 ± 0,016 | 0,983 ± 0,018 | 0,999 | equilibrado | 0,970 |
 
-Com 4 grupos de desenvolvimento, GroupKFold e LeaveOneGroupOut produzem a mesma partição; não são duas evidências independentes. Os valores mudam a cada execução da busca, porque os hiperparâmetros escolhidos dependem do corpus.
+Friedman nos 10 folds do LOGO: p = 1.2e-10. A MLP ficou em 1º em todos os folds e é melhor que cada outro modelo no Wilcoxon com Holm (p = 0.012, o menor possível com 10 folds). Modelo selecionado para a ESP32: MLP; paridade Python/C++ em 320 janelas: 100%. Figuras e tabelas completas: `reports/figuras-am/` e `reports/figuras-am/tabelas.json`.
+
+O resultado anterior, com 5 participantes, está registrado em [entrega_am_2026-11-15.md](entrega_am_2026-11-15.md).
 
 ## Limites e pendências
 
-- **Relatório SBC de AM:** [candidato no template](../reports/relatorio_aprendizado_maquina.pdf) com [editável](../reports/relatorio_aprendizado_maquina.docx), autores do README, cinco figuras de EDA e matrizes dos cinco modelos. O grupo deve revisar conteúdo, autoria, referências e limite de páginas antes de entregar. Ver [evidências de 15/11](entrega_am_2026-11-15.md).
+- **Relatório SBC de AM:** [editável](../reports/relatorio_aprendizado_maquina.docx) e [texto](../reports/relatorio_aprendizado_maquina.md) atualizados em 16/11. **O PDF precisa ser reexportado do `.docx`** (Word, Google Docs ou LibreOffice) antes da entrega. O grupo deve revisar conteúdo e autoria.
 - **Docker:** em 15/11, o Compose da raiz foi compilado e iniciado, o DAG completou as quatro tarefas e o verificador `--faults` aprovou 14 checks, incluindo KNN, AdaBoost, MLflow de hiperparâmetros e recuperação de serviços. Evidências e limites em [entrega de AM](entrega_am_2026-11-15.md). A execução foi uma demonstração simulada; não comprova desempenho físico.
 - **Dados reais:** todos os modelos foram treinados com dados simulados. A coleta com participantes segue em `docs/real_data_collection_guide.md`.
 - **Airflow:** no Compose, o DAG roda uma vez em lote. O scheduler contínuo fica no perfil `console`.

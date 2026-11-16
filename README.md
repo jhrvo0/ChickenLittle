@@ -8,6 +8,8 @@ O protótipo combina um sensor ultrassônico HC-SR04 e um sensor infravermelho T
 
 O projeto investiga como transformar sinais de sensores simples em comandos úteis, separando a implementação de software da evidência necessária para avaliar seu desempenho com pessoas e hardware real. Surgiu como ChickenLittle, evoluiu para MotionPet e mantém a experiência anterior em `/legacy/`.
 
+> **Avaliação:** o [índice da entrega](docs/indice_entrega.md) reúne o que foi feito em Sistemas Embarcados e em Aprendizado de Máquina, com links para código, evidências e o roteiro de demonstração.
+
 ## Demonstração
 
 Execute a interface em modo de demonstração e abra [127.0.0.1:8767](http://127.0.0.1:8767/). A origem DEMO usa dados simulados e é identificada na interface.
@@ -150,4 +152,4 @@ As responsabilidades acima são a divisão de trabalho proposta para o grupo, e 
 
 Comece pelo [índice da documentação](docs/README.md). Antes de publicação, consulte as [pendências de organização e segurança](docs/publicacao.md).
 
-**Aprendizado de Máquina:** [reprodução e pendências da entrega](docs/entrega_am_2026-11-15.md) e [relatório SBC para revisão do grupo](reports/relatorio_aprendizado_maquina.pdf) ([editável](reports/relatorio_aprendizado_maquina.docx)). As métricas desta versão são de dados simulados.
+**Aprendizado de Máquina:** [requisitos, comandos e resultados](docs/aprendizado_maquina.md) e relatório SBC ([PDF](reports/relatorio_aprendizado_maquina.pdf), [editável](reports/relatorio_aprendizado_maquina.docx), [texto](reports/relatorio_aprendizado_maquina.md)). As métricas são de dados simulados.
