@@ -49,6 +49,7 @@ sdkconfig.old
 .DS_Store
 Thumbs.db
 
+# Ferramentas de terceiros clonadas localmente
 /tools/
 
 # bancada (gerados localmente)

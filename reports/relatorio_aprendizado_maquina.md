@@ -151,8 +151,6 @@ O próximo passo é coletar participantes reais com o guia de coleta do projeto,
 O MotionLab integra aquisição por sistema embarcado, MQTT, persistência, Airflow, MLflow, API, dashboard e Docker em um pipeline reprodutível. Com validação agrupada por participante, Grid Search e teste estatístico, a MLP foi o melhor modelo no corpus simulado e roda em C++ com o mesmo resultado do Python. A validação com usuários reais é a etapa que falta para sustentar o uso físico.
 
 
-
-
 ## Referências
 
 - Breiman, L. (2001). Random forests. Machine Learning, 45(1):5–32.

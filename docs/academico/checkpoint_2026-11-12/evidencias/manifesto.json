@@ -44,7 +44,6 @@
   },
   "git_head": "37cdefd133fd5bb416e0950f905f15f1cb0a5d57",
   "source_sha256": {
-    "docs/README.md": "2552a22b3fe0bbbaaf83cdd4e7999244dd61e0d0f5526b520b7a6078ee65b325",
     "README.md": "18590026ba60a1c8ff55cd2255f2c1ce5a6ab1b5b3c9e07b8354b66c84fc8369",
     "docs/bench_verified_wiring.md": "2bc91a607e9bf3e2eb7db030808e7f8acb64b0e2f798cb11b2a59c120adfe64c",
     "docs/protocol.md": "8d25899e373160f8127220ecc62d1183e526f8cd8dbbc09a639765ad5731fc79",

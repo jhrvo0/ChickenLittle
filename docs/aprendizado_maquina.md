@@ -79,7 +79,7 @@ O resultado anterior, com 5 participantes, está registrado em [entrega_am_2026-
 
 ## Limites e pendências
 
-- **Relatório SBC de AM:** [editável](../reports/relatorio_aprendizado_maquina.docx) e [texto](../reports/relatorio_aprendizado_maquina.md) atualizados em 16/11. **O PDF precisa ser reexportado do `.docx`** (Word, Google Docs ou LibreOffice) antes da entrega. O grupo deve revisar conteúdo, autoria.
+- **Relatório SBC de AM:** [editável](../reports/relatorio_aprendizado_maquina.docx) e [texto](../reports/relatorio_aprendizado_maquina.md) atualizados em 16/11. **O PDF precisa ser reexportado do `.docx`** (Word, Google Docs ou LibreOffice) antes da entrega. O grupo deve revisar conteúdo e autoria.
 - **Docker:** em 15/11, o Compose da raiz foi compilado e iniciado, o DAG completou as quatro tarefas e o verificador `--faults` aprovou 14 checks, incluindo KNN, AdaBoost, MLflow de hiperparâmetros e recuperação de serviços. Evidências e limites em [entrega de AM](entrega_am_2026-11-15.md). A execução foi uma demonstração simulada; não comprova desempenho físico.
 - **Dados reais:** todos os modelos foram treinados com dados simulados. A coleta com participantes segue em `docs/real_data_collection_guide.md`.
 - **Airflow:** no Compose, o DAG roda uma vez em lote. O scheduler contínuo fica no perfil `console`.

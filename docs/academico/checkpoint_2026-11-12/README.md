@@ -59,7 +59,6 @@ Os três skips são comparações opcionais com `FRITZING_PARTS_DIR`, não defin
 Cópias idênticas às fornecidas, sem preenchimento ou alteração:
 
 - [Modelo do checkpoint](../Relatorio_CheckPoint_Sistemas_Embarcados_CESAR_School_2026.1.docx), SHA-256 `2ec97ec51e08b00f68fdc3f9ae666cd93c40ff803b670fbf3b0cef3e6331aa21`.
-- Enunciado de Embarcados (`Projeto-Embarcados_CesarSchool-CSBC (1).pdf`, fornecido pelos professores e não versionado neste repositório), SHA-256 `cf7c517dd67f5491309e5e994f777da5f77adcd1ece2bd9e6c9552009f29dd2f`.
 
 O DOCX foi lido integralmente por OOXML, incluindo todas as tabelas, cabeçalhos e rodapés. A prévia já aberta no Google Drive foi lida para localizar os campos por página: **6 páginas exibidas**, com painel docente na página 6. Os metadados `docProps/app.xml` e os valores em cache do rodapé ainda indicam 7. Isso explica a divergência; o checklist usa a paginação da prévia e também nomes de seção. A paginação pode mudar no editor usado pelo grupo. Não foram corrigidos os campos do modelo. O renderer local não estava disponível (`soffice.exe` ausente do runtime); nenhuma renderização local foi apresentada como concluída.
 

@@ -36,7 +36,7 @@ observacoes de seguranca, confirmacoes pendentes). Nada e desenhado a mao: `pyth
 | `export_fz.py`, `fz_parts.py` | `.fz/.fzz` (pecas core do Fritzing + pecas genericas embutidas) e releitura das redes do XML |
 | `export_wokwi.py`, `wokwi/` | `diagram.json`, `wokwi.toml`, cenario de teste (nao executados) |
 | `reports.py`, `guide_html.py`, `build.py` | tabelas, guia HTML e orquestrador |
-| `mcp/README.md` | avaliacao dos MCPs e estado real da configuracao |
+| `tools/` | `build_parts_db.py` (indice de pecas), `svg2png.py` (Chromium), `extract_geom.py` |
 | `out/` | artefatos gerados (reproduziveis; `MANIFEST.json` traz SHA-256) |
 
 ## Regenerar / editar
