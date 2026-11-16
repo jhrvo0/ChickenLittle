@@ -39,7 +39,7 @@ Endereços com Docker: dashboard em <http://127.0.0.1:8767>, API em <http://127.
 | Dashboard interativo | MotionLab, painel Motion Intelligence: sinais ao vivo, métricas, previsões e estado do serviço | Atendido com aplicação própria (a especificação cita Streamlit/Dash como exemplos) |
 | Docker Compose com execução em um único comando | `docker-compose.yml` na raiz (inclui `ops/mlops/compose.yaml`) | Atendido nesta revisão; ver limites |
 | README com equipe, nome, instruções e Google Sites | `README.md` | Atendido após o merge do branch `docs/ajustes-checkpoint` (link do Google Sites) |
-| Relatório no template SBC | — | **Pendente**: o relatório de AM ainda não existe (o PDF em `docs/` é o de Sistemas Embarcados) |
+| Relatório no template SBC | `reports/relatorio_aprendizado_maquina.pdf` e `.docx` | Candidato gerado com evidências locais; revisão humana e adequação à rubrica pendentes |
 
 ## O que mudou nesta revisão
 
@@ -68,8 +68,8 @@ Com 4 grupos de desenvolvimento, GroupKFold e LeaveOneGroupOut produzem a mesma 
 
 ## Limites e pendências
 
-- **Relatório SBC de AM:** precisa ser escrito pelo grupo no template anexo à especificação.
-- **Docker:** o Compose da raiz foi validado com `docker compose config` (todos os serviços e caminhos resolvem), mas a stack não foi subida nesta revisão. Antes da apresentação, rode `docker compose up --build` e `python ops/mlops/verify_stack.py --faults`; o verificador foi atualizado para esperar KNN, AdaBoost e o experimento de hiperparâmetros.
+- **Relatório SBC de AM:** [candidato no template](../reports/relatorio_aprendizado_maquina.pdf) com [editável](../reports/relatorio_aprendizado_maquina.docx), autores do README, cinco figuras de EDA e matrizes dos cinco modelos. O grupo deve revisar conteúdo, autoria, declaração de IA, referências e limite de páginas antes de entregar. Ver [evidências de 15/11](entrega_am_2026-11-15.md).
+- **Docker:** em 15/11, o Compose da raiz foi compilado e iniciado, o DAG completou as quatro tarefas e o verificador `--faults` aprovou 14 checks, incluindo KNN, AdaBoost, MLflow de hiperparâmetros e recuperação de serviços. Evidências e limites em [entrega de AM](entrega_am_2026-11-15.md). A execução foi uma demonstração simulada; não comprova desempenho físico.
 - **Dados reais:** todos os modelos foram treinados com dados simulados. A coleta com participantes segue em `docs/real_data_collection_guide.md`.
 - **Airflow:** no Compose, o DAG roda uma vez em lote. O scheduler contínuo fica no perfil `console`.
 - **Dashboard:** é a aplicação MotionLab, não Streamlit ou Dash; vale confirmar com o professor que atende ao requisito.
