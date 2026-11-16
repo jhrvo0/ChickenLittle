@@ -23,7 +23,7 @@ from ml.schemas import CORE_GESTURE_CLASSES, FEATURE_NAMES, PreprocessingConfig
 from ml.training.models import TrainingConfig
 from ml.training.splitter import split_windows_grouped, windows_to_xy
 from ml.training.trainer import save_trained_bundle, select_best_embeddable_bundle, train_candidate_models
-from ml.validation import cross_validate_grouped, search_hyperparameters, tune_tree_depth
+from ml.validation import compare_models_statistically, cross_validate_grouped, search_hyperparameters, tune_tree_depth
 
 COHORT_ORIGIN = {"real": "real_hardware", "synthetic": "synthetic_simulator", "demo": "synthetic_simulator"}
 
@@ -147,6 +147,10 @@ def run_experiment(raw_dir, *, cohort, output_root="data/experiments", seed=42,
         manifest["validation"]["leave_one_group_out"] = (
             cross_validate_grouped(development, cfg, group_attr=group_attr, leave_one_out=True)
             if leave_one_out else {"status": "not_requested", "reason": "Opcional; nunca LOO por janela sobreposta."})
+        # Mais folds dão mais poder ao teste pareado: prefere LOGO quando executado.
+        comparison_source = "leave_one_group_out" if leave_one_out else "group_kfold"
+        manifest["model_comparison"] = {"source": comparison_source,
+                                        **compare_models_statistically(manifest["validation"][comparison_source])}
         # O teste externo não participa da CV nem da seleção multicritério na validação.
         bundles, trained_split = train_candidate_models(windows, cfg, p_cfg, require_real_data=cohort == "real")
         assert trained_split == split
@@ -213,7 +217,7 @@ def main(argv=None):
     parser.add_argument("--verify-cpp", action="store_true")
     parser.add_argument("--tune", action="store_true", help="Compara profundidades 3, 5 e 7 da árvore só na CV de desenvolvimento.")
     parser.add_argument("--search", choices=("grid", "random"),
-                        help="Grid Search ou Random Search de hiperparâmetros por modelo, com GroupKFold no desenvolvimento.")
+                        help="Grid Search ou Random Search de hiperparâmetros por modelo, com k-fold agrupado (estratificado quando possível) no desenvolvimento.")
     parser.add_argument("--extended-models", action="store_true", help="Inclui KNN e AdaBoost na comparação.")
     parser.add_argument("--learned-baseline", action="store_true", help="Inclui o baseline aprendido (árvore de profundidade 1).")
     args = parser.parse_args(argv)
