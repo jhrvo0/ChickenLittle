@@ -192,8 +192,14 @@ def publish_demo(host, port, seed=42, *, ca_file=None):
             raise RuntimeError("Timeout ao assinar confirmações de persistência.")
         from uuid import uuid4
         batch = uuid4().hex[:8]
+        import random
+        variation = random.Random(seed)
         for index in range(1, 6):
-            rows = generate_synthetic_session(f"demo_p{index:02d}", f"mqtt_demo_p{index:02d}_{seed}_{batch}", seed + index)
+            # Mesma variação entre participantes do corpus sintético; sem ela os cinco grupos seriam
+            # estatisticamente idênticos e a avaliação agrupada da demo ficaria otimista.
+            rows = generate_synthetic_session(f"demo_p{index:02d}", f"mqtt_demo_p{index:02d}_{seed}_{batch}", seed + index,
+                                              participant_bias_cm=variation.uniform(-3.0, 3.0),
+                                              speed_scale=variation.uniform(0.88, 1.12))
             payload = {"schema_version": 1, "cohort": "demo", "records": [r.to_dict() for r in rows]}
             expected.update(session_id=rows[0].session_id, dataset_sha256=dataset_digest(rows))
             confirmed.clear()

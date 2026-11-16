@@ -111,3 +111,57 @@ def test_root_compose_runs_whole_stack_with_one_command():
 def test_airflow_dag_runs_extended_comparison_and_search():
     dag = (ROOT / "ops/mlops/dags/motionlab_experiment.py").read_text(encoding="utf-8")
     assert 'search="grid"' in dag and "include_extended_candidates=True" in dag and "leave_one_out=True" in dag
+
+
+def test_cv_uses_stratified_group_kfold_when_classes_span_enough_groups(development):
+    _, _, dev = development
+    cv = cross_validate_grouped(dev, FAST, group_attr="participant_id")
+    assert cv["method"] in ("StratifiedGroupKFold", "GroupKFold")
+    for model in cv["models"].values():
+        for fold in model["folds"]:
+            assert not set(fold["train_groups"]) & set(fold["validation_groups"])
+
+
+def test_can_stratify_requires_each_class_in_enough_groups():
+    import numpy as np
+    from ml.validation import _can_stratify
+    y = np.array([0, 0, 1, 1, 0, 1])
+    groups = np.array(["a", "b", "a", "b", "c", "c"])
+    assert _can_stratify(y, groups, 3)
+    assert not _can_stratify(np.array([0, 0, 1, 0, 0, 0]), groups, 3)  # classe 1 só no grupo "a"
+
+
+def test_statistical_comparison_ranks_models_and_corrects_p_values():
+    from ml.validation import compare_models_statistically
+    folds = lambda values: [{"fold": i, "status": "evaluated", "f1_macro": v} for i, v in enumerate(values)]
+    cv = {"method": "LeaveOneGroupOut", "n_splits": 6, "models": {
+        "strong": {"valid_folds": 6, "folds": folds([0.90, 0.92, 0.91, 0.93, 0.89, 0.94])},
+        "medium": {"valid_folds": 6, "folds": folds([0.80, 0.82, 0.79, 0.85, 0.81, 0.83])},
+        "weak": {"valid_folds": 6, "folds": folds([0.50, 0.55, 0.52, 0.51, 0.53, 0.54])},
+        "partial": {"valid_folds": 5, "folds": folds([0.99] * 5)},  # fora: não avaliado em todos os folds
+    }}
+    result = compare_models_statistically(cv)
+    assert result["status"] == "evaluated" and result["best_model"] == "strong"
+    assert set(result["mean_rank"]) == {"strong", "medium", "weak"}
+    assert result["mean_rank"]["strong"] == 1.0 and result["mean_rank"]["weak"] == 3.0
+    assert result["friedman"]["p_value"] < 0.05
+    holm = {r["model"]: r for r in result["pairwise_vs_best"]}
+    assert all(r["p_value_holm"] >= r["p_value"] for r in holm.values())
+
+
+def test_statistical_comparison_is_pending_with_too_few_folds():
+    from ml.validation import compare_models_statistically
+    assert compare_models_statistically({"n_splits": 2, "models": {}})["status"] == "pending"
+
+
+def test_synthetic_sessions_match_firmware_sampling_period():
+    import inspect
+    from ml.collection.synthetic import generate_synthetic_session
+    pinout = (ROOT / "firmware/main/pinout_config.h").read_text(encoding="utf-8")
+    assert "DEFAULT_SENSOR_PERIOD_MS   70UL" in pinout
+    assert inspect.signature(generate_synthetic_session).parameters["sample_period_ms"].default == 70
+
+
+def test_demo_publisher_varies_participants():
+    source = (ROOT / "ml/mqtt_ingestion.py").read_text(encoding="utf-8")
+    assert "participant_bias_cm=variation.uniform" in source and "speed_scale=variation.uniform" in source

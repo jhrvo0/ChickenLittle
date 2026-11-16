@@ -1,5 +1,7 @@
 # Entrega de Aprendizado de Máquina
 
+> **Atualização em 16/11:** este documento registra a execução de 15/11 com 5 participantes. Os resultados vigentes (12 participantes, StratifiedGroupKFold, comparação estatística e relatório reescrito) estão em [aprendizado_maquina.md](aprendizado_maquina.md#resultado-de-referência-corpus-simulado-seed-42).
+
 Esta revisão foi iniciada em 15/11/2026, após os merges dos PRs #1, #2 e #3 (HEAD `51dd39d`). A branch local é `verificacao/entrega-ml`. Não houve commit, push, merge, acesso serial nem gravação da placa.
 
 ## Como se situar no trabalho

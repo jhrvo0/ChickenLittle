@@ -63,7 +63,7 @@ def generate_synthetic_session(
     participant_id: str,
     session_id: str,
     seed: int,
-    sample_period_ms: int = 75,
+    sample_period_ms: int = 70,  # mesmo período padrão do firmware (DEFAULT_SENSOR_PERIOD_MS)
     participant_bias_cm: float = 0.0,
     speed_scale: float = 1.0,
 ) -> list[RawSampleRecord]:

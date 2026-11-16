@@ -150,4 +150,4 @@ As responsabilidades acima são a divisão de trabalho proposta para o grupo, e 
 
 Comece pelo [índice da documentação](docs/README.md). Antes de publicação, consulte as [pendências de organização e segurança](docs/publicacao.md). Segundo informação do representante do grupo, o professor autorizou em sala o uso integral de IA no trabalho.
 
-**Aprendizado de Máquina:** [reprodução e pendências da entrega](docs/entrega_am_2026-11-15.md) e [relatório SBC para revisão do grupo](reports/relatorio_aprendizado_maquina.pdf) ([editável](reports/relatorio_aprendizado_maquina.docx)). As métricas desta versão são de dados simulados.
+**Aprendizado de Máquina:** [requisitos, comandos e resultados](docs/aprendizado_maquina.md) e relatório SBC ([editável](reports/relatorio_aprendizado_maquina.docx), [texto](reports/relatorio_aprendizado_maquina.md), [PDF](reports/relatorio_aprendizado_maquina.pdf)). As métricas são de dados simulados.
