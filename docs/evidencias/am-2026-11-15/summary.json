@@ -1,0 +1,27 @@
+{
+  "date_local": "2026-11-15",
+  "base_commit": "51dd39d",
+  "branch": "verificacao/entrega-ml",
+  "pytest": {
+    "collected": 674,
+    "passed": 669,
+    "skipped": 5,
+    "failures": 0,
+    "errors": 0
+  },
+  "node_ui_passed": 20,
+  "integration": {
+    "status": "passed",
+    "checks_passed": 14
+  },
+  "report": {
+    "pages": 8,
+    "template_sha256": "5497e7a8fb846cf536c90c85488a18997fb94bd1deebdd9a7976153e07019cb1",
+    "pdf_sha256": "260ec2e8b5e193218354c73ec428948651e925a6db4d810e914d529865d4fc91",
+    "visual_qa": "all_8_pages_inspected",
+    "template_section_geometry": "preserved",
+    "review_status": "pending_group_review"
+  },
+  "physical_validation": "pending",
+  "firmware_build": "not_run"
+}
