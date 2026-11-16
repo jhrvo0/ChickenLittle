@@ -1,0 +1,15 @@
+{"check": "api_ready_after_airflow_publication", "status": "passed", "experiment_id": "20261116T022223_2905d60b", "model_sha256": "364beb81d71b34946c7b3bec2c38944619a0aad600e007c974c03358dbf2a570"}
+{"check": "evaluations_and_mlflow", "status": "passed", "models": ["rule_baseline", "decision_tree", "random_forest", "mlp_compact", "knn", "adaboost", "decision_stump_baseline"], "run_id": "ad16368e0a4c4a97887ecabe92cc0f4b", "real": "pending"}
+2026/11/15 23:23:36 INFO mlflow.agent.hint: Load the `mlflow-trace-instrumentation` skill at /Users/marco/Documents/GitHub/ChickenLittle/.venv/lib/python3.12/site-packages/mlflow/assistant/skills/mlflow-trace-instrumentation/SKILL.md before writing any tracing code; it ships with this MLflow install. Set MLFLOW_DISABLE_AGENT_HINT=1 to silence this.
+{"check": "hyperparameter_search_logged", "status": "passed", "experiment": "2"}
+{"check": "identified_airflow_run_and_mlflow_children", "status": "passed", "airflow": {"run_id": "manual__2026-11-16T02:22:20.709198+00:00", "state": "success", "tasks": {"configuration": "success", "experiment": "success", "prepare": "success", "publish": "success"}}, "finished_mlflow_children": 10, "saved_models": 7}
+{"check": "dashboard_backend_consumes_api", "status": "passed", "visual_integration": "manual_review"}
+{"check": "invalid_http_input_rejected", "status": "passed", "http_status": 400}
+{"check": "http_inference_and_dashboard_proxy_match", "status": "passed", "label": "NEUTRAL", "input_origin": "demo", "trained_on": ["synthetic_simulator"]}
+{"check": "mqtt_duplicate_deduplicated", "status": "passed", "session_id": "mqtt_demo_p01_42_0b81d8f1", "dataset_sha256": "c17c15d54c275f149474b0ef44a698795e4b25bd657e2deda55aebae1089e2e5"}
+{"check": "invalid_conflicting_and_wrong_topic_mqtt_do_not_change_corpus", "status": "passed"}
+{"check": "new_mqtt_session_automatically_reaches_dashboard_backend", "status": "passed", "session_id": "verify_new_5e065384", "label": "NEUTRAL", "model_sha256": "364beb81d71b34946c7b3bec2c38944619a0aad600e007c974c03358dbf2a570"}
+{"check": "consumer_restart_preserves_idempotency", "status": "passed"}
+{"check": "broker_restart_reconnects_consumer", "status": "passed"}
+{"check": "api_failure_and_restart_preserve_dashboard_and_predictions", "status": "passed"}
+{"check": "mlflow_restart_does_not_interrupt_published_inference", "status": "passed"}
