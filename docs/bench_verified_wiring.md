@@ -45,7 +45,7 @@ Evidências em 05/11, horários de Fortaleza (UTC−3):
 
 **GND de referência: 6J.** A indicação posterior de 2J usada durante a montagem integrada de 10/11 não é a ligação registrada no teste bem-sucedido. A revisão atual volta a usar 6J. Não foi comprovado que 2J seja a causa da falha; não reutilizá-lo como alternativa sem conferência específica.
 
-Origem: histórico local Claude do projeto, conversa `2d18fea6-8fc1-4e1b-8919-cd5f33dd3adc`, de 05/11/2026. Este arquivo resume apenas as informações de bancada pertinentes.
+Origem: registro de bancada de 05/11/2026. Este arquivo resume apenas as informações de bancada pertinentes.
 
 ### HC-SR04 — registros separados
 

@@ -17,7 +17,7 @@ Os projetos `teste-*` e os arquivos gerados em `hardware/out/` incluem registros
 5. Conferir configurações locais, certificados, chaves, arquivos `.env`, dados de participantes e destinos de exportação. `firmware/communication/iot_config.local.h`, `ops/iot/local/` e dados IoT estão ignorados, mas outros nomes ou localizações podem não estar.
 6. Revisar caminhos absolutos e informação da máquina, inclusive no [guia de coleta](real_data_collection_guide.md), nos documentos acadêmicos e nas evidências geradas. Substituir ou anonimizar somente após avaliar o contexto e a autorização de uso.
 7. Conferir capturas reais, instruções em clone limpo e disponibilidade das evidências: `data/experiments/`, modelos e coletas são ignorados. Não apresentar resultados sintéticos como medições físicas.
-8. Resolver posteriormente com os professores a organização por diretório e os demais critérios acadêmicos. Segundo o representante do grupo, o professor autorizou em sala o uso integral de IA no trabalho.
+8. Resolver posteriormente com os professores a organização por diretório e os demais critérios acadêmicos.
 
 ## Escopo da conferência
 

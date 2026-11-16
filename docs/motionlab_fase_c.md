@@ -6,7 +6,7 @@ Data: 11/11/2026. Escopo: software com aquisição simulada. Sem COM3, coleta f�
 
 ## Conclusão e limites da entrega
 
-Foi executado o caminho **simulador → Mosquitto → consumidor → JSONL → Airflow → preparação/treino/CV/tuning → MLflow HTTP → publicação do modelo → API → backend do dashboard**. Uma sessão nova também foi processada automaticamente depois do treino, sem reiniciar o modelo ou solicitar uma inferência manual. A exibição dos novos resultados acadêmicos na tela do Motion Intelligence ainda depende do Claude Code. Portanto, **a arquitetura de backend foi demonstrada; a entrega acadêmica completa permanece parcial**.
+Foi executado o caminho **simulador → Mosquitto → consumidor → JSONL → Airflow → preparação/treino/CV/tuning → MLflow HTTP → publicação do modelo → API → backend do dashboard**. Uma sessão nova também foi processada automaticamente depois do treino, sem reiniciar o modelo ou solicitar uma inferência manual. A exibição dos novos resultados acadêmicos na tela do Motion Intelligence ainda estava pendente nesta fase. Portanto, **a arquitetura de backend foi demonstrada; a entrega acadêmica completa permanece parcial**.
 
 Airflow foi executado no runtime oficial 3.1.6, com banco persistente, XCom e quatro tasks reais, usando `airflow dags test`. Isso não é um mock nem simples importação do DAG. O Compose executa o DAG de ponta a ponta em lote. O scheduler e a UI de `airflow standalone` são um perfil adicional; sua execução contínua não é comprovada por `dags test`.
 
@@ -39,7 +39,7 @@ O texto do template manda A4, uma coluna, margens superior/inferior/laterais de 
 - **Evidência ausente:** relatório Markdown escreve FAR não estimável; MLflow omite essa métrica e registra status/suporte; a seleção não dá crédito de FAR quando não há neutros. API oferece `far_neutral.value=null`, preservando os campos antigos por compatibilidade.
 - **Reprodução:** snapshot inclui `ml`, `terminal` e `simulator`; importação fora do checkout foi testada. Bases Docker fixadas por digest, dependências do servidor em `ops/mlops/requirements-server.lock`, builds sequenciais e exclusões de dados/venvs no contexto Docker.
 
-Contrato completo e exemplos para o Claude: [motionlab_ml_api.md](motionlab_ml_api.md#extensão-fase-c-para-o-claude-code). `input_origin`, `training_cohort` e `trained_on` são independentes. REAL, SYNTHETIC, DEMO e PENDING nunca são convertidos uns nos outros para preencher o dashboard.
+Contrato completo e exemplos para o frontend: [motionlab_ml_api.md](motionlab_ml_api.md#extensão-fase-c-para-o-dashboard). `input_origin`, `training_cohort` e `trained_on` são independentes. REAL, SYNTHETIC, DEMO e PENDING nunca são convertidos uns nos outros para preencher o dashboard.
 
 ## Auditoria contra a especificação original
 
@@ -62,7 +62,7 @@ Contrato completo e exemplos para o Claude: [motionlab_ml_api.md](motionlab_ml_a
 | Console/scheduler contínuo do Airflow | Bloqueado nesta rodada por memória | Perfil `console` preparado; orçamento insuficiente para validá-lo com os demais aplicativos. O runtime do DAG em lote foi executado |
 | Modelo validado integrado e consumo automático de novos dados | Atendido | Publicação identificada pelo experimento; nova sessão MQTT passa automaticamente ao worker e `/v1/predictions`, sem novo treino |
 | Inferências disponíveis por API | Atendido | HTTP `/v1/infer`, previsão automática e proxy do dashboard exercitados; saída/proveniência conferidas |
-| Dashboard interativo com aquisição, indicadores, métricas, inferências e monitoramento | Parcial | Interface existente servida; backend consome API e mantém módulos durante falha dela. **Novas métricas e previsões ainda não foram ligadas à tela pelo Claude** |
+| Dashboard interativo com aquisição, indicadores, métricas, inferências e monitoramento | Parcial | Interface existente servida; backend consome API e mantém módulos durante falha dela. **Novas métricas e previsões ainda não estavam ligadas à tela nesta fase** |
 | Compose com principais serviços e um comando | Atendido para backend; apresentação parcial | MQTT, persistência, Airflow, MLflow, API e dashboard no mesmo Compose; `stack.ps1` contorna paths/Buildx/WSL deste Windows. Lacuna visual impede declarar toda a apresentação final concluída |
 | Reprodutibilidade | Atendido no escopo de software | Locks, digests, seed, corpus e hashes, código, grupos, IDs de runs e verificador. Tempo/latência não são bit a bit determinísticos |
 | Demonstração final de toda a arquitetura | Parcial | Backend real demonstrado; apresentação visual final e discussão do grupo pendentes |

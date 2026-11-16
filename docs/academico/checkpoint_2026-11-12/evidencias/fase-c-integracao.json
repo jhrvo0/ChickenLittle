@@ -40,7 +40,7 @@
     {
       "check": "dashboard_backend_consumes_api",
       "status": "passed",
-      "visual_integration": "pending_claude"
+      "visual_integration": "manual_review"
     },
     {
       "check": "invalid_http_input_rejected",

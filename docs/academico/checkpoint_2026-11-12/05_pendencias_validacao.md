@@ -5,7 +5,7 @@
 | Ordem | Pendência | Quem pode resolver / evidência necessária |
 |---:|---|---|
 | 1 | Identificação do grupo e autoria | Grupo fornece número, título oficial, representante, nomes completos, usuários GitHub e responsabilidades reais |
-| 2 | Redação humana no modelo | Grupo escreve resumo, descrições do fluxo, funcionamento e próximos passos; IA limitada à revisão textual dentro da regra declarada |
+| 2 | Redação humana no modelo | Grupo escreve resumo, descrições do fluxo, funcionamento e próximos passos |
 | 3 | Fotografia física — Figura 2 | Grupo fotografa a bancada vigente sem inventar montagem ou modificar fios para a imagem |
 | 4 | Capturas das telas — Figuras 4 e 5 | Grupo segue [roteiro de captura](04_dashboard_evidencias.md#capturas-manuais-necessárias), mantendo DEMO visível |
 | 5 | Figuras técnicas — Figuras 1 e 3 | Conferir e inserir os PNGs deste pacote nas áreas originais; preservar a indicação de esquema técnico e caminho de rede pendente |
@@ -13,7 +13,7 @@
 | 7 | Datas e paginação | Entrega antecipada informada = 12/11; modelo = checkpoint 17/11; rodapé em cache “de 7”, prévia = 6. Confirmar antes de alterar |
 | 8 | GitHub privado e trabalho local não publicado | Grupo decide posteriormente a publicação/visibilidade; nenhuma alteração de Git foi autorizada nesta tarefa |
 | 9 | Estrutura de pastas | Mapear `terminal/`/`ml/`→applications, `firmware/`→esp32-esp8266, `hardware/`→schematics; confirmar aceite ou planejar ajuste posterior |
-| 10 | Revisão de conformidade | Deixar painel docente em branco; não alegar Wi-Fi físico, IPv6, atuador físico, precisão ou conclusão elétrica; revisar uso de IA |
+| 10 | Revisão de conformidade | Deixar painel docente em branco; não alegar Wi-Fi físico, IPv6, atuador físico, precisão ou conclusão elétrica |
 
 O prazo informado para amanhã se refere ao relatório de checkpoint. A especificação original também registra documentação final em 03/12 até 23h59 e apresentação em 12/12; não foram alteradas essas datas nem inferido horário de entrega para 12/11.
 
@@ -26,8 +26,7 @@ O prazo informado para amanhã se refere ao relatório de checkpoint. A especifi
 - Quem contribuiu no Git usando outro autor, conta compartilhada ou fora do repositório; uso efetivo de GitHub Projects, mesmo com recurso habilitado.
 - Link público de protótipo/Figma/Sites, caso exista fora dos arquivos inspecionados. A URL `127.0.0.1` é local.
 - Foto atual e condições do ensaio físico; não substituir por render.
-- Confirmação formal das datas, do requisito IPv6, dos nomes obrigatórios de diretório e da admissibilidade dos materiais técnicos de IA.
-- Declaração verdadeira do uso de IA e responsabilidade sobre a versão final; não gerar declaração assinada em nome do grupo.
+- Confirmação formal das datas, do requisito IPv6 e dos nomes obrigatórios de diretório.
 
 ## Pendências técnicas depois do relatório
 

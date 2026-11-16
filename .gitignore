@@ -49,7 +49,7 @@ sdkconfig.old
 .DS_Store
 Thumbs.db
 
-# Ferramentas de terceiros clonadas pelo setup do MCP (hardware/tools/setup_fritzing_mcp.py)
+# Ferramentas de terceiros clonadas localmente
 /tools/
 
 # bancada (gerados localmente)
@@ -64,5 +64,3 @@ firmware/communication/iot_config.local.h
 ops/iot/local/
 data/iot/
 
-# Configuração local do Claude Code
-.claude/

@@ -279,6 +279,5 @@ mosquitto-lan.conf,mosquitto-lan.acl,verify_broker.py}`, `tests/test_firmware_io
 Modificados nesta fase: `firmware/main/{main.cpp,README.md}`,
 `firmware/communication/jsonl_protocol.cpp`, `firmware/sensors/sensors_driver.cpp`,
 `firmware/platformio.ini`, `ml/{mqtt_ingestion.py,prediction_worker.py,inference_api.py}`,
-`.gitignore`, a exclusão de segredos locais no contexto em `.dockerignore` e a decisão
-técnica no `AGENTS.md`. As demais alterações presentes no
+`.gitignore` e a exclusão de segredos locais no contexto em `.dockerignore`. As demais alterações presentes no
 checkout são anteriores à fase e foram preservadas.

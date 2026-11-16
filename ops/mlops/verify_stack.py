@@ -126,7 +126,7 @@ def verify(args):
         key = re.search(r'name="motionpet-key" content="([^"]+)"', page).group(1)
         assert http("/api/ml/status", web=True)[1]["model_sha256"] == state["model_sha256"]
         assert http("/api/ml/evaluations", web=True)[1]["demo"]["experiment_id"] == state["experiment_id"]
-        record("dashboard_backend_consumes_api", visual_integration="pending_claude")
+        record("dashboard_backend_consumes_api", visual_integration="manual_review")
         code, invalid = http("/v1/infer", {"schema_version": 1, "input_origin": "demo", "features": [float("nan")]})
         assert code == 400 and invalid["error"] == "invalid_request"
         record("invalid_http_input_rejected", http_status=code)

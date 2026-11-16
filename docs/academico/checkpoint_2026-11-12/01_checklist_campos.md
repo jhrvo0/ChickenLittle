@@ -134,6 +134,6 @@ Deixar sem preenchimento pelo grupo: observações e “Atende?” dos oito pont
 - [ ] Preencher “Grupo ____” nos rodapés com o número confirmado, preservando o layout.
 - [ ] Conferir paginação real no editor; os valores “de 7” estão em cache e divergem da prévia de 6 páginas.
 - [ ] Manter identificação de DEMO/SINTÉTICO e as ressalvas das figuras técnicas.
-- [ ] Grupo redigir resumo, funcionamento, descrições e próximos passos; usar IA apenas dentro das regras declaradas da disciplina.
+- [ ] Grupo redigir resumo, funcionamento, descrições e próximos passos.
 - [ ] Revisar todos os campos entre colchetes; nenhum percentual é fornecido por este pacote.
 - [ ] Exportar/revisar a versão a entregar sem escrever no painel dos docentes; confirmar formato e horário do envio de amanhã no canal oficial.

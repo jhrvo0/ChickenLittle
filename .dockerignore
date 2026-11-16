@@ -11,7 +11,6 @@ build
 firmware
 hardware
 teste-*
-.claude
 .env*
 docs
 tests

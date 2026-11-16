@@ -80,7 +80,7 @@ O replay de `terminal/motionlab/dataset.py` conserva seus campos anteriores e ac
 
 Replay exploratório de todas as sessões não é o holdout acadêmico. Para a comparação formal, consumir os experimentos de `/v1/evaluations`. Todos os campos novos são aditivos; o frontend deve tolerar sua ausência em versões anteriores.
 
-## Extensão Fase C para o Claude Code
+## Extensão Fase C para o dashboard
 
 Configurar o backend com `python -m terminal.web --demo --ml-api-url http://127.0.0.1:8768`. Dentro do Compose a URL interna é `http://api:8768`. A URL é definida pelo operador, nunca pelo corpo da requisição. Não há mudanças em `/api/live`, `/api/lab`, `/api/experience` ou no gate.
 

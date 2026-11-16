@@ -64,7 +64,7 @@ def build(out_dir: Path, png: bool = False, wokwi_dir: Path | None = None) -> di
         p.write_text(reports.to_csv(reports.hole_map_rows(lay, st)), encoding="utf-8", newline="\n"); files.append(p)
         p = out_dir / f"estagio{st}.md"
         p.write_text(reports.stage_markdown(lay, st), encoding="utf-8", newline="\n"); files.append(p)
-    # pecas genericas (importaveis no Fritzing: Arquivo > Importar) + .fzp soltos para o indice do MCP
+    # pecas genericas (importaveis no Fritzing: Arquivo > Importar) + .fzp soltos para o indice de pecas
     import zipfile
     from . import fz_parts
     (out_dir / "parts").mkdir(exist_ok=True)

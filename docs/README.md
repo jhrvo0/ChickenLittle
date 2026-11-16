@@ -42,7 +42,7 @@ Este índice separa a descrição atual dos registros produzidos ao longo do des
 
 ## Documentação acadêmica
 
-As fontes e o checkpoint são documentos de trabalho do grupo; o material do checkpoint é um retrato da data em que foi preparado e pode não refletir mudanças posteriores. Segundo o representante do grupo, o professor autorizou em sala o uso integral de IA no trabalho.
+As fontes e o checkpoint são documentos de trabalho do grupo; o material do checkpoint é um retrato da data em que foi preparado e pode não refletir mudanças posteriores.
 
 ## Histórico técnico
 

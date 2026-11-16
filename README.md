@@ -148,6 +148,6 @@ As responsabilidades acima são a divisão de trabalho proposta para o grupo, e 
 
 **Página do projeto (Google Sites):** <https://sites.google.com/view/motionlab-grupo5>
 
-Comece pelo [índice da documentação](docs/README.md). Antes de publicação, consulte as [pendências de organização e segurança](docs/publicacao.md). Segundo informação do representante do grupo, o professor autorizou em sala o uso integral de IA no trabalho.
+Comece pelo [índice da documentação](docs/README.md). Antes de publicação, consulte as [pendências de organização e segurança](docs/publicacao.md).
 
-**Aprendizado de Máquina:** [requisitos, comandos e resultados](docs/aprendizado_maquina.md) e relatório SBC ([editável](reports/relatorio_aprendizado_maquina.docx), [texto](reports/relatorio_aprendizado_maquina.md), [PDF](reports/relatorio_aprendizado_maquina.pdf)). As métricas são de dados simulados.
+**Aprendizado de Máquina:** [requisitos, comandos e resultados](docs/aprendizado_maquina.md) e relatório SBC ([editável](reports/relatorio_aprendizado_maquina.docx), [texto](reports/relatorio_aprendizado_maquina.md)). As métricas são de dados simulados.

@@ -18,8 +18,8 @@ Correção posterior: a suspeita de defeito no treino registrada na seção 1 n�
 | Pet / Pet Launch | Funcionais e testados; o firmware mantém o pet como domínio autoritativo | `terminal/pet`, `terminal/games`, `firmware/pet` |
 | Air Music / Air Slides | Mínimos: nota por distância e slide por zona; sem looper, timbres ou controle externo | `terminal/modes/` |
 | Simulador | Determinístico 1D, usado pela porta DEMO | `simulator/` |
-| Validação física | Sensores leem juntos (relato do usuário); nada de precisão, latência ou ML em hardware | `AGENTS.md`, `docs/cycle5_bench_checklist.md` |
-| Treino | `ml/training` tem um bug conhecido (`AGENTS.md`): o caminho de re-treino real está pendente | `ml/training/trainer.py` |
+| Validação física | Sensores leem juntos (relato do usuário); nada de precisão, latência ou ML em hardware | `docs/bench_verified_wiring.md`, `docs/cycle5_bench_checklist.md` |
+| Treino | `ml/training` tinha um caminho de re-treino real pendente (registro histórico) | `ml/training/trainer.py` |
 
 ### Dependências relevantes
 - O firmware decide sozinho o que fazer com o pet a partir dos gestos (exceto em `PET_LAUNCH`). Isso independe do host e não atrapalha os módulos novos; o autosave NVS tem intervalo mínimo antidesgaste.
