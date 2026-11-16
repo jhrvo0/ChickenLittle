@@ -22,6 +22,15 @@ from ml.experiment import dataset_digest
 import paho.mqtt.client as mqtt
 
 
+def compose_command(compose_file=None):
+    """Use Docker nativo no macOS/Linux e preserve a bancada Windows/WSL."""
+    if sys.platform == "win32":
+        return ["wsl", "-d", "Ubuntu", "--", "docker", "compose", "-f",
+                compose_file or "/mnt/y/src/ChickenLittle/ops/mlops/compose.yaml"]
+    return ["docker", "compose", "-f",
+            str(compose_file or Path(__file__).resolve().parents[2] / "docker-compose.yml")]
+
+
 def wait_for(fn, timeout=180):
     deadline, last = time.monotonic() + timeout, None
     while time.monotonic() < deadline:
@@ -59,7 +68,7 @@ def verify(args):
             return response.status, json.load(response)
 
     def compose(*command):
-        result = subprocess.run(["wsl", "-d", "Ubuntu", "--", "docker", "compose", "-f", args.compose_file, *command], capture_output=True, text=True, timeout=45)
+        result = subprocess.run([*compose_command(args.compose_file), *command], capture_output=True, text=True, timeout=45)
         if result.returncode:
             raise RuntimeError(result.stderr[-2000:])
         return result.stdout
@@ -203,7 +212,7 @@ if __name__ == "__main__":
     parser.add_argument("--mqtt-host", default="127.0.0.1")
     parser.add_argument("--mqtt-port", type=int, default=1883)
     parser.add_argument("--data-root", default="data/experiments/phase-c/stack")
-    parser.add_argument("--compose-file", default="/mnt/y/src/ChickenLittle/ops/mlops/compose.yaml")
+    parser.add_argument("--compose-file", help="Compose local; no Windows, caminho visto pelo WSL.")
     parser.add_argument("--output", default="data/experiments/phase-c/integration.json")
     parser.add_argument("--faults", action="store_true")
     verify(parser.parse_args())

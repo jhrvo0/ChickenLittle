@@ -1,0 +1,27 @@
+........................................................................ [ 10%]
+........................................................................ [ 21%]
+........................................................................ [ 32%]
+..................................................ss......s......ss..... [ 42%]
+........................................................................ [ 53%]
+........................................................................ [ 64%]
+........................................................................ [ 74%]
+........................................................................ [ 85%]
+........................................................................ [ 96%]
+..........................                                               [100%]
+=============================== warnings summary ===============================
+tests/test_ml_am_requirements.py: 34 warnings
+tests/test_mlops.py: 9 warnings
+tests/test_mlops_phase_c.py: 9 warnings
+  /Users/marco/Documents/GitHub/ChickenLittle/.venv/lib/python3.12/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (80) reached and the optimization hasn't converged yet.
+    warnings.warn(
+
+tests/test_ml_am_requirements.py::test_experiment_records_search_and_logs_separate_mlflow_experiment
+  /Users/marco/Documents/GitHub/ChickenLittle/.venv/lib/python3.12/site-packages/mlflow/store/tracking/sqlalchemy_store.py:356: SADeprecationWarning: The ``noload`` loader strategy is deprecated and will be removed in a future release.  This option produces incorrect results by returning ``None`` for related items. (deprecated since: 2.1)
+    sqlalchemy.orm.configure_mappers()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [2] tests/test_hardware_cad.py:495: defina FRITZING_PARTS_DIR=<checkout do fritzing-parts> para comparar com o Fritzing
+SKIPPED [1] tests/test_hardware_cad.py:607: defina FRITZING_PARTS_DIR=<checkout do fritzing-parts> para comparar com o Fritzing
+SKIPPED [1] tests/test_iot_broker_provision.py:65: Provisionamento da bancada é específico do Windows/WSL.
+SKIPPED [1] tests/test_iot_broker_provision.py:76: Provisionamento da bancada é específico do Windows/WSL.

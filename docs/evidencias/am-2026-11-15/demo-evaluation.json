@@ -1,0 +1,589 @@
+{
+  "generated_at_iso": "2026-11-16T02:22:38.232648+00:00",
+  "experimental_status": "AWAITING_REAL_DATA",
+  "is_synthetic": true,
+  "synthetic_disclaimer": "AVISO DE DADOS SINTÉTICOS: O conjunto de dados contém amostras geradas por simulador ('synthetic_simulator'). O status experimental é estritamente 'AWAITING_REAL_DATA'. Estes resultados validam unicamente a integridade funcional do pipeline, das regras causais e do código de inferência/estabilização, NÃO constituindo evidência de desempenho em hardware real.",
+  "dataset_summary": {
+    "total_test_windows": 80,
+    "test_participants_count": 1,
+    "test_participants": [
+      "demo_p05"
+    ],
+    "test_sessions_count": 1,
+    "test_sessions": [
+      "mqtt_demo_p05_42_0b81d8f1"
+    ],
+    "split_strategy": "by_participant",
+    "warnings": []
+  },
+  "recommended_model": "mlp_compact",
+  "recommendation_reason": "O modelo 'mlp_compact' foi selecionado pelas métricas de validação e estimativas de memória. O teste não determina a escolha. Custos embarcados são estimados; latência é medida no notebook. Generalização física e custo na ESP32 precisam de validação independente.",
+  "models": {
+    "rule_baseline": {
+      "model_name": "rule_baseline",
+      "val_f1_macro": 0.5253,
+      "test_f1_macro": 0.5718,
+      "accuracy": 0.7125,
+      "false_activation_rate_neutral": 0.0698,
+      "neutral_support": 43,
+      "false_activation_rate_neutral_status": "evaluated",
+      "latency_mean_ms": 0.003,
+      "latency_p95_ms": 0.0036,
+      "latency_scope": "notebook_python",
+      "memory": {
+        "serialized_bytes": 387,
+        "estimated_esp32_flash_bytes": 512,
+        "estimated_esp32_sram_bytes": 64
+      },
+      "memory_scope": "estimated_esp32",
+      "per_class": {
+        "NEUTRAL": {
+          "precision": 0.8696,
+          "recall": 0.9302,
+          "f1": 0.8989,
+          "support": 43
+        },
+        "APPROACH": {
+          "precision": 0.4,
+          "recall": 0.6,
+          "f1": 0.48,
+          "support": 10
+        },
+        "RETREAT": {
+          "precision": 0.5,
+          "recall": 0.5714,
+          "f1": 0.5333,
+          "support": 14
+        },
+        "HOLD": {
+          "precision": 1.0,
+          "recall": 0.2308,
+          "f1": 0.375,
+          "support": 13
+        }
+      },
+      "confusion_matrix": [
+        [
+          40,
+          0,
+          3,
+          0
+        ],
+        [
+          2,
+          6,
+          2,
+          0
+        ],
+        [
+          3,
+          3,
+          8,
+          0
+        ],
+        [
+          1,
+          6,
+          3,
+          3
+        ]
+      ],
+      "event_level": {
+        "true_episodes": 6,
+        "matched_episodes": 3,
+        "duplicate_activations": 0,
+        "false_activations": 5,
+        "rejected_windows": 72,
+        "event_precision": 0.375,
+        "event_recall": 0.5,
+        "event_f1": 0.4286
+      }
+    },
+    "decision_tree": {
+      "model_name": "decision_tree",
+      "val_f1_macro": 0.7049,
+      "test_f1_macro": 0.6743,
+      "accuracy": 0.775,
+      "false_activation_rate_neutral": 0.0698,
+      "neutral_support": 43,
+      "false_activation_rate_neutral_status": "evaluated",
+      "latency_mean_ms": 0.0308,
+      "latency_p95_ms": 0.0332,
+      "latency_scope": "notebook_python",
+      "memory": {
+        "serialized_bytes": 7001,
+        "estimated_esp32_flash_bytes": 1416,
+        "estimated_esp32_sram_bytes": 128
+      },
+      "memory_scope": "estimated_esp32",
+      "per_class": {
+        "NEUTRAL": {
+          "precision": 0.9302,
+          "recall": 0.9302,
+          "f1": 0.9302,
+          "support": 43
+        },
+        "APPROACH": {
+          "precision": 0.5333,
+          "recall": 0.8,
+          "f1": 0.64,
+          "support": 10
+        },
+        "RETREAT": {
+          "precision": 0.75,
+          "recall": 0.6429,
+          "f1": 0.6923,
+          "support": 14
+        },
+        "HOLD": {
+          "precision": 0.5,
+          "recall": 0.3846,
+          "f1": 0.4348,
+          "support": 13
+        }
+      },
+      "confusion_matrix": [
+        [
+          40,
+          0,
+          1,
+          2
+        ],
+        [
+          1,
+          8,
+          0,
+          1
+        ],
+        [
+          1,
+          2,
+          9,
+          2
+        ],
+        [
+          1,
+          5,
+          2,
+          5
+        ]
+      ],
+      "event_level": {
+        "true_episodes": 6,
+        "matched_episodes": 5,
+        "duplicate_activations": 0,
+        "false_activations": 1,
+        "rejected_windows": 74,
+        "event_precision": 0.8333,
+        "event_recall": 0.8333,
+        "event_f1": 0.8333
+      }
+    },
+    "random_forest": {
+      "model_name": "random_forest",
+      "val_f1_macro": 0.8373,
+      "test_f1_macro": 0.8627,
+      "accuracy": 0.8875,
+      "false_activation_rate_neutral": 0.1163,
+      "neutral_support": 43,
+      "false_activation_rate_neutral_status": "evaluated",
+      "latency_mean_ms": 0.5081,
+      "latency_p95_ms": 0.5408,
+      "latency_scope": "notebook_python",
+      "memory": {
+        "serialized_bytes": 89561,
+        "estimated_esp32_flash_bytes": 19192,
+        "estimated_esp32_sram_bytes": 256
+      },
+      "memory_scope": "estimated_esp32",
+      "per_class": {
+        "NEUTRAL": {
+          "precision": 1.0,
+          "recall": 0.8837,
+          "f1": 0.9383,
+          "support": 43
+        },
+        "APPROACH": {
+          "precision": 0.5556,
+          "recall": 1.0,
+          "f1": 0.7143,
+          "support": 10
+        },
+        "RETREAT": {
+          "precision": 0.9286,
+          "recall": 0.9286,
+          "f1": 0.9286,
+          "support": 14
+        },
+        "HOLD": {
+          "precision": 1.0,
+          "recall": 0.7692,
+          "f1": 0.8696,
+          "support": 13
+        }
+      },
+      "confusion_matrix": [
+        [
+          38,
+          4,
+          1,
+          0
+        ],
+        [
+          0,
+          10,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          13,
+          0
+        ],
+        [
+          0,
+          3,
+          0,
+          10
+        ]
+      ],
+      "event_level": {
+        "true_episodes": 6,
+        "matched_episodes": 4,
+        "duplicate_activations": 0,
+        "false_activations": 0,
+        "rejected_windows": 76,
+        "event_precision": 1.0,
+        "event_recall": 0.6667,
+        "event_f1": 0.8
+      }
+    },
+    "mlp_compact": {
+      "model_name": "mlp_compact",
+      "val_f1_macro": 1.0,
+      "test_f1_macro": 0.966,
+      "accuracy": 0.975,
+      "false_activation_rate_neutral": 0.0233,
+      "neutral_support": 43,
+      "false_activation_rate_neutral_status": "evaluated",
+      "latency_mean_ms": 0.1137,
+      "latency_p95_ms": 0.1231,
+      "latency_scope": "notebook_python",
+      "memory": {
+        "serialized_bytes": 38377,
+        "estimated_esp32_flash_bytes": 1128,
+        "estimated_esp32_sram_bytes": 256
+      },
+      "memory_scope": "estimated_esp32",
+      "per_class": {
+        "NEUTRAL": {
+          "precision": 1.0,
+          "recall": 0.9767,
+          "f1": 0.9882,
+          "support": 43
+        },
+        "APPROACH": {
+          "precision": 1.0,
+          "recall": 0.9,
+          "f1": 0.9474,
+          "support": 10
+        },
+        "RETREAT": {
+          "precision": 0.9333,
+          "recall": 1.0,
+          "f1": 0.9655,
+          "support": 14
+        },
+        "HOLD": {
+          "precision": 0.9286,
+          "recall": 1.0,
+          "f1": 0.963,
+          "support": 13
+        }
+      },
+      "confusion_matrix": [
+        [
+          42,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          9,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          14,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          13
+        ]
+      ],
+      "event_level": {
+        "true_episodes": 6,
+        "matched_episodes": 6,
+        "duplicate_activations": 0,
+        "false_activations": 0,
+        "rejected_windows": 74,
+        "event_precision": 1.0,
+        "event_recall": 1.0,
+        "event_f1": 1.0
+      }
+    },
+    "knn": {
+      "model_name": "knn",
+      "val_f1_macro": 0.9129,
+      "test_f1_macro": 0.9475,
+      "accuracy": 0.95,
+      "false_activation_rate_neutral": 0.0698,
+      "neutral_support": 43,
+      "false_activation_rate_neutral_status": "evaluated",
+      "latency_mean_ms": 0.1959,
+      "latency_p95_ms": 0.213,
+      "latency_scope": "notebook_python",
+      "memory": {
+        "serialized_bytes": 49168,
+        "estimated_esp32_flash_bytes": 16384,
+        "estimated_esp32_sram_bytes": 512
+      },
+      "memory_scope": "estimated_esp32",
+      "per_class": {
+        "NEUTRAL": {
+          "precision": 0.9756,
+          "recall": 0.9302,
+          "f1": 0.9524,
+          "support": 43
+        },
+        "APPROACH": {
+          "precision": 0.8333,
+          "recall": 1.0,
+          "f1": 0.9091,
+          "support": 10
+        },
+        "RETREAT": {
+          "precision": 0.9286,
+          "recall": 0.9286,
+          "f1": 0.9286,
+          "support": 14
+        },
+        "HOLD": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 13
+        }
+      },
+      "confusion_matrix": [
+        [
+          40,
+          2,
+          1,
+          0
+        ],
+        [
+          0,
+          10,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          13,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          13
+        ]
+      ],
+      "event_level": {
+        "true_episodes": 6,
+        "matched_episodes": 6,
+        "duplicate_activations": 0,
+        "false_activations": 0,
+        "rejected_windows": 74,
+        "event_precision": 1.0,
+        "event_recall": 1.0,
+        "event_f1": 1.0
+      }
+    },
+    "adaboost": {
+      "model_name": "adaboost",
+      "val_f1_macro": 0.7446,
+      "test_f1_macro": 0.6905,
+      "accuracy": 0.7625,
+      "false_activation_rate_neutral": 0.1628,
+      "neutral_support": 43,
+      "false_activation_rate_neutral_status": "evaluated",
+      "latency_mean_ms": 0.845,
+      "latency_p95_ms": 0.8726,
+      "latency_scope": "notebook_python",
+      "memory": {
+        "serialized_bytes": 18724,
+        "estimated_esp32_flash_bytes": 1984,
+        "estimated_esp32_sram_bytes": 256
+      },
+      "memory_scope": "estimated_esp32",
+      "per_class": {
+        "NEUTRAL": {
+          "precision": 0.973,
+          "recall": 0.8372,
+          "f1": 0.9,
+          "support": 43
+        },
+        "APPROACH": {
+          "precision": 0.4,
+          "recall": 0.6,
+          "f1": 0.48,
+          "support": 10
+        },
+        "RETREAT": {
+          "precision": 0.6667,
+          "recall": 0.7143,
+          "f1": 0.6897,
+          "support": 14
+        },
+        "HOLD": {
+          "precision": 0.6923,
+          "recall": 0.6923,
+          "f1": 0.6923,
+          "support": 13
+        }
+      },
+      "confusion_matrix": [
+        [
+          36,
+          4,
+          1,
+          2
+        ],
+        [
+          0,
+          6,
+          2,
+          2
+        ],
+        [
+          1,
+          3,
+          10,
+          0
+        ],
+        [
+          0,
+          2,
+          2,
+          9
+        ]
+      ],
+      "event_level": {
+        "true_episodes": 6,
+        "matched_episodes": 0,
+        "duplicate_activations": 0,
+        "false_activations": 0,
+        "rejected_windows": 80,
+        "event_precision": 0.0,
+        "event_recall": 0.0,
+        "event_f1": 0.0
+      }
+    },
+    "decision_stump_baseline": {
+      "model_name": "decision_stump_baseline",
+      "val_f1_macro": 0.3279,
+      "test_f1_macro": 0.3548,
+      "accuracy": 0.65,
+      "false_activation_rate_neutral": 0.093,
+      "neutral_support": 43,
+      "false_activation_rate_neutral_status": "evaluated",
+      "latency_mean_ms": 0.0308,
+      "latency_p95_ms": 0.0322,
+      "latency_scope": "notebook_python",
+      "memory": {
+        "serialized_bytes": 1625,
+        "estimated_esp32_flash_bytes": 72,
+        "estimated_esp32_sram_bytes": 128
+      },
+      "memory_scope": "estimated_esp32",
+      "per_class": {
+        "NEUTRAL": {
+          "precision": 0.9512,
+          "recall": 0.907,
+          "f1": 0.9286,
+          "support": 43
+        },
+        "APPROACH": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 10
+        },
+        "RETREAT": {
+          "precision": 0.3333,
+          "recall": 0.9286,
+          "f1": 0.4906,
+          "support": 14
+        },
+        "HOLD": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 13
+        }
+      },
+      "confusion_matrix": [
+        [
+          39,
+          0,
+          4,
+          0
+        ],
+        [
+          1,
+          0,
+          9,
+          0
+        ],
+        [
+          1,
+          0,
+          13,
+          0
+        ],
+        [
+          0,
+          0,
+          13,
+          0
+        ]
+      ],
+      "event_level": {
+        "true_episodes": 6,
+        "matched_episodes": 0,
+        "duplicate_activations": 0,
+        "false_activations": 0,
+        "rejected_windows": 80,
+        "event_precision": 0.0,
+        "event_recall": 0.0,
+        "event_f1": 0.0
+      }
+    }
+  },
+  "schema_version": 1,
+  "cohort": "demo",
+  "dataset_sha256": "1715d1671f4f49f34fd8477ff2f8c60c8ac4df4a7321c6f0047507f2d8d488ce",
+  "experiment_id": "20261116T022223_2905d60b",
+  "evaluation_scope": "grouped_holdout",
+  "physical_validation": "pending"
+}
