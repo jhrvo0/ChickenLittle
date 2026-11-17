@@ -1,8 +1,11 @@
 name: motionlab-mlops
 
+# Uma imagem, um construtor: só `api` tem `build`. Os demais serviços reutilizam a imagem local
+# (`pull_policy: never`); construir a mesma tag em paralelo falha no Docker Desktop
+# (containerd: "image already exists") e tentar baixá-la falha com "pull access denied".
 x-runtime: &runtime
   image: motionlab-runtime:phase-c
-  build: {context: ../.., dockerfile: ops/mlops/Dockerfile}
+  pull_policy: never
   init: true
   cpus: 1.0
   environment: {OMP_NUM_THREADS: "1", OPENBLAS_NUM_THREADS: "1", MKL_NUM_THREADS: "1"}
@@ -51,6 +54,8 @@ services:
       retries: 12
   api:
     <<: *runtime
+    build: {context: ../.., dockerfile: ops/mlops/Dockerfile}
+    pull_policy: missing
     mem_limit: 384m
     command: ["python", "-m", "ml.inference_api", "--host", "0.0.0.0", "--deployment", "data/pipeline/deployment.json", "--watch-raw-root", "data/raw", "--predictions", "data/pipeline/predictions.json"]
     ports: ["127.0.0.1:8768:8768"]
@@ -79,6 +84,7 @@ services:
     depends_on: {ingest: {condition: service_healthy}}
   airflow-init:
     image: motionlab-airflow:phase-c
+    pull_policy: never
     user: "0:0"
     entrypoint: /bin/sh
     command: ["-c", "chown 50000:0 /opt/airflow/runtime && chmod 775 /opt/airflow/runtime"]
@@ -121,6 +127,7 @@ services:
   airflow-ui:
     profiles: ["console"]
     image: motionlab-airflow:phase-c
+    pull_policy: never
     mem_limit: 1800m
     cpus: 1.0
     command: standalone
