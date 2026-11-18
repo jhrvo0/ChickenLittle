@@ -5,6 +5,7 @@ Este índice separa a descrição atual dos registros produzidos ao longo do des
 ## Visão geral e arquitetura
 
 - [Índice da entrega](indice_entrega.md): visão consolidada de Sistemas Embarcados e Aprendizado de Máquina para a avaliação.
+- [Teste completo](teste_completo.md): roteiro para rodar e conferir tudo do zero (testes, experimento de ML, stack Docker e verificação), com o resultado esperado de cada passo.
 - [README principal](../README.md): objetivo, execução, funcionalidades e limites.
 - [Arquitetura e migração para MotionLab](motionlab_arquitetura.md): sinais, reconhecedores, ações e decisões. O diagnóstico inicial e o plano são históricos; veja o aviso no próprio documento.
 - [Protocolo serial JSON Lines v1](protocol.md): mensagens entre ESP32 e aplicação.
